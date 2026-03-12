@@ -408,7 +408,7 @@ impl App {
                     self.push_message(format!("Priestess: Inquiry complete (turn {}). Use /prescribe.", turn));
                 }
             }
-            ApiResponse::Prescribed { rite, meta } => {
+            ApiResponse::Prescribed { rite, reintegration_window, meta } => {
                 self.last_meta = Some(meta);
                 self.stage = "prescribed".to_string();
                 self.push_message(format!("Rite: {}", rite.rite_name));
@@ -446,6 +446,9 @@ impl App {
                 }
                 if let Some(duration) = rite.duration {
                     self.push_message(format!("Duration: {}", duration));
+                }
+                if let Some(window) = reintegration_window {
+                    self.push_message(format!("Reintegration window: {}", window));
                 }
                 self.push_message("May this mantra instruct you.".to_string());
             }
