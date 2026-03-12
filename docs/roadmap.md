@@ -190,6 +190,7 @@ What we do not have: anything a Seeker would trust, return to, or bring their in
 - Adaptive session depth: the interface quiets over time as the Seeker's session count grows; later sessions reduce scaffolding and explanation
 - Return session flow: Priestess greets the returning Seeker with memory of the last mantra ("You were going to reach out to your brother.") — no re-introduction, no blank slate
 - The Seeker who disappears and returns: no emphasis on the gap; no streak-break mechanics; the gap is received with "Three months. What's been happening?" — clean, open, no implication
+- **Opening inquiry prompt generator:** a curated, reviewable system for generating opening questions (not random), with explicit criteria, quality gates, and versioned prompt sets; includes a human review loop and A/B evaluation tied to reintegration quality, not engagement metrics
 
 **Could:**
 - Optional symbolic layer opt-in: Tarot draw, I Ching hexagram, or Gene Key gate offered as deepening during inquiry — not always, offered when semantically appropriate; never the default
