@@ -101,16 +101,21 @@ fn app_loop(
         }
 
         if let Some(req) = app.take_queued_request() {
-            let ready = match app.ritual_opened_at {
-                Some(started) => started.elapsed().as_millis() >= app.ritual_min_delay_ms,
-                None => true,
-            };
-            if ready && app.begin_allowed {
-                let _ = req_tx.send(req);
-                app.ritual_opened_at = None;
-                app.begin_allowed = false;
+            let is_begin = matches!(req, ApiRequest::BeginInquiry { .. });
+            if is_begin {
+                let ready = match app.ritual_opened_at {
+                    Some(started) => started.elapsed().as_millis() >= app.ritual_min_delay_ms,
+                    None => true,
+                };
+                if ready && app.begin_allowed {
+                    let _ = req_tx.send(req);
+                    app.ritual_opened_at = None;
+                    app.begin_allowed = false;
+                } else {
+                    app.queued_request = Some(req);
+                }
             } else {
-                app.queued_request = Some(req);
+                let _ = req_tx.send(req);
             }
         }
 
