@@ -100,7 +100,16 @@ fn app_loop(
         }
 
         if let Some(req) = app.take_queued_request() {
-            let _ = req_tx.send(req);
+            let ready = match app.ritual_opened_at {
+                Some(started) => started.elapsed().as_millis() >= app.ritual_min_delay_ms,
+                None => true,
+            };
+            if ready {
+                let _ = req_tx.send(req);
+                app.ritual_opened_at = None;
+            } else {
+                app.queued_request = Some(req);
+            }
         }
 
         if last_tick.elapsed() >= tick_rate {

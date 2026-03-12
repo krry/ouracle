@@ -40,6 +40,9 @@ pub struct App {
     pub pending_seeker_after_consent: bool,
     pub queued_request: Option<ApiRequest>,
     pub pending_begin_after_covenant: bool,
+    pub ritual_opened_at: Option<std::time::Instant>,
+    pub ritual_min_delay_ms: u128,
+    pub sessions_completed: u32,
 }
 
 impl App {
@@ -67,6 +70,9 @@ impl App {
             pending_seeker_after_consent: false,
             queued_request: None,
             pending_begin_after_covenant: false,
+            ritual_opened_at: None,
+            ritual_min_delay_ms: 1500,
+            sessions_completed: 0,
         }
     }
 
@@ -186,15 +192,19 @@ impl App {
             }
             "/status" => {
                 let msg = format!(
-                    "Status: base_url={} seeker_id={} session_id={} stage={} pending={} mouse_capture={}",
+                    "Status: base_url={} seeker_id={} session_id={} stage={} pending={} mouse_capture={} sessions_completed={}",
                     self.base_url,
                     self.seeker_id.as_deref().unwrap_or("none"),
                     self.session_id.as_deref().unwrap_or("none"),
                     self.stage,
                     self.pending,
-                    if self.mouse_capture { "on" } else { "off" }
+                    if self.mouse_capture { "on" } else { "off" },
+                    self.sessions_completed
                 );
                 (None, Some(msg))
+            }
+            "/sessions" => {
+                (None, Some(format!("Sessions completed: {}", self.sessions_completed)))
             }
             "/token" => {
                 let token = self.access_token.as_deref().unwrap_or("none");
@@ -318,6 +328,7 @@ impl App {
                 let req = ApiRequest::GetCovenant { base_url: self.base_url.clone() };
                 self.pending = true;
                 self.pending_begin_after_covenant = true;
+                self.ritual_opened_at = Some(std::time::Instant::now());
                 self.queued_request = Some(ApiRequest::BeginInquiry {
                     base_url: self.base_url.clone(),
                     access_token,
@@ -504,6 +515,7 @@ impl App {
             ApiResponse::ReintegrationComplete { witness, what_shifted, next, meta } => {
                 self.last_meta = Some(meta);
                 self.stage = "reintegration_complete".to_string();
+                self.sessions_completed = self.sessions_completed.saturating_add(1);
                 self.push_message(format!("Witness: {}", witness));
                 self.push_message(format!("Shift: {}", what_shifted));
                 self.push_message(format!("Next: {}", next));
