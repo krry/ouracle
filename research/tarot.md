@@ -69,7 +69,7 @@ URL: https://sacred-texts.com/tarot/ftc/ftc21.htm
 https://sacred-texts.com/tarot/index.htm  
 "117+ texts" on tarot including:
 - **A.E. Waite's *Pictorial Key to the Tarot* (1910)** — complete and fully digitized (public domain)  
-  URL: https://sacred-texts.com/tarot/pkt/index.htm  
+  URL: https://sacred-texts.com/tarot/pkt/index.htm
   Contains full descriptions of all 78 cards (Major Arcana + four suits) with divinatory meanings, reversed meanings, and historical commentary. This is the most complete freely-available English corpus of card meanings.
 - Etteilla method texts
 - Manly P. Hall's *Secret Teachings of All Ages* chapter on Tarot
