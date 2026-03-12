@@ -71,7 +71,7 @@ Rules:
 - [ ] Full ritual cycle enforced: Inquiry → Prescription → Reintegration (no skipping).
 - [ ] Prescription delivered as ritual card (name, act, context, optional invocation, expected textures) with pacing.
 - [ ] Closing phrase fixed: “May this mantra instruct you.”
-- [ ] Reintegration window signaled once; tone is holding, never urgent.
+- [x] Reintegration window signaled once; tone is holding, never urgent.
 - [ ] Thread view: readable letter of mantras + reintegration reports + octave trajectory.
 - [ ] Data controls: redact entries + delete account from thread view.
 - [ ] Threshold Covenant moment (100% responsibility) before first inquiry.
