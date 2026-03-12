@@ -26,7 +26,7 @@ pub enum ApiResponse {
     CovenantText { version: String, text: Vec<String>, meta: ApiMeta },
     SeekerCreated { seeker_id: String, access_token: String, refresh_token: String, meta: ApiMeta },
     CovenantRecorded { covenant_at: String, meta: ApiMeta },
-    InquiryQuestion { session_id: String, turn: u32, question: String, meta: ApiMeta },
+    InquiryQuestion { session_id: String, turn: u32, question: String, greeting: Option<String>, meta: ApiMeta },
     InquiryComplete { session_id: String, turn: u32, quality_sense: Option<String>, meta: ApiMeta },
     Prescribed { rite: Rite, reintegration_window: Option<String>, meta: ApiMeta },
     Thread { items: Vec<ThreadItem>, meta: ApiMeta },
@@ -261,7 +261,8 @@ pub fn execute(req: ApiRequest) -> ApiResponse {
                             let session_id = json.get("session_id").and_then(|v| v.as_str()).unwrap_or("").to_string();
                             let turn = json.get("turn").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
                             let question = json.get("question").and_then(|v| v.as_str()).unwrap_or("...").to_string();
-                            ApiResponse::InquiryQuestion { session_id, turn, question, meta }
+                            let greeting = json.get("greeting").and_then(|v| v.as_str()).map(|s| s.to_string());
+                            ApiResponse::InquiryQuestion { session_id, turn, question, greeting, meta }
                         }
                         Ok(json) => {
                             let msg = json.get("error").and_then(|v| v.as_str()).unwrap_or("Request failed.");

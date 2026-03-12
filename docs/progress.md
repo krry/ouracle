@@ -81,7 +81,7 @@ Rules:
 - [x] Data policy visible inside product (plain language).
 - [ ] Liminal opening beat (intentional stillness; not spinner).
 - [ ] Adaptive session depth (less scaffolding as sessions increase).
-- [ ] Returning seeker flow references last mantra; no re‑intro.
+- [x] Returning seeker flow references last mantra; no re‑intro.
 - [ ] Absence handled without gap‑shaming (“Three months. What’s been happening?”).
 - [ ] Optional symbolic layer opt‑in (Tarot/I Ching) when appropriate.
 - [ ] Print/save rite card.
