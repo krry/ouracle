@@ -5,4 +5,4 @@ node_modules/
 apps/tui/target
 research/*.zip
 research/ExportBlock*
-
+!api/migrations/*.sql

@@ -20,6 +20,7 @@ import {
   getSeeker,
   recordCovenant,
   getSeekerHistory,
+  getSeekerSessionCount,
   createSession,
   getSession,
   updateSession,
@@ -143,9 +144,14 @@ app.post('/session/new', authenticate, async (req, res) => {
     await recordCovenant(seeker_id, covenant.version);
   }
 
+  const sessionCount = await getSeekerSessionCount(seeker_id);
   const session = await createSession(seeker_id, covenant);
-  await updateSession(session.id, { stage: 'inquiry', turn: 0 });
-  const question = chooseOpeningQuestion(context || {});
+  const question = chooseOpeningQuestion({ ...(context || {}), session_count: sessionCount });
+  const conversation = [
+    { role: 'priestess', text: question, at: new Date().toISOString() },
+  ];
+
+  await updateSession(session.id, { stage: 'inquiry', turn: 0, conversation });
 
   return res.json({ session_id: session.id, stage: 'inquiry', turn: 0, question, awaiting: 'response' });
 });
@@ -174,8 +180,12 @@ app.post('/inquire', authenticate, async (req, res) => {
   const session = await getSession(session_id);
   if (!session) return res.status(404).json({ error: 'Session not found.' });
 
-  const newText = (session.full_text || '') + ' ' + (response || '');
+  const newText = `${session.full_text || ''} ${response || ''}`.trim();
   const newTurn = (session.turn || 0) + 1;
+  const conversation = Array.isArray(session.conversation) ? [...session.conversation] : [];
+  if (response) {
+    conversation.push({ role: 'seeker', text: response, at: new Date().toISOString() });
+  }
 
   const { vagal, belief, quality } = await infer(newText);
   const qualities = Object.values(OCTAVE).map((node) => node.quality).filter(Boolean);
@@ -194,6 +204,7 @@ app.post('/inquire', authenticate, async (req, res) => {
       stage: 'inquiry_complete',
       turn: newTurn,
       full_text: newText,
+      conversation,
       vagal_probable: vagal.probable,
       vagal_confidence: vagal.confidence,
       belief_pattern: belief.pattern,
@@ -231,7 +242,8 @@ app.post('/inquire', authenticate, async (req, res) => {
   ];
   const nextQ = clarifiers[newTurn - 1] || 'What else wants to be said?';
 
-  await updateSession(session_id, { turn: newTurn, full_text: newText });
+  conversation.push({ role: 'priestess', text: nextQ, at: new Date().toISOString() });
+  await updateSession(session_id, { turn: newTurn, full_text: newText, conversation });
 
   return res.json({
     session_id,

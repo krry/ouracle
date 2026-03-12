@@ -49,6 +49,15 @@ export async function getSeekerHistory(seeker_id, limit = 10) {
   `;
 }
 
+export async function getSeekerSessionCount(seeker_id) {
+  const [row] = await sql`
+    SELECT COUNT(*)::int AS count
+    FROM sessions
+    WHERE seeker_id = ${seeker_id}
+  `;
+  return row?.count ?? 0;
+}
+
 // ─────────────────────────────────────────────
 // SESSIONS
 // ─────────────────────────────────────────────
@@ -78,6 +87,7 @@ export async function getSession(id) {
 export async function updateSession(id, fields) {
   const {
     stage, turn, full_text,
+    conversation,
     vagal_probable, vagal_confidence,
     belief_pattern, belief_confidence,
     quality, quality_confidence, quality_is_shock,
@@ -91,6 +101,7 @@ export async function updateSession(id, fields) {
       stage              = COALESCE(${stage ?? null}, stage),
       turn               = COALESCE(${turn ?? null}, turn),
       full_text          = COALESCE(${full_text ?? null}, full_text),
+      conversation       = COALESCE(${conversation ? JSON.stringify(conversation) : null}::jsonb, conversation),
       vagal_probable     = COALESCE(${vagal_probable ?? null}, vagal_probable),
       vagal_confidence   = COALESCE(${vagal_confidence ?? null}, vagal_confidence),
       belief_pattern     = COALESCE(${belief_pattern ?? null}, belief_pattern),
