@@ -7,7 +7,7 @@ use rand::{RngCore, rngs::OsRng};
 
 use crate::aura::Aura;
 use crate::api::{ApiMeta, ApiRequest, ApiResponse};
-use crate::totem::{Totem, SeekerPreferences, TotemSession};
+use crate::totem::{Totem, SeekerPreferences};
 use crate::totem as totem_store;
 use std::path::PathBuf;
 
@@ -49,12 +49,14 @@ pub struct App {
     pub sessions_completed: u32,
     pub totem_path: PathBuf,
     pub totem: Option<Totem>,
+    pub voice_intensity: f32,
+    pub voice_target: f32,
 }
 
 impl App {
     pub fn new() -> Self {
         App {
-            mode: AppMode::Inquiry, // you’ll add Covenant gate later
+            mode: AppMode::Covenant,
             input: String::new(),
             messages: Vec::new(),
             aura: Aura::new(),
@@ -66,7 +68,7 @@ impl App {
             stage: "disconnected".to_string(),
             last_turn: None,
             pending: false,
-            dev_mode: true,
+            dev_mode: false,
             last_meta: None,
             submit_history: Vec::new(),
             history_index: None,
@@ -82,6 +84,8 @@ impl App {
             sessions_completed: 0,
             totem_path: totem_store::default_path(),
             totem: None,
+            voice_intensity: 0.0,
+            voice_target: 0.0,
         }
     }
 
@@ -152,8 +156,12 @@ impl App {
 
     // Called on each tick (for animations)
     pub fn on_tick(&mut self, delta: Duration) {
-        let _ = delta;
-        self.aura.tick();
+        self.aura.tick(delta);
+        let dt_s = delta.as_secs_f32();
+        let rate = 4.0;
+        let factor = (dt_s * rate).clamp(0.0, 1.0);
+        self.voice_intensity =
+            self.voice_intensity + factor * (self.voice_target - self.voice_intensity);
     }
 
     fn parse_input(&mut self, line: &str) -> (Option<ApiRequest>, Option<String>) {
@@ -167,7 +175,7 @@ impl App {
 
         let access_token = match &self.access_token {
             Some(t) => t.clone(),
-            None => return (None, Some("Priestess: No access token. Use /seeker then /covenant.".to_string())),
+            None => return (None, Some("Priestess: No access token. Use /welcome then /covenant.".to_string())),
         };
 
         let session_id = self.session_id.clone().unwrap_or_default();
@@ -187,7 +195,7 @@ impl App {
 
         match cmd {
             "/help" => {
-                let msg = "Commands: /policy, /covenant-text, /seeker, /covenant, /begin, /accept, /prescribe [tarot|iching], /thread, /redact <session_id>, /delete, /reintegrate yes|no, /totem status|init|export <path>|import <path>, /token, /mouse on|off, /dev on|off, /status, /help".to_string();
+                let msg = "Commands: /consent, /covenant-text, /welcome, /covenant, /begin, /intromit, /prescribe [tarot|iching], /thread, /redact <session_id>, /delete, /reintegrate yes|no, /totem status|init|export <path>|import <path>, /token, /mouse on|off, /dev on|off, /status, /help".to_string();
                 (None, Some(msg))
             }
             "/dev" => {
@@ -197,7 +205,7 @@ impl App {
                     "off" => self.dev_mode = false,
                     _ => self.dev_mode = !self.dev_mode,
                 }
-                (None, Some(format!("Dev panel: {}", if self.dev_mode { "on" } else { "off" })))
+                (None, None)
             }
             "/status" => {
                 let msg = format!(
@@ -281,11 +289,11 @@ impl App {
             "/thread" => {
                 let access_token = match &self.access_token {
                     Some(t) => t.clone(),
-                    None => return (None, Some("Priestess: No access token. Use /seeker first.".to_string())),
+                    None => return (None, Some("Priestess: No access token. Use /welcome first.".to_string())),
                 };
                 let seeker_id = match &self.seeker_id {
                     Some(id) => id.clone(),
-                    None => return (None, Some("Priestess: No seeker_id. Use /seeker first.".to_string())),
+                    None => return (None, Some("Priestess: No seeker_id. Use /welcome first.".to_string())),
                 };
                 let req = ApiRequest::FetchThread {
                     base_url: self.base_url.clone(),
@@ -298,11 +306,11 @@ impl App {
             "/delete" => {
                 let access_token = match &self.access_token {
                     Some(t) => t.clone(),
-                    None => return (None, Some("Priestess: No access token. Use /seeker first.".to_string())),
+                    None => return (None, Some("Priestess: No access token. Use /welcome first.".to_string())),
                 };
                 let seeker_id = match &self.seeker_id {
                     Some(id) => id.clone(),
-                    None => return (None, Some("Priestess: No seeker_id. Use /seeker first.".to_string())),
+                    None => return (None, Some("Priestess: No seeker_id. Use /welcome first.".to_string())),
                 };
                 let req = ApiRequest::DeleteSeeker {
                     base_url: self.base_url.clone(),
@@ -315,11 +323,11 @@ impl App {
             "/redact" => {
                 let access_token = match &self.access_token {
                     Some(t) => t.clone(),
-                    None => return (None, Some("Priestess: No access token. Use /seeker first.".to_string())),
+                    None => return (None, Some("Priestess: No access token. Use /welcome first.".to_string())),
                 };
                 let seeker_id = match &self.seeker_id {
                     Some(id) => id.clone(),
-                    None => return (None, Some("Priestess: No seeker_id. Use /seeker first.".to_string())),
+                    None => return (None, Some("Priestess: No seeker_id. Use /welcome first.".to_string())),
                 };
                 let session_id = match parts.get(1) {
                     Some(id) => (*id).to_string(),
@@ -351,34 +359,33 @@ impl App {
                 }
             }
             "/consent" => {
+                self.mode = AppMode::Covenant;
                 let req = ApiRequest::GetConsent { base_url: self.base_url.clone() };
                 self.pending = true;
                 (Some(req), Some("Priestess: Requesting consent disclosures.".to_string()))
             }
-            "/policy" => {
-                let req = ApiRequest::GetConsent { base_url: self.base_url.clone() };
-                self.pending = true;
-                (Some(req), Some("Priestess: Requesting data policy.".to_string()))
-            }
             "/covenant-text" => {
+                self.mode = AppMode::Covenant;
                 let req = ApiRequest::GetCovenant { base_url: self.base_url.clone() };
                 self.pending = true;
                 (Some(req), Some("Priestess: Requesting covenant text.".to_string()))
             }
-            "/seeker" => {
+            "/welcome" => {
+                self.mode = AppMode::Covenant;
                 let req = ApiRequest::GetConsent { base_url: self.base_url.clone() };
                 self.pending = true;
                 self.pending_seeker_after_consent = true;
                 (Some(req), Some("Priestess: Requesting consent disclosures.".to_string()))
             }
             "/covenant" => {
+                self.mode = AppMode::Covenant;
                 let access_token = match &self.access_token {
                     Some(t) => t.clone(),
-                    None => return (None, Some("Priestess: No access token. Use /seeker first.".to_string())),
+                    None => return (None, Some("Priestess: No access token. Use /welcome first.".to_string())),
                 };
                 let seeker_id = match &self.seeker_id {
                     Some(id) => id.clone(),
-                    None => return (None, Some("Priestess: No seeker_id. Use /seeker first.".to_string())),
+                    None => return (None, Some("Priestess: No seeker_id. Use /welcome first.".to_string())),
                 };
                 let req = ApiRequest::RecordCovenant {
                     base_url: self.base_url.clone(),
@@ -389,9 +396,10 @@ impl App {
                 (Some(req), Some("Priestess: Recording covenant.".to_string()))
             }
             "/begin" => {
+                self.mode = AppMode::Covenant;
                 let access_token = match &self.access_token {
                     Some(t) => t.clone(),
-                    None => return (None, Some("Priestess: No access token. Use /seeker then /covenant.".to_string())),
+                    None => return (None, Some("Priestess: No access token. Use /welcome then /covenant.".to_string())),
                 };
                 let req = ApiRequest::GetCovenant { base_url: self.base_url.clone() };
                 self.pending = true;
@@ -402,11 +410,12 @@ impl App {
                     base_url: self.base_url.clone(),
                     access_token,
                 });
-                (Some(req), Some("Priestess: Requesting covenant text. Type /accept to proceed.".to_string()))
+                (Some(req), Some("Priestess: Requesting covenant text. Type /intromit to proceed.".to_string()))
             }
-            "/accept" => {
+            "/intromit" => {
+                self.mode = AppMode::Covenant;
                 self.begin_allowed = true;
-                (None, Some("Priestess: Covenant accepted.".to_string()))
+                (None, Some("Priestess: Covenant sealed. Temple opens.".to_string()))
             }
             "/prescribe" => {
                 if self.stage != "inquiry_complete" {
@@ -414,7 +423,7 @@ impl App {
                 }
                 let access_token = match &self.access_token {
                     Some(t) => t.clone(),
-                    None => return (None, Some("Priestess: No access token. Use /seeker then /covenant.".to_string())),
+                    None => return (None, Some("Priestess: No access token. Use /welcome then /covenant.".to_string())),
                 };
                 let session_id = match &self.session_id {
                     Some(id) => id.clone(),
@@ -427,13 +436,14 @@ impl App {
                     session_id,
                     divination_source,
                 };
+                self.mode = AppMode::Prescribed;
                 self.pending = true;
                 (Some(req), Some("Priestess: Requesting prescription.".to_string()))
             }
             "/reintegrate" => {
                 let access_token = match &self.access_token {
                     Some(t) => t.clone(),
-                    None => return (None, Some("Priestess: No access token. Use /seeker then /covenant.".to_string())),
+                    None => return (None, Some("Priestess: No access token. Use /welcome then /covenant.".to_string())),
                 };
                 let session_id = match &self.session_id {
                     Some(id) => id.clone(),
@@ -446,6 +456,7 @@ impl App {
                     session_id,
                     enacted,
                 };
+                self.mode = AppMode::Reintegration;
                 self.pending = true;
                 (Some(req), Some(format!("Priestess: Sending reintegration report (enacted={}).", enacted)))
             }
@@ -458,6 +469,7 @@ impl App {
         match resp {
             ApiResponse::Consent { disclosures, meta } => {
                 self.last_meta = Some(meta);
+                self.mode = AppMode::Covenant;
                 self.push_message("Consent disclosures:".to_string());
                 for d in disclosures {
                     self.push_message(format!("- {}", d));
@@ -478,6 +490,7 @@ impl App {
             }
             ApiResponse::CovenantText { version, text, meta } => {
                 self.last_meta = Some(meta);
+                self.mode = AppMode::Covenant;
                 self.push_message(format!("Covenant v{}:", version));
                 for line in text {
                     self.push_message(format!("- {}", line));
@@ -488,6 +501,7 @@ impl App {
             }
             ApiResponse::SeekerCreated { seeker_id, access_token, refresh_token, meta } => {
                 self.last_meta = Some(meta);
+                self.mode = AppMode::Covenant;
                 self.seeker_id = Some(seeker_id.clone());
                 self.access_token = Some(access_token);
                 self.refresh_token = Some(refresh_token);
@@ -496,11 +510,13 @@ impl App {
             }
             ApiResponse::CovenantRecorded { covenant_at, meta } => {
                 self.last_meta = Some(meta);
+                self.mode = AppMode::Covenant;
                 self.stage = "covenanted".to_string();
                 self.push_message(format!("Priestess: Covenant recorded at {}", covenant_at));
             }
             ApiResponse::InquiryQuestion { session_id, turn, question, greeting, meta } => {
                 self.last_meta = Some(meta);
+                self.mode = AppMode::Inquiry;
                 self.session_id = Some(session_id);
                 self.stage = "inquiry".to_string();
                 self.last_turn = Some(turn);
@@ -514,6 +530,7 @@ impl App {
             }
             ApiResponse::InquiryComplete { session_id, turn, quality_sense, meta } => {
                 self.last_meta = Some(meta);
+                self.mode = AppMode::Inquiry;
                 self.session_id = Some(session_id);
                 self.stage = "inquiry_complete".to_string();
                 self.last_turn = Some(turn);
@@ -525,6 +542,7 @@ impl App {
             }
             ApiResponse::Prescribed { rite, reintegration_window, meta } => {
                 self.last_meta = Some(meta);
+                self.mode = AppMode::Prescribed;
                 self.stage = "prescribed".to_string();
                 self.push_message("Rite Card".to_string());
                 self.push_message(format!("Name: {}", rite.rite_name));
@@ -581,6 +599,7 @@ impl App {
             }
             ApiResponse::SeekerDeleted { seeker_id, meta } => {
                 self.last_meta = Some(meta);
+                self.mode = AppMode::Complete;
                 self.push_message(format!("Priestess: Seeker deleted: {}", seeker_id));
                 self.seeker_id = None;
                 self.access_token = None;
@@ -594,6 +613,7 @@ impl App {
             }
             ApiResponse::ReintegrationComplete { witness, what_shifted, next, meta } => {
                 self.last_meta = Some(meta);
+                self.mode = AppMode::Complete;
                 self.stage = "reintegration_complete".to_string();
                 self.sessions_completed = self.sessions_completed.saturating_add(1);
                 self.push_message(format!("Witness: {}", witness));
@@ -613,6 +633,17 @@ impl App {
     }
 
     fn push_message(&mut self, msg: String) {
+        let is_priestess = msg.starts_with("Priestess")
+            || msg.starts_with("Rite:")
+            || msg.starts_with("Witness:")
+            || msg.starts_with("Shift:")
+            || msg.starts_with("Next:");
+        if is_priestess {
+            self.voice_target = 1.0;
+            self.aura.launch_ripples(0.7);
+        } else if msg.starts_with("You:") {
+            self.voice_target = 0.0;
+        }
         self.messages.push(msg);
         if self.history_offset == 0 {
             self.history_offset = 0;

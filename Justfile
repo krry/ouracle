@@ -16,3 +16,6 @@ tui:
 
 tuid:
     cd apps/tui; cargo watch -x 'run'
+
+tuich:
+    cd apps/tui; cargo check

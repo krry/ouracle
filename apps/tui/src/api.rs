@@ -1,7 +1,7 @@
 use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use chrono::Utc;
 
 #[derive(Debug, Clone)]
@@ -96,7 +96,10 @@ pub fn execute(req: ApiRequest) -> ApiResponse {
         return ApiResponse::ShutdownAck;
     }
 
-    let client = Client::new();
+    let client = Client::builder()
+        .timeout(Duration::from_secs(10))
+        .build()
+        .unwrap_or_else(|_| Client::new());
     match req {
         ApiRequest::GetConsent { base_url } => {
             let started = Instant::now();
@@ -187,7 +190,14 @@ pub fn execute(req: ApiRequest) -> ApiResponse {
                             let seeker_id = json.get("seeker_id").and_then(|v| v.as_str()).unwrap_or("").to_string();
                             let access_token = json.get("access_token").and_then(|v| v.as_str()).unwrap_or("").to_string();
                             let refresh_token = json.get("refresh_token").and_then(|v| v.as_str()).unwrap_or("").to_string();
-                            ApiResponse::SeekerCreated { seeker_id, access_token, refresh_token, meta }
+                            if seeker_id.is_empty() || access_token.is_empty() || refresh_token.is_empty() {
+                                ApiResponse::Error {
+                                    message: "Seeker created response missing tokens or seeker_id.".to_string(),
+                                    meta,
+                                }
+                            } else {
+                                ApiResponse::SeekerCreated { seeker_id, access_token, refresh_token, meta }
+                            }
                         }
                         Ok(json) => {
                             let msg = json.get("error").and_then(|v| v.as_str()).unwrap_or("Request failed.");
