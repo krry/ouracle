@@ -170,7 +170,7 @@ impl App {
 
         match cmd {
             "/help" => {
-                let msg = "Commands: /consent, /seeker, /covenant, /begin, /prescribe [tarot|iching], /thread, /delete, /reintegrate yes|no, /token, /mouse on|off, /dev on|off, /status, /help".to_string();
+                let msg = "Commands: /policy, /covenant-text, /seeker, /covenant, /begin, /prescribe [tarot|iching], /thread, /delete, /reintegrate yes|no, /token, /mouse on|off, /dev on|off, /status, /help".to_string();
                 (None, Some(msg))
             }
             "/dev" => {
@@ -252,6 +252,16 @@ impl App {
                 let req = ApiRequest::GetConsent { base_url: self.base_url.clone() };
                 self.pending = true;
                 (Some(req), Some("Priestess: Requesting consent disclosures.".to_string()))
+            }
+            "/policy" => {
+                let req = ApiRequest::GetConsent { base_url: self.base_url.clone() };
+                self.pending = true;
+                (Some(req), Some("Priestess: Requesting data policy.".to_string()))
+            }
+            "/covenant-text" => {
+                let req = ApiRequest::GetCovenant { base_url: self.base_url.clone() };
+                self.pending = true;
+                (Some(req), Some("Priestess: Requesting covenant text.".to_string()))
             }
             "/seeker" => {
                 let req = ApiRequest::GetConsent { base_url: self.base_url.clone() };
@@ -351,6 +361,13 @@ impl App {
                     self.pending = true;
                     self.pending_seeker_after_consent = false;
                     self.push_message("Priestess: Consent received. Creating seeker...".to_string());
+                }
+            }
+            ApiResponse::CovenantText { version, text, meta } => {
+                self.last_meta = Some(meta);
+                self.push_message(format!("Covenant v{}:", version));
+                for line in text {
+                    self.push_message(format!("- {}", line));
                 }
             }
             ApiResponse::SeekerCreated { seeker_id, access_token, refresh_token, meta } => {
