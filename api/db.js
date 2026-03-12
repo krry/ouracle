@@ -90,6 +90,20 @@ export async function deleteSeeker(seeker_id) {
   return row ?? null;
 }
 
+export async function redactSession(seeker_id, session_id) {
+  const [row] = await sql`
+    UPDATE sessions
+    SET full_text = NULL,
+        conversation = NULL,
+        report = NULL,
+        rite_json = NULL,
+        updated_at = now()
+    WHERE id = ${session_id} AND seeker_id = ${seeker_id}
+    RETURNING id
+  `;
+  return row ?? null;
+}
+
 // ─────────────────────────────────────────────
 // SESSIONS
 // ─────────────────────────────────────────────

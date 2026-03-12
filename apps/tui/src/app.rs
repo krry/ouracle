@@ -172,7 +172,7 @@ impl App {
 
         match cmd {
             "/help" => {
-                let msg = "Commands: /policy, /covenant-text, /seeker, /covenant, /begin, /prescribe [tarot|iching], /thread, /delete, /reintegrate yes|no, /token, /mouse on|off, /dev on|off, /status, /help".to_string();
+                let msg = "Commands: /policy, /covenant-text, /seeker, /covenant, /begin, /prescribe [tarot|iching], /thread, /redact <session_id>, /delete, /reintegrate yes|no, /token, /mouse on|off, /dev on|off, /status, /help".to_string();
                 (None, Some(msg))
             }
             "/dev" => {
@@ -233,6 +233,28 @@ impl App {
                 };
                 self.pending = true;
                 (Some(req), Some("Priestess: Deleting seeker.".to_string()))
+            }
+            "/redact" => {
+                let access_token = match &self.access_token {
+                    Some(t) => t.clone(),
+                    None => return (None, Some("Priestess: No access token. Use /seeker first.".to_string())),
+                };
+                let seeker_id = match &self.seeker_id {
+                    Some(id) => id.clone(),
+                    None => return (None, Some("Priestess: No seeker_id. Use /seeker first.".to_string())),
+                };
+                let session_id = match parts.get(1) {
+                    Some(id) => (*id).to_string(),
+                    None => return (None, Some("Priestess: Provide a session_id to redact.".to_string())),
+                };
+                let req = ApiRequest::RedactSession {
+                    base_url: self.base_url.clone(),
+                    access_token,
+                    seeker_id,
+                    session_id,
+                };
+                self.pending = true;
+                (Some(req), Some("Priestess: Redacting session.".to_string()))
             }
             "/mouse" => {
                 let mode = parts.get(1).copied().unwrap_or("");
@@ -460,7 +482,7 @@ impl App {
                     let quality = item.quality.clone().unwrap_or_else(|| "unknown".to_string());
                     let enacted = item.enacted.map(|e| if e { "enacted" } else { "not enacted" }).unwrap_or("unknown");
                     let when = item.completed_at.or(item.created_at).unwrap_or_else(|| "".to_string());
-                    self.push_message(format!("- {} | {} | {} | {}", label, quality, enacted, when));
+                    self.push_message(format!("- {} | {} | {} | {} | {}", item.id, label, quality, enacted, when));
                 }
             }
             ApiResponse::SeekerDeleted { seeker_id, meta } => {
@@ -471,6 +493,10 @@ impl App {
                 self.refresh_token = None;
                 self.session_id = None;
                 self.stage = "deleted".to_string();
+            }
+            ApiResponse::SessionRedacted { session_id, meta } => {
+                self.last_meta = Some(meta);
+                self.push_message(format!("Priestess: Session redacted: {}", session_id));
             }
             ApiResponse::ReintegrationComplete { witness, what_shifted, next, meta } => {
                 self.last_meta = Some(meta);
