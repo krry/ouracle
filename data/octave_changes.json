@@ -1,0 +1,714 @@
+{
+  "metadata": {
+    "description": "Changes Above and Changes Below - I Ching hexagram transformations for each Octave step",
+    "total_hexagrams": 63
+  },
+  "steps": [
+    {
+      "order": 1,
+      "step": "Step 1",
+      "changes_above": [
+        {
+          "title": "Earth",
+          "wilhelm": "The Receptive (Earth)",
+          "gua": "䷁"
+        },
+        {
+          "title": "Leading",
+          "wilhelm": "The Army",
+          "gua": "䷆"
+        },
+        {
+          "title": "Flow",
+          "wilhelm": "Peace",
+          "gua": "䷊"
+        },
+        {
+          "title": "Integrity",
+          "wilhelm": "Modesty",
+          "gua": "䷎"
+        },
+        {
+          "title": "Nearing",
+          "wilhelm": "Approach",
+          "gua": "䷒"
+        },
+        {
+          "title": "Returning",
+          "wilhelm": "Return",
+          "gua": "䷗"
+        },
+        {
+          "title": "Brightness Hidden",
+          "wilhelm": "Darkening of the Light",
+          "gua": "䷣"
+        },
+        {
+          "title": "Pushing Upward",
+          "wilhelm": "Pushing Upward",
+          "gua": "䷭"
+        }
+      ],
+      "changes_below": [
+        {
+          "title": "Earth",
+          "wilhelm": "The Receptive (Earth)",
+          "gua": "䷁"
+        },
+        {
+          "title": "Seeking Union",
+          "wilhelm": "Holding Together",
+          "gua": "䷇"
+        },
+        {
+          "title": "Blocked",
+          "wilhelm": "Standstill",
+          "gua": "䷋"
+        },
+        {
+          "title": "Enthusing",
+          "wilhelm": "Enthusiasm",
+          "gua": "䷏"
+        },
+        {
+          "title": "Stripping Away",
+          "wilhelm": "Splitting Apart",
+          "gua": "䷖"
+        },
+        {
+          "title": "Advancing",
+          "wilhelm": "Progress",
+          "gua": "䷢"
+        },
+        {
+          "title": "Gathering",
+          "wilhelm": "Gathering Together",
+          "gua": "䷬"
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "step": "Step 2",
+      "changes_above": [
+        {
+          "title": "Sprouting",
+          "wilhelm": "Difficulty at the Beginning",
+          "gua": "䷂"
+        },
+        {
+          "title": "Waiting",
+          "wilhelm": "Waiting",
+          "gua": "䷄"
+        },
+        {
+          "title": "Seeking Union",
+          "wilhelm": "Holding Together",
+          "gua": "䷇"
+        },
+        {
+          "title": "Repeating Chasms",
+          "wilhelm": "The Abysmal (Water)",
+          "gua": "䷜"
+        },
+        {
+          "title": "Limping",
+          "wilhelm": "Obstruction",
+          "gua": "䷦"
+        },
+        {
+          "title": "The Well",
+          "wilhelm": "The Well",
+          "gua": "䷯"
+        },
+        {
+          "title": "Measuring",
+          "wilhelm": "Limitation",
+          "gua": "䷻"
+        },
+        {
+          "title": "Already Across",
+          "wilhelm": "After Completion",
+          "gua": "䷾"
+        }
+      ],
+      "changes_below": [
+        {
+          "title": "Not Knowing",
+          "wilhelm": "Youthful Folly",
+          "gua": "䷃"
+        },
+        {
+          "title": "Arguing",
+          "wilhelm": "Conflict",
+          "gua": "䷅"
+        },
+        {
+          "title": "Leading",
+          "wilhelm": "The Army",
+          "gua": "䷆"
+        },
+        {
+          "title": "Repeating Chasms",
+          "wilhelm": "The Abysmal (Water)",
+          "gua": "䷜"
+        },
+        {
+          "title": "Release",
+          "wilhelm": "Deliverance",
+          "gua": "䷧"
+        },
+        {
+          "title": "Confined",
+          "wilhelm": "Oppression",
+          "gua": "䷮"
+        },
+        {
+          "title": "Dispersing",
+          "wilhelm": "Dispersion",
+          "gua": "䷺"
+        },
+        {
+          "title": "Not Yet Across",
+          "wilhelm": "Before Completion",
+          "gua": "䷿"
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "step": "Step 3",
+      "changes_above": [
+        {
+          "title": "Possessing",
+          "wilhelm": "Great Possession",
+          "gua": "䷍"
+        },
+        {
+          "title": "Biting Through",
+          "wilhelm": "Biting Through",
+          "gua": "䷔"
+        },
+        {
+          "title": "Clarity",
+          "wilhelm": "The Clinging (Fire)",
+          "gua": "䷝"
+        },
+        {
+          "title": "Advancing",
+          "wilhelm": "Progress",
+          "gua": "䷢"
+        },
+        {
+          "title": "Opposing",
+          "wilhelm": "Opposition",
+          "gua": "䷥"
+        },
+        {
+          "title": "The Vessel",
+          "wilhelm": "The Cauldron",
+          "gua": "䷱"
+        },
+        {
+          "title": "Travelling",
+          "wilhelm": "The Wanderer",
+          "gua": "䷷"
+        },
+        {
+          "title": "Not Yet Across",
+          "wilhelm": "Before Completion",
+          "gua": "䷿"
+        }
+      ],
+      "changes_below": [
+        {
+          "title": "Harmonizing",
+          "wilhelm": "Fellowship",
+          "gua": "䷌"
+        },
+        {
+          "title": "Beauty",
+          "wilhelm": "Grace",
+          "gua": "䷕"
+        },
+        {
+          "title": "Clarity",
+          "wilhelm": "The Clinging (Fire)",
+          "gua": "䷝"
+        },
+        {
+          "title": "Brightness Hidden",
+          "wilhelm": "Darkening of the Light",
+          "gua": "䷣"
+        },
+        {
+          "title": "People in the Home",
+          "wilhelm": "The Family",
+          "gua": "䷤"
+        },
+        {
+          "title": "Radical Change",
+          "wilhelm": "Revolution",
+          "gua": "䷰"
+        },
+        {
+          "title": "Abundance",
+          "wilhelm": "Abundance",
+          "gua": "䷶"
+        },
+        {
+          "title": "Already Across",
+          "wilhelm": "After Completion",
+          "gua": "䷾"
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "step": "Step 4",
+      "changes_above": [
+        {
+          "title": "Following",
+          "wilhelm": "Following",
+          "gua": "䷐"
+        },
+        {
+          "title": "Great Exceeding",
+          "wilhelm": "Preponderance of the Great",
+          "gua": "䷛"
+        },
+        {
+          "title": "Influence",
+          "wilhelm": "Influence",
+          "gua": "䷞"
+        },
+        {
+          "title": "Deciding",
+          "wilhelm": "Breakthrough",
+          "gua": "䷪"
+        },
+        {
+          "title": "Gathering",
+          "wilhelm": "Gathering Together",
+          "gua": "䷬"
+        },
+        {
+          "title": "Confined",
+          "wilhelm": "Oppression",
+          "gua": "䷮"
+        },
+        {
+          "title": "Radical Change",
+          "wilhelm": "Revolution",
+          "gua": "䷰"
+        },
+        {
+          "title": "Opening",
+          "wilhelm": "The Joyous (Lake)",
+          "gua": "䷹"
+        }
+      ],
+      "changes_below": [
+        {
+          "title": "Treading",
+          "wilhelm": "Treading",
+          "gua": "䷉"
+        },
+        {
+          "title": "Nearing",
+          "wilhelm": "Approach",
+          "gua": "䷒"
+        },
+        {
+          "title": "Opposing",
+          "wilhelm": "Opposition",
+          "gua": "䷥"
+        },
+        {
+          "title": "Decreasing",
+          "wilhelm": "Decrease",
+          "gua": "䷨"
+        },
+        {
+          "title": "The Marrying Maiden",
+          "wilhelm": "The Marrying Virgin",
+          "gua": "䷵"
+        },
+        {
+          "title": "Opening",
+          "wilhelm": "The Joyous (Lake)",
+          "gua": "䷹"
+        },
+        {
+          "title": "Measuring",
+          "wilhelm": "Limitation",
+          "gua": "䷻"
+        },
+        {
+          "title": "Inner Truth",
+          "wilhelm": "Inner Truth",
+          "gua": "䷼"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "step": "Break 4/5",
+      "changes_above": [],
+      "changes_below": []
+    },
+    {
+      "order": 6,
+      "step": "Step 5",
+      "changes_above": [
+        {
+          "title": "Small Taming",
+          "wilhelm": "Small Taming",
+          "gua": "䷈"
+        },
+        {
+          "title": "People in the Home",
+          "wilhelm": "The Family",
+          "gua": "䷤"
+        },
+        {
+          "title": "Increasing",
+          "wilhelm": "Increase",
+          "gua": "䷩"
+        },
+        {
+          "title": "Gradual Progress",
+          "wilhelm": "Development",
+          "gua": "䷴"
+        },
+        {
+          "title": "Subtly Penetrating",
+          "wilhelm": "The Gentle (Wind)",
+          "gua": "䷸"
+        },
+        {
+          "title": "Dispersing",
+          "wilhelm": "Dispersion",
+          "gua": "䷺"
+        },
+        {
+          "title": "Inner Truth",
+          "wilhelm": "Inner Truth",
+          "gua": "䷼"
+        }
+      ],
+      "changes_below": [
+        {
+          "title": "Corrupting",
+          "wilhelm": "Work on the Decayed",
+          "gua": "䷑"
+        },
+        {
+          "title": "Great Exceeding",
+          "wilhelm": "Preponderance of the Great",
+          "gua": "䷛"
+        },
+        {
+          "title": "Lasting",
+          "wilhelm": "Duration",
+          "gua": "䷟"
+        },
+        {
+          "title": "Coupling",
+          "wilhelm": "Coming to Meet",
+          "gua": "䷫"
+        },
+        {
+          "title": "Pushing Upward",
+          "wilhelm": "Pushing Upward",
+          "gua": "䷭"
+        },
+        {
+          "title": "The Well",
+          "wilhelm": "The Well",
+          "gua": "䷯"
+        },
+        {
+          "title": "The Vessel",
+          "wilhelm": "The Cauldron",
+          "gua": "䷱"
+        },
+        {
+          "title": "Subtly Penetrating",
+          "wilhelm": "The Gentle (Wind)",
+          "gua": "䷸"
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "step": "Step 6",
+      "changes_above": [
+        {
+          "title": "Creative Force",
+          "wilhelm": "The Creative (Heaven)",
+          "gua": "䷀"
+        },
+        {
+          "title": "Arguing",
+          "wilhelm": "Conflict",
+          "gua": "䷅"
+        },
+        {
+          "title": "Treading",
+          "wilhelm": "Treading",
+          "gua": "䷉"
+        },
+        {
+          "title": "Blocked",
+          "wilhelm": "Standstill",
+          "gua": "䷋"
+        },
+        {
+          "title": "Harmonizing",
+          "wilhelm": "Fellowship",
+          "gua": "䷌"
+        },
+        {
+          "title": "Without Entanglement",
+          "wilhelm": "Innocence",
+          "gua": "䷘"
+        },
+        {
+          "title": "Retreat",
+          "wilhelm": "Retreat",
+          "gua": "䷠"
+        },
+        {
+          "title": "Coupling",
+          "wilhelm": "Coming to Meet",
+          "gua": "䷫"
+        }
+      ],
+      "changes_below": [
+        {
+          "title": "Creative Force",
+          "wilhelm": "The Creative (Heaven)",
+          "gua": "䷀"
+        },
+        {
+          "title": "Waiting",
+          "wilhelm": "Waiting",
+          "gua": "䷄"
+        },
+        {
+          "title": "Small Taming",
+          "wilhelm": "Small Taming",
+          "gua": "䷈"
+        },
+        {
+          "title": "Flow",
+          "wilhelm": "Peace",
+          "gua": "䷊"
+        },
+        {
+          "title": "Possessing",
+          "wilhelm": "Great Possession",
+          "gua": "䷍"
+        },
+        {
+          "title": "Great Taming",
+          "wilhelm": "Great Taming",
+          "gua": "䷙"
+        },
+        {
+          "title": "Great Vigour",
+          "wilhelm": "Great Power",
+          "gua": "䷡"
+        },
+        {
+          "title": "Deciding",
+          "wilhelm": "Breakthrough",
+          "gua": "䷪"
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "step": "Step 7",
+      "changes_above": [
+        {
+          "title": "Enthusing",
+          "wilhelm": "Enthusiasm",
+          "gua": "䷏"
+        },
+        {
+          "title": "Lasting",
+          "wilhelm": "Duration",
+          "gua": "䷟"
+        },
+        {
+          "title": "Great Vigour",
+          "wilhelm": "Great Power",
+          "gua": "䷡"
+        },
+        {
+          "title": "Release",
+          "wilhelm": "Deliverance",
+          "gua": "䷧"
+        },
+        {
+          "title": "Shock",
+          "wilhelm": "Shocking (Thunder)",
+          "gua": "䷲"
+        },
+        {
+          "title": "The Marrying Maiden",
+          "wilhelm": "The Marrying Virgin",
+          "gua": "䷵"
+        },
+        {
+          "title": "Abundance",
+          "wilhelm": "Abundance",
+          "gua": "䷶"
+        },
+        {
+          "title": "Small Exceeding",
+          "wilhelm": "Preponderance of the Small",
+          "gua": "䷽"
+        }
+      ],
+      "changes_below": [
+        {
+          "title": "Sprouting",
+          "wilhelm": "Difficulty at the Beginning",
+          "gua": "䷂"
+        },
+        {
+          "title": "Following",
+          "wilhelm": "Following",
+          "gua": "䷐"
+        },
+        {
+          "title": "Biting Through",
+          "wilhelm": "Biting Through",
+          "gua": "䷔"
+        },
+        {
+          "title": "Returning",
+          "wilhelm": "Return",
+          "gua": "䷗"
+        },
+        {
+          "title": "Without Entanglement",
+          "wilhelm": "Innocence",
+          "gua": "䷘"
+        },
+        {
+          "title": "Nourishment",
+          "wilhelm": "The Corners of the Mouth",
+          "gua": "䷚"
+        },
+        {
+          "title": "Increasing",
+          "wilhelm": "Increase",
+          "gua": "䷩"
+        },
+        {
+          "title": "Shock",
+          "wilhelm": "Shocking (Thunder)",
+          "gua": "䷲"
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "step": "Crisis 7/8",
+      "changes_above": [],
+      "changes_below": []
+    },
+    {
+      "order": 10,
+      "step": "Step 8/0",
+      "changes_above": [
+        {
+          "title": "Not Knowing",
+          "wilhelm": "Youthful Folly",
+          "gua": "䷃"
+        },
+        {
+          "title": "Corrupting",
+          "wilhelm": "Work on the Decayed",
+          "gua": "䷑"
+        },
+        {
+          "title": "Beauty",
+          "wilhelm": "Grace",
+          "gua": "䷕"
+        },
+        {
+          "title": "Stripping Away",
+          "wilhelm": "Splitting Apart",
+          "gua": "䷖"
+        },
+        {
+          "title": "Great Taming",
+          "wilhelm": "Great Taming",
+          "gua": "䷙"
+        },
+        {
+          "title": "Nourishment",
+          "wilhelm": "The Corners of the Mouth",
+          "gua": "䷚"
+        },
+        {
+          "title": "Decreasing",
+          "wilhelm": "Decrease",
+          "gua": "䷨"
+        },
+        {
+          "title": "Stilling",
+          "wilhelm": "The Still (Mountain)",
+          "gua": "䷳"
+        }
+      ],
+      "changes_below": [
+        {
+          "title": "Integrity",
+          "wilhelm": "Modesty",
+          "gua": "䷎"
+        },
+        {
+          "title": "Influence",
+          "wilhelm": "Influence",
+          "gua": "䷞"
+        },
+        {
+          "title": "Retreat",
+          "wilhelm": "Retreat",
+          "gua": "䷠"
+        },
+        {
+          "title": "Limping",
+          "wilhelm": "Obstruction",
+          "gua": "䷦"
+        },
+        {
+          "title": "Stilling",
+          "wilhelm": "The Still (Mountain)",
+          "gua": "䷳"
+        },
+        {
+          "title": "Gradual Progress",
+          "wilhelm": "Development",
+          "gua": "䷴"
+        },
+        {
+          "title": "Travelling",
+          "wilhelm": "The Wanderer",
+          "gua": "䷷"
+        },
+        {
+          "title": "Small Exceeding",
+          "wilhelm": "Preponderance of the Small",
+          "gua": "䷽"
+        }
+      ]
+    }
+  ]
+}

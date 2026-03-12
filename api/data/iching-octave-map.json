@@ -1,0 +1,322 @@
+[
+  {
+    "name": "Qián",
+    "quality": "activity",
+    "score": 0.3633
+  },
+  {
+    "name": "Kūn",
+    "quality": "entity",
+    "score": 0.3856
+  },
+  {
+    "name": "Zhūn",
+    "quality": "calamity",
+    "score": 0.3308
+  },
+  {
+    "name": "Méng",
+    "quality": "capacity",
+    "score": 0.3811
+  },
+  {
+    "name": "Xū",
+    "quality": "capacity",
+    "score": 0.3539
+  },
+  {
+    "name": "Sòng",
+    "quality": "capacity",
+    "score": 0.3454
+  },
+  {
+    "name": "Shī",
+    "quality": "entity",
+    "score": 0.3748
+  },
+  {
+    "name": "Bǐ",
+    "quality": "capacity",
+    "score": 0.3353
+  },
+  {
+    "name": "Xiǎo Xù",
+    "quality": "capacity",
+    "score": 0.3508
+  },
+  {
+    "name": "Lǚ",
+    "quality": "entity",
+    "score": 0.3724
+  },
+  {
+    "name": "Tài",
+    "quality": "unity",
+    "score": 0.3728
+  },
+  {
+    "name": "Pǐ",
+    "quality": "entity",
+    "score": 0.3536
+  },
+  {
+    "name": "Tóng Rén",
+    "quality": "capacity",
+    "score": 0.3751
+  },
+  {
+    "name": "Dà Yǒu",
+    "quality": "capacity",
+    "score": 0.3552
+  },
+  {
+    "name": "Qiān",
+    "quality": "capacity",
+    "score": 0.3761
+  },
+  {
+    "name": "Yù",
+    "quality": "causality",
+    "score": 0.357
+  },
+  {
+    "name": "Suí",
+    "quality": "eternity",
+    "score": 0.3455
+  },
+  {
+    "name": "Gŭ",
+    "quality": "calamity",
+    "score": 0.3686
+  },
+  {
+    "name": "Lín",
+    "quality": "capacity",
+    "score": 0.3692
+  },
+  {
+    "name": "Guān",
+    "quality": "eternity",
+    "score": 0.3794
+  },
+  {
+    "name": "Shì Kè",
+    "quality": "pity",
+    "score": 0.3386
+  },
+  {
+    "name": "Bì",
+    "quality": "entity",
+    "score": 0.3534
+  },
+  {
+    "name": "Bō",
+    "quality": "entity",
+    "score": 0.4468
+  },
+  {
+    "name": "Fù",
+    "quality": "pity",
+    "score": 0.3486
+  },
+  {
+    "name": "Wú Wàng",
+    "quality": "eternity",
+    "score": 0.3748
+  },
+  {
+    "name": "Dà Xù",
+    "quality": "capacity",
+    "score": 0.3815
+  },
+  {
+    "name": "Yí",
+    "quality": "capacity",
+    "score": 0.3271
+  },
+  {
+    "name": "Dà Guò",
+    "quality": "eternity",
+    "score": 0.339
+  },
+  {
+    "name": "Kǎn",
+    "quality": "capacity",
+    "score": 0.3691
+  },
+  {
+    "name": "Lí",
+    "quality": "entity",
+    "score": 0.3437
+  },
+  {
+    "name": "Xián",
+    "quality": "capacity",
+    "score": 0.3207
+  },
+  {
+    "name": "Héng",
+    "quality": "entity",
+    "score": 0.3327
+  },
+  {
+    "name": "Dùn",
+    "quality": "entity",
+    "score": 0.3141
+  },
+  {
+    "name": "Dà Zhuàng",
+    "quality": "entity",
+    "score": 0.3415
+  },
+  {
+    "name": "Jìn",
+    "quality": "eternity",
+    "score": 0.3264
+  },
+  {
+    "name": "Míng Yí",
+    "quality": "capacity",
+    "score": 0.3716
+  },
+  {
+    "name": "Jiā Rén",
+    "quality": "capacity",
+    "score": 0.3768
+  },
+  {
+    "name": "Kuí",
+    "quality": "entity",
+    "score": 0.3508
+  },
+  {
+    "name": "Jiǎn",
+    "quality": "capacity",
+    "score": 0.3342
+  },
+  {
+    "name": "Xiè",
+    "quality": "calamity",
+    "score": 0.3993
+  },
+  {
+    "name": "Sǔn",
+    "quality": "capacity",
+    "score": 0.3508
+  },
+  {
+    "name": "Yì",
+    "quality": "entity",
+    "score": 0.3158
+  },
+  {
+    "name": "Guài",
+    "quality": "entity",
+    "score": 0.3541
+  },
+  {
+    "name": "Gòu",
+    "quality": "entity",
+    "score": 0.3674
+  },
+  {
+    "name": "Cuì",
+    "quality": "capacity",
+    "score": 0.3708
+  },
+  {
+    "name": "Shēng",
+    "quality": "entity",
+    "score": 0.47
+  },
+  {
+    "name": "Kùn",
+    "quality": "capacity",
+    "score": 0.3342
+  },
+  {
+    "name": "Jǐng",
+    "quality": "capacity",
+    "score": 0.3713
+  },
+  {
+    "name": "Gé",
+    "quality": "capacity",
+    "score": 0.3173
+  },
+  {
+    "name": "Tǐng",
+    "quality": "capacity",
+    "score": 0.3636
+  },
+  {
+    "name": "Zhèn",
+    "quality": "pity",
+    "score": 0.3961
+  },
+  {
+    "name": "Gèn",
+    "quality": "capacity",
+    "score": 0.3596
+  },
+  {
+    "name": "Jiàn",
+    "quality": "capacity",
+    "score": 0.382
+  },
+  {
+    "name": "Guī Mèi",
+    "quality": "capacity",
+    "score": 0.3038
+  },
+  {
+    "name": "Fēng",
+    "quality": "entity",
+    "score": 0.3091
+  },
+  {
+    "name": "Lǚ",
+    "quality": "calamity",
+    "score": 0.3279
+  },
+  {
+    "name": "Xùn",
+    "quality": "capacity",
+    "score": 0.3439
+  },
+  {
+    "name": "Duì",
+    "quality": "capacity",
+    "score": 0.4074
+  },
+  {
+    "name": "Huàn",
+    "quality": "causality",
+    "score": 0.3241
+  },
+  {
+    "name": "Jié",
+    "quality": "capacity",
+    "score": 0.3762
+  },
+  {
+    "name": "Zhōng Fú",
+    "quality": "capacity",
+    "score": 0.3605
+  },
+  {
+    "name": "Xiǎo Guò",
+    "quality": "capacity",
+    "score": 0.3146
+  },
+  {
+    "name": "Jì Jì",
+    "quality": "calamity",
+    "score": 0.3544
+  },
+  {
+    "name": "Wèi Jì",
+    "quality": "activity",
+    "score": 0.349
+  }
+]

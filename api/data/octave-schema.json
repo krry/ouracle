@@ -1,0 +1,221 @@
+[
+  {
+    "name": "Step 1",
+    "note": "do",
+    "order": 1,
+    "quality": "entity",
+    "theme": "ground",
+    "intent": "be",
+    "act": "sit",
+    "realm": "point",
+    "shock": false,
+    "tarot_themes": [
+      "manifestation",
+      "willpower",
+      "confidence",
+      "bravery",
+      "forgiveness",
+      "courage"
+    ],
+    "signature_text": "entity | ground | be | sit | point | planes grounded | ground up matter | levelling up | unto the horizon | exposing roots | smell’s funny | feeling uprooted | sitting pretty | atop one’s throne | manifestation | willpower | confidence | bravery | forgiveness | courage"
+  },
+  {
+    "name": "Step 2",
+    "note": "re",
+    "order": 2,
+    "quality": "affinity",
+    "theme": "affinity",
+    "intent": "have",
+    "act": "feel",
+    "realm": "ray",
+    "shock": false,
+    "tarot_themes": [
+      "intuition",
+      "subconscious",
+      "dreams",
+      "patience",
+      "mindfulness",
+      "sacrifice",
+      "self-care",
+      "fertility",
+      "sensuality",
+      "motherhood"
+    ],
+    "signature_text": "affinity | affinity | have | feel | ray | Keeping each other warm | Filling in the blanks | Duos that just fit | The Gift of the Magi | Love Moves | Love Or Fear + Fear Or Joy | Love Over Fear | Peering into her crystal ball | Insects mating frenetically | Sexy fruit | A dog that rides horses | intuition | subconscious | dreams | patience | mindfulness | sacrifice | self-care | fertility | sensuality | motherhood"
+  },
+  {
+    "name": "Step 3",
+    "note": "mi",
+    "order": 3,
+    "quality": "activity",
+    "theme": "willpower",
+    "intent": "make",
+    "act": "dance",
+    "realm": "shape",
+    "shock": false,
+    "tarot_themes": [
+      "inevitability",
+      "transition",
+      "metamorphosis",
+      "authority",
+      "structure",
+      "rules"
+    ],
+    "signature_text": "activity | willpower | make | dance | shape | Gut Intuition | burning (desire) | smoldering (glances) | go with your gut | gut feelings | inevitability | transition | metamorphosis | authority | structure | rules"
+  },
+  {
+    "name": "Step 4",
+    "note": "fa",
+    "order": 4,
+    "quality": "capacity",
+    "theme": "love",
+    "intent": "live",
+    "act": "listen",
+    "realm": "form",
+    "shock": false,
+    "tarot_themes": [
+      "blending",
+      "harmony",
+      "moderation",
+      "tradition",
+      "wisdom",
+      "ethics",
+      "morality"
+    ],
+    "signature_text": "capacity | love | live | listen | form | Family matters | Capacity a la Orland Bishop | Parenting our friends | Toward deeper water | Carving out space within | Finding zen anywhere | Deepening our bonds | Shibumi - Zen Design | 6-Point Meditation Prep | The Way Of Zen | Snuck into the World Peace Summit | Following the Chartreuse Pulsing Pendants | A table left set | A frozen heart thawed with one last beat | A voice from the deep bubbling up | A glow from the chest | blending | harmony | moderation | tradition | wisdom | ethics | morality"
+  },
+  {
+    "name": "Break 4/5",
+    "note": "shock (air)",
+    "order": 5,
+    "quality": "pity",
+    "theme": "shock",
+    "intent": "improve",
+    "act": "shock",
+    "realm": "para",
+    "shock": true,
+    "tarot_themes": [
+      "bondage",
+      "materialism",
+      "oppression",
+      "excess",
+      "chaos",
+      "disruption",
+      "upheaval",
+      "disaster",
+      "catastrophe",
+      "shock"
+    ],
+    "signature_text": "pity | shock | improve | shock | para | Crossing the threshold | False boundaries a.k.a. barriers | Storing up grief | Examples of Technological Devolution | Day 10 - Effort: Grit to Surrender | Loss | tree bark peeling | skin molting or shedding | hair cuts, shaving | apoplexy? stroking out | bondage | materialism | oppression | excess | chaos | disruption | upheaval | disaster | catastrophe | shock"
+  },
+  {
+    "name": "Step 5",
+    "note": "so",
+    "order": 6,
+    "quality": "causality",
+    "theme": "song",
+    "intent": "say",
+    "act": "sing",
+    "realm": "mind",
+    "shock": false,
+    "tarot_themes": [
+      "relationships",
+      "harmony",
+      "compassion",
+      "focus",
+      "determination",
+      "drive"
+    ],
+    "signature_text": "causality | song | say | sing | mind | The raw power of sound | The pendulum swings | Tonedeafness and gusto don’t mix | Opposites repel until very close | Like attracts like until very close | Migratory patterns | Sam Keen's Tiny Voice | Wielding the power of prophetic speech | Manifesto Drafts | Get Real Manifesto | Self Sovereign Manifesto | Life Is What You Manifest | Affinity | Affinity Elevator | a ringing coin mid-toss | a bell unstruck (anahata) | look what just blew in | seeing one’s breath | relationships | harmony | compassion | focus | determination | drive"
+  },
+  {
+    "name": "Step 6",
+    "note": "la",
+    "order": 7,
+    "quality": "eternity",
+    "theme": "intuition",
+    "intent": "envision",
+    "act": "think",
+    "realm": "soul",
+    "shock": false,
+    "tarot_themes": [
+      "hope",
+      "optimism",
+      "trust",
+      "direction",
+      "shadows",
+      "illusion",
+      "unseen",
+      "subconscious"
+    ],
+    "signature_text": "eternity | intuition | envision | think | soul | Silicarbonian evolution | The Tao, correspondence | Truth and knowing | Sleep, and the unseen | Nested dreams | Dreaming Awake At The End Of Time: on Terence McKenna | A Dream I Had | Dreams | Dreamt Of A Wreck | Dreamliner | As Within So Without | We And Nature Are Within Each Other | Journey to the Undersea Mountaintop Within | The Truth Is Not For Sale | The Truth | Truth | Daoism | Examples of Technological Devolution | hope | optimism | trust | direction | shadows | illusion | unseen | subconscious"
+  },
+  {
+    "name": "Step 7",
+    "note": "si",
+    "order": 8,
+    "quality": "unity",
+    "theme": "universality",
+    "intent": "know",
+    "act": "intend",
+    "realm": "spirit",
+    "shock": false,
+    "tarot_themes": [
+      "balance",
+      "fairness",
+      "accountability",
+      "joy",
+      "enthusiasm",
+      "success",
+      "awakening"
+    ],
+    "signature_text": "unity | universality | know | intend | spirit | Pantheism | Starseed | The Starseed Prophecy | Anthropic Principle | The Mathematical Parameters Of Our Physical Reality | Panthea | Godfinger | Does Birdie Believe In God | This Is It: non-duality and DMT | Sundrown | Sacred geometry and the fractal reality of nature/nature of reality | Rainbow hair | Prisms | Blinded by the light | Jellyfish | Metatron’s cube | balance | fairness | accountability | joy | enthusiasm | success | awakening"
+  },
+  {
+    "name": "Crisis 7/8",
+    "note": "shock (impression)",
+    "order": 9,
+    "quality": "calamity",
+    "theme": "collapse",
+    "intent": "surrender",
+    "act": "fall",
+    "realm": "meta",
+    "shock": true,
+    "tarot_themes": [
+      "solitude",
+      "meditation",
+      "introspection",
+      "freedom",
+      "acceptance",
+      "honesty",
+      "purpose",
+      "potential",
+      "luck",
+      "naivete",
+      "aimlessness"
+    ],
+    "signature_text": "calamity | collapse | surrender | fall | meta | The last straw | The cruelty of hubris | Bitter irony | You get the lesson you need | Megalofascism Mounts All Apologies | Crisis Response | Hug The Storm | Hitting bottom | Long-fallen bridges | Squall line, green skies | Broken backed camel | Sirens and alarms | Craters, scorched earth | Disfiguring scars | Prosthetic limbs | solitude | meditation | introspection | freedom | acceptance | honesty | purpose | potential | luck | naivete | aimlessness"
+  },
+  {
+    "name": "Step 8/0",
+    "note": "do",
+    "order": 10,
+    "quality": "cyclicity",
+    "theme": "reunion",
+    "intent": "complete",
+    "act": "return",
+    "realm": "all",
+    "shock": false,
+    "tarot_themes": [
+      "change",
+      "destiny",
+      "responsibility",
+      "interconnectedness",
+      "completion",
+      "endings",
+      "closure",
+      "rebirth"
+    ],
+    "signature_text": "cyclicity | reunion | complete | return | all | Eggs and chickens | Charred remains reveal pink flesh | Rings, loops, worms, snakes | Fractal loops | Flowers from dung, flies on shit | Emerging from the rubble scathed and healing | change | destiny | responsibility | interconnectedness | completion | endings | closure | rebirth"
+  }
+]

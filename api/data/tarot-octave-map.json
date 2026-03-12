@@ -1,0 +1,548 @@
+[
+  {
+    "name": "The Fool",
+    "suit": "major",
+    "rank": 0,
+    "quality": "entity",
+    "score": 0.3951
+  },
+  {
+    "name": "The Magician",
+    "suit": "major",
+    "rank": 1,
+    "quality": "activity",
+    "score": 0.485
+  },
+  {
+    "name": "The Papess/High Priestess",
+    "suit": "major",
+    "rank": 2,
+    "quality": "activity",
+    "score": 0.3915
+  },
+  {
+    "name": "The Empress",
+    "suit": "major",
+    "rank": 3,
+    "quality": "affinity",
+    "score": 0.4518
+  },
+  {
+    "name": "The Emperor",
+    "suit": "major",
+    "rank": 4,
+    "quality": "activity",
+    "score": 0.4307
+  },
+  {
+    "name": "The Pope/Hierophant",
+    "suit": "major",
+    "rank": 5,
+    "quality": "unity",
+    "score": 0.351
+  },
+  {
+    "name": "The Lovers",
+    "suit": "major",
+    "rank": 6,
+    "quality": "affinity",
+    "score": 0.5567
+  },
+  {
+    "name": "The Chariot",
+    "suit": "major",
+    "rank": 7,
+    "quality": "entity",
+    "score": 0.4122
+  },
+  {
+    "name": "Strength",
+    "suit": "major",
+    "rank": 8,
+    "quality": "activity",
+    "score": 0.4929
+  },
+  {
+    "name": "The Hermit",
+    "suit": "major",
+    "rank": 9,
+    "quality": "capacity",
+    "score": 0.4251
+  },
+  {
+    "name": "The Wheel",
+    "suit": "major",
+    "rank": 10,
+    "quality": "calamity",
+    "score": 0.4619
+  },
+  {
+    "name": "Justice",
+    "suit": "major",
+    "rank": 11,
+    "quality": "capacity",
+    "score": 0.3549
+  },
+  {
+    "name": "The Hanged Man",
+    "suit": "major",
+    "rank": 12,
+    "quality": "calamity",
+    "score": 0.4479
+  },
+  {
+    "name": "Death",
+    "suit": "major",
+    "rank": 13,
+    "quality": "pity",
+    "score": 0.4807
+  },
+  {
+    "name": "Temperance",
+    "suit": "major",
+    "rank": 14,
+    "quality": "capacity",
+    "score": 0.4565
+  },
+  {
+    "name": "The Devil",
+    "suit": "major",
+    "rank": 15,
+    "quality": "pity",
+    "score": 0.4449
+  },
+  {
+    "name": "The Tower",
+    "suit": "major",
+    "rank": 16,
+    "quality": "pity",
+    "score": 0.5489
+  },
+  {
+    "name": "The Star",
+    "suit": "major",
+    "rank": 17,
+    "quality": "unity",
+    "score": 0.4813
+  },
+  {
+    "name": "The Moon",
+    "suit": "major",
+    "rank": 18,
+    "quality": "eternity",
+    "score": 0.4744
+  },
+  {
+    "name": "The Sun",
+    "suit": "major",
+    "rank": 19,
+    "quality": "entity",
+    "score": 0.4028
+  },
+  {
+    "name": "Judgement",
+    "suit": "major",
+    "rank": 20,
+    "quality": "calamity",
+    "score": 0.4955
+  },
+  {
+    "name": "The World",
+    "suit": "major",
+    "rank": 21,
+    "quality": "unity",
+    "score": 0.5206
+  },
+  {
+    "name": "ace of wands",
+    "suit": "wands",
+    "rank": 1,
+    "quality": "activity",
+    "score": 0.4759
+  },
+  {
+    "name": "two of wands",
+    "suit": "wands",
+    "rank": 2,
+    "quality": "activity",
+    "score": 0.4093
+  },
+  {
+    "name": "three of wands",
+    "suit": "wands",
+    "rank": 3,
+    "quality": "activity",
+    "score": 0.4567
+  },
+  {
+    "name": "four of wands",
+    "suit": "wands",
+    "rank": 4,
+    "quality": "affinity",
+    "score": 0.3682
+  },
+  {
+    "name": "five of wands",
+    "suit": "wands",
+    "rank": 5,
+    "quality": "pity",
+    "score": 0.3696
+  },
+  {
+    "name": "six of wands",
+    "suit": "wands",
+    "rank": 6,
+    "quality": "entity",
+    "score": 0.3671
+  },
+  {
+    "name": "seven of wands",
+    "suit": "wands",
+    "rank": 7,
+    "quality": "entity",
+    "score": 0.432
+  },
+  {
+    "name": "eight of wands",
+    "suit": "wands",
+    "rank": 8,
+    "quality": "activity",
+    "score": 0.4347
+  },
+  {
+    "name": "nine of wands",
+    "suit": "wands",
+    "rank": 9,
+    "quality": "calamity",
+    "score": 0.394
+  },
+  {
+    "name": "ten of wands",
+    "suit": "wands",
+    "rank": 10,
+    "quality": "pity",
+    "score": 0.4412
+  },
+  {
+    "name": "page of wands",
+    "suit": "wands",
+    "rank": "page",
+    "quality": "entity",
+    "score": 0.4223
+  },
+  {
+    "name": "knight of wands",
+    "suit": "wands",
+    "rank": "knight",
+    "quality": "activity",
+    "score": 0.4286
+  },
+  {
+    "name": "queen of wands",
+    "suit": "wands",
+    "rank": "queen",
+    "quality": "activity",
+    "score": 0.4112
+  },
+  {
+    "name": "king of wands",
+    "suit": "wands",
+    "rank": "king",
+    "quality": "activity",
+    "score": 0.4261
+  },
+  {
+    "name": "ace of cups",
+    "suit": "cups",
+    "rank": 1,
+    "quality": "affinity",
+    "score": 0.4999
+  },
+  {
+    "name": "two of cups",
+    "suit": "cups",
+    "rank": 2,
+    "quality": "affinity",
+    "score": 0.5547
+  },
+  {
+    "name": "three of cups",
+    "suit": "cups",
+    "rank": 3,
+    "quality": "affinity",
+    "score": 0.4651
+  },
+  {
+    "name": "four of cups",
+    "suit": "cups",
+    "rank": 4,
+    "quality": "entity",
+    "score": 0.3711
+  },
+  {
+    "name": "five of cups",
+    "suit": "cups",
+    "rank": 5,
+    "quality": "calamity",
+    "score": 0.493
+  },
+  {
+    "name": "six of cups",
+    "suit": "cups",
+    "rank": 6,
+    "quality": "affinity",
+    "score": 0.3805
+  },
+  {
+    "name": "seven of cups",
+    "suit": "cups",
+    "rank": 7,
+    "quality": "eternity",
+    "score": 0.4254
+  },
+  {
+    "name": "eight of cups",
+    "suit": "cups",
+    "rank": 8,
+    "quality": "calamity",
+    "score": 0.398
+  },
+  {
+    "name": "nine of cups",
+    "suit": "cups",
+    "rank": 9,
+    "quality": "affinity",
+    "score": 0.3737
+  },
+  {
+    "name": "ten of cups",
+    "suit": "cups",
+    "rank": 10,
+    "quality": "affinity",
+    "score": 0.4212
+  },
+  {
+    "name": "page of cups",
+    "suit": "cups",
+    "rank": "page",
+    "quality": "affinity",
+    "score": 0.431
+  },
+  {
+    "name": "knight of cups",
+    "suit": "cups",
+    "rank": "knight",
+    "quality": "activity",
+    "score": 0.4068
+  },
+  {
+    "name": "queen of cups",
+    "suit": "cups",
+    "rank": "queen",
+    "quality": "affinity",
+    "score": 0.4538
+  },
+  {
+    "name": "king of cups",
+    "suit": "cups",
+    "rank": "king",
+    "quality": "capacity",
+    "score": 0.4306
+  },
+  {
+    "name": "ace of swords",
+    "suit": "swords",
+    "rank": 1,
+    "quality": "activity",
+    "score": 0.365
+  },
+  {
+    "name": "two of swords",
+    "suit": "swords",
+    "rank": 2,
+    "quality": "pity",
+    "score": 0.3331
+  },
+  {
+    "name": "three of swords",
+    "suit": "swords",
+    "rank": 3,
+    "quality": "calamity",
+    "score": 0.447
+  },
+  {
+    "name": "four of swords",
+    "suit": "swords",
+    "rank": 4,
+    "quality": "capacity",
+    "score": 0.3992
+  },
+  {
+    "name": "five of swords",
+    "suit": "swords",
+    "rank": 5,
+    "quality": "calamity",
+    "score": 0.3844
+  },
+  {
+    "name": "six of swords",
+    "suit": "swords",
+    "rank": 6,
+    "quality": "calamity",
+    "score": 0.4631
+  },
+  {
+    "name": "seven of swords",
+    "suit": "swords",
+    "rank": 7,
+    "quality": "entity",
+    "score": 0.3325
+  },
+  {
+    "name": "eight of swords",
+    "suit": "swords",
+    "rank": 8,
+    "quality": "pity",
+    "score": 0.4408
+  },
+  {
+    "name": "nine of swords",
+    "suit": "swords",
+    "rank": 9,
+    "quality": "pity",
+    "score": 0.4104
+  },
+  {
+    "name": "ten of swords",
+    "suit": "swords",
+    "rank": 10,
+    "quality": "calamity",
+    "score": 0.4864
+  },
+  {
+    "name": "page of swords",
+    "suit": "swords",
+    "rank": "page",
+    "quality": "pity",
+    "score": 0.3239
+  },
+  {
+    "name": "knight of swords",
+    "suit": "swords",
+    "rank": "knight",
+    "quality": "entity",
+    "score": 0.3195
+  },
+  {
+    "name": "queen of swords",
+    "suit": "swords",
+    "rank": "queen",
+    "quality": "activity",
+    "score": 0.3476
+  },
+  {
+    "name": "king of swords",
+    "suit": "swords",
+    "rank": "king",
+    "quality": "activity",
+    "score": 0.3252
+  },
+  {
+    "name": "ace of coins",
+    "suit": "coins",
+    "rank": 1,
+    "quality": "entity",
+    "score": 0.3877
+  },
+  {
+    "name": "two of coins",
+    "suit": "coins",
+    "rank": 2,
+    "quality": "activity",
+    "score": 0.3722
+  },
+  {
+    "name": "three of coins",
+    "suit": "coins",
+    "rank": 3,
+    "quality": "entity",
+    "score": 0.3474
+  },
+  {
+    "name": "four of coins",
+    "suit": "coins",
+    "rank": 4,
+    "quality": "pity",
+    "score": 0.3806
+  },
+  {
+    "name": "five of coins",
+    "suit": "coins",
+    "rank": 5,
+    "quality": "calamity",
+    "score": 0.4482
+  },
+  {
+    "name": "six of coins",
+    "suit": "coins",
+    "rank": 6,
+    "quality": "affinity",
+    "score": 0.3303
+  },
+  {
+    "name": "seven of coins",
+    "suit": "coins",
+    "rank": 7,
+    "quality": "pity",
+    "score": 0.4084
+  },
+  {
+    "name": "eight of coins",
+    "suit": "coins",
+    "rank": 8,
+    "quality": "activity",
+    "score": 0.3714
+  },
+  {
+    "name": "nine of coins",
+    "suit": "coins",
+    "rank": 9,
+    "quality": "pity",
+    "score": 0.3943
+  },
+  {
+    "name": "ten of coins",
+    "suit": "coins",
+    "rank": 10,
+    "quality": "pity",
+    "score": 0.379
+  },
+  {
+    "name": "page of coins",
+    "suit": "coins",
+    "rank": "page",
+    "quality": "pity",
+    "score": 0.4161
+  },
+  {
+    "name": "knight of coins",
+    "suit": "coins",
+    "rank": "knight",
+    "quality": "entity",
+    "score": 0.3594
+  },
+  {
+    "name": "queen of coins",
+    "suit": "coins",
+    "rank": "queen",
+    "quality": "affinity",
+    "score": 0.379
+  },
+  {
+    "name": "king of coins",
+    "suit": "coins",
+    "rank": "king",
+    "quality": "entity",
+    "score": 0.4183
+  }
+]
