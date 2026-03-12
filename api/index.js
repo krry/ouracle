@@ -23,6 +23,7 @@ import {
   getSeekerHistory,
   getSeekerSessionCount,
   getSeekerLatestSession,
+  getSeekerThread,
   createSession,
   getSession,
   updateSession,
@@ -30,6 +31,7 @@ import {
   getSeekerEnactments,
   hasEnacted,
   writeToCorpus,
+  deleteSeeker,
   createApiKey,
   updateApiKey,
 } from './db.js';
@@ -481,8 +483,28 @@ app.post('/seeker/:id/covenant', authenticate, async (req, res) => {
 });
 
 app.get('/seeker/:id/history', authenticate, async (req, res) => {
+  if (req.seeker_id !== req.params.id) {
+    return res.status(403).json({ error: 'Forbidden.' });
+  }
   const history = await getSeekerHistory(req.params.id);
   return res.json({ seeker_id: req.params.id, history });
+});
+
+app.get('/seeker/:id/thread', authenticate, async (req, res) => {
+  if (req.seeker_id !== req.params.id) {
+    return res.status(403).json({ error: 'Forbidden.' });
+  }
+  const thread = await getSeekerThread(req.params.id);
+  return res.json({ seeker_id: req.params.id, thread });
+});
+
+app.delete('/seeker/:id', authenticate, async (req, res) => {
+  if (req.seeker_id !== req.params.id) {
+    return res.status(403).json({ error: 'Forbidden.' });
+  }
+  const deleted = await deleteSeeker(req.params.id);
+  if (!deleted) return res.status(404).json({ error: 'Seeker not found.' });
+  return res.json({ deleted: true, seeker_id: req.params.id });
 });
 
 // ─────────────────────────────────────────────
