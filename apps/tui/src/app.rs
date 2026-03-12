@@ -39,6 +39,7 @@ pub struct App {
     pub mouse_capture_dirty: bool,
     pub pending_seeker_after_consent: bool,
     pub queued_request: Option<ApiRequest>,
+    pub pending_begin_after_covenant: bool,
 }
 
 impl App {
@@ -65,6 +66,7 @@ impl App {
             mouse_capture_dirty: false,
             pending_seeker_after_consent: false,
             queued_request: None,
+            pending_begin_after_covenant: false,
         }
     }
 
@@ -291,12 +293,14 @@ impl App {
                     Some(t) => t.clone(),
                     None => return (None, Some("Priestess: No access token. Use /seeker then /covenant.".to_string())),
                 };
-                let req = ApiRequest::BeginInquiry {
+                let req = ApiRequest::GetCovenant { base_url: self.base_url.clone() };
+                self.pending = true;
+                self.pending_begin_after_covenant = true;
+                self.queued_request = Some(ApiRequest::BeginInquiry {
                     base_url: self.base_url.clone(),
                     access_token,
-                };
-                self.pending = true;
-                (Some(req), Some("Priestess: Opening inquiry (covenant included).".to_string()))
+                });
+                (Some(req), Some("Priestess: Requesting covenant text.".to_string()))
             }
             "/prescribe" => {
                 let access_token = match &self.access_token {
@@ -368,6 +372,9 @@ impl App {
                 self.push_message(format!("Covenant v{}:", version));
                 for line in text {
                     self.push_message(format!("- {}", line));
+                }
+                if self.pending_begin_after_covenant {
+                    self.pending_begin_after_covenant = false;
                 }
             }
             ApiResponse::SeekerCreated { seeker_id, access_token, refresh_token, meta } => {
