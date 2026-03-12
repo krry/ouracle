@@ -42,6 +42,7 @@ pub struct App {
     pub pending_begin_after_covenant: bool,
     pub ritual_opened_at: Option<std::time::Instant>,
     pub ritual_min_delay_ms: u128,
+    pub begin_allowed: bool,
     pub sessions_completed: u32,
 }
 
@@ -72,6 +73,7 @@ impl App {
             pending_begin_after_covenant: false,
             ritual_opened_at: None,
             ritual_min_delay_ms: 1500,
+            begin_allowed: false,
             sessions_completed: 0,
         }
     }
@@ -178,7 +180,7 @@ impl App {
 
         match cmd {
             "/help" => {
-                let msg = "Commands: /policy, /covenant-text, /seeker, /covenant, /begin, /prescribe [tarot|iching], /thread, /redact <session_id>, /delete, /reintegrate yes|no, /token, /mouse on|off, /dev on|off, /status, /help".to_string();
+                let msg = "Commands: /policy, /covenant-text, /seeker, /covenant, /begin, /accept, /prescribe [tarot|iching], /thread, /redact <session_id>, /delete, /reintegrate yes|no, /token, /mouse on|off, /dev on|off, /status, /help".to_string();
                 (None, Some(msg))
             }
             "/dev" => {
@@ -329,13 +331,21 @@ impl App {
                 self.pending = true;
                 self.pending_begin_after_covenant = true;
                 self.ritual_opened_at = Some(std::time::Instant::now());
+                self.begin_allowed = false;
                 self.queued_request = Some(ApiRequest::BeginInquiry {
                     base_url: self.base_url.clone(),
                     access_token,
                 });
-                (Some(req), Some("Priestess: Requesting covenant text.".to_string()))
+                (Some(req), Some("Priestess: Requesting covenant text. Type /accept to proceed.".to_string()))
+            }
+            "/accept" => {
+                self.begin_allowed = true;
+                (None, Some("Priestess: Covenant accepted.".to_string()))
             }
             "/prescribe" => {
+                if self.stage != "inquiry_complete" {
+                    return (None, Some("Priestess: Inquiry not complete yet.".to_string()));
+                }
                 let access_token = match &self.access_token {
                     Some(t) => t.clone(),
                     None => return (None, Some("Priestess: No access token. Use /seeker then /covenant.".to_string())),

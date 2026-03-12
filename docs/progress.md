@@ -68,13 +68,13 @@ Rules:
 - [ ] Web Priestess single‑page conversational UI (no chrome, centered field, question above).
 - [ ] First‑session flow: one‑sentence Priestess intro; opening question before any form.
 - [ ] Account creation deferred until after first genuine exchange. (deferred: anonymous reception taste, not a session)
-- [ ] Full ritual cycle enforced: Inquiry → Prescription → Reintegration (no skipping).
+- [x] Full ritual cycle enforced: Inquiry → Prescription → Reintegration (no skipping).
 - [ ] Prescription delivered as ritual card (name, act, context, optional invocation, expected textures) with pacing.
 - [x] Closing phrase fixed: “May this mantra instruct you.”
 - [x] Reintegration window signaled once; tone is holding, never urgent.
 - [ ] Thread view: readable letter of mantras + reintegration reports + octave trajectory. (deferred to Phase 7)
 - [x] Data controls: redact entries + delete account from thread view.
-- [ ] Threshold Covenant moment (100% responsibility) before first inquiry.
+- [x] Threshold Covenant moment (100% responsibility) before first inquiry.
 - [ ] Ambient audio layer (opt‑in) for sonic space; silence/pacing designed.
 - [ ] No gamification UI anywhere (no streaks/scores/levels/badges).
 - [ ] Accessibility baseline: min 16px, WCAG AA/AAA contrast, keyboard nav, voice input, pausable sessions.

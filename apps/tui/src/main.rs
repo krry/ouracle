@@ -104,9 +104,10 @@ fn app_loop(
                 Some(started) => started.elapsed().as_millis() >= app.ritual_min_delay_ms,
                 None => true,
             };
-            if ready {
+            if ready && app.begin_allowed {
                 let _ = req_tx.send(req);
                 app.ritual_opened_at = None;
+                app.begin_allowed = false;
             } else {
                 app.queued_request = Some(req);
             }
