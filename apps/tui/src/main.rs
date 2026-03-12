@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 use color_eyre::eyre::Result;
 use crossterm::{
     // event::{self, Event, KeyCode},
-    event::{self},
+    event::{self, DisableMouseCapture, EnableMouseCapture},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -34,7 +34,7 @@ fn run() -> Result<()> {
     // 1. Set up terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen)?;
+    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
     terminal.clear()?;
@@ -44,7 +44,7 @@ fn run() -> Result<()> {
 
     // 3. Restore terminal even if app_loop errors
     disable_raw_mode()?;
-    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+    execute!(terminal.backend_mut(), DisableMouseCapture, LeaveAlternateScreen)?;
     terminal.show_cursor()?;
 
     res
@@ -86,8 +86,21 @@ fn app_loop(
             }
         }
 
+        if app.mouse_capture_dirty {
+            if app.mouse_capture {
+                execute!(terminal.backend_mut(), EnableMouseCapture)?;
+            } else {
+                execute!(terminal.backend_mut(), DisableMouseCapture)?;
+            }
+            app.mouse_capture_dirty = false;
+        }
+
         while let Ok(resp) = resp_rx.try_recv() {
             app.handle_api_response(resp);
+        }
+
+        if let Some(req) = app.take_queued_request() {
+            let _ = req_tx.send(req);
         }
 
         if last_tick.elapsed() >= tick_rate {
