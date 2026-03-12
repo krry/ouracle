@@ -7,6 +7,9 @@ use rand::{RngCore, rngs::OsRng};
 
 use crate::aura::Aura;
 use crate::api::{ApiMeta, ApiRequest, ApiResponse};
+use crate::totem::{Totem, SeekerPreferences, TotemSession};
+use crate::totem as totem_store;
+use std::path::PathBuf;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AppMode {
@@ -44,6 +47,8 @@ pub struct App {
     pub ritual_min_delay_ms: u128,
     pub begin_allowed: bool,
     pub sessions_completed: u32,
+    pub totem_path: PathBuf,
+    pub totem: Option<Totem>,
 }
 
 impl App {
@@ -75,6 +80,8 @@ impl App {
             ritual_min_delay_ms: 1500,
             begin_allowed: false,
             sessions_completed: 0,
+            totem_path: totem_store::default_path(),
+            totem: None,
         }
     }
 
@@ -180,7 +187,7 @@ impl App {
 
         match cmd {
             "/help" => {
-                let msg = "Commands: /policy, /covenant-text, /seeker, /covenant, /begin, /accept, /prescribe [tarot|iching], /thread, /redact <session_id>, /delete, /reintegrate yes|no, /token, /mouse on|off, /dev on|off, /status, /help".to_string();
+                let msg = "Commands: /policy, /covenant-text, /seeker, /covenant, /begin, /accept, /prescribe [tarot|iching], /thread, /redact <session_id>, /delete, /reintegrate yes|no, /totem status|init|export <path>|import <path>, /token, /mouse on|off, /dev on|off, /status, /help".to_string();
                 (None, Some(msg))
             }
             "/dev" => {
@@ -194,14 +201,15 @@ impl App {
             }
             "/status" => {
                 let msg = format!(
-                    "Status: base_url={} seeker_id={} session_id={} stage={} pending={} mouse_capture={} sessions_completed={}",
+                    "Status: base_url={} seeker_id={} session_id={} stage={} pending={} mouse_capture={} sessions_completed={} totem={}",
                     self.base_url,
                     self.seeker_id.as_deref().unwrap_or("none"),
                     self.session_id.as_deref().unwrap_or("none"),
                     self.stage,
                     self.pending,
                     if self.mouse_capture { "on" } else { "off" },
-                    self.sessions_completed
+                    self.sessions_completed,
+                    if self.totem.is_some() { "loaded" } else { "none" }
                 );
                 (None, Some(msg))
             }
@@ -211,6 +219,64 @@ impl App {
             "/token" => {
                 let token = self.access_token.as_deref().unwrap_or("none");
                 (None, Some(format!("Bearer: {}", token)))
+            }
+            "/totem" => {
+                let sub = parts.get(1).copied().unwrap_or("status");
+                match sub {
+                    "status" => {
+                        let msg = if let Some(t) = &self.totem {
+                            format!("Totem: {} (v{})", t.totem_id, t.totem_version)
+                        } else if self.totem_path.exists() {
+                            "Totem: file exists (not loaded)".to_string()
+                        } else {
+                            "Totem: none".to_string()
+                        };
+                        (None, Some(msg))
+                    }
+                    "init" => {
+                        let now = totem_store::now_iso();
+                        let totem = Totem {
+                            totem_version: "0.1".to_string(),
+                            totem_id: random_hex(16),
+                            created_at: now.clone(),
+                            updated_at: now,
+                            seeker_preferences: SeekerPreferences {
+                                oracle_flavor: "none".to_string(),
+                                timezone: std::env::var("TZ").unwrap_or_else(|_| "UTC".to_string()),
+                            },
+                            sessions: Vec::new(),
+                        };
+                        let _ = totem_store::save(&self.totem_path, &totem);
+                        self.totem = Some(totem);
+                        (None, Some("Totem initialized (unencrypted stub).".to_string()))
+                    }
+                    "export" => {
+                        let path = match parts.get(2) {
+                            Some(p) => PathBuf::from(*p),
+                            None => return (None, Some("Usage: /totem export <path>".to_string())),
+                        };
+                        if let Some(t) = &self.totem {
+                            let _ = totem_store::save(&path, t);
+                            (None, Some(format!("Totem exported to {}", path.display())))
+                        } else {
+                            (None, Some("Totem not loaded.".to_string()))
+                        }
+                    }
+                    "import" => {
+                        let path = match parts.get(2) {
+                            Some(p) => PathBuf::from(*p),
+                            None => return (None, Some("Usage: /totem import <path>".to_string())),
+                        };
+                        let loaded = totem_store::load(&path);
+                        if let Some(t) = loaded {
+                            self.totem = Some(t);
+                            (None, Some(format!("Totem imported from {}", path.display())))
+                        } else {
+                            (None, Some("Totem import failed.".to_string()))
+                        }
+                    }
+                    _ => (None, Some("Usage: /totem status|init|export <path>|import <path>".to_string())),
+                }
             }
             "/thread" => {
                 let access_token = match &self.access_token {
