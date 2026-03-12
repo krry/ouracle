@@ -32,6 +32,7 @@ import {
   hasEnacted,
   writeToCorpus,
   deleteSeeker,
+  redactSession,
   createApiKey,
   updateApiKey,
 } from './db.js';
@@ -505,6 +506,15 @@ app.delete('/seeker/:id', authenticate, async (req, res) => {
   const deleted = await deleteSeeker(req.params.id);
   if (!deleted) return res.status(404).json({ error: 'Seeker not found.' });
   return res.json({ deleted: true, seeker_id: req.params.id });
+});
+
+app.patch('/seeker/:id/thread/:session_id/redact', authenticate, async (req, res) => {
+  if (req.seeker_id !== req.params.id) {
+    return res.status(403).json({ error: 'Forbidden.' });
+  }
+  const redacted = await redactSession(req.params.id, req.params.session_id);
+  if (!redacted) return res.status(404).json({ error: 'Session not found.' });
+  return res.json({ redacted: true, session_id: req.params.session_id });
 });
 
 // ─────────────────────────────────────────────

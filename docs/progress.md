@@ -73,7 +73,7 @@ Rules:
 - [ ] Closing phrase fixed: “May this mantra instruct you.”
 - [x] Reintegration window signaled once; tone is holding, never urgent.
 - [ ] Thread view: readable letter of mantras + reintegration reports + octave trajectory.
-- [ ] Data controls: redact entries + delete account from thread view.
+- [x] Data controls: redact entries + delete account from thread view.
 - [ ] Threshold Covenant moment (100% responsibility) before first inquiry.
 - [ ] Ambient audio layer (opt‑in) for sonic space; silence/pacing designed.
 - [ ] No gamification UI anywhere (no streaks/scores/levels/badges).
