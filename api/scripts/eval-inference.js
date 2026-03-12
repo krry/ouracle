@@ -16,10 +16,17 @@ function readFile(p) {
 
 function parseSection(md, prefix) {
   const entries = [];
-  const re = new RegExp(`id:\\s*${prefix}_(\\d+)[\\s\\S]*?label:\\s*([^\n]+)[\\s\\S]*?text:\\s*\"([\s\S]*?)\"`, 'g');
-  let m;
-  while ((m = re.exec(md)) !== null) {
-    entries.push({ id: `${prefix}_${m[1]}`, label: m[2].trim(), text: m[3].trim() });
+  const blockRe = /```([\s\S]*?)```/g;
+  let match;
+  while ((match = blockRe.exec(md)) !== null) {
+    const block = match[1];
+    const idMatch = block.match(/^\s*id:\s*([A-Z]+_\d+)\s*$/m);
+    if (!idMatch || !idMatch[1].startsWith(`${prefix}_`)) continue;
+    const labelMatch = block.match(/^\s*label:\s*([^\n]+)\s*$/m);
+    const textMatch = block.match(/^\s*text:\s*(?:"([\s\S]*?)"|([^\n]+))\s*$/m);
+    if (!labelMatch || !textMatch) continue;
+    const text = (textMatch[1] ?? textMatch[2] ?? '').trim();
+    entries.push({ id: idMatch[1], label: labelMatch[1].trim(), text });
   }
   return entries;
 }
