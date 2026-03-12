@@ -1,9 +1,10 @@
 use ratatui::{
-    layout::{Constraint, Direction, Layout, Rect},
+    layout::{Constraint, Direction, Layout},
     style::{Color, Style},
     widgets::{Block, Borders, Paragraph, Wrap},
     Frame,
 };
+use textwrap::wrap;
 
 use crate::app::App;
 
@@ -53,11 +54,13 @@ pub fn draw(frame: &mut Frame, app: &App) {
     };
 
     let history_area = main_chunks[0];
-    let history = app.messages.join("\n");
-    let history_lines = history.lines().count();
+    let wrap_width = history_area.width.saturating_sub(2) as usize;
+    let wrapped_lines = wrap_messages(&app.messages, wrap_width);
+    let history = wrapped_lines.join("\n");
+    let history_lines = wrapped_lines.len();
     let visible_lines = history_area.height.saturating_sub(2) as usize;
     let max_offset = history_lines.saturating_sub(visible_lines);
-    let scroll = max_offset as u16;
+    let scroll = max_offset.saturating_sub(app.history_offset.min(max_offset)) as u16;
     let history_widget = Paragraph::new(history)
         .block(Block::default().borders(Borders::ALL).title("Thread"))
         .wrap(Wrap { trim: false })
@@ -156,8 +159,30 @@ fn format_legend() -> String {
     let lines = [
         "/consent  /seeker  /covenant",
         "/begin    /prescribe [tarot|iching]",
-        "/reintegrate yes|no",
-        "/dev on|off  /status  /help",
+        "/reintegrate yes|no  /token",
+        "/mouse on|off  /dev on|off",
+        "/status  /help",
     ];
     lines.join("\n")
+}
+
+fn wrap_messages(messages: &[String], width: usize) -> Vec<String> {
+    let mut out = Vec::new();
+    for msg in messages {
+        for line in msg.split('\n') {
+            if width == 0 {
+                out.push(line.to_string());
+                continue;
+            }
+            let wrapped = wrap(line, width);
+            if wrapped.is_empty() {
+                out.push(String::new());
+            } else {
+                for w in wrapped {
+                    out.push(w.into_owned());
+                }
+            }
+        }
+    }
+    out
 }

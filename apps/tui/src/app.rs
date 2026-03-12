@@ -2,7 +2,7 @@
 
 use std::time::Duration;
 
-use crossterm::event::{Event, KeyCode, KeyEvent};
+use crossterm::event::{Event, KeyCode, KeyEvent, MouseEventKind};
 use rand::{RngCore, rngs::OsRng};
 
 use crate::aura::Aura;
@@ -34,7 +34,11 @@ pub struct App {
     pub last_meta: Option<ApiMeta>,
     pub submit_history: Vec<String>,
     pub history_index: Option<usize>,
-    pub history_offset: usize,
+    pub history_offset: usize, // lines up from bottom (0 = pinned to latest)
+    pub mouse_capture: bool,
+    pub mouse_capture_dirty: bool,
+    pub pending_seeker_after_consent: bool,
+    pub queued_request: Option<ApiRequest>,
 }
 
 impl App {
@@ -57,6 +61,10 @@ impl App {
             submit_history: Vec::new(),
             history_index: None,
             history_offset: 0,
+            mouse_capture: true,
+            mouse_capture_dirty: false,
+            pending_seeker_after_consent: false,
+            queued_request: None,
         }
     }
 
@@ -87,10 +95,13 @@ impl App {
                     return (false, req);
                 }
                 KeyCode::PageUp => {
-                    self.history_offset = self.history_offset.saturating_sub(5);
+                    self.history_offset = self.history_offset.saturating_add(5);
                 }
                 KeyCode::PageDown => {
-                    self.history_offset = self.history_offset.saturating_add(5);
+                    self.history_offset = self.history_offset.saturating_sub(5);
+                }
+                KeyCode::End => {
+                    self.history_offset = 0;
                 }
                 KeyCode::Up => {
                     self.load_prev_history();
@@ -106,6 +117,17 @@ impl App {
                 }
                 _ => {}
             },
+            Event::Mouse(mouse) => {
+                match mouse.kind {
+                    MouseEventKind::ScrollUp => {
+                        self.history_offset = self.history_offset.saturating_add(3);
+                    }
+                    MouseEventKind::ScrollDown => {
+                        self.history_offset = self.history_offset.saturating_sub(3);
+                    }
+                    _ => {}
+                }
+            }
             _ => {}
         }
         (false, None)
@@ -148,7 +170,7 @@ impl App {
 
         match cmd {
             "/help" => {
-                let msg = "Commands: /consent, /seeker, /covenant, /begin, /prescribe [tarot|iching], /reintegrate yes|no, /dev on|off, /status, /help".to_string();
+                let msg = "Commands: /consent, /seeker, /covenant, /begin, /prescribe [tarot|iching], /reintegrate yes|no, /token, /mouse on|off, /dev on|off, /status, /help".to_string();
                 (None, Some(msg))
             }
             "/dev" => {
@@ -162,14 +184,35 @@ impl App {
             }
             "/status" => {
                 let msg = format!(
-                    "Status: base_url={} seeker_id={} session_id={} stage={} pending={}",
+                    "Status: base_url={} seeker_id={} session_id={} stage={} pending={} mouse_capture={}",
                     self.base_url,
                     self.seeker_id.as_deref().unwrap_or("none"),
                     self.session_id.as_deref().unwrap_or("none"),
                     self.stage,
-                    self.pending
+                    self.pending,
+                    if self.mouse_capture { "on" } else { "off" }
                 );
                 (None, Some(msg))
+            }
+            "/token" => {
+                let token = self.access_token.as_deref().unwrap_or("none");
+                (None, Some(format!("Bearer: {}", token)))
+            }
+            "/mouse" => {
+                let mode = parts.get(1).copied().unwrap_or("");
+                match mode {
+                    "on" => {
+                        self.mouse_capture = true;
+                        self.mouse_capture_dirty = true;
+                        (None, Some("Mouse capture: on (scroll enabled, selection disabled)".to_string()))
+                    }
+                    "off" => {
+                        self.mouse_capture = false;
+                        self.mouse_capture_dirty = true;
+                        (None, Some("Mouse capture: off (selection enabled, scroll disabled)".to_string()))
+                    }
+                    _ => (None, Some("Usage: /mouse on|off".to_string())),
+                }
             }
             "/consent" => {
                 let req = ApiRequest::GetConsent { base_url: self.base_url.clone() };
@@ -177,11 +220,10 @@ impl App {
                 (Some(req), Some("Priestess: Requesting consent disclosures.".to_string()))
             }
             "/seeker" => {
-                let device_id = random_hex(16);
-                let timezone = std::env::var("TZ").unwrap_or_else(|_| "UTC".to_string());
-                let req = ApiRequest::CreateSeeker { base_url: self.base_url.clone(), device_id, timezone };
+                let req = ApiRequest::GetConsent { base_url: self.base_url.clone() };
                 self.pending = true;
-                (Some(req), Some("Priestess: Creating seeker.".to_string()))
+                self.pending_seeker_after_consent = true;
+                (Some(req), Some("Priestess: Requesting consent disclosures.".to_string()))
             }
             "/covenant" => {
                 let access_token = match &self.access_token {
@@ -264,6 +306,18 @@ impl App {
                     self.push_message(format!("- {}", d));
                 }
                 self.stage = "consent".to_string();
+                if self.pending_seeker_after_consent {
+                    let device_id = random_hex(16);
+                    let timezone = std::env::var("TZ").unwrap_or_else(|_| "UTC".to_string());
+                    self.queued_request = Some(ApiRequest::CreateSeeker {
+                        base_url: self.base_url.clone(),
+                        device_id,
+                        timezone,
+                    });
+                    self.pending = true;
+                    self.pending_seeker_after_consent = false;
+                    self.push_message("Priestess: Consent received. Creating seeker...".to_string());
+                }
             }
             ApiResponse::SeekerCreated { seeker_id, access_token, refresh_token, meta } => {
                 self.last_meta = Some(meta);
@@ -352,9 +406,15 @@ impl App {
         }
     }
 
+    pub fn take_queued_request(&mut self) -> Option<ApiRequest> {
+        self.queued_request.take()
+    }
+
     fn push_message(&mut self, msg: String) {
         self.messages.push(msg);
-        self.history_offset = self.messages.len();
+        if self.history_offset == 0 {
+            self.history_offset = 0;
+        }
     }
 
     fn push_history(&mut self, line: &str) {
