@@ -15,13 +15,11 @@
 
 ## Where We Stand
 
-Today: a working Express API on port 3737. Seven rites. Five opening questions. Semantic inference via OpenRouter tools (keyword fallback still possible). Postgres-backed persistence (seekers, sessions, enactments, reintegration corpus). JWT auth for Seeker flows plus API key auth for external callers. Covenant gate and session lifecycle endpoints live. Session history is queryable.
+Today: a working Express API on port 3737. Seven rites. Five opening questions. Keyword-based inference that scores text against lists. In-memory sessions that die on restart. No auth. No persistence. No identity.
 
 It runs. It completes the three-stage loop. It returns something real. That's what we protect.
 
 What we do not have: anything a Seeker would trust, return to, or bring their inner life to. The gap between "it runs" and "it's ready" is exactly what this roadmap closes — in order, without skipping steps, without shipping what isn't safe.
-
-Specifically missing: a Priestess UI, Totem client and sync, rate limiting, streaming responses, mobile surfaces, the Agora, or the donation/membership flow.
 
 **Ouracle is organized as a non-profit church under US law (501(c)(3) or equivalent religious organization structure).** This is not a commercial product seeking revenue. It is a portal seeking Seekers. The language in this roadmap reflects that: where v1 said "revenue-ready," this document says "donation/membership-ready." Where v1 said "B2B licensing," this document says "organizational access." Legal entity formation follows proof of concept — the idea proves itself before the legal structure formalizes around it.
 
