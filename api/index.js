@@ -169,11 +169,14 @@ app.post('/session/new', authenticate, async (req, res) => {
     days_since_last: daysSinceLast,
   });
   const lastAct = lastSession?.rite_json?.act;
-  const greeting = lastAct
+  const returningGreeting = lastAct
     ? `You were going to ${lastAct.replace(/\.$/, '')}.`
     : lastSession?.rite_name
       ? `You were working with ${lastSession.rite_name}.`
       : null;
+  const greeting = daysSinceLast !== null && daysSinceLast >= 90
+    ? "Three months. What's been happening?"
+    : returningGreeting;
   const nowIso = new Date().toISOString();
   const conversation = [
     ...(greeting ? [{ role: 'priestess', text: greeting, at: nowIso }] : []),
