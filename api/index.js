@@ -11,6 +11,7 @@ import {
   buildPrescription,
   variantRite,
   chooseOpeningQuestion,
+  drawOracle,
   RITES,
   BELIEFS,
   OCTAVE,
@@ -21,6 +22,7 @@ import {
   recordCovenant,
   getSeekerHistory,
   getSeekerSessionCount,
+  getSeekerLatestSession,
   createSession,
   getSession,
   updateSession,
@@ -145,8 +147,24 @@ app.post('/session/new', authenticate, async (req, res) => {
   }
 
   const sessionCount = await getSeekerSessionCount(seeker_id);
+  const lastSession = await getSeekerLatestSession(seeker_id);
+  const lastQuestion = Array.isArray(lastSession?.conversation)
+    ? lastSession.conversation.find((entry) => entry?.role === 'priestess')?.text
+    : null;
+  const lastAt = lastSession?.completed_at || lastSession?.created_at;
+  const daysSinceLast = lastAt
+    ? Math.floor((Date.now() - new Date(lastAt).getTime()) / (1000 * 60 * 60 * 24))
+    : null;
+
   const session = await createSession(seeker_id, covenant);
-  const question = chooseOpeningQuestion({ ...(context || {}), session_count: sessionCount });
+  const question = chooseOpeningQuestion({
+    ...(context || {}),
+    session_count: sessionCount,
+    last_question: lastQuestion,
+    last_quality: lastSession?.quality ?? null,
+    last_rite_name: lastSession?.rite_name ?? null,
+    days_since_last: daysSinceLast,
+  });
   const conversation = [
     { role: 'priestess', text: question, at: new Date().toISOString() },
   ];
@@ -260,7 +278,7 @@ app.post('/inquire', authenticate, async (req, res) => {
 // POST /prescribe
 // ─────────────────────────────────────────────
 app.post('/prescribe', authenticate, async (req, res) => {
-  const { session_id } = req.body;
+  const { session_id, oracle_flavor } = req.body;
 
   const session = await getSession(session_id);
   if (!session) return res.status(404).json({ error: 'Session not found. Run /inquire first.' });
@@ -271,6 +289,7 @@ app.post('/prescribe', authenticate, async (req, res) => {
   const belief  = { pattern: session.belief_pattern, confidence: session.belief_confidence, meta: BELIEFS[session.belief_pattern] };
   const quality = { quality: session.quality, confidence: session.quality_confidence, is_shock: session.quality_is_shock };
   const prescription = buildPrescription(session.vagal_probable, belief, quality);
+  const oracle = drawOracle(oracle_flavor, quality.quality);
   const history = await getSeekerHistory(session.seeker_id, 1);
   const lastRite = history?.[0]?.rite_name || null;
   const needsVariant = lastRite && prescription.rite?.rite_name === lastRite;
@@ -278,11 +297,12 @@ app.post('/prescribe', authenticate, async (req, res) => {
   if (needsVariant) {
     prescription.rite = variantRite(prescription.rite);
   }
+  const ritePayload = oracle ? { ...prescription.rite, oracle } : prescription.rite;
 
   await updateSession(session_id, {
     stage: 'prescribed',
     rite_name: prescription.rite?.rite_name,
-    rite_json: prescription.rite,
+    rite_json: ritePayload,
     love_fear_audit: prescription.love_fear_audit,
     prescribed_at: new Date().toISOString(),
   });
@@ -290,7 +310,8 @@ app.post('/prescribe', authenticate, async (req, res) => {
   const resp = {
     session_id,
     stage: 'prescription',
-    rite: prescription.rite,
+    rite: ritePayload,
+    oracle,
     reintegration_window: '24–72h',
     _meta: {
       vagal_state: prescription.vagal_state,

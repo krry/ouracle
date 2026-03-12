@@ -58,6 +58,17 @@ export async function getSeekerSessionCount(seeker_id) {
   return row?.count ?? 0;
 }
 
+export async function getSeekerLatestSession(seeker_id) {
+  const [row] = await sql`
+    SELECT id, conversation, quality, rite_name, completed_at, created_at
+    FROM sessions
+    WHERE seeker_id = ${seeker_id}
+    ORDER BY created_at DESC
+    LIMIT 1
+  `;
+  return row ?? null;
+}
+
 // ─────────────────────────────────────────────
 // SESSIONS
 // ─────────────────────────────────────────────

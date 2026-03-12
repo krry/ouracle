@@ -2,6 +2,11 @@
 // The engine does not discuss its inner workings.
 // All internal inference (vagal, belief, quality) is metadata — not Seeker language.
 
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { randomInt } from 'crypto';
+
 // ─────────────────────────────────────────────
 // THE OCTAVE OF EVOLUTION
 // Source: Notion — 🎼 The Octave of Evolution
@@ -335,10 +340,63 @@ export function chooseOpeningQuestion(context = {}) {
   if (context.hint === 'story')  return OPENING_QUESTIONS[2];
   if (context.hint === 'honest') return OPENING_QUESTIONS[3];
   if (context.hint === 'unsaid') return OPENING_QUESTIONS[4];
-  if (Number.isInteger(context.session_count)) {
-    return OPENING_QUESTIONS[context.session_count % OPENING_QUESTIONS.length];
+  const pool = context.last_question
+    ? OPENING_QUESTIONS.filter((q) => q !== context.last_question)
+    : [...OPENING_QUESTIONS];
+  if (Number.isInteger(context.session_count) && pool.length) {
+    return pool[context.session_count % pool.length];
   }
+  if (pool.length) return pool[0];
   return OPENING_QUESTIONS[0];
+}
+
+// ─────────────────────────────────────────────
+// ORACLE FLAVOR DRAWS
+// ─────────────────────────────────────────────
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ORACLE_MAPS = {
+  tarot: loadOracleMap(path.join(__dirname, 'data', 'tarot-octave-map.json')),
+  iching: loadOracleMap(path.join(__dirname, 'data', 'iching-octave-map.json')),
+};
+
+function loadOracleMap(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+export function drawOracle(flavor, quality) {
+  if (!flavor || !quality) return null;
+  const key = String(flavor).toLowerCase();
+  const map = ORACLE_MAPS[key];
+  if (!Array.isArray(map)) return null;
+
+  const matches = map.filter((entry) => entry.quality === quality);
+  if (!matches.length) return null;
+  const choice = matches[randomInt(matches.length)];
+
+  if (key === 'tarot') {
+    return {
+      flavor: 'tarot',
+      card: { name: choice.name, suit: choice.suit, rank: choice.rank },
+      quality: choice.quality,
+      score: choice.score,
+    };
+  }
+
+  if (key === 'iching') {
+    return {
+      flavor: 'iching',
+      hexagram: { number: choice.number, name: choice.name },
+      quality: choice.quality,
+      score: choice.score,
+    };
+  }
+
+  return null;
 }
 
 // ─────────────────────────────────────────────
