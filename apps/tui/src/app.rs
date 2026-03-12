@@ -412,11 +412,14 @@ impl App {
                 self.stage = "covenanted".to_string();
                 self.push_message(format!("Priestess: Covenant recorded at {}", covenant_at));
             }
-            ApiResponse::InquiryQuestion { session_id, turn, question, meta } => {
+            ApiResponse::InquiryQuestion { session_id, turn, question, greeting, meta } => {
                 self.last_meta = Some(meta);
                 self.session_id = Some(session_id);
                 self.stage = "inquiry".to_string();
                 self.last_turn = Some(turn);
+                if let Some(g) = greeting {
+                    self.push_message(format!("Priestess: {}", g));
+                }
                 self.push_message(format!("Priestess (turn {}): {}", turn, question));
             }
             ApiResponse::InquiryComplete { session_id, turn, quality_sense, meta } => {

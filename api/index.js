@@ -168,13 +168,21 @@ app.post('/session/new', authenticate, async (req, res) => {
     last_rite_name: lastSession?.rite_name ?? null,
     days_since_last: daysSinceLast,
   });
+  const lastAct = lastSession?.rite_json?.act;
+  const greeting = lastAct
+    ? `You were going to ${lastAct.replace(/\.$/, '')}.`
+    : lastSession?.rite_name
+      ? `You were working with ${lastSession.rite_name}.`
+      : null;
+  const nowIso = new Date().toISOString();
   const conversation = [
-    { role: 'priestess', text: question, at: new Date().toISOString() },
+    ...(greeting ? [{ role: 'priestess', text: greeting, at: nowIso }] : []),
+    { role: 'priestess', text: question, at: nowIso },
   ];
 
   await updateSession(session.id, { stage: 'inquiry', turn: 0, conversation });
 
-  return res.json({ session_id: session.id, stage: 'inquiry', turn: 0, question, awaiting: 'response' });
+  return res.json({ session_id: session.id, stage: 'inquiry', turn: 0, greeting, question, awaiting: 'response' });
 });
 
 app.get('/session/:id', authenticate, async (req, res) => {

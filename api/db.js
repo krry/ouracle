@@ -72,7 +72,7 @@ export async function getSeekerSessionCount(seeker_id) {
 
 export async function getSeekerLatestSession(seeker_id) {
   const [row] = await sql`
-    SELECT id, conversation, quality, rite_name, completed_at, created_at
+    SELECT id, conversation, quality, rite_name, rite_json, completed_at, created_at
     FROM sessions
     WHERE seeker_id = ${seeker_id}
     ORDER BY created_at DESC
