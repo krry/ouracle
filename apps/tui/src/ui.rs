@@ -164,6 +164,7 @@ fn format_legend() -> String {
         "/thread  /redact <id>",
         "/delete  /token",
         "/reintegrate yes|no",
+        "/totem status|init|export|import",
         "/sessions (completed count)",
         "/mouse on|off  /dev on|off",
         "/status  /help",

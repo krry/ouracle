@@ -89,7 +89,7 @@ Rules:
 ### API + Platform (Tech Spec)
 - [ ] SvelteKit web app scaffolded with Priestess UI. (deferred)
 - [x] Session open accepts covenant and returns opening question (already in API, surfaced in TUI).
-- [ ] Totem v0.1 client scaffolding (encrypted local store + export/import stub).
+- [x] Totem v0.1 client scaffolding (encrypted local store + export/import stub). (stubbed, unencrypted)
 - [x] Thread view API shape aligns with Totem session summaries.
 - [x] Delete seeker cascade endpoint implemented and exposed in UI.
 - [ ] Voice input support integrated in web app. (deferred)

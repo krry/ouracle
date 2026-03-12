@@ -21,6 +21,7 @@ mod app;
 mod ui;
 mod aura;
 mod api;
+mod totem;
 
 use crate::app::App;
 use crate::api::{ApiRequest, ApiResponse, execute as execute_api};
