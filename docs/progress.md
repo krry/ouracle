@@ -70,7 +70,7 @@ Rules:
 - [ ] Account creation deferred until after first genuine exchange.
 - [ ] Full ritual cycle enforced: Inquiry → Prescription → Reintegration (no skipping).
 - [ ] Prescription delivered as ritual card (name, act, context, optional invocation, expected textures) with pacing.
-- [ ] Closing phrase fixed: “May this mantra instruct you.”
+- [x] Closing phrase fixed: “May this mantra instruct you.”
 - [x] Reintegration window signaled once; tone is holding, never urgent.
 - [ ] Thread view: readable letter of mantras + reintegration reports + octave trajectory.
 - [x] Data controls: redact entries + delete account from thread view.
@@ -83,7 +83,7 @@ Rules:
 - [ ] Adaptive session depth (less scaffolding as sessions increase).
 - [x] Returning seeker flow references last mantra; no re‑intro.
 - [x] Absence handled without gap‑shaming (“Three months. What’s been happening?”).
-- [ ] Optional symbolic layer opt‑in (Tarot/I Ching) when appropriate.
+- [x] Optional symbolic layer opt‑in (Tarot/I Ching) when appropriate.
 - [ ] Print/save rite card.
 
 ### API + Platform (Tech Spec)
