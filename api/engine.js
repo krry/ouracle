@@ -355,7 +355,7 @@ export function chooseOpeningQuestion(context = {}) {
 // ─────────────────────────────────────────────
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ORACLE_MAPS = {
+const DIVINATION_MAPS = {
   tarot: loadOracleMap(path.join(__dirname, 'data', 'tarot-octave-map.json')),
   iching: loadOracleMap(path.join(__dirname, 'data', 'iching-octave-map.json')),
 };
@@ -368,10 +368,10 @@ function loadOracleMap(filePath) {
   }
 }
 
-export function drawOracle(flavor, quality) {
-  if (!flavor || !quality) return null;
-  const key = String(flavor).toLowerCase();
-  const map = ORACLE_MAPS[key];
+export function drawDivinationSource(divinationSource, quality) {
+  if (!divinationSource || !quality) return null;
+  const key = String(divinationSource).toLowerCase();
+  const map = DIVINATION_MAPS[key];
   if (!Array.isArray(map)) return null;
 
   const matches = map.filter((entry) => entry.quality === quality);
@@ -380,7 +380,7 @@ export function drawOracle(flavor, quality) {
 
   if (key === 'tarot') {
     return {
-      flavor: 'tarot',
+      source: 'tarot',
       card: { name: choice.name, suit: choice.suit, rank: choice.rank },
       quality: choice.quality,
       score: choice.score,
@@ -389,7 +389,7 @@ export function drawOracle(flavor, quality) {
 
   if (key === 'iching') {
     return {
-      flavor: 'iching',
+      source: 'iching',
       hexagram: { number: choice.number, name: choice.name },
       quality: choice.quality,
       score: choice.score,
