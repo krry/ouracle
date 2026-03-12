@@ -3,3 +3,6 @@ node_modules/
 *.env.local
 .DS_Store
 apps/tui/target
+research/*.zip
+research/ExportBlock*
+
