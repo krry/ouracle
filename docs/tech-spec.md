@@ -9,6 +9,14 @@
 
 ## Changelog
 
+### v3.1 — 2026-03-12
+
+1. **Session lifecycle updated** — `POST /session/new` (covenant required), `GET /session/:id` (auth required).
+2. **Covenant endpoint** — `GET /covenant/current` documented as public for Priestess fetch.
+3. **Auth in place** — JWT for Seeker flows; API key auth for external callers.
+4. **Persistence implemented** — Postgres via Neon for seekers, sessions, enactments, reintegration corpus.
+5. **Admin API keys** — mint/rotate endpoints added (`POST /admin/api-keys`, `PATCH /admin/api-keys/:id`).
+
 ### v3.0 — 2026-03-09
 
 Twelve updates integrated from Chef's feedback (`chef-feedback-9-mar-26.md`):
@@ -143,11 +151,11 @@ Priestess calls POST /:chakra/:verb
 
 - **Runtime:** Node.js, ES Modules
 - **Framework:** Express 4.x
-- **Session store:** In-memory `Map` (v0.2 — ephemeral, non-distributed, non-persistent)
-- **Engine:** Pure function keyword scoring (no external LLM call yet)
+- **Session store:** Postgres (Neon) for seekers, sessions, enactments, reintegration corpus
+- **Engine:** LLM tool-call inference via OpenRouter (keyword fallback path still supported)
 - **Port:** 3737
-- **Auth:** None (v0.2)
-- **Package:** `meat-api` v0.1.0
+- **Auth:** JWT for Seeker flows; API key auth for external callers
+- **Package:** `meat-api` v0.2.0
 
 ---
 
@@ -157,12 +165,21 @@ Priestess calls POST /:chakra/:verb
 
 | Endpoint | Status | Notes |
 |----------|--------|-------|
-| `POST /inquire` | Working | Starts or continues a session; infers vagal + belief |
+| `POST /inquire` | Working | Continues a session; requires `session_id`; infers vagal + belief |
 | `POST /prescribe` | Working | Builds rite from session inference |
 | `POST /reintegrate` | Working | Closes loop; logs system learning |
 | `POST /:chakra/:verb` | Working | Direct rite for known chakra/verb pairs |
-| `GET /session/new` | Working | Mints a session ID |
-| `GET /session/:id` | Working | Returns full session state |
+| `POST /session/new` | Working | Opens a session; covenant required |
+| `GET /session/:id` | Working | Returns full session state (auth required) |
+| `GET /covenant/current` | Working | Public covenant text |
+| `GET /consent` | Working | Current consent model |
+| `POST /seeker/new` | Working | Creates seeker + issues tokens |
+| `POST /auth/token` | Working | Issues access + refresh tokens |
+| `POST /auth/refresh` | Working | Rotates access token |
+| `POST /seeker/:id/covenant` | Working | Records covenant acceptance |
+| `GET /seeker/:id/history` | Working | Recent completed sessions |
+| `POST /admin/api-keys` | Working | Admin-minted API keys |
+| `PATCH /admin/api-keys/:id` | Working | Admin update/disable API keys |
 | `GET /health` | Working | Status check |
 
 The core three-stage protocol — Inquire → Prescribe → Reintegrate — is functionally complete at a proof-of-concept level. Inference is keyword-matching, not semantic. Sessions are ephemeral. No auth, no rate limiting, no persistence.
@@ -174,14 +191,22 @@ All endpoints use `application/json`. Base path: `/v1` (to be versioned on deplo
 **Session lifecycle:**
 
 ```
-GET  /session/new                       → { session_id }
+POST /session/new                       → { session_id, stage, turn, question, awaiting }
 GET  /session/:id                       → full session state
+```
+
+**Covenant + consent:**
+
+```
+GET  /covenant/current                  → { version, text, effective_date }
+GET  /consent                           → current consent model
+POST /seeker/:id/covenant               → records covenant acceptance
 ```
 
 **Ritual protocol:**
 
 ```
-POST /inquire                           → opens or continues inquiry turn
+POST /inquire                           → continues inquiry turn (session_id required)
 POST /prescribe                         → builds rite from completed inquiry
 POST /reintegrate                       → receives somatic report; closes session
 ```
@@ -191,6 +216,22 @@ POST /reintegrate                       → receives somatic report; closes sess
 ```
 POST /:chakra/:verb                     → direct rite for (chakra, verb) pair
                                           requires session_id, checks prerequisites
+```
+
+**Auth + seeker:**
+
+```
+POST /seeker/new                        → create seeker + tokens
+POST /auth/token                        → issue tokens for seeker_id
+POST /auth/refresh                      → rotate access token
+GET  /seeker/:id/history                → recent completed sessions
+```
+
+**Admin (API keys):**
+
+```
+POST  /admin/api-keys                   → mint API key (admin bearer)
+PATCH /admin/api-keys/:id               → update API key (admin bearer)
 ```
 
 **Custom headers (spec, not yet enforced):**
@@ -245,12 +286,15 @@ A session is the unit of one rite cycle. It holds:
 
 Roughly in order of priority:
 
-**P0 — Required before any real usage:**
+**P0 — Completed (2026-03-12):**
 
-1. **Persistence layer** — sessions to SQLite (single-node deploy) or Postgres (multi-node / cloud). Schema below in §5.
-2. **Seeker identity** — `seeker_id` (opaque, per-device or per-account) that links sessions. No email required at start; device-scoped first.
-3. **Authentication** — API key auth for organizational access; JWT or session token for consumer Priestesses. See §7.
+1. **Persistence layer** — Postgres via Neon for seekers, sessions, enactments, reintegration corpus.
+2. **Seeker identity** — `seeker_id` links sessions and history.
+3. **Authentication** — JWT for Seeker flows; API key auth for external callers.
 4. **Covenant gate** — session initiation requires explicit covenant acceptance. See §2.5.
+
+**P0 — Remaining before any real usage:**
+
 5. **Totem sync protocol** — spec and implement the encrypted portable cell that holds the Seeker's memory client-side. See §5.
 
 **P1 — Required before any meaningful quality:**
@@ -275,10 +319,11 @@ Anyone entering the temple must accept the 100% Responsibility Covenant before a
 
 **Technical surface:**
 
-- `GET /session/new` requires a `covenant` parameter: `{ "version": 1, "accepted": true, "timestamp": "ISO8601" }`. Session creation fails (400) if covenant is not present or `accepted` is false.
-- The covenant version is stored in the session record (`covenant_version`, `covenant_accepted`).
+- `POST /session/new` requires a `covenant` payload: `{ "version": 1, "accepted": true, "timestamp": "ISO8601" }`. Session creation fails (400) if covenant is not present or `accepted` is false.
+- The covenant version is stored in the session record (`covenant_version`, `covenant_accepted_at`).
 - The Priestess app is responsible for presenting the covenant plainly before calling `/session/new`. The language is not fine print. It is the threshold. The Seeker steps over it consciously or does not enter.
 - Covenant text is versioned. If the covenant changes, existing sessions are not affected. New sessions require the current version.
+- `POST /seeker/:id/covenant` records covenant acceptance on the seeker record (for returning sessions).
 
 **Covenant endpoint:**
 

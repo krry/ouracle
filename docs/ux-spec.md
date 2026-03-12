@@ -24,6 +24,10 @@
 - "marketplace" → "Agora" everywhere in the doc
 - "ceremonies" → "rites" throughout
 
+**Changelog — v3.1 (2026-03-12):**
+- Aligned threshold covenant to a versioned, fetchable covenant text (Priestess can always render the current vow).
+- Clarified that session entry happens only after covenant acceptance; inquiry never starts before the threshold.
+
 **Changelog — v2 (2026-03-09):**
 - Added Section XI: The Totem — portable encrypted memory cell, first-session setup, lost-device recovery
 - Added Section XII: The Threshold Covenant — 100% responsibility entry rite; not a terms-of-service
