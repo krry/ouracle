@@ -159,7 +159,8 @@ fn format_legend() -> String {
     let lines = [
         "/policy  /covenant-text",
         "/seeker  /covenant",
-        "/begin    /prescribe [tarot|iching]",
+        "/begin  /accept",
+        "/prescribe [tarot|iching]",
         "/thread  /redact <id>",
         "/delete  /token",
         "/reintegrate yes|no",
