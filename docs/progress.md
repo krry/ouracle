@@ -75,16 +75,16 @@ Rules:
 - [ ] Thread view: readable letter of mantras + reintegration reports + octave trajectory. (deferred to Phase 7)
 - [x] Data controls: redact entries + delete account from thread view.
 - [x] Threshold Covenant moment (100% responsibility) before first inquiry.
-- [ ] Ambient audio layer (opt‑in) for sonic space; silence/pacing designed.
+- [ ] Ambient audio layer (opt‑in) for sonic space; silence/pacing designed. (deferred)
 - [x] No gamification UI anywhere (no streaks/scores/levels/badges).
-- [ ] Accessibility baseline: min 16px, WCAG AA/AAA contrast, keyboard nav, voice input, pausable sessions.
+- [ ] Accessibility baseline: min 16px, WCAG AA/AAA contrast, keyboard nav, voice input, pausable sessions. (deferred)
 - [x] Data policy visible inside product (plain language).
 - [x] Liminal opening beat (intentional stillness; not spinner).
 - [x] Adaptive session depth (less scaffolding as sessions increase). (tracked via sessions_completed in TUI)
 - [x] Returning seeker flow references last mantra; no re‑intro.
 - [x] Absence handled without gap‑shaming (“Three months. What’s been happening?”).
 - [x] Optional symbolic layer opt‑in (Tarot/I Ching) when appropriate.
-- [ ] Print/save rite card.
+- [ ] Print/save rite card. (deferred)
 
 ### API + Platform (Tech Spec)
 - [ ] SvelteKit web app scaffolded with Priestess UI. (deferred)
@@ -93,17 +93,17 @@ Rules:
 - [x] Thread view API shape aligns with Totem session summaries.
 - [x] Delete seeker cascade endpoint implemented and exposed in UI.
 - [ ] Voice input support integrated in web app. (deferred)
-- [ ] No third‑party analytics SDKs.
+- [x] No third‑party analytics SDKs.
 
 ### Validation (Roadmap Acceptance)
-- [ ] New seeker can complete full cycle without account creation; account offer only after first mantra.
-- [ ] Covenant gate blocks session until accepted; covenant recorded.
-- [ ] Returning seeker sees previous mantras in thread view; Priestess references last rite.
-- [ ] No UI element for streaks/scores/levels/badges.
-- [ ] Absence not coded as failure.
+- [ ] New seeker can complete full cycle without account creation; account offer only after first mantra. (deferred)
+- [x] Covenant gate blocks session until accepted; covenant recorded.
+- [ ] Returning seeker sees previous mantras in thread view; Priestess references last rite. (deferred: thread view Phase 7)
+- [x] No UI element for streaks/scores/levels/badges.
+- [x] Absence not coded as failure.
 - [x] Data policy visible without leaving product.
-- [ ] All primary flows keyboard navigable; voice input completes full cycle.
-- [ ] Delete account from thread view performs cascade delete.
+- [ ] All primary flows keyboard navigable; voice input completes full cycle. (deferred: web UI)
+- [x] Delete account from thread view performs cascade delete.
 
 ## Phase 4 — The Commons (Checklist)
 
