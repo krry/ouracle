@@ -335,6 +335,9 @@ export function chooseOpeningQuestion(context = {}) {
   if (context.hint === 'story')  return OPENING_QUESTIONS[2];
   if (context.hint === 'honest') return OPENING_QUESTIONS[3];
   if (context.hint === 'unsaid') return OPENING_QUESTIONS[4];
+  if (Number.isInteger(context.session_count)) {
+    return OPENING_QUESTIONS[context.session_count % OPENING_QUESTIONS.length];
+  }
   return OPENING_QUESTIONS[0];
 }
 

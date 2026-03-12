@@ -5,6 +5,7 @@ Multimodal oracle drawing on Tarot de Marseilles, I Ching, Gene Keys, Delphic ma
 ## Structure
 
 - `docs/` — specifications and design documents
+- Source of truth: implement `docs/` rather than editing them to match code
 - `api/` — MEATAPI diagnostic engine (Node.js/Express)
 - `research/` — Wesley's research on divination source material
 
