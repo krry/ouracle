@@ -1,0 +1,35 @@
+{
+  "date": "2026-03-12",
+  "notes": "Phase 1 baseline metrics after semantic inference + embeddings tests.",
+  "eval_inference": {
+    "at": "2026-03-12T09:36:50.866Z",
+    "vagal": { "total": 20, "correct": 13, "acc": 0.65 },
+    "belief": { "total": 20, "correct": 13, "acc": 0.65 },
+    "octave": { "total": 10, "correct": 8, "acc": 0.8 }
+  },
+  "false_positive_test": {
+    "at": "2026-03-12T09:37:00.214Z",
+    "total": 10,
+    "flagged": 1,
+    "flagged_rate": 0.1,
+    "flagged_items": [
+      {
+        "id": 5,
+        "text": "The coffee shop was busy, but the line moved quickly.",
+        "vagal": { "probable": "ventral", "confidence": "medium" },
+        "belief": { "pattern": null, "confidence": "low" },
+        "quality": { "quality": null, "confidence": "low" }
+      }
+    ]
+  },
+  "octave_narrative_test": {
+    "at": "2026-03-12T09:37:17.237Z",
+    "total": 10,
+    "correct": 8,
+    "acc": 0.8,
+    "misses": [
+      { "id": "OCTAVE_05", "gold": "pity", "predicted": "calamity" },
+      { "id": "OCTAVE_08", "gold": "unity", "predicted": "affinity" }
+    ]
+  }
+}

@@ -11,7 +11,7 @@ import {
   buildPrescription,
   variantRite,
   chooseOpeningQuestion,
-  drawOracle,
+  drawDivinationSource,
   RITES,
   BELIEFS,
   OCTAVE,
@@ -278,7 +278,7 @@ app.post('/inquire', authenticate, async (req, res) => {
 // POST /prescribe
 // ─────────────────────────────────────────────
 app.post('/prescribe', authenticate, async (req, res) => {
-  const { session_id, oracle_flavor } = req.body;
+  const { session_id, divination_source } = req.body;
 
   const session = await getSession(session_id);
   if (!session) return res.status(404).json({ error: 'Session not found. Run /inquire first.' });
@@ -289,7 +289,7 @@ app.post('/prescribe', authenticate, async (req, res) => {
   const belief  = { pattern: session.belief_pattern, confidence: session.belief_confidence, meta: BELIEFS[session.belief_pattern] };
   const quality = { quality: session.quality, confidence: session.quality_confidence, is_shock: session.quality_is_shock };
   const prescription = buildPrescription(session.vagal_probable, belief, quality);
-  const oracle = drawOracle(oracle_flavor, quality.quality);
+  const divination = drawDivinationSource(divination_source, quality.quality);
   const history = await getSeekerHistory(session.seeker_id, 1);
   const lastRite = history?.[0]?.rite_name || null;
   const needsVariant = lastRite && prescription.rite?.rite_name === lastRite;
@@ -297,7 +297,7 @@ app.post('/prescribe', authenticate, async (req, res) => {
   if (needsVariant) {
     prescription.rite = variantRite(prescription.rite);
   }
-  const ritePayload = oracle ? { ...prescription.rite, oracle } : prescription.rite;
+  const ritePayload = divination ? { ...prescription.rite, divination } : prescription.rite;
 
   await updateSession(session_id, {
     stage: 'prescribed',
@@ -311,7 +311,7 @@ app.post('/prescribe', authenticate, async (req, res) => {
     session_id,
     stage: 'prescription',
     rite: ritePayload,
-    oracle,
+    divination,
     reintegration_window: '24–72h',
     _meta: {
       vagal_state: prescription.vagal_state,
