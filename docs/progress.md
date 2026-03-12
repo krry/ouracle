@@ -67,7 +67,7 @@ Rules:
 ### Product + Experience (Roadmap + UX)
 - [ ] Web Priestess single‑page conversational UI (no chrome, centered field, question above).
 - [ ] First‑session flow: one‑sentence Priestess intro; opening question before any form.
-- [ ] Account creation deferred until after first genuine exchange.
+- [ ] Account creation deferred until after first genuine exchange. (deferred: anonymous reception taste, not a session)
 - [ ] Full ritual cycle enforced: Inquiry → Prescription → Reintegration (no skipping).
 - [ ] Prescription delivered as ritual card (name, act, context, optional invocation, expected textures) with pacing.
 - [x] Closing phrase fixed: “May this mantra instruct you.”
