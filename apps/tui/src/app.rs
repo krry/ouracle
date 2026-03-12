@@ -438,6 +438,9 @@ impl App {
                 self.session_id = Some(session_id);
                 self.stage = "inquiry".to_string();
                 self.last_turn = Some(turn);
+                if turn == 0 && self.sessions_completed == 0 {
+                    self.push_message("Priestess: Welcome as you are.".to_string());
+                }
                 if let Some(g) = greeting {
                     self.push_message(format!("Priestess: {}", g));
                 }
@@ -457,7 +460,8 @@ impl App {
             ApiResponse::Prescribed { rite, reintegration_window, meta } => {
                 self.last_meta = Some(meta);
                 self.stage = "prescribed".to_string();
-                self.push_message(format!("Rite: {}", rite.rite_name));
+                self.push_message("Rite Card".to_string());
+                self.push_message(format!("Name: {}", rite.rite_name));
                 self.push_message(format!("Act: {}", rite.act));
                 self.push_message(format!("Invocation: {}", rite.invocation));
                 if !rite.textures.is_empty() {
