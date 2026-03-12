@@ -27,7 +27,7 @@ pub enum ApiResponse {
     CovenantRecorded { covenant_at: String, meta: ApiMeta },
     InquiryQuestion { session_id: String, turn: u32, question: String, meta: ApiMeta },
     InquiryComplete { session_id: String, turn: u32, quality_sense: Option<String>, meta: ApiMeta },
-    Prescribed { rite: Rite, meta: ApiMeta },
+    Prescribed { rite: Rite, reintegration_window: Option<String>, meta: ApiMeta },
     Thread { items: Vec<ThreadItem>, meta: ApiMeta },
     SeekerDeleted { seeker_id: String, meta: ApiMeta },
     ReintegrationComplete { witness: String, what_shifted: String, next: String, meta: ApiMeta },
@@ -347,7 +347,8 @@ pub fn execute(req: ApiRequest) -> ApiResponse {
                                         duration: None,
                                         divination: None,
                                     });
-                                    ApiResponse::Prescribed { rite, meta }
+                                    let reintegration_window = json.get("reintegration_window").and_then(|v| v.as_str()).map(|s| s.to_string());
+                                    ApiResponse::Prescribed { rite, reintegration_window, meta }
                                 }
                                 None => ApiResponse::Error {
                                     message: "No rite returned.".to_string(),
