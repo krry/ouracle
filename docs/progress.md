@@ -48,7 +48,7 @@ Rules:
 - [x] Inference quality baseline: vagal + belief tests (20 each) before/after upgrade.
 - [x] Oracle flavor sorting: Tarot + I Ching mapped into Octave JSON lookup.
 - [x] Multi‑turn conversation buffer (speaker + timestamps) suitable for LLM context.
-- [ ] Opening question selection uses seeker history summary (last rite/quality/days since).
+- [x] Opening question selection uses seeker history summary (last rite/quality/days since).
 - [x] False‑positive test: 10 neutral texts; flag any confidence > low.
 - [ ] Enriched rite construction (optional): add symbolic resonance to rite text.
 - [ ] Preliminary octave history tracking per seeker (optional).
@@ -78,7 +78,7 @@ Rules:
 - [ ] Ambient audio layer (opt‑in) for sonic space; silence/pacing designed.
 - [ ] No gamification UI anywhere (no streaks/scores/levels/badges).
 - [ ] Accessibility baseline: min 16px, WCAG AA/AAA contrast, keyboard nav, voice input, pausable sessions.
-- [ ] Data policy visible inside product (plain language).
+- [x] Data policy visible inside product (plain language).
 - [ ] Liminal opening beat (intentional stillness; not spinner).
 - [ ] Adaptive session depth (less scaffolding as sessions increase).
 - [ ] Returning seeker flow references last mantra; no re‑intro.
@@ -87,12 +87,12 @@ Rules:
 - [ ] Print/save rite card.
 
 ### API + Platform (Tech Spec)
-- [ ] SvelteKit web app scaffolded with Priestess UI.
-- [ ] Session open accepts covenant and returns opening question (already in API, surface in UI).
+- [ ] SvelteKit web app scaffolded with Priestess UI. (deferred)
+- [x] Session open accepts covenant and returns opening question (already in API, surfaced in TUI).
 - [ ] Totem v0.1 client scaffolding (encrypted local store + export/import stub).
-- [ ] Thread view API shape aligns with Totem session summaries.
-- [ ] Delete seeker cascade endpoint implemented and exposed in UI.
-- [ ] Voice input support integrated in web app.
+- [x] Thread view API shape aligns with Totem session summaries.
+- [x] Delete seeker cascade endpoint implemented and exposed in UI.
+- [ ] Voice input support integrated in web app. (deferred)
 - [ ] No third‑party analytics SDKs.
 
 ### Validation (Roadmap Acceptance)
@@ -101,7 +101,7 @@ Rules:
 - [ ] Returning seeker sees previous mantras in thread view; Priestess references last rite.
 - [ ] No UI element for streaks/scores/levels/badges.
 - [ ] Absence not coded as failure.
-- [ ] Data policy visible without leaving product.
+- [x] Data policy visible without leaving product.
 - [ ] All primary flows keyboard navigable; voice input completes full cycle.
 - [ ] Delete account from thread view performs cascade delete.
 

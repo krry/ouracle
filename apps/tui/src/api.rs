@@ -7,6 +7,7 @@ use chrono::Utc;
 #[derive(Debug, Clone)]
 pub enum ApiRequest {
     GetConsent { base_url: String },
+    GetCovenant { base_url: String },
     CreateSeeker { base_url: String, device_id: String, timezone: String },
     RecordCovenant { base_url: String, access_token: String, seeker_id: String },
     BeginInquiry { base_url: String, access_token: String },
@@ -21,6 +22,7 @@ pub enum ApiRequest {
 #[derive(Debug, Clone)]
 pub enum ApiResponse {
     Consent { disclosures: Vec<String>, meta: ApiMeta },
+    CovenantText { version: String, text: Vec<String>, meta: ApiMeta },
     SeekerCreated { seeker_id: String, access_token: String, refresh_token: String, meta: ApiMeta },
     CovenantRecorded { covenant_at: String, meta: ApiMeta },
     InquiryQuestion { session_id: String, turn: u32, question: String, meta: ApiMeta },
@@ -114,6 +116,42 @@ pub fn execute(req: ApiRequest) -> ApiResponse {
                             })
                             .unwrap_or_default();
                             ApiResponse::Consent { disclosures, meta }
+                        }
+                        Err(err) => ApiResponse::Error {
+                            message: format!("Invalid JSON: {err}"),
+                            meta: build_meta(endpoint, status, started.elapsed().as_millis(), None, None),
+                        },
+                    }
+                }
+                Err(err) => ApiResponse::Error {
+                    message: err.to_string(),
+                    meta: build_meta(endpoint, 0, started.elapsed().as_millis(), None, None),
+                },
+            }
+        }
+        ApiRequest::GetCovenant { base_url } => {
+            let started = Instant::now();
+            let endpoint = "/covenant/current".to_string();
+            let url = format!("{base_url}/covenant/current");
+            match client.get(url).send() {
+                Ok(resp) => {
+                    let status = resp.status().as_u16();
+                    match resp.json::<Value>() {
+                        Ok(json) if status < 400 => {
+                            let meta = build_meta(endpoint, status, started.elapsed().as_millis(), None, Some(&json));
+                            let version = json.get("version").and_then(|v| v.as_i64()).map(|v| v.to_string()).unwrap_or_else(|| "unknown".to_string());
+                            let text = json.get("text")
+                                .and_then(|v| v.as_array())
+                                .map(|arr| arr.iter().filter_map(|s| s.as_str().map(|x| x.to_string())).collect::<Vec<_>>())
+                                .unwrap_or_default();
+                            ApiResponse::CovenantText { version, text, meta }
+                        }
+                        Ok(json) => {
+                            let msg = json.get("error").and_then(|v| v.as_str()).unwrap_or("Request failed.");
+                            ApiResponse::Error {
+                                message: msg.to_string(),
+                                meta: build_meta(endpoint, status, started.elapsed().as_millis(), None, Some(&json)),
+                            }
                         }
                         Err(err) => ApiResponse::Error {
                             message: format!("Invalid JSON: {err}"),

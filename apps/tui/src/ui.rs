@@ -157,7 +157,8 @@ fn short_token(token: Option<&str>) -> String {
 
 fn format_legend() -> String {
     let lines = [
-        "/consent  /seeker  /covenant",
+        "/policy  /covenant-text",
+        "/seeker  /covenant",
         "/begin    /prescribe [tarot|iching]",
         "/thread  /delete  /token",
         "/reintegrate yes|no",
