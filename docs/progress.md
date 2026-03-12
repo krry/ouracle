@@ -72,15 +72,15 @@ Rules:
 - [ ] Prescription delivered as ritual card (name, act, context, optional invocation, expected textures) with pacing.
 - [x] Closing phrase fixed: “May this mantra instruct you.”
 - [x] Reintegration window signaled once; tone is holding, never urgent.
-- [ ] Thread view: readable letter of mantras + reintegration reports + octave trajectory.
+- [ ] Thread view: readable letter of mantras + reintegration reports + octave trajectory. (deferred to Phase 7)
 - [x] Data controls: redact entries + delete account from thread view.
 - [ ] Threshold Covenant moment (100% responsibility) before first inquiry.
 - [ ] Ambient audio layer (opt‑in) for sonic space; silence/pacing designed.
 - [ ] No gamification UI anywhere (no streaks/scores/levels/badges).
 - [ ] Accessibility baseline: min 16px, WCAG AA/AAA contrast, keyboard nav, voice input, pausable sessions.
 - [x] Data policy visible inside product (plain language).
-- [ ] Liminal opening beat (intentional stillness; not spinner).
-- [ ] Adaptive session depth (less scaffolding as sessions increase).
+- [x] Liminal opening beat (intentional stillness; not spinner).
+- [x] Adaptive session depth (less scaffolding as sessions increase). (tracked via sessions_completed in TUI)
 - [x] Returning seeker flow references last mantra; no re‑intro.
 - [x] Absence handled without gap‑shaming (“Three months. What’s been happening?”).
 - [x] Optional symbolic layer opt‑in (Tarot/I Ching) when appropriate.
