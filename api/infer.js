@@ -8,10 +8,22 @@
 //   - Correlation ID only — for debugging, not for re-identification.
 //   - The text sent is the seeker's inquiry text only. Nothing else.
 
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { randomUUID } from 'crypto';
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const OPENROUTER_API_KEY = process.env.OURACLE_OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
+if (!OPENROUTER_API_KEY) {
+  throw new Error('OpenRouter API key missing. Set OURACLE_OPENROUTER_API_KEY or OPENROUTER_API_KEY.');
+}
+
+const client = new OpenAI({
+  apiKey: OPENROUTER_API_KEY,
+  baseURL: 'https://openrouter.ai/api/v1',
+  defaultHeaders: {
+    ...(process.env.OPENROUTER_REFERER ? { 'HTTP-Referer': process.env.OPENROUTER_REFERER } : {}),
+    ...(process.env.OPENROUTER_TITLE ? { 'X-Title': process.env.OPENROUTER_TITLE } : {}),
+  },
+});
 
 // ─────────────────────────────────────────────
 // INFERENCE SCHEMA
@@ -19,64 +31,67 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 // ─────────────────────────────────────────────
 
 const INFERENCE_TOOL = {
-  name: 'classify_seeker_state',
-  description: 'Classify the internal state expressed in the seeker\'s inquiry text.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      vagal_state: {
-        type: 'string',
-        enum: ['ventral', 'sympathetic', 'dorsal', 'mixed'],
-        description: 'The probable nervous system state expressed in the text.',
+  type: 'function',
+  function: {
+    name: 'classify_seeker_state',
+    description: 'Classify the internal state expressed in the seeker\'s inquiry text.',
+    parameters: {
+      type: 'object',
+      properties: {
+        vagal_state: {
+          type: 'string',
+          enum: ['ventral', 'sympathetic', 'dorsal', 'mixed'],
+          description: 'The probable nervous system state expressed in the text.',
+        },
+        vagal_confidence: {
+          type: 'string',
+          enum: ['low', 'medium', 'high'],
+          description: 'Confidence in the vagal state inference.',
+        },
+        vagal_reasoning: {
+          type: 'string',
+          description: 'One sentence: what in the text signals this vagal state.',
+        },
+        belief_pattern: {
+          type: ['string', 'null'],
+          enum: ['scarcity', 'unworthiness', 'control', 'isolation', 'silence', 'blindness', 'separation', null],
+          description: 'The dominant limiting belief pattern, if present. null if none is clear.',
+        },
+        belief_confidence: {
+          type: 'string',
+          enum: ['low', 'medium', 'high'],
+          description: 'Confidence in the belief pattern inference.',
+        },
+        belief_reasoning: {
+          type: 'string',
+          description: 'One sentence: what in the text signals this belief pattern.',
+        },
+        quality: {
+          type: ['string', 'null'],
+          enum: ['entity', 'affinity', 'activity', 'pity', 'capacity', 'causality', 'eternity', 'unity', 'calamity', 'cyclicity', null],
+          description: 'The octave quality the seeker seems to be inhabiting. null if unclear.',
+        },
+        quality_confidence: {
+          type: 'string',
+          enum: ['low', 'medium', 'high'],
+          description: 'Confidence in the quality inference.',
+        },
+        quality_is_shock: {
+          type: 'boolean',
+          description: 'True only if quality is "pity" (Break 4/5) or "calamity" (Crisis 7/8).',
+        },
+        quality_reasoning: {
+          type: 'string',
+          description: 'One sentence: what in the text signals this octave quality.',
+        },
       },
-      vagal_confidence: {
-        type: 'string',
-        enum: ['low', 'medium', 'high'],
-        description: 'Confidence in the vagal state inference.',
-      },
-      vagal_reasoning: {
-        type: 'string',
-        description: 'One sentence: what in the text signals this vagal state.',
-      },
-      belief_pattern: {
-        type: ['string', 'null'],
-        enum: ['scarcity', 'unworthiness', 'control', 'isolation', 'silence', 'blindness', 'separation', null],
-        description: 'The dominant limiting belief pattern, if present. null if none is clear.',
-      },
-      belief_confidence: {
-        type: 'string',
-        enum: ['low', 'medium', 'high'],
-        description: 'Confidence in the belief pattern inference.',
-      },
-      belief_reasoning: {
-        type: 'string',
-        description: 'One sentence: what in the text signals this belief pattern.',
-      },
-      quality: {
-        type: ['string', 'null'],
-        enum: ['entity', 'affinity', 'activity', 'pity', 'capacity', 'causality', 'eternity', 'unity', 'calamity', 'cyclicity', null],
-        description: 'The octave quality the seeker seems to be inhabiting. null if unclear.',
-      },
-      quality_confidence: {
-        type: 'string',
-        enum: ['low', 'medium', 'high'],
-        description: 'Confidence in the quality inference.',
-      },
-      quality_is_shock: {
-        type: 'boolean',
-        description: 'True only if quality is "pity" (Break 4/5) or "calamity" (Crisis 7/8).',
-      },
-      quality_reasoning: {
-        type: 'string',
-        description: 'One sentence: what in the text signals this octave quality.',
-      },
+      required: [
+        'vagal_state', 'vagal_confidence', 'vagal_reasoning',
+        'belief_pattern', 'belief_confidence', 'belief_reasoning',
+        'quality', 'quality_confidence', 'quality_is_shock', 'quality_reasoning',
+      ],
+      additionalProperties: false,
     },
-    required: [
-      'vagal_state', 'vagal_confidence', 'vagal_reasoning',
-      'belief_pattern', 'belief_confidence', 'belief_reasoning',
-      'quality', 'quality_confidence', 'quality_is_shock', 'quality_reasoning',
-    ],
-    additionalProperties: false,
   },
 };
 
@@ -133,21 +148,35 @@ CRITICAL RULES:
 export async function inferSemantics(text) {
   const correlationId = randomUUID();
   const startedAt = Date.now();
+  const providerOrder = (process.env.OURACLE_OPENROUTER_PROVIDER_ORDER || process.env.OPENROUTER_PROVIDER_ORDER || '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
 
   try {
-    const response = await client.messages.create({
-      model: 'claude-opus-4-6',
+    const response = await client.chat.completions.create({
+      model: process.env.OURACLE_OPENROUTER_MODEL || process.env.OPENROUTER_MODEL || 'minimax/minimax-m2.5',
       max_tokens: 1024,
-      system: SYSTEM_PROMPT,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: text },
+      ],
+      ...(providerOrder.length
+        ? {
+            provider: {
+              order: providerOrder,
+              allow_fallbacks: false,
+            },
+          }
+        : {}),
       tools: [INFERENCE_TOOL],
-      tool_choice: { type: 'tool', name: 'classify_seeker_state' },
-      messages: [{ role: 'user', content: text }],
+      tool_choice: { type: 'function', function: { name: 'classify_seeker_state' } },
     });
 
-    const toolUse = response.content.find(b => b.type === 'tool_use');
-    if (!toolUse) throw new Error('No tool_use block in inference response');
+    const toolCall = response.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall) throw new Error('No tool call in inference response');
 
-    const result = toolUse.input;
+    const result = JSON.parse(toolCall.function.arguments || '{}');
     const durationMs = Date.now() - startedAt;
 
     // Log — correlation ID only, no seeker data
@@ -155,8 +184,8 @@ export async function inferSemantics(text) {
       event: 'inference',
       correlation_id: correlationId,
       duration_ms: durationMs,
-      input_tokens: response.usage.input_tokens,
-      output_tokens: response.usage.output_tokens,
+      input_tokens: response.usage?.prompt_tokens ?? null,
+      output_tokens: response.usage?.completion_tokens ?? null,
       vagal_state: result.vagal_state,
       vagal_confidence: result.vagal_confidence,
       belief_pattern: result.belief_pattern,
