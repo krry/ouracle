@@ -49,6 +49,18 @@ export async function getSeekerHistory(seeker_id, limit = 10) {
   `;
 }
 
+export async function getSeekerThread(seeker_id, limit = 50) {
+  return sql`
+    SELECT id, stage, quality, enacted,
+           rite_name, rite_json, report,
+           created_at, prescribed_at, completed_at
+    FROM sessions
+    WHERE seeker_id = ${seeker_id}
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+}
+
 export async function getSeekerSessionCount(seeker_id) {
   const [row] = await sql`
     SELECT COUNT(*)::int AS count
@@ -65,6 +77,15 @@ export async function getSeekerLatestSession(seeker_id) {
     WHERE seeker_id = ${seeker_id}
     ORDER BY created_at DESC
     LIMIT 1
+  `;
+  return row ?? null;
+}
+
+export async function deleteSeeker(seeker_id) {
+  const [row] = await sql`
+    DELETE FROM seekers
+    WHERE id = ${seeker_id}
+    RETURNING id
   `;
   return row ?? null;
 }

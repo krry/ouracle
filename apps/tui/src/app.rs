@@ -170,7 +170,7 @@ impl App {
 
         match cmd {
             "/help" => {
-                let msg = "Commands: /consent, /seeker, /covenant, /begin, /prescribe [tarot|iching], /reintegrate yes|no, /token, /mouse on|off, /dev on|off, /status, /help".to_string();
+                let msg = "Commands: /consent, /seeker, /covenant, /begin, /prescribe [tarot|iching], /thread, /delete, /reintegrate yes|no, /token, /mouse on|off, /dev on|off, /status, /help".to_string();
                 (None, Some(msg))
             }
             "/dev" => {
@@ -197,6 +197,40 @@ impl App {
             "/token" => {
                 let token = self.access_token.as_deref().unwrap_or("none");
                 (None, Some(format!("Bearer: {}", token)))
+            }
+            "/thread" => {
+                let access_token = match &self.access_token {
+                    Some(t) => t.clone(),
+                    None => return (None, Some("Priestess: No access token. Use /seeker first.".to_string())),
+                };
+                let seeker_id = match &self.seeker_id {
+                    Some(id) => id.clone(),
+                    None => return (None, Some("Priestess: No seeker_id. Use /seeker first.".to_string())),
+                };
+                let req = ApiRequest::FetchThread {
+                    base_url: self.base_url.clone(),
+                    access_token,
+                    seeker_id,
+                };
+                self.pending = true;
+                (Some(req), Some("Priestess: Fetching thread.".to_string()))
+            }
+            "/delete" => {
+                let access_token = match &self.access_token {
+                    Some(t) => t.clone(),
+                    None => return (None, Some("Priestess: No access token. Use /seeker first.".to_string())),
+                };
+                let seeker_id = match &self.seeker_id {
+                    Some(id) => id.clone(),
+                    None => return (None, Some("Priestess: No seeker_id. Use /seeker first.".to_string())),
+                };
+                let req = ApiRequest::DeleteSeeker {
+                    base_url: self.base_url.clone(),
+                    access_token,
+                    seeker_id,
+                };
+                self.pending = true;
+                (Some(req), Some("Priestess: Deleting seeker.".to_string()))
             }
             "/mouse" => {
                 let mode = parts.get(1).copied().unwrap_or("");
@@ -390,6 +424,26 @@ impl App {
                     self.push_message(format!("Duration: {}", duration));
                 }
                 self.push_message("May this mantra instruct you.".to_string());
+            }
+            ApiResponse::Thread { items, meta } => {
+                self.last_meta = Some(meta);
+                self.push_message("Thread:".to_string());
+                for item in items {
+                    let label = item.rite_name.clone().unwrap_or_else(|| "Unprescribed".to_string());
+                    let quality = item.quality.clone().unwrap_or_else(|| "unknown".to_string());
+                    let enacted = item.enacted.map(|e| if e { "enacted" } else { "not enacted" }).unwrap_or("unknown");
+                    let when = item.completed_at.or(item.created_at).unwrap_or_else(|| "".to_string());
+                    self.push_message(format!("- {} | {} | {} | {}", label, quality, enacted, when));
+                }
+            }
+            ApiResponse::SeekerDeleted { seeker_id, meta } => {
+                self.last_meta = Some(meta);
+                self.push_message(format!("Priestess: Seeker deleted: {}", seeker_id));
+                self.seeker_id = None;
+                self.access_token = None;
+                self.refresh_token = None;
+                self.session_id = None;
+                self.stage = "deleted".to_string();
             }
             ApiResponse::ReintegrationComplete { witness, what_shifted, next, meta } => {
                 self.last_meta = Some(meta);

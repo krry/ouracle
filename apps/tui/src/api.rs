@@ -12,6 +12,8 @@ pub enum ApiRequest {
     BeginInquiry { base_url: String, access_token: String },
     ContinueInquiry { base_url: String, access_token: String, session_id: String, response: String },
     Prescribe { base_url: String, access_token: String, session_id: String, divination_source: Option<String> },
+    FetchThread { base_url: String, access_token: String, seeker_id: String },
+    DeleteSeeker { base_url: String, access_token: String, seeker_id: String },
     Reintegrate { base_url: String, access_token: String, session_id: String, enacted: bool },
     Shutdown,
 }
@@ -24,6 +26,8 @@ pub enum ApiResponse {
     InquiryQuestion { session_id: String, turn: u32, question: String, meta: ApiMeta },
     InquiryComplete { session_id: String, turn: u32, quality_sense: Option<String>, meta: ApiMeta },
     Prescribed { rite: Rite, meta: ApiMeta },
+    Thread { items: Vec<ThreadItem>, meta: ApiMeta },
+    SeekerDeleted { seeker_id: String, meta: ApiMeta },
     ReintegrationComplete { witness: String, what_shifted: String, next: String, meta: ApiMeta },
     Error { message: String, meta: ApiMeta },
     ShutdownAck,
@@ -70,6 +74,17 @@ pub struct DivinationCard {
 pub struct DivinationHexagram {
     pub number: u32,
     pub name: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ThreadItem {
+    pub id: String,
+    pub stage: Option<String>,
+    pub quality: Option<String>,
+    pub enacted: Option<bool>,
+    pub rite_name: Option<String>,
+    pub created_at: Option<String>,
+    pub completed_at: Option<String>,
 }
 
 pub fn execute(req: ApiRequest) -> ApiResponse {
@@ -318,6 +333,77 @@ pub fn execute(req: ApiRequest) -> ApiResponse {
                 Err(err) => ApiResponse::Error {
                     message: err.to_string(),
                     meta: build_meta(endpoint, 0, started.elapsed().as_millis(), Some(&body), None),
+                },
+            }
+        }
+        ApiRequest::FetchThread { base_url, access_token, seeker_id } => {
+            let started = Instant::now();
+            let endpoint = format!("/seeker/{}/thread", seeker_id);
+            let url = format!("{base_url}/seeker/{seeker_id}/thread");
+            match client.get(url).bearer_auth(access_token).send() {
+                Ok(resp) => {
+                    let status = resp.status().as_u16();
+                    match resp.json::<Value>() {
+                        Ok(json) if status < 400 => {
+                            let meta = build_meta(endpoint, status, started.elapsed().as_millis(), None, Some(&json));
+                            let items = json.get("thread")
+                                .and_then(|v| v.as_array())
+                                .map(|arr| {
+                                    arr.iter().filter_map(|item| {
+                                        serde_json::from_value::<ThreadItem>(item.clone()).ok()
+                                    }).collect::<Vec<_>>()
+                                })
+                                .unwrap_or_default();
+                            ApiResponse::Thread { items, meta }
+                        }
+                        Ok(json) => {
+                            let msg = json.get("error").and_then(|v| v.as_str()).unwrap_or("Request failed.");
+                            ApiResponse::Error {
+                                message: msg.to_string(),
+                                meta: build_meta(endpoint, status, started.elapsed().as_millis(), None, Some(&json)),
+                            }
+                        }
+                        Err(err) => ApiResponse::Error {
+                            message: format!("Invalid JSON: {err}"),
+                            meta: build_meta(endpoint, status, started.elapsed().as_millis(), None, None),
+                        },
+                    }
+                }
+                Err(err) => ApiResponse::Error {
+                    message: err.to_string(),
+                    meta: build_meta(endpoint, 0, started.elapsed().as_millis(), None, None),
+                },
+            }
+        }
+        ApiRequest::DeleteSeeker { base_url, access_token, seeker_id } => {
+            let started = Instant::now();
+            let endpoint = format!("/seeker/{}", seeker_id);
+            let url = format!("{base_url}/seeker/{seeker_id}");
+            match client.delete(url).bearer_auth(access_token).send() {
+                Ok(resp) => {
+                    let status = resp.status().as_u16();
+                    match resp.json::<Value>() {
+                        Ok(json) if status < 400 => {
+                            let meta = build_meta(endpoint, status, started.elapsed().as_millis(), None, Some(&json));
+                            let seeker_id = json.get("seeker_id").and_then(|v| v.as_str()).unwrap_or("").to_string();
+                            ApiResponse::SeekerDeleted { seeker_id, meta }
+                        }
+                        Ok(json) => {
+                            let msg = json.get("error").and_then(|v| v.as_str()).unwrap_or("Request failed.");
+                            ApiResponse::Error {
+                                message: msg.to_string(),
+                                meta: build_meta(endpoint, status, started.elapsed().as_millis(), None, Some(&json)),
+                            }
+                        }
+                        Err(err) => ApiResponse::Error {
+                            message: format!("Invalid JSON: {err}"),
+                            meta: build_meta(endpoint, status, started.elapsed().as_millis(), None, None),
+                        },
+                    }
+                }
+                Err(err) => ApiResponse::Error {
+                    message: err.to_string(),
+                    meta: build_meta(endpoint, 0, started.elapsed().as_millis(), None, None),
                 },
             }
         }
