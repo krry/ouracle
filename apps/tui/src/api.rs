@@ -302,7 +302,7 @@ pub fn execute(req: ApiRequest) -> ApiResponse {
                                 ApiResponse::InquiryComplete { session_id, turn, quality_sense, meta }
                             } else {
                                 let question = json.get("question").and_then(|v| v.as_str()).unwrap_or("...").to_string();
-                                ApiResponse::InquiryQuestion { session_id, turn, question, meta }
+                                ApiResponse::InquiryQuestion { session_id, turn, question, greeting: None, meta }
                             }
                         }
                         Ok(json) => {
