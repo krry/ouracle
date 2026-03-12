@@ -155,7 +155,7 @@ fn short_token(token: Option<&str>) -> String {
 fn format_legend() -> String {
     let lines = [
         "/consent  /seeker  /covenant",
-        "/begin    /prescribe",
+        "/begin    /prescribe [tarot|iching]",
         "/reintegrate yes|no",
         "/dev on|off  /status  /help",
     ];

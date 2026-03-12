@@ -2,6 +2,7 @@ use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::time::Instant;
+use chrono::Utc;
 
 #[derive(Debug, Clone)]
 pub enum ApiRequest {
@@ -10,7 +11,7 @@ pub enum ApiRequest {
     RecordCovenant { base_url: String, access_token: String, seeker_id: String },
     BeginInquiry { base_url: String, access_token: String },
     ContinueInquiry { base_url: String, access_token: String, session_id: String, response: String },
-    Prescribe { base_url: String, access_token: String, session_id: String },
+    Prescribe { base_url: String, access_token: String, session_id: String, divination_source: Option<String> },
     Reintegrate { base_url: String, access_token: String, session_id: String, enacted: bool },
     Shutdown,
 }
@@ -46,6 +47,29 @@ pub struct Rite {
     pub orientation: String,
     pub context: Option<String>,
     pub duration: Option<String>,
+    pub divination: Option<Divination>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct Divination {
+    pub source: String,
+    pub quality: Option<String>,
+    pub score: Option<f64>,
+    pub card: Option<DivinationCard>,
+    pub hexagram: Option<DivinationHexagram>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct DivinationCard {
+    pub name: String,
+    pub suit: Option<String>,
+    pub rank: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct DivinationHexagram {
+    pub number: u32,
+    pub name: String,
 }
 
 pub fn execute(req: ApiRequest) -> ApiResponse {
@@ -164,9 +188,15 @@ pub fn execute(req: ApiRequest) -> ApiResponse {
         }
         ApiRequest::BeginInquiry { base_url, access_token } => {
             let started = Instant::now();
-            let endpoint = "/inquire".to_string();
-            let url = format!("{base_url}/inquire");
-            let body = serde_json::json!({});
+            let endpoint = "/session/new".to_string();
+            let url = format!("{base_url}/session/new");
+            let body = serde_json::json!({
+                "covenant": {
+                    "version": 1,
+                    "accepted": true,
+                    "timestamp": Utc::now().to_rfc3339(),
+                }
+            });
             match client.post(url).bearer_auth(access_token).json(&body).send() {
                 Ok(resp) => {
                     let status = resp.status().as_u16();
@@ -238,11 +268,14 @@ pub fn execute(req: ApiRequest) -> ApiResponse {
                 },
             }
         }
-        ApiRequest::Prescribe { base_url, access_token, session_id } => {
+        ApiRequest::Prescribe { base_url, access_token, session_id, divination_source } => {
             let started = Instant::now();
             let endpoint = "/prescribe".to_string();
             let url = format!("{base_url}/prescribe");
-            let body = serde_json::json!({ "session_id": session_id });
+            let body = serde_json::json!({
+                "session_id": session_id,
+                "divination_source": divination_source
+            });
             match client.post(url).bearer_auth(access_token).json(&body).send() {
                 Ok(resp) => {
                     let status = resp.status().as_u16();
@@ -259,6 +292,7 @@ pub fn execute(req: ApiRequest) -> ApiResponse {
                                         orientation: "unknown".to_string(),
                                         context: None,
                                         duration: None,
+                                        divination: None,
                                     });
                                     ApiResponse::Prescribed { rite, meta }
                                 }

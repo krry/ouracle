@@ -148,7 +148,7 @@ impl App {
 
         match cmd {
             "/help" => {
-                let msg = "Commands: /consent, /seeker, /covenant, /begin, /prescribe, /reintegrate yes|no, /dev on|off, /status, /help".to_string();
+                let msg = "Commands: /consent, /seeker, /covenant, /begin, /prescribe [tarot|iching], /reintegrate yes|no, /dev on|off, /status, /help".to_string();
                 (None, Some(msg))
             }
             "/dev" => {
@@ -210,7 +210,7 @@ impl App {
                     access_token,
                 };
                 self.pending = true;
-                (Some(req), Some("Priestess: Opening inquiry.".to_string()))
+                (Some(req), Some("Priestess: Opening inquiry (covenant included).".to_string()))
             }
             "/prescribe" => {
                 let access_token = match &self.access_token {
@@ -221,10 +221,12 @@ impl App {
                     Some(id) => id.clone(),
                     None => return (None, Some("Priestess: No session_id. Use /begin first.".to_string())),
                 };
+                let divination_source = parts.get(1).map(|v| v.to_string());
                 let req = ApiRequest::Prescribe {
                     base_url: self.base_url.clone(),
                     access_token,
                     session_id,
+                    divination_source,
                 };
                 self.pending = true;
                 (Some(req), Some("Priestess: Requesting prescription.".to_string()))
@@ -302,6 +304,30 @@ impl App {
                 self.push_message(format!("Invocation: {}", rite.invocation));
                 if !rite.textures.is_empty() {
                     self.push_message(format!("Textures: {}", rite.textures.join(" | ")));
+                }
+                if let Some(divination) = rite.divination {
+                    match divination.source.as_str() {
+                        "tarot" => {
+                            if let Some(card) = divination.card {
+                                let mut label = card.name;
+                                if let Some(suit) = card.suit {
+                                    label = format!("{label} ({suit})");
+                                }
+                                if let Some(rank) = card.rank {
+                                    label = format!("{label} — {rank}");
+                                }
+                                self.push_message(format!("Divination: Tarot — {}", label));
+                            }
+                        }
+                        "iching" => {
+                            if let Some(hex) = divination.hexagram {
+                                self.push_message(format!("Divination: I Ching — {} {}", hex.number, hex.name));
+                            }
+                        }
+                        _ => {
+                            self.push_message(format!("Divination: {}", divination.source));
+                        }
+                    }
                 }
                 if let Some(context) = rite.context {
                     self.push_message(format!("Context: {}", context));
