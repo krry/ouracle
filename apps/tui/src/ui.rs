@@ -54,10 +54,10 @@ pub fn draw(frame: &mut Frame, app: &App) {
 
     let history_area = main_chunks[0];
     let history = app.messages.join("\n");
-    let history_lines = app.messages.len();
+    let history_lines = history.lines().count();
     let visible_lines = history_area.height.saturating_sub(2) as usize;
     let max_offset = history_lines.saturating_sub(visible_lines);
-    let scroll = app.history_offset.min(max_offset) as u16;
+    let scroll = max_offset as u16;
     let history_widget = Paragraph::new(history)
         .block(Block::default().borders(Borders::ALL).title("Thread"))
         .wrap(Wrap { trim: false })
