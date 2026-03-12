@@ -170,13 +170,13 @@ export const RITES = {
 // CLUE KEYWORD MAPS
 // ─────────────────────────────────────────────
 
-const VAGAL_CLUE_MAP = {
+export const VAGAL_CLUE_MAP = {
   sympathetic: ['urgent', 'urgency', "can't stop", 'racing', 'tight', 'tense', 'scared', 'fear', 'must', 'control', 'not enough', 'deadline', 'running out', 'anxious', 'anxiety', 'hoarding', 'gripping', 'panicking', 'restless', 'spinning'],
   dorsal:      ['numb', "what's the point", "can't feel", 'flat', 'hopeless', 'frozen', 'heavy', 'shutdown', 'disconnected', 'why bother', 'exhausted', 'collapsed', "don't care", 'giving up', 'pointless'],
   ventral:     ['curious', 'open', 'possible', 'connected', 'enough', 'present', 'playful', 'grateful', 'flowing', 'clear', 'easy', 'spacious', 'calm'],
 };
 
-const BELIEF_CLUE_MAP = {
+export const BELIEF_CLUE_MAP = {
   scarcity:     ['not enough', 'running out', "can't afford", 'scarce', 'losing', 'hoarding', 'taking', 'mine', 'protect what i have'],
   unworthiness: ["don't deserve", 'not good enough', 'unworthy', 'who am i', 'imposter', 'fraud', "shouldn't", 'not ready', "when i'm better"],
   control:      ['must manage', "can't trust", "don't trust", 'need to control', 'if i let go', 'what if they', 'have to do it myself', 'do everything myself', 'no one else can', "can't let go", 'i have to manage', 'orchestrat'],
@@ -277,8 +277,10 @@ export function inferQuality(text) {
 
 export async function infer(text) {
   if (process.env.SEMANTIC_INFERENCE === 'true') {
-    const { inferSemantics } = await import('./infer.js');
-    const result = await inferSemantics(text);
+    const mode = (process.env.SEMANTIC_INFERENCE_MODE || 'llm').toLowerCase();
+    const result = mode === 'embeddings'
+      ? await (await import('./semantic-embeddings.js')).inferSemanticsEmbeddings(text)
+      : await (await import('./infer.js')).inferSemantics(text);
     // Attach seeker_language from OCTAVE for the quality node
     if (result.quality.quality) {
       const node = Object.values(OCTAVE).find(n => n.quality === result.quality.quality);
@@ -348,7 +350,7 @@ export function buildPrescription(vagalState, belief, quality) {
   // Deeply shut down: offer grounding before any rite
   const needsGrounding = vagalState === 'dorsal';
 
-  const selectedRite = needsGrounding ? RITES.grounding : rite;
+  const selectedRite = needsGrounding ? RITES.grounding : (rite || RITES.grounding);
   const audit = auditLoveFear(selectedRite);
 
   // Flag if the rite reads as fear-facing (shouldn't happen with current rites,
@@ -368,5 +370,17 @@ export function buildPrescription(vagalState, belief, quality) {
       : flagged
         ? `⚠ Rite orientation flagged as fear-facing. Review before presenting to Seeker.`
         : null,
+  };
+}
+
+export function variantRite(rite) {
+  if (!rite) return rite;
+  return {
+    ...rite,
+    act: `${rite.act} Do it once in a different place, time, or with a new witness.`,
+    textures: Array.isArray(rite.textures)
+      ? [...rite.textures, 'A subtle shift from the change in context']
+      : rite.textures,
+    variant_of: rite.rite_name,
   };
 }

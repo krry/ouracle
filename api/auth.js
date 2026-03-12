@@ -25,6 +25,25 @@ export function verifyAccessToken(token) {
   return jwt.verify(token, ACCESS_SECRET); // throws on invalid/expired
 }
 
+export function hashApiKey(apiKey) {
+  return createHash('sha256').update(apiKey).digest('hex');
+}
+
+async function verifyApiKey(apiKey) {
+  const hash = hashApiKey(apiKey);
+  const [row] = await sql`
+    SELECT id, active, expires_at FROM api_keys
+    WHERE key_hash = ${hash}
+    LIMIT 1
+  `;
+
+  if (!row || row.active === false) return null;
+  if (row.expires_at && new Date(row.expires_at) <= new Date()) return null;
+
+  await sql`UPDATE api_keys SET last_used_at = now() WHERE id = ${row.id}`;
+  return row;
+}
+
 export async function issueTokenPair(seeker_id) {
   const access_token  = signAccessToken(seeker_id);
   const refresh_token = randomBytes(40).toString('hex');
@@ -65,11 +84,23 @@ export function authenticate(req, res, next) {
     return res.status(401).json({ error: 'Unauthorized. Provide a Bearer token.' });
   }
 
+  const token = header.slice(7);
+
   try {
-    const payload = verifyAccessToken(header.slice(7));
+    const payload = verifyAccessToken(token);
     req.seeker_id = payload.seeker_id;
-    next();
+    return next();
   } catch {
-    return res.status(401).json({ error: 'Token invalid or expired.' });
+    // Fallback to API key auth for external callers.
   }
+
+  verifyApiKey(token)
+    .then((apiKey) => {
+      if (!apiKey) {
+        return res.status(401).json({ error: 'Token invalid or expired.' });
+      }
+      req.api_key_id = apiKey.id;
+      return next();
+    })
+    .catch(() => res.status(401).json({ error: 'Token invalid or expired.' }));
 }

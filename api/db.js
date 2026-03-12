@@ -53,10 +53,18 @@ export async function getSeekerHistory(seeker_id, limit = 10) {
 // SESSIONS
 // ─────────────────────────────────────────────
 
-export async function createSession(seeker_id) {
+export async function createSession(seeker_id, covenant) {
+  const covenant_version = covenant?.version ?? null;
+  const covenant_accepted = covenant?.accepted === true;
+  const covenant_timestamp = covenant?.timestamp ?? null;
+
   const [session] = await sql`
-    INSERT INTO sessions (seeker_id)
-    VALUES (${seeker_id})
+    INSERT INTO sessions (seeker_id, covenant_version, covenant_accepted_at)
+    VALUES (
+      ${seeker_id},
+      ${covenant_version},
+      ${covenant_accepted ? (covenant_timestamp ?? new Date().toISOString()) : null}
+    )
     RETURNING *
   `;
   return session;
@@ -162,4 +170,30 @@ export async function writeToCorpus({
     RETURNING id, created_at
   `;
   return row;
+}
+
+// ─────────────────────────────────────────────
+// API KEYS
+// ─────────────────────────────────────────────
+
+export async function createApiKey({ key_hash, label, expires_at }) {
+  const [row] = await sql`
+    INSERT INTO api_keys (key_hash, label, expires_at)
+    VALUES (${key_hash}, ${label ?? null}, ${expires_at ?? null})
+    RETURNING id, label, active, expires_at, created_at
+  `;
+  return row;
+}
+
+export async function updateApiKey(id, { active, expires_at, label }) {
+  const [row] = await sql`
+    UPDATE api_keys SET
+      active = COALESCE(${active ?? null}, active),
+      expires_at = COALESCE(${expires_at ?? null}, expires_at),
+      label = COALESCE(${label ?? null}, label),
+      last_used_at = last_used_at
+    WHERE id = ${id}
+    RETURNING id, label, active, expires_at, last_used_at, created_at
+  `;
+  return row ?? null;
 }

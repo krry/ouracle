@@ -1,15 +1,19 @@
 import express from 'express';
+import { randomUUID } from 'crypto';
 import {
   authenticate,
   issueTokenPair,
   rotateRefreshToken,
+  hashApiKey,
 } from './auth.js';
 import {
   infer,
   buildPrescription,
+  variantRite,
   chooseOpeningQuestion,
   RITES,
   BELIEFS,
+  OCTAVE,
 } from './engine.js';
 import {
   createSeeker,
@@ -23,10 +27,30 @@ import {
   getSeekerEnactments,
   hasEnacted,
   writeToCorpus,
+  createApiKey,
+  updateApiKey,
 } from './db.js';
 
 const app = express();
 app.use(express.json());
+
+const ADMIN_KEY = process.env.OURACLE_ADMIN_KEY;
+
+// ─────────────────────────────────────────────
+// COVENANT
+// Public: Priestess apps fetch the current covenant text.
+// ─────────────────────────────────────────────
+
+const COVENANT = {
+  version: 1,
+  effective_date: '2026-03-11',
+  text: [
+    'I accept 100% responsibility for my actions — legal, lawful, moral, ethical, physical, and financial.',
+    'Ouracle listens. Ouracle speaks. I act as I will.',
+  ],
+};
+
+app.get('/covenant/current', (_req, res) => res.json(COVENANT));
 
 // ─────────────────────────────────────────────
 // PREREQUISITE MAP
@@ -89,26 +113,61 @@ function directRite(domain, verb) {
 }
 
 // ─────────────────────────────────────────────
+// SESSION LIFECYCLE
+// ─────────────────────────────────────────────
+
+app.post('/session/new', authenticate, async (req, res) => {
+  const { covenant, context } = req.body || {};
+  const seeker_id = req.seeker_id; // from JWT
+
+  const seeker = await getSeeker(seeker_id);
+  if (!seeker) return res.status(404).json({ error: 'Seeker not found.' });
+  if (!seeker.consented_at) {
+    return res.status(403).json({ error: 'Consent not recorded. Complete POST /seeker/new with { consented: true } first.' });
+  }
+  if (!covenant?.accepted) {
+    return res.status(400).json({
+      error: 'Covenant not accepted.',
+      hint: 'Fetch GET /covenant/current, then POST /session/new with { covenant: { version, accepted: true, timestamp } }.',
+    });
+  }
+  if (String(covenant.version) !== String(COVENANT.version)) {
+    return res.status(400).json({
+      error: 'Covenant version mismatch.',
+      current: COVENANT.version,
+      hint: 'Fetch GET /covenant/current for the latest covenant.',
+    });
+  }
+
+  if (!seeker.covenant_at || String(seeker.covenant_version) !== String(covenant.version)) {
+    await recordCovenant(seeker_id, covenant.version);
+  }
+
+  const session = await createSession(seeker_id, covenant);
+  await updateSession(session.id, { stage: 'inquiry', turn: 0 });
+  const question = chooseOpeningQuestion(context || {});
+
+  return res.json({ session_id: session.id, stage: 'inquiry', turn: 0, question, awaiting: 'response' });
+});
+
+app.get('/session/:id', authenticate, async (req, res) => {
+  const session = await getSession(req.params.id);
+  if (!session) return res.status(404).json({ error: 'Session not found.' });
+  return res.json(session);
+});
+
+// ─────────────────────────────────────────────
 // STAGE 1: INQUIRY
 // POST /inquire
 // ─────────────────────────────────────────────
 app.post('/inquire', authenticate, async (req, res) => {
-  const { session_id, response, context } = req.body;
+  const { session_id, response, octave_override } = req.body;
 
-  // New session
   if (!session_id) {
-    const seeker_id = req.seeker_id; // from JWT
-    const seeker = await getSeeker(seeker_id);
-    if (!seeker) return res.status(404).json({ error: 'Seeker not found.' });
-    if (!seeker.consented_at) {
-      return res.status(403).json({ error: 'Consent not recorded. Complete POST /seeker/new with { consented: true } first.' });
-    }
-
-    const question = chooseOpeningQuestion(context || {});
-    const session = await createSession(seeker_id);
-    await updateSession(session.id, { stage: 'inquiry', turn: 0 });
-
-    return res.json({ session_id: session.id, stage: 'inquiry', turn: 0, question, awaiting: 'response' });
+    return res.status(400).json({
+      error: 'session_id required.',
+      hint: 'Start with POST /session/new to open a session.',
+    });
   }
 
   // Continuing session
@@ -119,6 +178,14 @@ app.post('/inquire', authenticate, async (req, res) => {
   const newTurn = (session.turn || 0) + 1;
 
   const { vagal, belief, quality } = await infer(newText);
+  const qualities = Object.values(OCTAVE).map((node) => node.quality).filter(Boolean);
+  const overrideValid = octave_override && qualities.includes(octave_override);
+  const octaveNode = Object.values(OCTAVE).find((node) => node.quality === (overrideValid ? octave_override : quality.quality));
+  if (overrideValid) {
+    quality.quality = octave_override;
+    quality.confidence = 'high';
+    quality.is_shock = octaveNode?.shock || false;
+  }
 
   const threshold = vagal.confidence === 'high' || (vagal.confidence === 'medium' && belief.confidence !== 'low');
 
@@ -142,6 +209,9 @@ app.post('/inquire', authenticate, async (req, res) => {
       turn: newTurn,
       ready_for_prescription: true,
       quality_sense: quality.seeker_language || null,
+      octave_prompt: octaveNode?.note
+        ? `It sounds like you may be at ${octaveNode.note} — ${octaveNode.theme || octaveNode.quality}. Does that land?`
+        : null,
       _meta: {
         vagal_probable: vagal.probable,
         vagal_confidence: vagal.confidence,
@@ -189,6 +259,13 @@ app.post('/prescribe', authenticate, async (req, res) => {
   const belief  = { pattern: session.belief_pattern, confidence: session.belief_confidence, meta: BELIEFS[session.belief_pattern] };
   const quality = { quality: session.quality, confidence: session.quality_confidence, is_shock: session.quality_is_shock };
   const prescription = buildPrescription(session.vagal_probable, belief, quality);
+  const history = await getSeekerHistory(session.seeker_id, 1);
+  const lastRite = history?.[0]?.rite_name || null;
+  const needsVariant = lastRite && prescription.rite?.rite_name === lastRite;
+
+  if (needsVariant) {
+    prescription.rite = variantRite(prescription.rite);
+  }
 
   await updateSession(session_id, {
     stage: 'prescribed',
@@ -300,6 +377,45 @@ app.post('/seeker/new', async (req, res) => {
   const seeker = await createSeeker({ device_id, email_hash, timezone, consent_version });
   const tokens = await issueTokenPair(seeker.id);
   return res.status(201).json({ seeker_id: seeker.id, ...tokens, created_at: seeker.created_at });
+});
+
+// ─────────────────────────────────────────────
+// ADMIN: API KEY MINTING
+// ─────────────────────────────────────────────
+
+app.post('/admin/api-keys', async (req, res) => {
+  if (!ADMIN_KEY) return res.status(500).json({ error: 'OURACLE_ADMIN_KEY not configured.' });
+  const header = req.headers['authorization'];
+  if (!header?.startsWith('Bearer ') || header.slice(7) !== ADMIN_KEY) {
+    return res.status(401).json({ error: 'Unauthorized.' });
+  }
+
+  const { label, expires_at } = req.body || {};
+  const plain = `ouracle_${randomUUID()}`;
+  const key_hash = hashApiKey(plain);
+  const record = await createApiKey({ key_hash, label, expires_at });
+
+  return res.status(201).json({
+    api_key: plain,
+    ...record,
+  });
+});
+
+app.patch('/admin/api-keys/:id', async (req, res) => {
+  if (!ADMIN_KEY) return res.status(500).json({ error: 'OURACLE_ADMIN_KEY not configured.' });
+  const header = req.headers['authorization'];
+  if (!header?.startsWith('Bearer ') || header.slice(7) !== ADMIN_KEY) {
+    return res.status(401).json({ error: 'Unauthorized.' });
+  }
+
+  const { active, expires_at, label } = req.body || {};
+  if (active === undefined && !expires_at && !label) {
+    return res.status(400).json({ error: 'No updates provided.' });
+  }
+
+  const record = await updateApiKey(req.params.id, { active, expires_at, label });
+  if (!record) return res.status(404).json({ error: 'API key not found.' });
+  return res.json(record);
 });
 
 // POST /auth/token — issue tokens for an existing seeker (re-auth)
