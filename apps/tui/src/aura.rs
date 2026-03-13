@@ -159,6 +159,7 @@ impl Aura {
         let cx = area.x as f32 + (area.width as f32 / 2.0);
         let cy = area.y as f32 + (area.height as f32 / 2.0);
         let max_dist = ((area.width as f32).hypot(area.height as f32)) / 2.0;
+        let (hx, hy, _, _) = hole_geometry(area);
 
         let buf = frame.buffer_mut();
 
@@ -171,9 +172,6 @@ impl Aura {
                 let dy = y as f32 - cy;
                 let dist = (dx * dx + dy * dy).sqrt();
                 let _r = (dist / max_dist).clamp(0.0, 1.0);
-
-                // Match hole size to the 80x24 conversation block.
-                let (hx, hy, _, _) = hole_geometry(area);
 
                 let nx = dx / hx;
                 let ny = dy / hy;
@@ -404,4 +402,21 @@ fn hole_geometry(area: Rect) -> (f32, f32, f32, f32) {
 fn smoothstep(edge0: f32, edge1: f32, x: f32) -> f32 {
     let t = ((x - edge0) / (edge1 - edge0)).clamp(0.0, 1.0);
     t * t * (3.0 - 2.0 * t)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ratatui::layout::Rect;
+
+    #[test]
+    fn hole_geometry_is_deterministic() {
+        let area = Rect { x: 0, y: 0, width: 120, height: 40 };
+        let (hx1, hy1, cx1, cy1) = hole_geometry(area);
+        let (hx2, hy2, cx2, cy2) = hole_geometry(area);
+        assert_eq!(hx1, hx2);
+        assert_eq!(hy1, hy2);
+        assert_eq!(cx1, cx2);
+        assert_eq!(cy1, cy2);
+    }
 }
