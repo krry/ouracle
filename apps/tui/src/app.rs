@@ -351,12 +351,12 @@ impl App {
             if self.seeker_id.is_none() {
                 return self.parse_command("/welcome");
             }
-            return (None, Some("Priestess: Use /begin to start an inquiry.".to_string()));
+            return (None, Some("You may /begin or /restart or /reset.".to_string()));
         }
 
         let access_token = match &self.access_token {
             Some(t) => t.clone(),
-            None => return (None, Some("Priestess: No access token. Use /welcome then /covenant.".to_string())),
+            None => return (None, Some("Receive our /welcome, or /restart.".to_string())),
         };
 
         let session_id = self.session_id.clone().unwrap_or_default();
@@ -774,7 +774,7 @@ impl App {
                 self.refresh_token = Some(refresh_token);
                 self.stage = "seeker_ready".to_string();
                 self.awaiting_password = true;
-                self.push_message("Seeker created. Set a password:".to_string());
+                self.push_message("We will remember you. Choose a password.".to_string());
             }
             ApiResponse::PasswordSet { meta } => {
                 self.last_meta = Some(meta);
@@ -790,7 +790,8 @@ impl App {
                 self.last_meta = Some(meta);
                 self.mode = AppMode::Covenant;
                 self.stage = "covenanted".to_string();
-                self.push_message(format!("Covenant recorded at {}", covenant_at));
+                // self.push_message(format!("Covenant recorded at {}", covenant_at));
+                self.push_message(format!("The covenant is sealed."));
             }
             ApiResponse::InquiryQuestion { session_id, turn, question, greeting, meta } => {
                 self.last_meta = Some(meta);
