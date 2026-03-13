@@ -6,15 +6,15 @@ use std::{
     io::Write,
     sync::mpsc::{self, Receiver},
     thread,
-    time::{Duration, SystemTime, UNIX_EPOCH},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
-use crossterm::event::{Event, KeyCode, KeyEvent, MouseEventKind};
+use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseEventKind};
 use rand::{RngCore, rngs::OsRng};
 use reqwest::blocking::Client;
 use serde_json::json;
 use sha2::{Digest, Sha256};
-use std::process::Command;
+use std::process::{Child, Command};
 
 use crate::aura::Aura;
 use crate::api::{ApiMeta, ApiRequest, ApiResponse};
@@ -94,17 +94,24 @@ pub struct App {
     awaiting_password: bool,
     pending_covenant_after_name: bool,
     pending_record_covenant: bool,
+    echo_mode: bool,
     auto_hue: bool,
     root_hue_f32: f32,
     tts_duration_rx: Option<Receiver<Result<f32, String>>>,
     priestess_target_duration_ms: Option<f32>,
     priestess_line_chars: usize,
     priestess_elapsed_ms: f32,
+    pub stt_error: Option<String>,
+    pub stt_recording: bool,
+    stt_record_started: Option<Instant>,
+    stt_recorder: Option<Child>,
+    stt_record_path: Option<PathBuf>,
+    stt_transcribe_rx: Option<Receiver<Result<String, String>>>,
 }
 
 impl App {
     pub fn new() -> Self {
-        App {
+        let mut app = App {
             mode: AppMode::Covenant,
             input: String::new(),
             messages: Vec::new(),
@@ -136,22 +143,18 @@ impl App {
             totem: None,
             voice_intensity: 0.0,
             voice_target: 0.0,
-            voice_mode: if std::env::var("FISH_AUDIO_API_KEY").is_ok() {
-                VoiceMode::Fish
-            } else {
-                VoiceMode::Say
-            },
+            voice_mode: VoiceMode::Say,
             priestess_display: String::new(),
             priestess_prev: String::new(),
             priestess_transition_ms: 0.0,
             priestess_transition_duration_ms: 360.0,
             priestess_next_delay_ms: 0.0,
-            priestess_queue: "Welcome, traveler...\n\nHow are you arriving?".chars().collect(),
+            priestess_queue: Vec::new(),
             priestess_accum_ms: 0.0,
             seeker_fade_ms: 0.0,
             seeker_fade_duration_ms: 480.0,
             seeker_fade_line: String::new(),
-            priestess_typing: true,
+            priestess_typing: false,
             cursor_visible: false,
             cursor_dirty: true,
             seeker_last_line: String::new(),
@@ -163,19 +166,32 @@ impl App {
             awaiting_password: false,
             pending_covenant_after_name: false,
             pending_record_covenant: false,
+            echo_mode: false,
             auto_hue: true,
             root_hue_f32: theme::current_root_hue() as f32,
             tts_duration_rx: None,
             priestess_target_duration_ms: None,
             priestess_line_chars: 0,
             priestess_elapsed_ms: 0.0,
-        }
+            stt_error: None,
+            stt_recording: false,
+            stt_record_started: None,
+            stt_recorder: None,
+            stt_record_path: None,
+            stt_transcribe_rx: None,
+        };
+        app.start_priestess_line("Welcome, traveler...\n\nHow are you arriving?".to_string());
+        app
     }
 
     // Called on each key event
     pub fn on_event(&mut self, event: &Event) -> (bool, Option<ApiRequest>) {
         match event {
-            Event::Key(KeyEvent { code, .. }) => match code {
+            Event::Key(KeyEvent { code, modifiers, kind, .. }) => {
+                if self.handle_ptt_event(*code, *modifiers, *kind) {
+                    return (false, None);
+                }
+                match code {
                 KeyCode::Char('q') if self.input.is_empty() => {
                     // signal caller to quit
                     return (true, None);
@@ -220,7 +236,7 @@ impl App {
                     self.input.pop();
                 }
                 _ => {}
-            },
+            }},
             Event::Mouse(mouse) => {
                 match mouse.kind {
                     MouseEventKind::Down(crossterm::event::MouseButton::Left) => {
@@ -242,6 +258,28 @@ impl App {
         (false, None)
     }
 
+    fn handle_ptt_event(&mut self, code: KeyCode, modifiers: KeyModifiers, kind: KeyEventKind) -> bool {
+        if !is_ptt_key(code, modifiers) {
+            return false;
+        }
+        match kind {
+            KeyEventKind::Press => {
+                if self.stt_recording {
+                    self.stop_stt_recording();
+                } else {
+                    self.start_stt_recording();
+                }
+            }
+            KeyEventKind::Release => {
+                if self.stt_recording {
+                    self.stop_stt_recording();
+                }
+            }
+            KeyEventKind::Repeat => {}
+        }
+        true
+    }
+
     // Called on each tick (for animations)
     pub fn on_tick(&mut self, delta: Duration) {
         self.aura.tick(delta);
@@ -254,6 +292,34 @@ impl App {
         let factor = (dt_s * rate).clamp(0.0, 1.0);
         self.voice_intensity =
             self.voice_intensity + factor * (self.voice_target - self.voice_intensity);
+
+        if self.stt_recording {
+            if let Some(started) = self.stt_record_started {
+                if started.elapsed() >= Duration::from_secs(60) {
+                    self.stop_stt_recording();
+                }
+            }
+        }
+
+        if let Some(rx) = &self.stt_transcribe_rx {
+            if let Ok(result) = rx.try_recv() {
+                self.stt_transcribe_rx = None;
+                match result {
+                    Ok(text) => {
+                        let text = text.trim();
+                        if !text.is_empty() {
+                            if !self.input.is_empty() && !self.input.ends_with(' ') {
+                                self.input.push(' ');
+                            }
+                            self.input.push_str(text);
+                        }
+                    }
+                    Err(err) => {
+                        self.stt_error = Some(err);
+                    }
+                }
+            }
+        }
 
         if !self.priestess_queue.is_empty() {
             self.priestess_typing = true;
@@ -330,9 +396,52 @@ impl App {
         }
     }
 
+    fn start_stt_recording(&mut self) {
+        if self.stt_recording {
+            return;
+        }
+        let path = stt_record_path();
+        let child = match spawn_stt_recorder(&path) {
+            Ok(child) => child,
+            Err(err) => {
+                self.stt_error = Some(err);
+                return;
+            }
+        };
+        self.stt_error = None;
+        self.stt_recording = true;
+        self.stt_record_started = Some(Instant::now());
+        self.stt_recorder = Some(child);
+        self.stt_record_path = Some(path);
+    }
+
+    fn stop_stt_recording(&mut self) {
+        if !self.stt_recording {
+            return;
+        }
+        self.stt_recording = false;
+        self.stt_record_started = None;
+        if let Some(mut child) = self.stt_recorder.take() {
+            let _ = child.kill();
+            let _ = child.wait();
+        }
+        let Some(path) = self.stt_record_path.take() else {
+            return;
+        };
+        self.stt_transcribe_rx = spawn_stt_transcribe(path);
+    }
+
     fn parse_input(&mut self, line: &str) -> (Option<ApiRequest>, Option<String>) {
         if line.starts_with('/') {
             return self.parse_command(line);
+        }
+
+        if self.echo_mode {
+            let clean = line.trim();
+            if !clean.is_empty() {
+                self.push_message(clean.to_string());
+            }
+            return (None, None);
         }
 
         if self.awaiting_name {
@@ -376,7 +485,7 @@ impl App {
 
         match cmd {
             "/help" => {
-                let msg = "Commands: /consent, /covenant-text, /welcome, /covenant, /begin, /intromit, /prescribe [tarot|iching], /thread, /redact <session_id>, /delete, /reintegrate yes|no, /totem status|init|export <path>|import <path>, /token, /mouse on|off, /dev on|off, /status, /restart, /reset, /help".to_string();
+                let msg = "Commands: /consent, /covenant-text, /welcome, /covenant, /begin, /intromit, /prescribe [tarot|iching], /thread, /redact <session_id>, /delete, /reintegrate yes|no, /totem status|init|export <path>|import <path>, /token, /mouse on|off, /dev on|off, /status, /echo on|off, /set color|pace|voice|glyphs, /get color|pace|glyphs, /restart, /reset, /help".to_string();
                 (None, Some(msg))
             }
             "/dev" => {
@@ -389,6 +498,20 @@ impl App {
                 self.cursor_visible = self.dev_mode;
                 self.cursor_dirty = true;
                 (None, None)
+            }
+            "/echo" => {
+                let mode = parts.get(1).copied().unwrap_or("");
+                match mode {
+                    "on" => {
+                        self.echo_mode = true;
+                        (None, Some("Echo mode: on.".to_string()))
+                    }
+                    "off" => {
+                        self.echo_mode = false;
+                        (None, Some("Echo mode: off.".to_string()))
+                    }
+                    _ => (None, Some("Usage: /echo on|off".to_string())),
+                }
             }
             "/status" => {
                 let msg = format!(
@@ -447,7 +570,40 @@ impl App {
                             _ => (None, Some("Usage: /set voice fish|say|off".to_string())),
                         }
                     }
-                    _ => (None, Some("Enter a hue on the color wheel (1-360).".to_string())),
+                    "glyphs" => {
+                        let mode = parts.get(2).copied().unwrap_or("");
+                        match mode {
+                            "braille" => {
+                                self.aura.set_glyph_mode(crate::aura::AuraGlyphMode::Braille);
+                                (None, Some("Aura glyphs set to braille.".to_string()))
+                            }
+                            "taz" => {
+                                self.aura.set_glyph_mode(crate::aura::AuraGlyphMode::Taz);
+                                (None, Some("Aura glyphs set to taz.".to_string()))
+                            }
+                            "math" => {
+                                self.aura.set_glyph_mode(crate::aura::AuraGlyphMode::Math);
+                                (None, Some("Aura glyphs set to math.".to_string()))
+                            }
+                            "mahjong" => {
+                                self.aura.set_glyph_mode(crate::aura::AuraGlyphMode::Mahjong);
+                                (None, Some("Aura glyphs set to mahjong.".to_string()))
+                            }
+                            "dominoes" => {
+                                self.aura.set_glyph_mode(crate::aura::AuraGlyphMode::Dominoes);
+                                (None, Some("Aura glyphs set to dominoes.".to_string()))
+                            }
+                            "cards" => {
+                                self.aura.set_glyph_mode(crate::aura::AuraGlyphMode::Cards);
+                                (None, Some("Aura glyphs set to cards.".to_string()))
+                            }
+                            _ => {
+                                let msg = "Usage: /set glyphs braille|taz|math|mahjong|dominoes|cards".to_string();
+                                (None, Some(msg))
+                            }
+                        }
+                    }
+                    _ => (None, Some("Usage: /set color|pace|voice|glyphs ...".to_string())),
                 }
             }
             "/get" => {
@@ -465,7 +621,18 @@ impl App {
                         };
                         (None, Some(format!("pace: {}", pace)))
                     }
-                    _ => (None, Some("Usage: /get color | /get pace".to_string())),
+                    "glyphs" => {
+                        let mode = match self.aura.glyph_mode() {
+                            crate::aura::AuraGlyphMode::Braille => "braille",
+                            crate::aura::AuraGlyphMode::Taz => "taz",
+                            crate::aura::AuraGlyphMode::Math => "math",
+                            crate::aura::AuraGlyphMode::Mahjong => "mahjong",
+                            crate::aura::AuraGlyphMode::Dominoes => "dominoes",
+                            crate::aura::AuraGlyphMode::Cards => "cards",
+                        };
+                        (None, Some(format!("glyphs: {}", mode)))
+                    }
+                    _ => (None, Some("Usage: /get color | /get pace | /get glyphs".to_string())),
                 }
             }
             "/sessions" => {
@@ -1097,9 +1264,9 @@ impl App {
 
         self.priestess_display.clear();
         self.priestess_prev.clear();
-        self.priestess_queue = "Welcome, traveler...".chars().collect();
+        self.priestess_queue.clear();
         self.priestess_accum_ms = 0.0;
-        self.priestess_typing = true;
+        self.priestess_typing = false;
         self.priestess_line_queue.clear();
         self.priestess_transition_ms = 0.0;
         self.priestess_next_delay_ms = 0.0;
@@ -1114,6 +1281,8 @@ impl App {
 
         self.voice_intensity = 0.0;
         self.voice_target = 0.0;
+
+        self.start_priestess_line("Welcome, traveler...".to_string());
 
         self.pending = false;
         self.queued_request = None;
@@ -1182,6 +1351,131 @@ fn normalize_priestess_line(msg: &str) -> Option<String> {
         }
     }
     if line.is_empty() { None } else { Some(line) }
+}
+
+fn is_ptt_key(code: KeyCode, modifiers: KeyModifiers) -> bool {
+    let mod_only = modifiers.contains(KeyModifiers::SUPER) || modifiers.contains(KeyModifiers::ALT);
+    matches!(code, KeyCode::F(9))
+        || (mod_only && matches!(code, KeyCode::Char(' ')))
+        || (mod_only && matches!(code, KeyCode::Null))
+}
+
+fn stt_record_dir() -> PathBuf {
+    if let Ok(dir) = std::env::var("OURACLE_STT_DIR") {
+        return PathBuf::from(dir);
+    }
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    root.join("data").join("stt_recordings")
+}
+
+fn stt_transcript_dir() -> PathBuf {
+    if let Ok(dir) = std::env::var("OURACLE_STT_TRANSCRIPT_DIR") {
+        return PathBuf::from(dir);
+    }
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    root.join("data").join("stt_transcripts")
+}
+
+fn stt_record_path() -> PathBuf {
+    let ts = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+    let key = random_hex(4);
+    stt_record_dir().join(format!("stt_{}_{}.wav", ts, key))
+}
+
+fn spawn_stt_recorder(path: &Path) -> Result<Child, String> {
+    let cmd = std::env::var("OURACLE_STT_RECORDER").unwrap_or_else(|_| "sox".to_string());
+    if let Some(dir) = path.parent() {
+        fs::create_dir_all(dir).map_err(|e| format!("stt record dir error: {e}"))?;
+    }
+    let mut command = Command::new(&cmd);
+    if cmd == "sox" {
+        command.args(["-d", "-c", "1", "-r", "16000", "-b", "16", "-e", "signed-integer"]);
+    } else if let Ok(args) = std::env::var("OURACLE_STT_RECORDER_ARGS") {
+        command.args(args.split_whitespace());
+    }
+    command.arg(path);
+    command.spawn().map_err(|e| format!("stt record spawn error: {e}"))
+}
+
+fn spawn_stt_transcribe(path: PathBuf) -> Option<Receiver<Result<String, String>>> {
+    let (tx, rx) = mpsc::channel();
+    thread::spawn(move || {
+        let result = whisper_transcribe(&path);
+        let _ = tx.send(result);
+    });
+    Some(rx)
+}
+
+fn whisper_transcribe(path: &Path) -> Result<String, String> {
+    let cmd = whisper_cmd()?;
+    let model_path = whisper_model_path()?;
+    let out_dir = stt_transcript_dir();
+    fs::create_dir_all(&out_dir).map_err(|e| format!("stt transcript dir error: {e}"))?;
+    let key = random_hex(5);
+    let out_base = out_dir.join(format!("stt_{}", key));
+    let mut command = Command::new(cmd);
+    command
+        .arg("-m")
+        .arg(model_path)
+        .arg("-f")
+        .arg(path)
+        .arg("-otxt")
+        .arg("-of")
+        .arg(&out_base);
+    if let Ok(lang) = std::env::var("OURACLE_WHISPER_LANG") {
+        let lang = lang.trim();
+        if !lang.is_empty() {
+            command.arg("-l").arg(lang);
+        }
+    }
+    let status = command.status().map_err(|e| format!("whisper spawn error: {e}"))?;
+    if !status.success() {
+        return Err(format!("whisper exited with status {}", status));
+    }
+    let out_txt = out_base.with_extension("txt");
+    let text = fs::read_to_string(&out_txt).map_err(|e| format!("whisper output read error: {e}"))?;
+    Ok(clean_transcript(&text))
+}
+
+fn whisper_cmd() -> Result<String, String> {
+    if let Ok(cmd) = std::env::var("OURACLE_WHISPER_CMD") {
+        return Ok(cmd);
+    }
+    for candidate in ["whisper", "whisper-cpp"] {
+        if Command::new(candidate).arg("--help").output().is_ok() {
+            return Ok(candidate.to_string());
+        }
+    }
+    Err("Whisper command not found. Install whisper.cpp or set OURACLE_WHISPER_CMD.".to_string())
+}
+
+fn whisper_model_path() -> Result<PathBuf, String> {
+    if let Ok(path) = std::env::var("OURACLE_WHISPER_MODEL") {
+        return Ok(PathBuf::from(path));
+    }
+    let mut candidates = Vec::new();
+    candidates.push(PathBuf::from("/opt/homebrew/share/whisper.cpp/models/ggml-base.en.bin"));
+    candidates.push(PathBuf::from("/usr/local/share/whisper.cpp/models/ggml-base.en.bin"));
+    if let Ok(home) = std::env::var("HOME") {
+        candidates.push(PathBuf::from(home).join(".local/share/whisper.cpp/models/ggml-base.en.bin"));
+    }
+    for path in candidates {
+        if path.exists() {
+            return Ok(path);
+        }
+    }
+    Err("Whisper model not found. Set OURACLE_WHISPER_MODEL to a ggml model path.".to_string())
+}
+
+fn clean_transcript(text: &str) -> String {
+    text.lines()
+        .map(|line| line.trim())
+        .filter(|line| !line.is_empty())
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 fn pace_to_scalar(pace: u8) -> f32 {
@@ -1256,7 +1550,7 @@ fn spawn_tts(line: String) -> Option<Receiver<Result<f32, String>>> {
         }
     };
     let model = std::env::var("FISH_AUDIO_MODEL").unwrap_or_else(|_| "s1".to_string());
-    let model_id = std::env::var("FISH_AUDIO_MODEL_ID").ok();
+    let model_id = std::env::var("FISH_AUDIO_VOICE_OPRAH").ok();
     let (tx, rx) = mpsc::channel();
     thread::spawn(move || {
         let duration = match fish_tts(&line, &api_key, &model, model_id.as_deref()) {

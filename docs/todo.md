@@ -1,6 +1,9 @@
 **TODO**
 
 ## TUI tuneup
+- [ ] test speech to text and text to speech
+- [ ] toggle dev mode more easy; keymaps?
+- [ ] wire up TUI with openclaw?
 - [ ] figure out the covenant dance in the TUI
 - [ ] write a script for the typical ouracle consultation
 - [ ] find the priestess a better voice on fish.audio
