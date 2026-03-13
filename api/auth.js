@@ -5,6 +5,7 @@
 import jwt from 'jsonwebtoken';
 import { createHash, randomBytes } from 'crypto';
 import { neon } from '@neondatabase/serverless';
+import argon2 from 'argon2';
 
 const sql = neon(process.env.DATABASE_URL);
 
@@ -27,6 +28,15 @@ export function verifyAccessToken(token) {
 
 export function hashApiKey(apiKey) {
   return createHash('sha256').update(apiKey).digest('hex');
+}
+
+export async function hashPassword(password) {
+  return argon2.hash(password, { type: argon2.argon2id });
+}
+
+export async function verifyPassword(password, hash) {
+  if (!hash) return false;
+  return argon2.verify(hash, password);
 }
 
 async function verifyApiKey(apiKey) {

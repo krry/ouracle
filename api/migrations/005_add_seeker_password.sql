@@ -1,0 +1,1 @@
+ALTER TABLE seekers ADD COLUMN IF NOT EXISTS password_hash TEXT;
