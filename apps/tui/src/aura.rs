@@ -197,7 +197,7 @@ impl Aura {
                     if mist < 0.18 {
                         continue;
                     }
-                    let (ch, _) = self.glyph_for_energy_stochastic(mist, noise);
+                    let (ch, _) = self.glyph_for_energy_stochastic(mist, noise, col as u32, row as u32);
                     let mut symbol_buf = [0u8; 4];
                     let symbol = ch.encode_utf8(&mut symbol_buf);
                     cell.set_symbol(symbol);
@@ -230,7 +230,7 @@ impl Aura {
                     continue;
                 }
 
-                let (ch, _tier) = self.glyph_for_energy_stochastic(energy, noise);
+                let (ch, _tier) = self.glyph_for_energy_stochastic(energy, noise, col as u32, row as u32);
                 let Some(cell) = buf.cell_mut((x, y)) else {
                     continue;
                 };
@@ -285,7 +285,7 @@ impl Aura {
         (v as f32) / 65535.0
     }
 
-    fn glyph_for_energy_stochastic(&mut self, e: f32, _noise: f32) -> (char, u8) {
+    fn glyph_for_energy_stochastic(&self, e: f32, _noise: f32, col: u32, row: u32) -> (char, u8) {
         const ENERGY_FLOOR: f32 = 0.12;
         const TIERS: usize = 4;
 
@@ -301,7 +301,7 @@ impl Aura {
                 let t_skew = t.powf(2.2);
                 let mut dots = 1 + (t_skew * 7.999).floor() as u8;
                 // Bias toward lighter densities (0–2 dots).
-                let roll = self.rng.r#gen::<f32>();
+                let roll = self.noise3(col, row, self.frame.wrapping_add(100));
                 if roll < 0.28 {
                     dots = dots.saturating_sub(1);
                 }
@@ -312,28 +312,29 @@ impl Aura {
                     return (' ', 0);
                 }
                 let list = &self.braille_by_dots[dots as usize];
-                let idx = self.rng.gen_range(0..list.len());
+                let idx_noise = self.noise3(col, row, self.frame.wrapping_add(200));
+                let idx = (idx_noise * list.len() as f32) as usize % list.len().max(1);
                 let pattern = list[idx];
                 (braille_char(pattern), dots)
             }
             AuraGlyphMode::Taz => {
-                let ch = sample_tier(&mut self.rng, TAZ_TIERS[tier]);
+                let ch = sample_tier(self.noise3(col, row, self.frame.wrapping_add(300)), TAZ_TIERS[tier]);
                 (ch, (tier + 1) as u8)
             }
             AuraGlyphMode::Math => {
-                let ch = sample_tier(&mut self.rng, MATH_TIERS[tier]);
+                let ch = sample_tier(self.noise3(col, row, self.frame.wrapping_add(300)), MATH_TIERS[tier]);
                 (ch, (tier + 1) as u8)
             }
             AuraGlyphMode::Mahjong => {
-                let ch = sample_tier(&mut self.rng, MAHJONG_TIERS[tier]);
+                let ch = sample_tier(self.noise3(col, row, self.frame.wrapping_add(300)), MAHJONG_TIERS[tier]);
                 (ch, (tier + 1) as u8)
             }
             AuraGlyphMode::Dominoes => {
-                let ch = sample_tier(&mut self.rng, DOMINOES_TIERS[tier]);
+                let ch = sample_tier(self.noise3(col, row, self.frame.wrapping_add(300)), DOMINOES_TIERS[tier]);
                 (ch, (tier + 1) as u8)
             }
             AuraGlyphMode::Cards => {
-                let ch = sample_tier(&mut self.rng, CARDS_TIERS[tier]);
+                let ch = sample_tier(self.noise3(col, row, self.frame.wrapping_add(300)), CARDS_TIERS[tier]);
                 (ch, (tier + 1) as u8)
             }
         }
@@ -344,11 +345,11 @@ fn braille_char(pattern: u8) -> char {
     char::from_u32(0x2800 + pattern as u32).unwrap_or(' ')
 }
 
-fn sample_tier(rng: &mut StdRng, tier: &[char]) -> char {
+fn sample_tier(noise: f32, tier: &[char]) -> char {
     if tier.is_empty() {
         return ' ';
     }
-    let idx = rng.gen_range(0..tier.len());
+    let idx = (noise * tier.len() as f32) as usize % tier.len();
     tier[idx]
 }
 
@@ -418,5 +419,30 @@ mod tests {
         assert_eq!(hy1, hy2);
         assert_eq!(cx1, cx2);
         assert_eq!(cy1, cy2);
+    }
+
+    #[test]
+    fn noise3_range() {
+        let aura = Aura::new();
+        for x in 0..10u32 {
+            for y in 0..10u32 {
+                for z in 0..10u64 {
+                    let v = aura.noise3(x, y, z);
+                    assert!(v >= 0.0 && v <= 1.0, "noise3({x},{y},{z}) = {v}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn sample_tier_noise_bounds() {
+        let tier = &['a', 'b', 'c', 'd'];
+        // noise 0.0 → index 0
+        assert_eq!(sample_tier(0.0, tier), 'a');
+        // noise 0.999 → last index
+        let idx = (0.999_f32 * tier.len() as f32) as usize % tier.len();
+        assert_eq!(sample_tier(0.999, tier), tier[idx]);
+        // never panics with empty tier
+        assert_eq!(sample_tier(0.5, &[]), ' ');
     }
 }
