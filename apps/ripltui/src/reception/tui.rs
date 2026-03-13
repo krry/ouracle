@@ -25,9 +25,6 @@ enum Step {
     Name,
     Password { name: String },
     Covenant {
-        name: String,
-        password: String,
-        version: String,
         lines: Vec<String>,
         offset: usize,
         /// Credentials already obtained (returning seeker covenant path)
@@ -72,11 +69,8 @@ pub fn ensure_credentials(
             Ok(rotated) => {
                 // Covenant update required — fetch text then enter Covenant step.
                 terminal.draw(|f| draw(f, &mut state))?;
-                let (version, lines) = http::fetch_covenant(base_url)?;
+                let (_version, lines) = http::fetch_covenant(base_url)?;
                 let step = Step::Covenant {
-                    name: String::new(),
-                    password: String::new(),
-                    version,
                     lines,
                     offset: 0,
                     existing_creds: Some(Box::new(rotated.credentials)),
@@ -179,14 +173,11 @@ fn handle_event(
                         terminal.draw(|f| draw(f, state))?;
 
                         match http::register_seeker(base_url, &name, &password) {
-                            Ok((creds, handle)) => {
+                            Ok((creds, _handle)) => {
                                 state.connecting = false;
                                 terminal.draw(|f| draw(f, state))?;
-                                let (version, lines) = http::fetch_covenant(base_url)?;
+                                let (_version, lines) = http::fetch_covenant(base_url)?;
                                 let step = Step::Covenant {
-                                    name: handle,
-                                    password,
-                                    version,
                                     lines,
                                     offset: 0,
                                     existing_creds: Some(Box::new(creds)),
@@ -283,11 +274,8 @@ fn handle_event(
                             Ok(rotated) => {
                                 state.connecting = false;
                                 terminal.draw(|f| draw(f, state))?;
-                                let (version, lines) = http::fetch_covenant(base_url)?;
+                                let (_version, lines) = http::fetch_covenant(base_url)?;
                                 let step = Step::Covenant {
-                                    name: handle,
-                                    password,
-                                    version,
                                     lines,
                                     offset: 0,
                                     existing_creds: Some(Box::new(rotated.credentials)),
