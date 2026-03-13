@@ -15,10 +15,10 @@ const sql = neon(process.env.DATABASE_URL);
 // SEEKERS
 // ─────────────────────────────────────────────
 
-export async function createSeeker({ device_id, email_hash, timezone, consent_version }) {
+export async function createSeeker({ device_id, email_hash, timezone, consent_version, name, password_hash }) {
   const [seeker] = await sql`
-    INSERT INTO seekers (device_id, email_hash, timezone, consent_version, consented_at)
-    VALUES (${device_id ?? null}, ${email_hash ?? null}, ${timezone ?? null}, ${consent_version}, now())
+    INSERT INTO seekers (device_id, email_hash, timezone, consent_version, consented_at, name, password_hash)
+    VALUES (${device_id ?? null}, ${email_hash ?? null}, ${timezone ?? null}, ${consent_version}, now(), ${name ?? null}, ${password_hash ?? null})
     RETURNING *
   `;
   return seeker;
@@ -84,6 +84,16 @@ export async function getSeekerLatestSession(seeker_id) {
 export async function deleteSeeker(seeker_id) {
   const [row] = await sql`
     DELETE FROM seekers
+    WHERE id = ${seeker_id}
+    RETURNING id
+  `;
+  return row ?? null;
+}
+
+export async function updateSeekerPassword(seeker_id, password_hash) {
+  const [row] = await sql`
+    UPDATE seekers
+    SET password_hash = ${password_hash}, updated_at = now()
     WHERE id = ${seeker_id}
     RETURNING id
   `;

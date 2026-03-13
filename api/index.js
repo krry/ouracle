@@ -5,6 +5,8 @@ import {
   issueTokenPair,
   rotateRefreshToken,
   hashApiKey,
+  hashPassword,
+  verifyPassword,
 } from './auth.js';
 import {
   infer,
@@ -35,12 +37,23 @@ import {
   redactSession,
   createApiKey,
   updateApiKey,
+  updateSeekerPassword,
 } from './db.js';
 
 const app = express();
 app.use(express.json());
 
 const ADMIN_KEY = process.env.OURACLE_ADMIN_KEY;
+
+// Request logging (minimal, no body)
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const ms = Date.now() - start;
+    console.log(`${req.method} ${req.originalUrl} -> ${res.statusCode} ${ms}ms`);
+  });
+  next();
+});
 
 // ─────────────────────────────────────────────
 // COVENANT
@@ -399,9 +412,7 @@ app.post('/reintegrate', authenticate, async (req, res) => {
 
 // Three disclosures shown before a seeker record is created.
 const CONSENT_DISCLOSURES = [
-  'Your words during inquiry are stored to deliver your rite. They are not sold, shared, or used to train external models.',
-  'Anonymized rite outcomes (not your words) may be used to improve the Ouracle engine over time. You will always know this.',
-  'You may delete your account and all associated data at any time.',
+  'Property is theft. Ideas are free. Privacy is an illusion.',
 ];
 
 // Step 1: GET /consent — receive the disclosures before agreeing
@@ -411,7 +422,7 @@ app.get('/consent', (_req, res) => {
 
 // Step 2: POST /seeker/new — create seeker only after explicit consent
 app.post('/seeker/new', async (req, res) => {
-  const { device_id, email_hash, timezone, consented, consent_version = '1.0' } = req.body;
+  const { device_id, email_hash, timezone, name, consented, consent_version = '1.0' } = req.body;
 
   if (!consented) {
     return res.status(400).json({
@@ -421,9 +432,28 @@ app.post('/seeker/new', async (req, res) => {
     });
   }
 
-  const seeker = await createSeeker({ device_id, email_hash, timezone, consent_version });
+  const seeker = await createSeeker({ device_id, email_hash, timezone, consent_version, name, password_hash: null });
   const tokens = await issueTokenPair(seeker.id);
   return res.status(201).json({ seeker_id: seeker.id, ...tokens, created_at: seeker.created_at });
+});
+
+// POST /seeker/:id/password — set password once
+app.post('/seeker/:id/password', authenticate, async (req, res) => {
+  if (req.seeker_id !== req.params.id) {
+    return res.status(403).json({ error: 'Forbidden.' });
+  }
+  const { password } = req.body;
+  if (!password || String(password).trim().length === 0) {
+    return res.status(400).json({ error: 'password required.' });
+  }
+  const seeker = await getSeeker(req.params.id);
+  if (!seeker) return res.status(404).json({ error: 'Seeker not found.' });
+  if (seeker.password_hash) {
+    return res.status(409).json({ error: 'Password already set.' });
+  }
+  const password_hash = await hashPassword(String(password));
+  await updateSeekerPassword(req.params.id, password_hash);
+  return res.json({ seeker_id: req.params.id, password_set: true });
 });
 
 // ─────────────────────────────────────────────
@@ -467,10 +497,15 @@ app.patch('/admin/api-keys/:id', async (req, res) => {
 
 // POST /auth/token — issue tokens for an existing seeker (re-auth)
 app.post('/auth/token', async (req, res) => {
-  const { seeker_id } = req.body;
+  const { seeker_id, password } = req.body;
   if (!seeker_id) return res.status(400).json({ error: 'seeker_id required.' });
+  if (!password || String(password).trim().length === 0) {
+    return res.status(400).json({ error: 'password required.' });
+  }
   const seeker = await getSeeker(seeker_id);
   if (!seeker) return res.status(404).json({ error: 'Seeker not found.' });
+  const ok = await verifyPassword(String(password), seeker.password_hash);
+  if (!ok) return res.status(401).json({ error: 'Invalid credentials.' });
   const tokens = await issueTokenPair(seeker_id);
   return res.json(tokens);
 });

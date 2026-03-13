@@ -8,7 +8,9 @@ use chrono::Utc;
 pub enum ApiRequest {
     GetConsent { base_url: String },
     GetCovenant { base_url: String },
-    CreateSeeker { base_url: String, device_id: String, timezone: String },
+    GetSession { base_url: String, access_token: String, session_id: String },
+    CreateSeeker { base_url: String, device_id: String, timezone: String, name: String },
+    SetPassword { base_url: String, access_token: String, seeker_id: String, password: String },
     RecordCovenant { base_url: String, access_token: String, seeker_id: String },
     BeginInquiry { base_url: String, access_token: String },
     ContinueInquiry { base_url: String, access_token: String, session_id: String, response: String },
@@ -26,8 +28,10 @@ pub enum ApiResponse {
     CovenantText { version: String, text: Vec<String>, meta: ApiMeta },
     SeekerCreated { seeker_id: String, access_token: String, refresh_token: String, meta: ApiMeta },
     CovenantRecorded { covenant_at: String, meta: ApiMeta },
+    PasswordSet { meta: ApiMeta },
     InquiryQuestion { session_id: String, turn: u32, question: String, greeting: Option<String>, meta: ApiMeta },
     InquiryComplete { session_id: String, turn: u32, quality_sense: Option<String>, meta: ApiMeta },
+    Session { session_id: String, stage: Option<String>, turn: Option<u32>, priestess_lines: Vec<String>, meta: ApiMeta },
     Prescribed { rite: Rite, reintegration_window: Option<String>, meta: ApiMeta },
     Thread { items: Vec<ThreadItem>, meta: ApiMeta },
     SeekerDeleted { seeker_id: String, meta: ApiMeta },
@@ -170,7 +174,51 @@ pub fn execute(req: ApiRequest) -> ApiResponse {
                 },
             }
         }
-        ApiRequest::CreateSeeker { base_url, device_id, timezone } => {
+        ApiRequest::GetSession { base_url, access_token, session_id } => {
+            let started = Instant::now();
+            let endpoint = format!("/session/{session_id}");
+            let url = format!("{base_url}/session/{session_id}");
+            match client.get(url).bearer_auth(access_token).send() {
+                Ok(resp) => {
+                    let status = resp.status().as_u16();
+                    match resp.json::<Value>() {
+                        Ok(json) if status < 400 => {
+                            let meta = build_meta(endpoint, status, started.elapsed().as_millis(), None, Some(&json));
+                            let stage = json.get("stage").and_then(|v| v.as_str()).map(|v| v.to_string());
+                            let turn = json.get("turn").and_then(|v| v.as_u64()).map(|v| v as u32);
+                            let mut priestess_lines = Vec::new();
+                            if let Some(arr) = json.get("conversation").and_then(|v| v.as_array()) {
+                                for item in arr {
+                                    let role = item.get("role").and_then(|v| v.as_str()).unwrap_or("");
+                                    if role == "priestess" {
+                                        if let Some(text) = item.get("text").and_then(|v| v.as_str()) {
+                                            priestess_lines.push(text.to_string());
+                                        }
+                                    }
+                                }
+                            }
+                            ApiResponse::Session { session_id, stage, turn, priestess_lines, meta }
+                        }
+                        Ok(json) => {
+                            let msg = json.get("error").and_then(|v| v.as_str()).unwrap_or("Request failed.");
+                            ApiResponse::Error {
+                                message: msg.to_string(),
+                                meta: build_meta(endpoint, status, started.elapsed().as_millis(), None, Some(&json)),
+                            }
+                        }
+                        Err(err) => ApiResponse::Error {
+                            message: format!("Invalid JSON: {err}"),
+                            meta: build_meta(endpoint, status, started.elapsed().as_millis(), None, None),
+                        },
+                    }
+                }
+                Err(err) => ApiResponse::Error {
+                    message: err.to_string(),
+                    meta: build_meta(endpoint, 0, started.elapsed().as_millis(), None, None),
+                },
+            }
+        }
+        ApiRequest::CreateSeeker { base_url, device_id, timezone, name } => {
             let started = Instant::now();
             let endpoint = "/seeker/new".to_string();
             let url = format!("{base_url}/seeker/new");
@@ -178,6 +226,7 @@ pub fn execute(req: ApiRequest) -> ApiResponse {
                 "device_id": device_id,
                 "email_hash": null,
                 "timezone": timezone,
+                "name": name,
                 "consented": true,
                 "consent_version": "1.0"
             });
@@ -186,7 +235,7 @@ pub fn execute(req: ApiRequest) -> ApiResponse {
                     let status = resp.status().as_u16();
                     match resp.json::<Value>() {
                         Ok(json) if status < 400 => {
-                            let meta = build_meta(endpoint, status, started.elapsed().as_millis(), Some(&body), Some(&json));
+                            let meta = build_meta(endpoint, status, started.elapsed().as_millis(), None, Some(&json));
                             let seeker_id = json.get("seeker_id").and_then(|v| v.as_str()).unwrap_or("").to_string();
                             let access_token = json.get("access_token").and_then(|v| v.as_str()).unwrap_or("").to_string();
                             let refresh_token = json.get("refresh_token").and_then(|v| v.as_str()).unwrap_or("").to_string();
@@ -203,18 +252,49 @@ pub fn execute(req: ApiRequest) -> ApiResponse {
                             let msg = json.get("error").and_then(|v| v.as_str()).unwrap_or("Request failed.");
                             ApiResponse::Error {
                                 message: msg.to_string(),
-                                meta: build_meta(endpoint, status, started.elapsed().as_millis(), Some(&body), Some(&json)),
+                                meta: build_meta(endpoint, status, started.elapsed().as_millis(), None, Some(&json)),
                             }
                         }
                         Err(err) => ApiResponse::Error {
                             message: format!("Invalid JSON: {err}"),
-                            meta: build_meta(endpoint, status, started.elapsed().as_millis(), Some(&body), None),
+                            meta: build_meta(endpoint, status, started.elapsed().as_millis(), None, None),
                         },
                     }
                 }
                 Err(err) => ApiResponse::Error {
                     message: err.to_string(),
-                    meta: build_meta(endpoint, 0, started.elapsed().as_millis(), Some(&body), None),
+                    meta: build_meta(endpoint, 0, started.elapsed().as_millis(), None, None),
+                },
+            }
+        }
+        ApiRequest::SetPassword { base_url, access_token, seeker_id, password } => {
+            let started = Instant::now();
+            let endpoint = "/seeker/:id/password".to_string();
+            let url = format!("{base_url}/seeker/{seeker_id}/password");
+            let body = serde_json::json!({ "password": password });
+            match client.post(url).bearer_auth(access_token).json(&body).send() {
+                Ok(resp) => {
+                    let status = resp.status().as_u16();
+                    match resp.json::<Value>() {
+                        Ok(json) if status < 400 => ApiResponse::PasswordSet {
+                            meta: build_meta(endpoint, status, started.elapsed().as_millis(), None, Some(&json)),
+                        },
+                        Ok(json) => {
+                            let msg = json.get("error").and_then(|v| v.as_str()).unwrap_or("Request failed.");
+                            ApiResponse::Error {
+                                message: msg.to_string(),
+                                meta: build_meta(endpoint, status, started.elapsed().as_millis(), None, Some(&json)),
+                            }
+                        }
+                        Err(err) => ApiResponse::Error {
+                            message: format!("Invalid JSON: {err}"),
+                            meta: build_meta(endpoint, status, started.elapsed().as_millis(), None, None),
+                        },
+                    }
+                }
+                Err(err) => ApiResponse::Error {
+                    message: err.to_string(),
+                    meta: build_meta(endpoint, 0, started.elapsed().as_millis(), None, None),
                 },
             }
         }
