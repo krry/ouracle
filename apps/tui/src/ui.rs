@@ -9,7 +9,7 @@ use textwrap::wrap;
 use crate::app::App;
 use crate::theme::{text_accent, text_fade, text_primary, text_secondary};
 
-pub fn draw(frame: &mut Frame, app: &App) {
+pub fn draw(frame: &mut Frame, app: &mut App) {
     let size = frame.area();
 
     // Simple vertical layout: main area + input line at bottom
@@ -215,6 +215,8 @@ fn format_state(app: &App) -> String {
     lines.push(format!("session_id: {}", app.session_id.as_deref().unwrap_or("none")));
     lines.push(format!("access_token: {}", short_token(app.access_token.as_deref())));
     lines.push(format!("refresh_token: {}", short_token(app.refresh_token.as_deref())));
+    lines.push(format!("stt_recording: {}", app.stt_recording));
+    lines.push(format!("stt_error: {}", app.stt_error.as_deref().unwrap_or("none")));
     lines.join("\n")
 }
 

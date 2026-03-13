@@ -16,6 +16,17 @@ pub enum BreathPhase {
     Exhale,
 }
 
+/// Glyph palette used by the aura renderer.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AuraGlyphMode {
+    Braille,
+    Taz,
+    Math,
+    Mahjong,
+    Dominoes,
+    Cards,
+}
+
 /// An expanding ripple started when the Priestess speaks.
 #[derive(Debug, Clone)]
 pub struct Ripple {
@@ -36,10 +47,17 @@ pub struct Aura {
     breath_duration: f32,
     ripples: Vec<Ripple>,
     rng: StdRng,
+    glyph_mode: AuraGlyphMode,
+    braille_by_dots: [Vec<u8>; 9],
 }
 
 impl Aura {
     pub fn new() -> Self {
+        let mut braille_by_dots = std::array::from_fn(|_| Vec::new());
+        for pattern in 0u16..=255 {
+            let dots = (pattern as u8).count_ones() as usize;
+            braille_by_dots[dots].push(pattern as u8);
+        }
         Aura {
             frame: 0,
             time_s: 0.0,
@@ -48,7 +66,17 @@ impl Aura {
             breath_duration: 60.0 / 7.0,
             ripples: Vec::new(),
             rng: StdRng::from_entropy(),
+            glyph_mode: AuraGlyphMode::Braille,
+            braille_by_dots,
         }
+    }
+
+    pub fn set_glyph_mode(&mut self, mode: AuraGlyphMode) {
+        self.glyph_mode = mode;
+    }
+
+    pub fn glyph_mode(&self) -> AuraGlyphMode {
+        self.glyph_mode
     }
 
     /// Advance time and breath phase.
@@ -118,7 +146,7 @@ impl Aura {
     }
 
     /// Main render entry. `voice_intensity` is 0..1.
-    pub fn render(&self, frame: &mut Frame, area: Rect, voice_intensity: f32) {
+    pub fn render(&mut self, frame: &mut Frame, area: Rect, voice_intensity: f32) {
         let width = area.width as usize;
         let height = area.height as usize;
 
@@ -171,7 +199,7 @@ impl Aura {
                     if mist < 0.18 {
                         continue;
                     }
-                    let (ch, _) = Self::glyph_for_energy_stochastic(mist, noise);
+                    let (ch, _) = self.glyph_for_energy_stochastic(mist, noise);
                     let mut symbol_buf = [0u8; 4];
                     let symbol = ch.encode_utf8(&mut symbol_buf);
                     cell.set_symbol(symbol);
@@ -204,7 +232,7 @@ impl Aura {
                     continue;
                 }
 
-                let (ch, _tier) = Self::glyph_for_energy_stochastic(energy, noise);
+                let (ch, _tier) = self.glyph_for_energy_stochastic(energy, noise);
                 let Some(cell) = buf.cell_mut((x, y)) else {
                     continue;
                 };
@@ -259,39 +287,107 @@ impl Aura {
         (v as f32) / 65535.0
     }
 
-    fn glyph_for_energy_stochastic(e: f32, noise: f32) -> (char, u8) {
-        let n = (noise * 7.0).floor() as i32;
-        if e < 0.12 {
-            (' ', 0)
-        } else if e < 0.28 {
-            match n % 3 {
-                0 => ('⠁', 1),
-                1 => ('⠂', 1),
-                _ => ('⠄', 1),
+    fn glyph_for_energy_stochastic(&mut self, e: f32, _noise: f32) -> (char, u8) {
+        const ENERGY_FLOOR: f32 = 0.12;
+        const TIERS: usize = 4;
+
+        if e < ENERGY_FLOOR {
+            return (' ', 0);
+        }
+
+        let t = ((e - ENERGY_FLOOR) / (1.0 - ENERGY_FLOOR)).clamp(0.0, 1.0);
+        let tier = (t * TIERS as f32).floor().min((TIERS - 1) as f32) as usize;
+
+        match self.glyph_mode {
+            AuraGlyphMode::Braille => {
+                let t_skew = t.powf(2.2);
+                let mut dots = 1 + (t_skew * 7.999).floor() as u8;
+                // Bias toward lighter densities (0–2 dots).
+                let roll = self.rng.r#gen::<f32>();
+                if roll < 0.28 {
+                    dots = dots.saturating_sub(1);
+                }
+                if roll < 0.12 {
+                    dots = dots.saturating_sub(1);
+                }
+                if dots == 0 {
+                    return (' ', 0);
+                }
+                let list = &self.braille_by_dots[dots as usize];
+                let idx = self.rng.gen_range(0..list.len());
+                let pattern = list[idx];
+                (braille_char(pattern), dots)
             }
-        } else if e < 0.5 {
-            match n % 4 {
-                0 => ('⠆', 2),
-                1 => ('⠇', 2),
-                2 => ('⠒', 2),
-                _ => ('⠖', 2),
+            AuraGlyphMode::Taz => {
+                let ch = sample_tier(&mut self.rng, TAZ_TIERS[tier]);
+                (ch, (tier + 1) as u8)
             }
-        } else if e < 0.75 {
-            match n % 4 {
-                0 => ('⠦', 3),
-                1 => ('⠧', 3),
-                2 => ('⠶', 3),
-                _ => ('⠷', 3),
+            AuraGlyphMode::Math => {
+                let ch = sample_tier(&mut self.rng, MATH_TIERS[tier]);
+                (ch, (tier + 1) as u8)
             }
-        } else {
-            match n % 3 {
-                0 => ('⣿', 4),
-                1 => ('⣷', 4),
-                _ => ('⣯', 4),
+            AuraGlyphMode::Mahjong => {
+                let ch = sample_tier(&mut self.rng, MAHJONG_TIERS[tier]);
+                (ch, (tier + 1) as u8)
+            }
+            AuraGlyphMode::Dominoes => {
+                let ch = sample_tier(&mut self.rng, DOMINOES_TIERS[tier]);
+                (ch, (tier + 1) as u8)
+            }
+            AuraGlyphMode::Cards => {
+                let ch = sample_tier(&mut self.rng, CARDS_TIERS[tier]);
+                (ch, (tier + 1) as u8)
             }
         }
     }
 }
+
+fn braille_char(pattern: u8) -> char {
+    char::from_u32(0x2800 + pattern as u32).unwrap_or(' ')
+}
+
+fn sample_tier(rng: &mut StdRng, tier: &[char]) -> char {
+    if tier.is_empty() {
+        return ' ';
+    }
+    let idx = rng.gen_range(0..tier.len());
+    tier[idx]
+}
+
+const TAZ_TIERS: [&[char]; 4] = [
+    &['.', ',', ':', '\''],
+    &['!', '?', ';', '~', '^'],
+    &['@', '#', '$', '%', '&'],
+    &['*', '¶', '§', '†', '‽', '∅'],
+];
+
+const MATH_TIERS: [&[char]; 4] = [
+    &['+', '-', '=', '·', '×', '÷'],
+    &['±', '≈', '≠', '≤', '≥', '∝', '√'],
+    &['∑', '∏', '∫', '∂', '∞', '∇'],
+    &['∮', '∴', '∵', '∃', '∀', '∘', '⊕', '⊗'],
+];
+
+const MAHJONG_TIERS: [&[char]; 4] = [
+    &['🀇', '🀈', '🀉', '🀊', '🀋', '🀌', '🀍', '🀎', '🀏'],
+    &['🀐', '🀑', '🀒', '🀓', '🀔', '🀕', '🀖', '🀗', '🀘'],
+    &['🀀', '🀁', '🀂', '🀃', '🀄', '🀅', '🀆'],
+    &['🀙', '🀚', '🀛', '🀜', '🀝', '🀞', '🀟', '🀠', '🀡', '🀢', '🀣', '🀤', '🀥', '🀦', '🀧', '🀨', '🀩', '🀪', '🀫'],
+];
+
+const DOMINOES_TIERS: [&[char]; 4] = [
+    &['🀰', '🀱', '🀲', '🀳', '🀴', '🀵', '🀶', '🀷'],
+    &['🀸', '🀹', '🀺', '🀻', '🀼', '🀽', '🀾', '🀿'],
+    &['🁀', '🁁', '🁂', '🁃', '🁄', '🁅', '🁆', '🁇'],
+    &['🁈', '🁉', '🁊', '🁋', '🁌', '🁍', '🁎', '🁏'],
+];
+
+const CARDS_TIERS: [&[char]; 4] = [
+    &['🂡', '🂢', '🂣', '🂤', '🂥', '🂦', '🂧', '🂨', '🂩'],
+    &['🂱', '🂲', '🂳', '🂴', '🂵', '🂶', '🂷', '🂸', '🂹'],
+    &['🃁', '🃂', '🃃', '🃄', '🃅', '🃆', '🃇', '🃈', '🃉'],
+    &['🃑', '🃒', '🃓', '🃔', '🃕', '🃖', '🃗', '🃘', '🃙'],
+];
 
 fn hole_geometry(area: Rect) -> (f32, f32, f32, f32) {
     let target_half_w: f32 = 32.0;

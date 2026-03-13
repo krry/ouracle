@@ -72,7 +72,7 @@ fn app_loop(
     loop {
         let size = terminal.size()?;
         app.last_frame = Some(size.into());
-        terminal.draw(|frame| ui::draw(frame, &app))?;
+        terminal.draw(|frame| ui::draw(frame, &mut app))?;
 
         let timeout = tick_rate
             .checked_sub(last_tick.elapsed())
