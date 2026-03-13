@@ -21,6 +21,7 @@ mod app;
 mod ui;
 mod aura;
 mod api;
+mod theme;
 mod totem;
 
 use crate::app::App;
@@ -69,6 +70,8 @@ fn app_loop(
     let tick_rate = Duration::from_millis(100);
 
     loop {
+        let size = terminal.size()?;
+        app.last_frame = Some(size.into());
         terminal.draw(|frame| ui::draw(frame, &app))?;
 
         let timeout = tick_rate
@@ -94,6 +97,15 @@ fn app_loop(
                 execute!(terminal.backend_mut(), DisableMouseCapture)?;
             }
             app.mouse_capture_dirty = false;
+        }
+
+        if app.cursor_dirty {
+            if app.cursor_visible {
+                terminal.show_cursor()?;
+            } else {
+                terminal.hide_cursor()?;
+            }
+            app.cursor_dirty = false;
         }
 
         while let Ok(resp) = resp_rx.try_recv() {

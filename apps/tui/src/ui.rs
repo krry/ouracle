@@ -1,12 +1,13 @@
 use ratatui::{
     layout::{Constraint, Direction, Layout, Margin},
-    style::{Color, Style},
+    style::Style,
     widgets::{Block, Borders, Clear, Paragraph, Wrap},
     Frame,
 };
 use textwrap::wrap;
 
 use crate::app::App;
+use crate::theme::{text_accent, text_fade, text_primary, text_secondary};
 
 pub fn draw(frame: &mut Frame, app: &App) {
     let size = frame.area();
@@ -18,7 +19,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
         .constraints([
             Constraint::Length(3), // status
             Constraint::Min(3),    // history + ambient aura
-            Constraint::Length(3) // input box
+            Constraint::Length(3)  // input box
         ])
         .split(inner);
 
@@ -29,18 +30,12 @@ pub fn draw(frame: &mut Frame, app: &App) {
     // call ambient aura renderer to decorate main_area first
     app.aura.render(frame, size, app.voice_intensity);
 
-    // let inner = Rect {
-    //     x: size.x + 1,
-    //     y: size.y + 1,
-    //     width: size.width.saturating_sub(2),
-    //     height: size.height.saturating_sub(2),
-    // };
-
     if app.dev_mode {
         let status = format!("mode={:?} stage={} pending={}", app.mode, app.stage, app.pending);
         frame.render_widget(Clear, status_area);
         let status_widget = Paragraph::new(status)
             .block(Block::default().borders(Borders::ALL).title("Status"))
+            .style(Style::default().fg(text_primary()))
             .wrap(Wrap { trim: true });
         frame.render_widget(status_widget, status_area);
 
@@ -60,6 +55,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
         frame.render_widget(Clear, history_area);
         let history_widget = Paragraph::new(history)
             .block(Block::default().borders(Borders::ALL).title("Thread"))
+            .style(Style::default().fg(text_primary()))
             .wrap(Wrap { trim: false })
             .scroll((scroll, 0));
         frame.render_widget(history_widget, history_area);
@@ -75,6 +71,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
         frame.render_widget(Clear, state_area);
         let state_widget = Paragraph::new(state_text)
             .block(Block::default().borders(Borders::ALL).title("Dev State"))
+            .style(Style::default().fg(text_primary()))
             .wrap(Wrap { trim: true });
         frame.render_widget(state_widget, state_area);
 
@@ -83,6 +80,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
         frame.render_widget(Clear, meta_area);
         let meta_widget = Paragraph::new(meta_text)
             .block(Block::default().borders(Borders::ALL).title("Dev Meta"))
+            .style(Style::default().fg(text_primary()))
             .wrap(Wrap { trim: true });
         frame.render_widget(meta_widget, meta_area);
 
@@ -91,6 +89,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
         frame.render_widget(Clear, legend_area);
         let legend_widget = Paragraph::new(legend_text)
             .block(Block::default().borders(Borders::ALL).title("Legend"))
+            .style(Style::default().fg(text_primary()))
             .wrap(Wrap { trim: true });
         frame.render_widget(legend_widget, legend_area);
 
@@ -100,16 +99,17 @@ pub fn draw(frame: &mut Frame, app: &App) {
                 Block::default()
                     .borders(Borders::ALL)
                     .title("Seeker")
-                    .border_style(Style::default().fg(Color::Cyan)),
+                    .border_style(Style::default().fg(text_accent())),
             );
+        let input_widget = input_widget.style(Style::default().fg(text_primary()));
         frame.render_widget(input_widget, input_area);
 
         let x = input_area.x + 1 + app.input.len() as u16;
         let y = input_area.y + 1;
         frame.set_cursor_position((x, y));
     } else {
-        let max_width = 40u16.min(size.width.saturating_sub(2));
-        let max_height = 20u16.min(size.height.saturating_sub(2));
+        let max_width = 80u16.min(size.width.saturating_sub(2));
+        let max_height = 24u16.min(size.height.saturating_sub(2));
         let start_x = size.x + (size.width.saturating_sub(max_width)) / 2;
         let start_y = size.y + (size.height.saturating_sub(max_height)) / 2;
 
@@ -122,31 +122,65 @@ pub fn draw(frame: &mut Frame, app: &App) {
 
         let center_chunks = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Min(3), Constraint::Length(3)])
+            .constraints([Constraint::Length(12), Constraint::Length(1), Constraint::Length(11)])
             .split(center_area);
 
-        let history_area = center_chunks[0];
-        let input_area = center_chunks[1];
+        let priestess_area = center_chunks[0];
+        let seeker_area = center_chunks[2];
 
-        let wrap_width = history_area.width as usize;
-        let wrapped_lines = wrap_messages(&app.messages, wrap_width);
-        let history = wrapped_lines.join("\n");
-        let history_lines = wrapped_lines.len();
-        let visible_lines = history_area.height as usize;
-        let max_offset = history_lines.saturating_sub(visible_lines);
-        let scroll = max_offset.saturating_sub(app.history_offset.min(max_offset)) as u16;
-        let history_widget = Paragraph::new(history)
-            .wrap(Wrap { trim: false })
-            .scroll((scroll, 0));
-        frame.render_widget(history_widget, history_area);
+        let wrap_width = priestess_area.width as usize;
+        if app.priestess_transition_ms > 0.0 && !app.priestess_prev.is_empty() {
+            let progress = (app.priestess_transition_ms / app.priestess_transition_duration_ms).clamp(0.0, 1.0);
+            let shift = (progress * 6.0).round() as usize;
+            let faded = text_fade(1.0 - progress);
+            let prev_lines = wrap_messages(&[app.priestess_prev.clone()], wrap_width);
+            let shifted_prev = shift_left_lines(&prev_lines, shift);
+            draw_centered_lines_sparse(frame, priestess_area, &shifted_prev, faded, true);
+        }
 
-        let input_widget = Paragraph::new(app.input.as_str())
-            .style(Style::default().fg(Color::Cyan));
-        frame.render_widget(input_widget, input_area);
+        let priestess_line = if app.priestess_display.is_empty() {
+            String::new()
+        } else {
+            app.priestess_display.clone()
+        };
+        let wrapped_lines = wrap_messages(&[priestess_line], wrap_width);
+        draw_centered_lines_sparse(frame, priestess_area, &wrapped_lines, text_secondary(), true);
 
-        let x = input_area.x + app.input.len() as u16;
+        let seeker_chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([Constraint::Length(1), Constraint::Min(1)])
+            .split(seeker_area);
+        let input_area = seeker_chunks[0];
+        let submissions_area = seeker_chunks[1];
+
+        draw_centered_line_sparse(frame, input_area, &app.input, text_primary());
+
+        let submissions = if app.seeker_last_line.is_empty() {
+            Vec::new()
+        } else {
+            vec![app.seeker_last_line.clone()]
+        };
+        let submissions = suppress_faded_line(&submissions, &app.seeker_fade_line, app.seeker_fade_ms);
+        let fade_color = if app.seeker_fade_ms > 0.0 {
+            let progress = (app.seeker_fade_ms / app.seeker_fade_duration_ms).clamp(0.0, 1.0);
+            text_fade(1.0 - progress)
+        } else {
+            text_primary()
+        };
+        draw_centered_lines_sparse_with_first_color(
+            frame,
+            submissions_area,
+            &submissions,
+            text_primary(),
+            fade_color,
+        );
+
+        let input_len = app.input.chars().count();
+        let width = input_area.width as usize;
+        let pad = width.saturating_sub(input_len) / 2;
+        let x = input_area.x + pad as u16 + input_len as u16;
         let y = input_area.y;
-        frame.set_cursor_position((x, y));
+        draw_cursor_glyph(frame, x, y, text_accent());
     }
 }
 
@@ -160,6 +194,9 @@ fn format_meta(app: &App) -> String {
     lines.push(format!("endpoint: {}", meta.endpoint));
     lines.push(format!("status: {}", meta.status));
     lines.push(format!("duration_ms: {}", meta.duration_ms));
+    if let Some(err) = &app.tts_error {
+        lines.push(format!("tts_error: {}", err));
+    }
     lines.push("request:".to_string());
     lines.push(meta.request.clone().unwrap_or_else(|| "null".to_string()));
     lines.push("response:".to_string());
@@ -227,6 +264,145 @@ fn wrap_messages(messages: &[String], width: usize) -> Vec<String> {
                 }
             }
         }
+    }
+    out
+}
+
+fn shift_left_lines(lines: &[String], shift: usize) -> Vec<String> {
+    if shift == 0 {
+        return lines.to_vec();
+    }
+    lines
+        .iter()
+        .map(|line| {
+            let mut chars: Vec<char> = line.chars().collect();
+            if shift >= chars.len() {
+                return String::new();
+            }
+            chars.drain(0..shift);
+            chars.into_iter().collect()
+        })
+        .collect()
+}
+
+fn draw_centered_lines_sparse(
+    frame: &mut Frame,
+    area: ratatui::layout::Rect,
+    lines: &[String],
+    color: ratatui::style::Color,
+    bottom_align: bool,
+) {
+    let buf = frame.buffer_mut();
+    let height = area.height as usize;
+    let start_row = if bottom_align && lines.len() < height {
+        height - lines.len()
+    } else {
+        0
+    };
+
+    for (i, line) in lines.iter().enumerate() {
+        let row = start_row + i;
+        if row >= height {
+            break;
+        }
+        let len = line.chars().count();
+        let pad = (area.width as usize).saturating_sub(len) / 2;
+        let y = area.y + row as u16;
+        let mut x = area.x + pad as u16;
+        for ch in line.chars() {
+            if x >= area.x.saturating_add(area.width) {
+                break;
+            }
+            if let Some(cell) = buf.cell_mut((x, y)) {
+                let mut symbol_buf = [0u8; 4];
+                let symbol = ch.encode_utf8(&mut symbol_buf);
+                cell.set_symbol(symbol);
+                cell.set_style(Style::default().fg(color));
+            }
+            x += 1;
+        }
+    }
+}
+
+fn draw_centered_line_sparse(
+    frame: &mut Frame,
+    area: ratatui::layout::Rect,
+    line: &str,
+    color: ratatui::style::Color,
+) {
+    let buf = frame.buffer_mut();
+    let len = line.chars().count();
+    let pad = (area.width as usize).saturating_sub(len) / 2;
+    let y = area.y;
+    let mut x = area.x + pad as u16;
+    for ch in line.chars() {
+        if x >= area.x.saturating_add(area.width) {
+            break;
+        }
+        if let Some(cell) = buf.cell_mut((x, y)) {
+            let mut symbol_buf = [0u8; 4];
+            let symbol = ch.encode_utf8(&mut symbol_buf);
+            cell.set_symbol(symbol);
+            cell.set_style(Style::default().fg(color));
+        }
+        x += 1;
+    }
+}
+
+fn draw_cursor_glyph(frame: &mut Frame, x: u16, y: u16, color: ratatui::style::Color) {
+    let buf = frame.buffer_mut();
+    if let Some(cell) = buf.cell_mut((x, y)) {
+        cell.set_symbol("▌");
+        cell.set_style(Style::default().fg(color));
+    }
+}
+
+fn draw_centered_lines_sparse_with_first_color(
+    frame: &mut Frame,
+    area: ratatui::layout::Rect,
+    lines: &[String],
+    color: ratatui::style::Color,
+    first_color: ratatui::style::Color,
+) {
+    let buf = frame.buffer_mut();
+    let height = area.height as usize;
+
+    for (i, line) in lines.iter().enumerate() {
+        if i >= height {
+            break;
+        }
+        let len = line.chars().count();
+        let pad = (area.width as usize).saturating_sub(len) / 2;
+        let y = area.y + i as u16;
+        let mut x = area.x + pad as u16;
+        let line_color = if i == 0 { first_color } else { color };
+        for ch in line.chars() {
+            if x >= area.x.saturating_add(area.width) {
+                break;
+            }
+            if let Some(cell) = buf.cell_mut((x, y)) {
+                let mut symbol_buf = [0u8; 4];
+                let symbol = ch.encode_utf8(&mut symbol_buf);
+                cell.set_symbol(symbol);
+                cell.set_style(Style::default().fg(line_color));
+            }
+            x += 1;
+        }
+    }
+}
+
+fn suppress_faded_line(lines: &[String], faded: &str, fade_ms: f32) -> Vec<String> {
+    if faded.is_empty() || fade_ms > 0.0 {
+        return lines.to_vec();
+    }
+    let mut out = Vec::with_capacity(lines.len());
+    let mut removed = false;
+    for line in lines {
+        if !removed && line == faded {
+            removed = true;
+            continue;
+        }
+        out.push(line.clone());
     }
     out
 }
