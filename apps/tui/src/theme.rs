@@ -25,6 +25,10 @@ pub fn text_fade(t: f32) -> Color {
     hsl(hue_jing(), sat, light)
 }
 
+pub fn text_warning() -> Color {
+    hsl(12.0, 0.55, 0.62)
+}
+
 pub fn aura_color(energy: f32, noise: f32, shimmer: f32) -> Color {
     let t = (energy * 0.35 + noise * 0.45 + shimmer * 0.20).clamp(0.0, 1.0);
 
