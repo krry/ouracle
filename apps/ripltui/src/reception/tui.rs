@@ -179,12 +179,12 @@ fn handle_event(
                         terminal.draw(|f| draw(f, state))?;
 
                         match http::register_seeker(base_url, &name, &password) {
-                            Ok((creds, _handle)) => {
+                            Ok((creds, handle)) => {
                                 state.connecting = false;
                                 terminal.draw(|f| draw(f, state))?;
                                 let (version, lines) = http::fetch_covenant(base_url)?;
                                 let step = Step::Covenant {
-                                    name,
+                                    name: handle,
                                     password,
                                     version,
                                     lines,
@@ -236,8 +236,9 @@ fn handle_event(
                     return Ok(Outcome::Done(None));
                 }
                 KeyCode::Char('j') | KeyCode::Down => {
-                    if let Step::Covenant { offset, .. } = &mut state.step {
-                        *offset = offset.saturating_add(1);
+                    if let Step::Covenant { offset, lines, .. } = &mut state.step {
+                        let max = lines.len().saturating_sub(1);
+                        *offset = (*offset + 1).min(max);
                     }
                 }
                 KeyCode::Char('k') | KeyCode::Up => {
