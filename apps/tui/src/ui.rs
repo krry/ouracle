@@ -10,7 +10,7 @@ use textwrap::wrap;
 use crate::app::App;
 use crate::theme::{text_accent, text_fade, text_primary, text_secondary, text_warning};
 
-pub fn draw(frame: &mut Frame, app: &mut App, render_aura: bool) {
+pub fn draw(frame: &mut Frame, app: &mut App) {
     let size = frame.area();
 
     // Simple vertical layout: main area + input line at bottom
@@ -29,9 +29,7 @@ pub fn draw(frame: &mut Frame, app: &mut App, render_aura: bool) {
     let input_area = chunks[2];
 
     // call ambient aura renderer to decorate main_area first
-    if render_aura {
-        app.aura.render(frame, size, app.voice_intensity);
-    }
+    app.aura.render(frame, size, app.voice_intensity);
 
     if app.dev_mode {
         let status = format!("mode={:?} stage={} pending={}", app.mode, app.stage, app.pending);
