@@ -200,6 +200,9 @@ impl App {
     pub fn on_event(&mut self, event: &Event) -> (bool, Option<ApiRequest>) {
         match event {
             Event::Key(KeyEvent { code, modifiers, kind, .. }) => {
+                if self.handle_space_ptt(*code, *kind) {
+                    return (false, None);
+                }
                 if self.handle_ptt_event(*code, *modifiers, *kind) {
                     return (false, None);
                 }
@@ -300,6 +303,11 @@ impl App {
             self.root_hue_f32 = (self.root_hue_f32 + dt_s * 24.0) % 360.0;
             theme::set_root_hue(self.root_hue_f32.round() as u16);
         }
+        if self.stt_transcribe_rx.is_some() {
+            self.voice_target = 0.35;
+        } else if self.stt_recording {
+            self.voice_target = 0.0;
+        }
         let rate = 4.0;
         let factor = (dt_s * rate).clamp(0.0, 1.0);
         self.voice_intensity =
@@ -311,6 +319,35 @@ impl App {
                     self.stop_stt_recording();
                 }
             }
+        }
+
+        // Tick-based Space PTT release inference (for terminals without KeyRelease).
+        if self.ptt_space_down {
+            let elapsed_ms = self.ptt_space_last_repeat
+                .map(|t| t.elapsed().as_millis())
+                .unwrap_or(u128::MAX);
+            if elapsed_ms > 300 {
+                let was_active_ptt = self.stt_active_ptt;
+                let count = self.ptt_space_repeat_count;
+                self.clear_ptt_space_state();
+                if was_active_ptt {
+                    self.stop_stt_recording();
+                } else if count < 4 {
+                    self.input.push(' ');
+                }
+                // else: threshold reached but recording never started (error path) — discard
+            }
+        }
+
+        // Inward ripple launch cadence while recording.
+        if self.stt_recording {
+            self.stt_ripple_accum_ms += delta.as_secs_f32() * 1000.0;
+            if self.stt_ripple_accum_ms >= 500.0 {
+                self.stt_ripple_accum_ms -= 500.0;
+                self.aura.launch_inward_ripple();
+            }
+        } else {
+            self.stt_ripple_accum_ms = 0.0;
         }
 
         if let Some(rx) = &self.stt_transcribe_rx {
@@ -965,7 +1002,7 @@ impl App {
                     self.pending = true;
                 }
             }
-            ApiResponse::CovenantRecorded { covenant_at, meta } => {
+            ApiResponse::CovenantRecorded { covenant_at: _, meta } => {
                 self.last_meta = Some(meta);
                 self.mode = AppMode::Covenant;
                 self.stage = "covenanted".to_string();
@@ -1358,6 +1395,10 @@ impl App {
         self.stt_active_ptt = false;
     }
 
+    pub fn stt_transcribing(&self) -> bool {
+        self.stt_transcribe_rx.is_some()
+    }
+
     /// Returns true if the event was consumed by the Space PTT handler.
     /// Space PTT is disabled during structured text prompts (consent, name, password).
     pub fn handle_space_ptt(&mut self, code: KeyCode, kind: KeyEventKind) -> bool {
@@ -1719,10 +1760,6 @@ mod tests {
 
     fn make_space_press() -> (KeyCode, KeyEventKind) {
         (KeyCode::Char(' '), KeyEventKind::Press)
-    }
-
-    fn make_space_repeat() -> (KeyCode, KeyEventKind) {
-        (KeyCode::Char(' '), KeyEventKind::Repeat)
     }
 
     fn make_space_release() -> (KeyCode, KeyEventKind) {

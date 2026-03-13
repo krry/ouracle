@@ -1,13 +1,14 @@
 use ratatui::{
     layout::{Constraint, Direction, Layout, Margin},
     style::Style,
+    text::{Line, Span},
     widgets::{Block, Borders, Clear, Paragraph, Wrap},
     Frame,
 };
 use textwrap::wrap;
 
 use crate::app::App;
-use crate::theme::{text_accent, text_fade, text_primary, text_secondary};
+use crate::theme::{text_accent, text_fade, text_primary, text_secondary, text_warning};
 
 pub fn draw(frame: &mut Frame, app: &mut App, render_aura: bool) {
     let size = frame.area();
@@ -96,7 +97,7 @@ pub fn draw(frame: &mut Frame, app: &mut App, render_aura: bool) {
         frame.render_widget(legend_widget, legend_area);
 
         frame.render_widget(Clear, input_area);
-        let input_widget = Paragraph::new(app.input.as_str())
+        let input_widget = Paragraph::new(input_line(app))
             .block(
                 Block::default()
                     .borders(Borders::ALL)
@@ -155,7 +156,7 @@ pub fn draw(frame: &mut Frame, app: &mut App, render_aura: bool) {
         let input_area = seeker_chunks[0];
         let submissions_area = seeker_chunks[1];
 
-        draw_centered_line_sparse(frame, input_area, &app.input, text_primary());
+        draw_centered_line_with_suffix(frame, input_area, &app.input, text_primary(), stt_status_tag(app));
 
         let submissions = if app.seeker_last_line.is_empty() {
             Vec::new()
@@ -328,17 +329,23 @@ fn draw_centered_lines_sparse(
     }
 }
 
-fn draw_centered_line_sparse(
+fn draw_centered_line_with_suffix(
     frame: &mut Frame,
     area: ratatui::layout::Rect,
     line: &str,
     color: ratatui::style::Color,
+    suffix: Option<(String, ratatui::style::Color)>,
 ) {
-    let buf = frame.buffer_mut();
-    let len = line.chars().count();
-    let pad = (area.width as usize).saturating_sub(len) / 2;
+    let suffix_text = suffix
+        .as_ref()
+        .map(|(text, _)| format!(" {}", text))
+        .unwrap_or_default();
+    let full_len = line.chars().count() + suffix_text.chars().count();
+    let pad = (area.width as usize).saturating_sub(full_len) / 2;
     let y = area.y;
     let mut x = area.x + pad as u16;
+    let buf = frame.buffer_mut();
+
     for ch in line.chars() {
         if x >= area.x.saturating_add(area.width) {
             break;
@@ -350,6 +357,21 @@ fn draw_centered_line_sparse(
             cell.set_style(Style::default().fg(color));
         }
         x += 1;
+    }
+
+    if let Some((_, suffix_color)) = suffix {
+        for ch in suffix_text.chars() {
+            if x >= area.x.saturating_add(area.width) {
+                break;
+            }
+            if let Some(cell) = buf.cell_mut((x, y)) {
+                let mut symbol_buf = [0u8; 4];
+                let symbol = ch.encode_utf8(&mut symbol_buf);
+                cell.set_symbol(symbol);
+                cell.set_style(Style::default().fg(suffix_color));
+            }
+            x += 1;
+        }
     }
 }
 
@@ -409,6 +431,31 @@ fn suppress_faded_line(lines: &[String], faded: &str, fade_ms: f32) -> Vec<Strin
         out.push(line.clone());
     }
     out
+}
+
+fn stt_status_tag(app: &App) -> Option<(String, ratatui::style::Color)> {
+    if app.stt_error.is_some() {
+        return Some(("[ stt error ]".to_string(), text_warning()));
+    }
+    if app.stt_recording {
+        return Some(("[ ● rec ]".to_string(), text_accent()));
+    }
+    if app.stt_transcribing() {
+        return Some(("[ … ]".to_string(), text_fade(0.7)));
+    }
+    None
+}
+
+fn input_line(app: &App) -> Line<'static> {
+    let mut spans = Vec::new();
+    spans.push(Span::styled(
+        app.input.clone(),
+        Style::default().fg(text_primary()),
+    ));
+    if let Some((text, color)) = stt_status_tag(app) {
+        spans.push(Span::styled(format!(" {}", text), Style::default().fg(color)));
+    }
+    Line::from(spans)
 }
 
 // center clearing now handled by aura's torus math
