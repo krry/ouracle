@@ -616,6 +616,219 @@ app.post('/:domain/:verb', authenticate, async (req, res) => {
   });
 });
 
+// ─────────────────────────────────────────────
+// CHAT — unified SSE streaming endpoint for RIPL
+// POST /chat
+// ─────────────────────────────────────────────
+
+// Stream text word-by-word with ~25ms spacing.
+async function streamText(emit, text) {
+  const chunks = text.split(/(\s+)/);
+  for (const chunk of chunks) {
+    if (chunk) {
+      emit({ type: 'token', token: chunk });
+      await new Promise((r) => setTimeout(r, 22));
+    }
+  }
+}
+
+app.post('/chat', authenticate, async (req, res) => {
+  const { session_id, message } = req.body || {};
+  const seeker_id = req.seeker_id;
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+  });
+
+  const emit = (obj) => res.write(`data: ${JSON.stringify(obj)}\n\n`);
+  const finish = (stage, extra = {}) => {
+    emit({ type: 'complete', stage, ...extra });
+    res.end();
+  };
+  const fail = (message) => {
+    emit({ type: 'error', message });
+    res.end();
+  };
+
+  try {
+    const seeker = await getSeeker(seeker_id);
+    if (!seeker) return fail('Seeker not found.');
+
+    // ── New session ──────────────────────────────
+    if (!session_id) {
+      if (!seeker.consented_at) return fail('Consent not recorded.');
+      if (!seeker.covenant_at) {
+        await recordCovenant(seeker_id, COVENANT.version);
+      }
+
+      const sessionCount = await getSeekerSessionCount(seeker_id);
+      const lastSession = await getSeekerLatestSession(seeker_id);
+      const lastQuestion = Array.isArray(lastSession?.conversation)
+        ? lastSession.conversation.find((e) => e?.role === 'priestess')?.text
+        : null;
+      const lastAt = lastSession?.completed_at || lastSession?.created_at;
+      const daysSinceLast = lastAt
+        ? Math.floor((Date.now() - new Date(lastAt).getTime()) / (1000 * 60 * 60 * 24))
+        : null;
+
+      const covenantPayload = {
+        version: COVENANT.version,
+        accepted: true,
+        timestamp: new Date().toISOString(),
+      };
+      const session = await createSession(seeker_id, covenantPayload);
+      const question = chooseOpeningQuestion({
+        session_count: sessionCount,
+        last_question: lastQuestion,
+        last_quality: lastSession?.quality ?? null,
+        last_rite_name: lastSession?.rite_name ?? null,
+        days_since_last: daysSinceLast,
+      });
+      const nowIso = new Date().toISOString();
+      const lastAct = lastSession?.rite_json?.act;
+      const returningGreeting = lastAct
+        ? `You were going to ${lastAct.replace(/\.$/, '')}.`
+        : lastSession?.rite_name
+          ? `You were working with ${lastSession.rite_name}.`
+          : null;
+      const greeting = daysSinceLast !== null && daysSinceLast >= 90
+        ? "Three months. What's been happening?"
+        : returningGreeting;
+
+      const conversation = [
+        ...(greeting ? [{ role: 'priestess', text: greeting, at: nowIso }] : []),
+        { role: 'priestess', text: question, at: nowIso },
+      ];
+      await updateSession(session.id, { stage: 'inquiry', turn: 0, conversation });
+
+      emit({ type: 'session', session_id: session.id, stage: 'inquiry' });
+      if (greeting) {
+        await streamText(emit, greeting);
+        emit({ type: 'break' });
+      }
+      await streamText(emit, question);
+      return finish('inquiry', { session_id: session.id });
+    }
+
+    // ── Continue existing session ─────────────────
+    const session = await getSession(session_id);
+    if (!session) return fail('Session not found.');
+
+    const stage = session.stage;
+
+    if (stage === 'inquiry') {
+      if (!message) return fail('message required during inquiry.');
+
+      const newText = `${session.full_text || ''} ${message}`.trim();
+      const newTurn = (session.turn || 0) + 1;
+      const conversation = Array.isArray(session.conversation) ? [...session.conversation] : [];
+      conversation.push({ role: 'seeker', text: message, at: new Date().toISOString() });
+
+      const { vagal, belief, quality } = await infer(newText);
+      const threshold = vagal.confidence === 'high' || (vagal.confidence === 'medium' && belief.confidence !== 'low');
+
+      if (threshold || newTurn >= 3) {
+        await updateSession(session_id, {
+          stage: 'inquiry_complete',
+          turn: newTurn,
+          full_text: newText,
+          conversation,
+          vagal_probable: vagal.probable,
+          vagal_confidence: vagal.confidence,
+          belief_pattern: belief.pattern,
+          belief_confidence: belief.confidence,
+          quality: quality.quality,
+          quality_confidence: quality.confidence,
+          quality_is_shock: quality.is_shock,
+        });
+
+        // Auto-prescribe when inquiry is complete.
+        const belief2 = { pattern: session.belief_pattern || belief.pattern, confidence: belief.confidence, meta: BELIEFS[belief.pattern] };
+        const quality2 = { quality: quality.quality, confidence: quality.confidence, is_shock: quality.is_shock };
+        const prescription = buildPrescription(vagal.probable, belief2, quality2);
+        const divination = drawDivinationSource(null, quality2.quality);
+        const history = await getSeekerHistory(seeker_id, 1);
+        const lastRite = history?.[0]?.rite_name || null;
+        if (lastRite && prescription.rite?.rite_name === lastRite) {
+          prescription.rite = variantRite(prescription.rite);
+        }
+        const ritePayload = divination ? { ...prescription.rite, divination } : prescription.rite;
+        await updateSession(session_id, {
+          stage: 'prescribed',
+          rite_name: prescription.rite?.rite_name,
+          rite_json: ritePayload,
+          love_fear_audit: prescription.love_fear_audit,
+          prescribed_at: new Date().toISOString(),
+        });
+
+        // Stream the rite.
+        const riteText = [
+          ritePayload.rite_name,
+          ritePayload.act,
+          ritePayload.invocation,
+          ...(ritePayload.textures || []),
+        ].filter(Boolean).join('  ·  ');
+        if (quality.seeker_language) {
+          await streamText(emit, quality.seeker_language);
+          emit({ type: 'break' });
+        }
+        await streamText(emit, riteText);
+        return finish('prescribed', { session_id, rite_name: prescription.rite?.rite_name });
+      }
+
+      const clarifiers = [
+        'Where do you feel that in your body right now?',
+        'How long have you been carrying this?',
+        "What would happen if you didn't do anything about it?",
+        'Who else is in this with you, even invisibly?',
+      ];
+      const nextQ = clarifiers[newTurn - 1] || 'What else wants to be said?';
+      conversation.push({ role: 'priestess', text: nextQ, at: new Date().toISOString() });
+      await updateSession(session_id, { turn: newTurn, full_text: newText, conversation });
+
+      await streamText(emit, nextQ);
+      return finish('inquiry', { session_id, turn: newTurn });
+    }
+
+    if (stage === 'prescribed') {
+      // Seeker is reporting reintegration. Any message counts as enacted = true.
+      const enacted = !!message;
+      await updateSession(session_id, {
+        stage: 'complete',
+        enacted,
+        report: { enacted, notes: message || '' },
+        completed_at: new Date().toISOString(),
+      });
+      await writeToCorpus({
+        belief_pattern: session.belief_pattern,
+        vagal_state: session.vagal_probable,
+        quality: session.quality,
+        quality_is_shock: session.quality_is_shock,
+        rite_name: session.rite_name,
+        enacted,
+      });
+
+      const witness = enacted
+        ? 'You enacted the rite. Whatever arose — that was the rite working.'
+        : 'You held the rite without enacting it. That resistance is itself information.';
+      await streamText(emit, witness);
+      return finish('complete', { session_id });
+    }
+
+    if (stage === 'complete' || stage === 'inquiry_complete') {
+      return fail(`Session is in stage '${stage}'. Start a new session.`);
+    }
+
+    return fail(`Unexpected session stage: ${stage}.`);
+
+  } catch (err) {
+    console.error('/chat error:', err);
+    fail(err?.message || 'Internal error.');
+  }
+});
+
 app.get('/health', (_req, res) => res.json({ status: 'alive', version: '0.2.0' }));
 
 const PORT = process.env.PORT || 3737;
