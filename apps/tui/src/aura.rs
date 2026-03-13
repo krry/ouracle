@@ -36,6 +36,14 @@ pub struct Ripple {
     pub strength: f32,
     pub center: Option<(f32, f32)>,
     pub start_radius: f32,
+    pub direction: RippleDir,
+}
+
+/// Direction of a ripple — outward from center or inward toward it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RippleDir {
+    Outward,
+    Inward,
 }
 
 /// Aura state: breathing field + ripples + RNG for puffs.
@@ -45,7 +53,7 @@ pub struct Aura {
     phase: BreathPhase,
     breath_t: f32,
     breath_duration: f32,
-    ripples: Vec<Ripple>,
+    pub ripples: Vec<Ripple>,
     rng: StdRng,
     glyph_mode: AuraGlyphMode,
     braille_by_dots: [Vec<u8>; 9],
@@ -113,6 +121,7 @@ impl Aura {
                 strength,
                 center: None,
                 start_radius: 1.0,
+                direction: RippleDir::Outward,
             });
         }
     }
@@ -141,8 +150,24 @@ impl Aura {
                 strength,
                 center: Some((nx, ny)),
                 start_radius: 0.0,
+                direction: RippleDir::Outward,
             });
         }
+    }
+
+    /// Launch an inward-contracting ripple — used during STT recording to
+    /// signal "listening / gathering". Enters the visible ring band ~1s after
+    /// launch and reaches the hole edge at ~2.4s.
+    pub fn launch_inward_ripple(&mut self) {
+        self.ripples.push(Ripple {
+            t0: self.time_s,
+            speed: 0.25,
+            width: 0.12,
+            strength: 0.4,
+            center: None,
+            start_radius: 1.6,
+            direction: RippleDir::Inward,
+        });
     }
 
     /// Main render entry. `voice_intensity` is 0..1.
@@ -259,7 +284,10 @@ impl Aura {
                 continue;
             }
             let wobble = (shimmer - 0.5) * 0.08 + (noise - 0.5) * 0.06;
-            let center_r = ripple.start_radius + ripple.speed * age * (1.0 + wobble);
+            let center_r = match ripple.direction {
+                RippleDir::Outward => ripple.start_radius + ripple.speed * age * (1.0 + wobble),
+                RippleDir::Inward => (ripple.start_radius - ripple.speed * age).max(0.0),
+            };
             let dist = if let Some((cx, cy)) = ripple.center {
                 let dx = nx - cx;
                 let dy = ny - cy;
@@ -444,5 +472,42 @@ mod tests {
         assert_eq!(sample_tier(0.999, tier), tier[idx]);
         // never panics with empty tier
         assert_eq!(sample_tier(0.5, &[]), ' ');
+    }
+
+    #[test]
+    fn inward_ripple_energy_at_center_r() {
+        let mut aura = Aura::new();
+        // Launch at time_s=0. Advance 400ms → center_r = 1.6 - 0.25*0.4 = 1.5.
+        aura.launch_inward_ripple();
+        aura.tick(std::time::Duration::from_millis(400));
+        // At r=1.5, dr=0, ring_env=1, energy ≈ strength*1*time_env ≈ 0.4.
+        let energy = aura.ripple_energy(1.5, 0.0, 0.0, 0.5, 0.5);
+        assert!(energy > 0.3, "expected energy > 0.3 at center of inward ripple, got {energy}");
+    }
+
+    #[test]
+    fn inward_ripple_zero_after_contraction() {
+        let mut aura = Aura::new();
+        aura.launch_inward_ripple();
+        // Advance 7s: center_r = (1.6 - 0.25*7).max(0) = 0.
+        // At r=1.5, dr=1.5 >> width=0.12 → ring_env=0 → energy=0.
+        aura.tick(std::time::Duration::from_secs(7));
+        let energy = aura.ripple_energy(1.5, 0.0, 0.0, 0.5, 0.5);
+        assert!(energy < 0.001, "expected ~0 after inward ripple contracts, got {energy}");
+    }
+
+    #[test]
+    fn outward_ripples_all_have_outward_direction() {
+        let mut aura = Aura::new();
+        aura.launch_ripples(0.7, 1.0);
+        assert!(!aura.ripples.is_empty());
+        for r in &aura.ripples {
+            assert_eq!(r.direction, RippleDir::Outward);
+        }
+        let area = ratatui::layout::Rect { x: 0, y: 0, width: 120, height: 40 };
+        aura.launch_ripple_at(0, 0, area, 1.0); // click outside hole
+        for r in &aura.ripples {
+            assert_eq!(r.direction, RippleDir::Outward);
+        }
     }
 }
