@@ -108,6 +108,11 @@ pub struct App {
     stt_recorder: Option<Child>,
     stt_record_path: Option<PathBuf>,
     stt_transcribe_rx: Option<Receiver<Result<String, String>>>,
+    pub ptt_space_down: bool,
+    pub ptt_space_repeat_count: u32,
+    pub ptt_space_last_repeat: Option<Instant>,
+    pub stt_active_ptt: bool,
+    pub stt_ripple_accum_ms: f32,
 }
 
 impl App {
@@ -181,6 +186,11 @@ impl App {
             stt_recorder: None,
             stt_record_path: None,
             stt_transcribe_rx: None,
+            ptt_space_down: false,
+            ptt_space_repeat_count: 0,
+            ptt_space_last_repeat: None,
+            stt_active_ptt: false,
+            stt_ripple_accum_ms: 0.0,
         };
         app.start_priestess_line("Welcome, traveler...\n\nHow are you arriving?".to_string());
         app
@@ -1340,6 +1350,69 @@ impl App {
         }
         pace_to_char_ms(self.pace)
     }
+
+    fn clear_ptt_space_state(&mut self) {
+        self.ptt_space_down = false;
+        self.ptt_space_repeat_count = 0;
+        self.ptt_space_last_repeat = None;
+        self.stt_active_ptt = false;
+    }
+
+    /// Returns true if the event was consumed by the Space PTT handler.
+    /// Space PTT is disabled during structured text prompts (consent, name, password).
+    pub fn handle_space_ptt(&mut self, code: KeyCode, kind: KeyEventKind) -> bool {
+        if code != KeyCode::Char(' ') {
+            return false;
+        }
+        if self.awaiting_consent || self.awaiting_name || self.awaiting_password {
+            return false;
+        }
+        match kind {
+            KeyEventKind::Press => {
+                self.ptt_space_down = true;
+                self.ptt_space_repeat_count = 0;
+                self.ptt_space_last_repeat = Some(Instant::now());
+                true
+            }
+            KeyEventKind::Repeat => {
+                if !self.ptt_space_down {
+                    return false;
+                }
+                let elapsed_ms = self.ptt_space_last_repeat
+                    .map(|t| t.elapsed().as_millis())
+                    .unwrap_or(u128::MAX);
+                if elapsed_ms >= 150 {
+                    // Gap too large — disarm, let the char fall through next press.
+                    self.ptt_space_down = false;
+                    self.ptt_space_repeat_count = 0;
+                    self.ptt_space_last_repeat = None;
+                    return false;
+                }
+                self.ptt_space_last_repeat = Some(Instant::now());
+                self.ptt_space_repeat_count += 1;
+                if self.ptt_space_repeat_count >= 4 && !self.stt_recording {
+                    self.start_stt_recording();
+                    self.stt_active_ptt = true;
+                }
+                true
+            }
+            KeyEventKind::Release => {
+                if !self.ptt_space_down {
+                    return false;
+                }
+                let was_active_ptt = self.stt_active_ptt;
+                let count = self.ptt_space_repeat_count;
+                self.clear_ptt_space_state();
+                if was_active_ptt {
+                    self.stop_stt_recording();
+                } else if count < 4 {
+                    self.input.push(' ');
+                }
+                // count >= 4 but stt_recording was already true (started by F9 etc.): no-op
+                true
+            }
+        }
+    }
 }
 
 fn normalize_priestess_line(msg: &str) -> Option<String> {
@@ -1637,4 +1710,49 @@ fn afinfo_duration_seconds(path: &std::path::Path) -> Option<f32> {
         }
     }
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crossterm::event::KeyEventKind;
+
+    fn make_space_press() -> (KeyCode, KeyEventKind) {
+        (KeyCode::Char(' '), KeyEventKind::Press)
+    }
+
+    fn make_space_repeat() -> (KeyCode, KeyEventKind) {
+        (KeyCode::Char(' '), KeyEventKind::Repeat)
+    }
+
+    fn make_space_release() -> (KeyCode, KeyEventKind) {
+        (KeyCode::Char(' '), KeyEventKind::Release)
+    }
+
+    #[test]
+    fn space_tap_inserts_space() {
+        let mut app = App::new();
+        let (code, kind) = make_space_press();
+        assert!(app.handle_space_ptt(code, kind)); // consumed
+        let (code, kind) = make_space_release();
+        assert!(app.handle_space_ptt(code, kind)); // consumed
+        assert_eq!(app.input, " ");
+        assert!(!app.stt_recording);
+    }
+
+    #[test]
+    fn space_ptt_disabled_during_consent() {
+        let mut app = App::new();
+        app.awaiting_consent = true;
+        let (code, kind) = make_space_press();
+        assert!(!app.handle_space_ptt(code, kind)); // not consumed
+    }
+
+    #[test]
+    fn space_ptt_disabled_during_name_prompt() {
+        let mut app = App::new();
+        app.awaiting_name = true;
+        let (code, kind) = make_space_press();
+        assert!(!app.handle_space_ptt(code, kind));
+    }
 }
