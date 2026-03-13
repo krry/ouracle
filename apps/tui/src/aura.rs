@@ -3,9 +3,11 @@ use std::time::Duration;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use ratatui::{
     layout::Rect,
-    style::{Color, Style},
+    style::Style,
     Frame,
 };
+
+use crate::theme::aura_color;
 
 /// Slow breathing phase of the aura.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -21,6 +23,8 @@ pub struct Ripple {
     pub speed: f32,
     pub width: f32,
     pub strength: f32,
+    pub center: Option<(f32, f32)>,
+    pub start_radius: f32,
 }
 
 /// Aura state: breathing field + ripples + RNG for puffs.
@@ -67,18 +71,48 @@ impl Aura {
     }
 
     /// Launch one or more ripples when the Priestess begins speaking.
-    pub fn launch_ripples(&mut self, base_strength: f32) {
+    pub fn launch_ripples(&mut self, base_strength: f32, pace: f32) {
         let now = self.time_s;
         for i in 0..3 {
             let jitter = (i as f32) * 0.1;
             let strength = (base_strength * (0.8 + 0.4 * self.rng.r#gen::<f32>())).clamp(0.0, 1.0);
-            let speed = 0.2 + 0.1 * self.rng.r#gen::<f32>();
+            let speed = (0.35 + 0.2 * self.rng.r#gen::<f32>()) * pace.clamp(0.6, 2.4);
             let width = 0.1 + 0.05 * self.rng.r#gen::<f32>();
             self.ripples.push(Ripple {
                 t0: now + jitter,
                 speed,
                 width,
                 strength,
+                center: None,
+                start_radius: 1.0,
+            });
+        }
+    }
+
+    /// Launch a ripple centered at a mouse click, outside the hole.
+    pub fn launch_ripple_at(&mut self, x: u16, y: u16, area: Rect, pace: f32) {
+        let (hx, hy, cx, cy) = hole_geometry(area);
+        let dx = x as f32 - cx;
+        let dy = y as f32 - cy;
+        let nx = dx / hx;
+        let ny = dy / hy;
+        let e = (nx * nx + ny * ny).sqrt();
+        if e < 1.0 {
+            return;
+        }
+
+        for i in 0..3 {
+            let jitter = (i as f32) * 0.06;
+            let strength = 0.75 + 0.25 * self.rng.r#gen::<f32>();
+            let speed = (0.55 + 0.35 * self.rng.r#gen::<f32>()) * pace.clamp(0.6, 2.4);
+            let width = 0.10 + 0.06 * self.rng.r#gen::<f32>();
+            self.ripples.push(Ripple {
+                t0: self.time_s + jitter,
+                speed,
+                width,
+                strength,
+                center: Some((nx, ny)),
+                start_radius: 0.0,
             });
         }
     }
@@ -98,7 +132,6 @@ impl Aura {
         let cy = area.y as f32 + (area.height as f32 / 2.0);
         let max_dist = ((area.width as f32).hypot(area.height as f32)) / 2.0;
 
-        let style = Style::default().fg(Color::Rgb(90, 150, 220));
         let buf = frame.buffer_mut();
 
         for row in 0..height {
@@ -109,32 +142,41 @@ impl Aura {
                 let dx = x as f32 - cx;
                 let dy = y as f32 - cy;
                 let dist = (dx * dx + dy * dy).sqrt();
-                let r = (dist / max_dist).clamp(0.0, 1.0);
+                let _r = (dist / max_dist).clamp(0.0, 1.0);
 
-                let inner_radius: f32 = 0.30;
-                let ring_width: f32 = 0.20;
-                let ring_start = inner_radius;
-                let ring_end = (inner_radius + ring_width).min(0.95_f32);
+                // Match hole size to the 80x24 conversation block.
+                let (hx, hy, _, _) = hole_geometry(area);
 
-                let nx = dx / (area.width as f32 / 2.0);
-                let ny = dy / (area.height as f32 / 2.0);
-                let e = (nx * nx + ny * ny).sqrt().clamp(0.0, 1.0);
+                let nx = dx / hx;
+                let ny = dy / hy;
+                let e = (nx * nx + ny * ny).sqrt();
+
+                let ring_start: f32 = 1.0;
+                let ring_width: f32 = 0.35;
+                let ring_end = ring_start + ring_width;
 
                 let noise = self.noise3(col as u32, row as u32, self.frame / 2) * 0.06;
+                let shimmer = self.noise3(col as u32, row as u32, self.frame / 5);
 
                 if e < ring_start {
-                    let mist = (noise + breath_env * 0.05).clamp(0.0, 1.0);
-                    if mist < 0.12 {
-                        continue;
-                    }
-                    let (ch, _) = Self::glyph_for_energy_stochastic(mist, noise);
                     let Some(cell) = buf.cell_mut((x, y)) else {
                         continue;
                     };
+                    // Clear the hole every frame to avoid residual artifacts.
+                    cell.set_symbol(" ");
+                    cell.set_style(Style::default());
+
+                    // Very light mist in the hole.
+                    let mist = (noise * 0.7 + breath_env * 0.03 + (shimmer - 0.5) * 0.05).clamp(0.0, 1.0);
+                    if mist < 0.18 {
+                        continue;
+                    }
+                    let (ch, _) = Self::glyph_for_energy_stochastic(mist, noise);
                     let mut symbol_buf = [0u8; 4];
                     let symbol = ch.encode_utf8(&mut symbol_buf);
                     cell.set_symbol(symbol);
-                    cell.set_style(style);
+                    let color = aura_color(mist, noise, shimmer);
+                    cell.set_style(Style::default().fg(color));
                     continue;
                 }
 
@@ -146,9 +188,10 @@ impl Aura {
                     BreathPhase::Exhale => breath_env * ring_t,
                 };
 
-                let ripple_energy = self.ripple_energy(r);
+                let ripple_energy = self.ripple_energy(e, nx, ny, shimmer, noise);
 
-                let mut energy = (base_energy * 0.55 + ripple_energy * 0.85 + noise + 0.05) * ring_env;
+                let ripple_mod = 0.45 + 0.35 * shimmer;
+                let mut energy = (base_energy * 0.55 + ripple_energy * ripple_mod + noise + 0.05) * ring_env;
                 energy *= 0.55 + 0.35 * voice_intensity;
                 let mut energy = energy.clamp(0.0, 1.0);
 
@@ -156,18 +199,20 @@ impl Aura {
                 energy = (energy + jitter).clamp(0.0, 1.0);
 
                 let blank_gate = self.noise3(col as u32, row as u32, self.frame / 4);
-                if blank_gate < 0.32 && energy < 0.55 {
+                let blank_thresh = if ripple_energy > 0.04 { 0.46 } else { 0.36 };
+                if blank_gate < blank_thresh && energy < 0.7 {
                     continue;
                 }
 
-                let (ch, _) = Self::glyph_for_energy_stochastic(energy, noise);
+                let (ch, _tier) = Self::glyph_for_energy_stochastic(energy, noise);
                 let Some(cell) = buf.cell_mut((x, y)) else {
                     continue;
                 };
                 let mut symbol_buf = [0u8; 4];
                 let symbol = ch.encode_utf8(&mut symbol_buf);
                 cell.set_symbol(symbol);
-                cell.set_style(style);
+                let color = aura_color(energy, noise, shimmer);
+                cell.set_style(Style::default().fg(color));
             }
         }
     }
@@ -180,15 +225,23 @@ impl Aura {
         }
     }
 
-    fn ripple_energy(&self, r: f32) -> f32 {
+    fn ripple_energy(&self, r: f32, nx: f32, ny: f32, shimmer: f32, noise: f32) -> f32 {
         let mut acc = 0.0;
         for ripple in &self.ripples {
             let age = self.time_s - ripple.t0;
             if age < 0.0 {
                 continue;
             }
-            let center_r = ripple.speed * age;
-            let dr = (r - center_r).abs();
+            let wobble = (shimmer - 0.5) * 0.08 + (noise - 0.5) * 0.06;
+            let center_r = ripple.start_radius + ripple.speed * age * (1.0 + wobble);
+            let dist = if let Some((cx, cy)) = ripple.center {
+                let dx = nx - cx;
+                let dy = ny - cy;
+                (dx * dx + dy * dy).sqrt()
+            } else {
+                r
+            };
+            let dr = (dist - center_r).abs();
             let ring_env = (1.0 - (dr / ripple.width)).clamp(0.0, 1.0);
             let max_age = self.breath_duration * 3.0;
             let time_env = (1.0 - age / max_age).clamp(0.0, 1.0);
@@ -238,6 +291,18 @@ impl Aura {
             }
         }
     }
+}
+
+fn hole_geometry(area: Rect) -> (f32, f32, f32, f32) {
+    let target_half_w: f32 = 32.0;
+    let target_half_h: f32 = 9.0;
+    let half_w = (area.width as f32 / 2.0).max(1.0);
+    let half_h = (area.height as f32 / 2.0).max(1.0);
+    let hx = target_half_w.min(half_w - 1.0).max(1.0);
+    let hy = target_half_h.min(half_h - 1.0).max(1.0);
+    let cx = area.x as f32 + (area.width as f32 / 2.0);
+    let cy = area.y as f32 + (area.height as f32 / 2.0);
+    (hx, hy, cx, cy)
 }
 
 fn smoothstep(edge0: f32, edge1: f32, x: f32) -> f32 {
