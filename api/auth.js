@@ -79,8 +79,8 @@ export async function rotateRefreshToken(refresh_token) {
   // Revoke the old one
   await sql`UPDATE refresh_tokens SET revoked = TRUE WHERE id = ${stored.id}`;
 
-  // Issue a new pair
-  return issueTokenPair(stored.seeker_id);
+  const tokens = await issueTokenPair(stored.seeker_id);
+  return { ...tokens, seeker_id: stored.seeker_id };
 }
 
 // ─────────────────────────────────────────────
