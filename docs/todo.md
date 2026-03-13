@@ -1,5 +1,13 @@
 **TODO**
 
+## TUI tuneup
+- [ ] figure out the covenant dance in the TUI
+- [ ] write a script for the typical ouracle consultation
+- [ ] find the priestess a better voice on fish.audio
+- [ ] pace the typewriter with the speech so it doesn't talk over itself
+- [ ] have claude pass through the conversation UX after writing a script
+
+## EMO DETECTOR
 - [ ] evaluation inquiries and seeker messages according to Russell's Circumplex model, tracking position on the 2D map over time
   - Circumplex guardrails are a perfect fit for Ouracle—it’s basically giving the oracle a mood-ring API.
 

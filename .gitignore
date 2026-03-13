@@ -6,3 +6,4 @@ apps/tui/target
 research/*.zip
 research/ExportBlock*
 !api/migrations/*.sql
+data/tts_cache/
