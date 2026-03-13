@@ -12,13 +12,72 @@ if (!process.env.DATABASE_URL) {
 const sql = neon(process.env.DATABASE_URL);
 
 // ─────────────────────────────────────────────
+// HANDLE GENERATION
+// ─────────────────────────────────────────────
+
+const EMOJI_POOL = [
+  '🌙','⭐','🌟','💫','✨','🌞','☄️','🪐','🌛','🌜',
+  '🔥','💧','🌊','⚡','🌀','🌬️',
+  '🌿','🍃','🌱','🌺','🌸','🌼','🌻','🌹','🍀','🌾',
+  '🌴','🌵','🎋','🍄','🪸','🪨',
+  '🦋','🦉','🐉','🦅','🦁','🐺','🦊','🦌','🦚','🦜',
+  '🐝','🦈','🦩','🦬','🪶',
+  '💎','🔮','💠','🗝️','🕯️','⚗️','🧿','🪬','🪄','🔭',
+  '💡','🫧','🪩','🧲','🌂',
+  '🌈','🏔️','🌌','🕊️','♾️','⚜️','🏵️','🎯','🎭','☯️',
+  '🧊','❄️','🌪️','⛰️','🗺️','🧭','🎐','🌤️',
+];
+
+function slugify(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20) || 'seeker';
+}
+
+export async function generateHandle(name) {
+  const base = slugify(name);
+
+  // Find which emoji are already taken for this base slug.
+  const rows = await sql`
+    SELECT handle FROM seekers WHERE handle_base = ${base}
+  `;
+  const taken = new Set(rows.map((r) => r.handle));
+
+  // Shuffle and try each emoji.
+  const shuffled = [...EMOJI_POOL].sort(() => Math.random() - 0.5);
+  for (const emoji of shuffled) {
+    const candidate = `${base}${emoji}`;
+    if (!taken.has(candidate)) {
+      return { handle: candidate, handle_base: base };
+    }
+  }
+
+  return null; // All emoji exhausted for this slug.
+}
+
+export async function getSeekerByHandle(handle) {
+  const [seeker] = await sql`
+    SELECT * FROM seekers WHERE LOWER(handle) = LOWER(${handle})
+  `;
+  return seeker ?? null;
+}
+
+// ─────────────────────────────────────────────
 // SEEKERS
 // ─────────────────────────────────────────────
 
-export async function createSeeker({ device_id, email_hash, timezone, consent_version, name, password_hash }) {
+export async function createSeeker({ device_id, email_hash, timezone, consent_version, name, password_hash, handle, handle_base }) {
   const [seeker] = await sql`
-    INSERT INTO seekers (device_id, email_hash, timezone, consent_version, consented_at, name, password_hash)
-    VALUES (${device_id ?? null}, ${email_hash ?? null}, ${timezone ?? null}, ${consent_version}, now(), ${name ?? null}, ${password_hash ?? null})
+    INSERT INTO seekers (device_id, email_hash, timezone, consent_version, consented_at, name, password_hash, handle, handle_base)
+    VALUES (
+      ${device_id ?? null},
+      ${email_hash ?? null},
+      ${timezone ?? null},
+      ${consent_version},
+      now(),
+      ${name ?? null},
+      ${password_hash ?? null},
+      ${handle},
+      ${handle_base}
+    )
     RETURNING *
   `;
   return seeker;
