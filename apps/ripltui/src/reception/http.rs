@@ -8,7 +8,7 @@ use serde_json::Value;
 
 // ─── Credentials ──────────────────────────────────────────────────────────────
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Credentials {
     pub seeker_id: String,
     pub access_token: String,
