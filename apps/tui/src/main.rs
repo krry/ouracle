@@ -68,11 +68,16 @@ fn app_loop(
 
     let mut last_tick = Instant::now();
     let tick_rate = Duration::from_millis(100);
+    const AURA_FRAME_MS: u128 = 150;
 
     loop {
         let size = terminal.size()?;
         app.last_frame = Some(size.into());
-        terminal.draw(|frame| ui::draw(frame, &mut app))?;
+        let render_aura = app.aura_last_render.elapsed().as_millis() >= AURA_FRAME_MS;
+        terminal.draw(|frame| ui::draw(frame, &mut app, render_aura))?;
+        if render_aura {
+            app.aura_last_render = Instant::now();
+        }
 
         let timeout = tick_rate
             .checked_sub(last_tick.elapsed())
