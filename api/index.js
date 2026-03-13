@@ -38,6 +38,8 @@ import {
   createApiKey,
   updateApiKey,
   updateSeekerPassword,
+  generateHandle,
+  getSeekerByHandle,
 } from './db.js';
 
 const app = express();
@@ -61,13 +63,17 @@ app.use((req, res, next) => {
 // ─────────────────────────────────────────────
 
 const COVENANT = {
-  version: 1,
+  version: '1.0',
   effective_date: '2026-03-11',
   text: [
     'I accept 100% responsibility for my actions — legal, lawful, moral, ethical, physical, and financial.',
     'Ouracle listens. Ouracle speaks. I act as I will.',
   ],
 };
+
+function deriveStage(seeker) {
+  return seeker?.covenant_at ? 'covenanted' : 'known';
+}
 
 app.get('/covenant/current', (_req, res) => res.json(COVENANT));
 
@@ -410,31 +416,53 @@ app.post('/reintegrate', authenticate, async (req, res) => {
 // AUTH ROUTES
 // ─────────────────────────────────────────────
 
-// Three disclosures shown before a seeker record is created.
-const CONSENT_DISCLOSURES = [
-  'Property is theft. Ideas are free. Privacy is an illusion.',
-];
-
-// Step 1: GET /consent — receive the disclosures before agreeing
-app.get('/consent', (_req, res) => {
-  res.json({ disclosures: CONSENT_DISCLOSURES, next: 'POST /seeker/new with { consented: true } to proceed.' });
-});
-
-// Step 2: POST /seeker/new — create seeker only after explicit consent
 app.post('/seeker/new', async (req, res) => {
-  const { device_id, email_hash, timezone, name, consented, consent_version = '1.0' } = req.body;
+  const { name, password, device_id, timezone } = req.body || {};
 
-  if (!consented) {
-    return res.status(400).json({
-      error: 'Consent required.',
-      hint: 'GET /consent to review disclosures, then POST with { consented: true }.',
-      disclosures: CONSENT_DISCLOSURES,
-    });
+  if (!name || String(name).trim().length === 0) {
+    return res.status(400).json({ error: 'name required.' });
+  }
+  if (!password || String(password).trim().length === 0) {
+    return res.status(400).json({ error: 'password required.' });
   }
 
-  const seeker = await createSeeker({ device_id, email_hash, timezone, consent_version, name, password_hash: null });
+  // Retry loop guards against the race between generateHandle's SELECT
+  // and the INSERT — the UNIQUE constraint catches concurrent collisions.
+  const password_hash = await hashPassword(String(password));
+  let seeker;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const handleResult = await generateHandle(String(name).trim());
+    if (!handleResult) {
+      return res.status(409).json({
+        error: 'handle_exhausted',
+        message: 'No unique handle available for this name. Try a different name.',
+      });
+    }
+    try {
+      seeker = await createSeeker({
+        device_id: device_id ?? null,
+        email_hash: null,
+        timezone: timezone ?? null,
+        consent_version: COVENANT.version,
+        name: String(name).trim(),
+        password_hash,
+        handle: handleResult.handle,
+        handle_base: handleResult.handle_base,
+      });
+      break; // success
+    } catch (err) {
+      if (err?.code === '23505' && attempt < 4) continue; // unique violation, retry
+      throw err;
+    }
+  }
+
   const tokens = await issueTokenPair(seeker.id);
-  return res.status(201).json({ seeker_id: seeker.id, ...tokens, created_at: seeker.created_at });
+  return res.status(201).json({
+    seeker_id: seeker.id,
+    handle: seeker.handle,
+    stage: deriveStage(seeker),
+    ...tokens,
+  });
 });
 
 // POST /seeker/:id/password — set password once
@@ -497,17 +525,35 @@ app.patch('/admin/api-keys/:id', async (req, res) => {
 
 // POST /auth/token — issue tokens for an existing seeker (re-auth)
 app.post('/auth/token', async (req, res) => {
-  const { seeker_id, password } = req.body;
-  if (!seeker_id) return res.status(400).json({ error: 'seeker_id required.' });
+  const { seeker_id, handle, password } = req.body;
+
   if (!password || String(password).trim().length === 0) {
     return res.status(400).json({ error: 'password required.' });
   }
-  const seeker = await getSeeker(seeker_id);
-  if (!seeker) return res.status(404).json({ error: 'Seeker not found.' });
+
+  let seeker;
+  if (handle) {
+    seeker = await getSeekerByHandle(String(handle).trim());
+    if (!seeker) return res.status(404).json({ error: 'Seeker not found.' });
+  } else if (seeker_id) {
+    seeker = await getSeeker(seeker_id);
+    if (!seeker) return res.status(404).json({ error: 'Seeker not found.' });
+  } else {
+    return res.status(400).json({ error: 'handle or seeker_id required.' });
+  }
+
+  if (!seeker.password_hash) {
+    return res.status(401).json({ error: 'No password set on this account.' });
+  }
   const ok = await verifyPassword(String(password), seeker.password_hash);
   if (!ok) return res.status(401).json({ error: 'Invalid credentials.' });
-  const tokens = await issueTokenPair(seeker_id);
-  return res.json(tokens);
+
+  const tokens = await issueTokenPair(seeker.id);
+  return res.json({
+    seeker_id: seeker.id,
+    stage: deriveStage(seeker),
+    ...tokens,
+  });
 });
 
 // POST /auth/refresh — rotate token pair
@@ -515,11 +561,29 @@ app.post('/auth/refresh', async (req, res) => {
   const { refresh_token } = req.body;
   if (!refresh_token) return res.status(400).json({ error: 'refresh_token required.' });
   try {
-    const tokens = await rotateRefreshToken(refresh_token);
-    return res.json(tokens);
+    const result = await rotateRefreshToken(refresh_token);
+    const seeker = await getSeeker(result.seeker_id);
+    return res.json({
+      seeker_id: result.seeker_id,
+      stage: deriveStage(seeker),
+      access_token: result.access_token,
+      refresh_token: result.refresh_token,
+      expires_in: result.expires_in,
+    });
   } catch {
     return res.status(401).json({ error: 'Invalid or expired refresh token.' });
   }
+});
+
+// POST /covenant — accept the current covenant. Auth required.
+app.post('/covenant', authenticate, async (req, res) => {
+  const seeker = await recordCovenant(req.seeker_id, String(COVENANT.version));
+  if (!seeker) return res.status(404).json({ error: 'Seeker not found.' });
+  return res.json({
+    seeker_id: seeker.id,
+    covenant_at: seeker.covenant_at,
+    stage: deriveStage(seeker),
+  });
 });
 
 app.post('/seeker/:id/covenant', authenticate, async (req, res) => {
