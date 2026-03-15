@@ -7,6 +7,7 @@ description = "Clea — Chief Priestess of Ouracle. CLI/TUI for macOS."
 license = "MIT"
 repository = "https://github.com/krry/ouracle"
 homepage = "https://ouracle.kerry.ink/clea"
+readme = "README.md"
 keywords = ["tui", "ai", "chat", "terminal", "ratatui"]
 categories = ["command-line-interface", "command-line-utilities"]
 
