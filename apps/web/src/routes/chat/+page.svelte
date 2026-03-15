@@ -1,12 +1,23 @@
 <script lang="ts">
-  import { authed, guestTurns } from '$lib/stores';
+  import { onMount } from 'svelte';
+  import { authed, creds, guestTurns } from '$lib/stores';
   import { GUEST_LIMIT } from '$lib/guestSession';
+  import { authClient } from '$lib/auth';
   import Reception from '$lib/Reception.svelte';
   import Chat from '$lib/Chat.svelte';
   import AltarOverlay from '$lib/AltarOverlay.svelte';
 
   let wantsSignin = $state(false);
   $effect(() => { if ($authed) wantsSignin = false; });
+
+  // Sync BetterAuth session cookie → localStorage after OAuth redirect
+  onMount(async () => {
+    if ($authed) return;
+    const { data } = await authClient.getSession();
+    if (data?.session?.token && data?.user?.id) {
+      creds.login({ access_token: data.session.token, refresh_token: '', seeker_id: data.user.id });
+    }
+  });
 </script>
 
 <svelte:head>

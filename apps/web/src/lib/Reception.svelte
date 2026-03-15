@@ -71,10 +71,13 @@
     error = '';
     busy = true;
     try {
-      // social signIn triggers OAuth redirect — no result to handle here
-      await signIn.social({ provider, callbackURL: window.location.href });
+      const result = await signIn.social({ provider, callbackURL: window.location.href });
+      // If the SDK returned a URL instead of auto-redirecting, navigate manually
+      const url = (result as { data?: { url?: string } })?.data?.url;
+      if (url) window.location.href = url;
     } catch (e: unknown) {
       error = e instanceof Error ? e.message : 'something went wrong';
+    } finally {
       busy = false;
     }
   }
@@ -104,7 +107,6 @@
     <button class="social" onclick={() => socialSignIn('apple')} disabled={busy}>Apple</button>
     <button class="social" onclick={() => socialSignIn('google')} disabled={busy}>Google</button>
     <button class="social" onclick={() => socialSignIn('github')} disabled={busy}>GitHub</button>
-    <button class="social" onclick={passkeySignIn} disabled={busy}>Passkey</button>
   </div>
 
   <div class="divider"><span>or</span></div>
