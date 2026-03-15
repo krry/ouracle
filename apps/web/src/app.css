@@ -15,6 +15,26 @@
 
 	/* ambience slider: 0 = bare, 1 = full */
 	--ambience: 1;
+
+	--font-display: 'Crimson Pro', 'Georgia', serif;
+	--space-xs: 0.5rem;
+	--space-sm: 1rem;
+	--space-md: 2rem;
+	--space-lg: 4rem;
+	--space-xl: 8rem;
+	--max-prose: 640px;
+	--max-wide: 1024px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:      hsl(var(--hue), 12%, 97%);
+    --surface: hsl(var(--hue), 10%, 92%);
+    --border:  hsl(var(--hue), 10%, 82%);
+    --muted:   hsl(var(--hue), 8%, 50%);
+    --text:    hsl(var(--hue), 10%, 10%);
+    --accent:  hsl(var(--hue), 60%, 40%);
+  }
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

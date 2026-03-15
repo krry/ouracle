@@ -1,142 +1,216 @@
 <script lang="ts">
-	import { signup, signin } from './api';
-	import { creds } from './stores';
+  import { signIn, signUp, passkey } from './auth';
+  import { creds } from './stores';
+  import { generateDeviceKeyPair, storePrivateKey } from './totem';
 
-	let mode: 'sign-in' | 'sign-up' = 'sign-in';
-	let name = '';
-	let password = '';
-	let error = '';
-	let busy = false;
+  type Mode = 'sign-in' | 'sign-up';
+  let mode = $state<Mode>('sign-in');
+  let email = $state('');
+  let name = $state('');
+  let password = $state('');
+  let error = $state('');
+  let busy = $state(false);
 
-	async function submit() {
-		error = '';
-		busy = true;
-		try {
-			const res = mode === 'sign-up'
-				? await signup(name, password)
-				: await signin(name, password);
-			creds.login(res);
-		} catch (e: unknown) {
-			error = e instanceof Error ? e.message : 'something went wrong';
-		} finally {
-			busy = false;
-		}
-	}
+  const BASE = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
+
+  async function registerDeviceKey(token: string) {
+    try {
+      const { publicKeyJwk, privateKey } = await generateDeviceKeyPair();
+      await storePrivateKey(privateKey);
+      await fetch(`${BASE}/totem/devices`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_name: navigator.userAgent.slice(0, 64), public_key: JSON.stringify(publicKeyJwk) }),
+      });
+    } catch {
+      // non-fatal — device key can be registered later
+    }
+  }
+
+  // BetterAuth 1.x returns { data, error } — data.token is the session token,
+  // data.user has { id, name, email, ... }. We store token as access_token.
+  type AuthResult = {
+    data?: { token?: string; user?: { id: string; name?: string } } | null;
+    error?: { message?: string } | null;
+  };
+
+  async function handleCredResult(result: AuthResult) {
+    if (result.error) {
+      error = result.error.message ?? 'something went wrong';
+      return;
+    }
+    const token = result.data?.token ?? '';
+    const user = result.data?.user;
+    if (token && user) {
+      // BetterAuth uses session tokens, not JWTs.
+      // Store as access_token; refresh_token left empty (BetterAuth manages sessions server-side).
+      creds.login({ access_token: token, refresh_token: '', seeker_id: user.id });
+      await registerDeviceKey(token);
+    }
+  }
+
+  async function submit() {
+    error = '';
+    busy = true;
+    try {
+      if (mode === 'sign-up') {
+        const result = await signUp.email({ email, password, name });
+        await handleCredResult(result as AuthResult);
+      } else {
+        const result = await signIn.email({ email, password });
+        await handleCredResult(result as AuthResult);
+      }
+    } catch (e: unknown) {
+      error = e instanceof Error ? e.message : 'something went wrong';
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function socialSignIn(provider: 'google' | 'github' | 'apple') {
+    error = '';
+    busy = true;
+    try {
+      // social signIn triggers OAuth redirect — no result to handle here
+      await signIn.social({ provider, callbackURL: window.location.href });
+    } catch (e: unknown) {
+      error = e instanceof Error ? e.message : 'something went wrong';
+      busy = false;
+    }
+  }
+
+  async function passkeySignIn() {
+    error = '';
+    busy = true;
+    try {
+      // passkey.signIn() is the authenticate flow in better-auth 1.x
+      const result = await passkey.signIn();
+      await handleCredResult(result as AuthResult);
+    } catch (e: unknown) {
+      error = e instanceof Error ? e.message : 'something went wrong';
+    } finally {
+      busy = false;
+    }
+  }
 </script>
 
 <main>
-	<header>
-		<h1>Ouracle</h1>
-		<p class="sub">speak. listen. know.</p>
-	</header>
+  <header>
+    <h1>Ouracle</h1>
+    <p class="sub">speak. listen. know.</p>
+  </header>
 
-	<form on:submit|preventDefault={submit}>
-		<label>
-			<span>name</span>
-			<input bind:value={name} type="text" autocomplete="username" required />
-		</label>
-		<label>
-			<span>password</span>
-			<input bind:value={password} type="password" autocomplete={mode === 'sign-up' ? 'new-password' : 'current-password'} required />
-		</label>
+  <div class="social-row">
+    <button class="social" onclick={() => socialSignIn('apple')} disabled={busy}>Apple</button>
+    <button class="social" onclick={() => socialSignIn('google')} disabled={busy}>Google</button>
+    <button class="social" onclick={() => socialSignIn('github')} disabled={busy}>GitHub</button>
+    <button class="social" onclick={passkeySignIn} disabled={busy}>Passkey</button>
+  </div>
 
-		{#if error}<p class="error">{error}</p>{/if}
+  <div class="divider"><span>or</span></div>
 
-		<button type="submit" disabled={busy}>
-			{busy ? '…' : mode === 'sign-in' ? 'enter' : 'begin'}
-		</button>
-	</form>
+  <form onsubmit={(e) => { e.preventDefault(); submit(); }}>
+    {#if mode === 'sign-up'}
+      <label>
+        <span>name</span>
+        <input bind:value={name} type="text" autocomplete="name" required />
+      </label>
+    {/if}
+    <label>
+      <span>email</span>
+      <input bind:value={email} type="email" autocomplete="email" required />
+    </label>
+    <label>
+      <span>password</span>
+      <input bind:value={password} type="password"
+        autocomplete={mode === 'sign-up' ? 'new-password' : 'current-password'} required />
+    </label>
 
-	<button class="toggle" on:click={() => mode = mode === 'sign-in' ? 'sign-up' : 'sign-in'}>
-		{mode === 'sign-in' ? 'new seeker' : 'returning seeker'}
-	</button>
+    {#if error}<p class="error">{error}</p>{/if}
+
+    <button type="submit" class="primary" disabled={busy}>
+      {busy ? '…' : mode === 'sign-in' ? 'enter' : 'begin'}
+    </button>
+  </form>
+
+  <button class="toggle" onclick={() => { mode = mode === 'sign-in' ? 'sign-up' : 'sign-in'; error = ''; }}>
+    {mode === 'sign-in' ? 'new seeker' : 'returning seeker'}
+  </button>
 </main>
 
 <style>
 main {
-	height: 100dvh;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: 2rem;
-	padding: 2rem;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem;
 }
-
 header { text-align: center; }
-
-h1 {
-	font-size: 2rem;
-	letter-spacing: 0.2em;
-	color: var(--accent);
+h1 { font-size: 2rem; letter-spacing: 0.2em; color: var(--accent); }
+.sub { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.15em; margin-top: 0.4rem; }
+.social-row { display: flex; gap: 0.75rem; }
+.social {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  padding: 0.5rem 1rem;
+  transition: border-color 0.15s, color 0.15s;
 }
-
-.sub {
-	color: var(--muted);
-	font-size: 0.8rem;
-	letter-spacing: 0.15em;
-	margin-top: 0.4rem;
+.social:hover { border-color: var(--accent); color: var(--accent); }
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 300px;
+  color: var(--muted);
+  font-size: 0.75rem;
 }
-
-form {
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-	width: 100%;
-	max-width: 320px;
-}
-
-label {
-	display: flex;
-	flex-direction: column;
-	gap: 0.3rem;
-	font-size: 0.75rem;
-	color: var(--muted);
-	letter-spacing: 0.1em;
-}
-
+.divider::before, .divider::after { content: ''; flex: 1; border-top: 1px solid var(--border); }
+form { display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 300px; }
+label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em; }
 input {
-	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	color: var(--text);
-	font-family: var(--font-mono);
-	font-size: 1rem;
-	padding: 0.6rem 0.8rem;
-	outline: none;
-	transition: border-color 0.15s;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  padding: 0.6rem 0.8rem;
+  outline: none;
+  transition: border-color 0.15s;
 }
-
 input:focus { border-color: var(--accent); }
-
-button[type="submit"] {
-	background: var(--accent);
-	border: none;
-	border-radius: var(--radius);
-	color: var(--bg);
-	cursor: pointer;
-	font-family: var(--font-mono);
-	font-size: 0.9rem;
-	letter-spacing: 0.1em;
-	padding: 0.7rem;
-	transition: opacity 0.15s;
+.primary {
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: var(--bg);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  padding: 0.7rem;
+  transition: opacity 0.15s;
 }
-
-button[type="submit"]:disabled { opacity: 0.4; cursor: default; }
-
-.error {
-	color: hsl(0, 60%, 65%);
-	font-size: 0.8rem;
-}
-
+.primary:disabled { opacity: 0.4; cursor: default; }
+.error { color: hsl(0, 60%, 65%); font-size: 0.8rem; }
 .toggle {
-	background: none;
-	border: none;
-	color: var(--muted);
-	cursor: pointer;
-	font-family: var(--font-mono);
-	font-size: 0.75rem;
-	letter-spacing: 0.1em;
-	text-decoration: underline;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-decoration: underline;
 }
 </style>

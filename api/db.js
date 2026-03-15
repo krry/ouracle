@@ -331,3 +331,68 @@ export async function updateApiKey(id, { active, expires_at, label }) {
   `;
   return row ?? null;
 }
+
+// ─────────────────────────────────────────────
+// BETTERAUTH BRIDGE + TOTEM
+// ─────────────────────────────────────────────
+
+export async function getOrCreateSeekerByAuthId(authUserId, name) {
+  const [existing] = await sql`
+    SELECT * FROM seekers WHERE auth_user_id = ${authUserId}
+  `;
+  if (existing) return existing;
+  const [created] = await sql`
+    INSERT INTO seekers (auth_user_id, name, consent_version, consented_at)
+    VALUES (${authUserId}, ${name ?? null}, ${'1.0'}, now())
+    RETURNING *
+  `;
+  return created;
+}
+
+export async function getTotem(seekerId) {
+  const [row] = await sql`
+    SELECT * FROM totems WHERE seeker_id = ${seekerId}
+  `;
+  return row ?? null;
+}
+
+export async function upsertTotem(seekerId, ciphertext, publicKey) {
+  await sql`
+    INSERT INTO totems (seeker_id, ciphertext, public_key, updated_at)
+    VALUES (${seekerId}, ${ciphertext}, ${publicKey}, NOW())
+    ON CONFLICT (seeker_id) DO UPDATE
+    SET ciphertext = ${ciphertext}, public_key = ${publicKey}, updated_at = NOW()
+  `;
+}
+
+export async function getDevices(seekerId) {
+  return sql`
+    SELECT * FROM totem_devices WHERE seeker_id = ${seekerId} ORDER BY created_at
+  `;
+}
+
+export async function addDevice(seekerId, deviceName, publicKey, wrappedKey) {
+  await sql`
+    INSERT INTO totem_devices (seeker_id, device_name, public_key, wrapped_key)
+    VALUES (${seekerId}, ${deviceName ?? null}, ${publicKey}, ${wrappedKey ?? null})
+  `;
+}
+
+// ─────────────────────────────────────────────
+// GUEST SESSIONS
+// Short-lived, no-auth sessions for unauthenticated seekers.
+// ─────────────────────────────────────────────
+
+export async function createGuestSession() {
+  const rows = await sql`INSERT INTO guest_sessions DEFAULT VALUES RETURNING *`;
+  return rows[0];
+}
+
+export async function getGuestSession(id) {
+  const rows = await sql`SELECT * FROM guest_sessions WHERE id = ${id}::uuid AND expires_at > NOW()`;
+  return rows[0] ?? null;
+}
+
+export async function incrementGuestTurn(id) {
+  await sql`UPDATE guest_sessions SET turns_used = turns_used + 1 WHERE id = ${id}::uuid`;
+}

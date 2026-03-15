@@ -1,16 +1,37 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { creds, messages, streaming, voiceState, waveform, ambience } from './stores';
+	import { onMount, onDestroy } from 'svelte';
+	import { get } from 'svelte/store';
+	import { creds, authed, messages, streaming, voiceState, waveform, ambience, guestTurns, ttsEnabled } from './stores';
 	import { chat, tts, stt } from './api';
 	import Breath from './Breath.svelte';
 	import type { Credentials } from './stores';
+	import { incrementGuestTurns, getGuestTurns, GUEST_LIMIT } from './guestSession';
+	import { TotemSession } from './totemSession';
+	import { renderMarkdown } from './markdown';
+	import { createAudioQueue, type AudioQueue } from './audio';
 
+	export let guestMode = false;
+
+	let audioQueue: AudioQueue | null = null;
 	let sessionId: string | null = null;
 	let input = '';
 	let msgList: HTMLElement;
 	let audioCtx: AudioContext;
 	let mediaRecorder: MediaRecorder | null = null;
 	let chunks: Blob[] = [];
+
+	let guestToken: string | null = null;
+	let totemSession: TotemSession | null = null;
+
+	async function ensureGuestToken(): Promise<void> {
+		const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('clea_guest_token') : null;
+		if (stored) { guestToken = stored; return; }
+		const BASE = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
+		const res = await fetch(`${BASE}/aspire`, { method: 'POST' });
+		const { guest_token } = await res.json();
+		if (typeof localStorage !== 'undefined') localStorage.setItem('clea_guest_token', guest_token);
+		guestToken = guest_token;
+	}
 
 	// scroll to bottom on new messages
 	$: if ($messages && msgList) {
@@ -19,16 +40,20 @@
 
 	async function send(text: string) {
 		if ($streaming) return;
-		const c = $creds as Credentials;
+		const token = !guestMode ? ($creds as Credentials | null)?.access_token ?? '' : guestToken ?? '';
 		// Only push user message if there's actual text (first turn may be empty — opens the session)
 		if (text.trim()) {
 			messages.update(m => [...m, { role: 'user', content: text }]);
+			if (guestMode) {
+				incrementGuestTurns();
+				guestTurns.set(getGuestTurns());
+			}
 		}
 		messages.update(m => [...m, { role: 'assistant', content: '' }]);
 		streaming.set(true);
 
 		try {
-			for await (const _ of chat(c.access_token, text, sessionId, (event) => {
+			for await (const _ of chat(token, text, sessionId, (event) => {
 				if (event.type === 'session') {
 					sessionId = event.session_id as string;
 				} else if (event.type === 'token') {
@@ -38,19 +63,56 @@
 						return [...m];
 					});
 				} else if (event.type === 'break') {
-					// Priestess finished one block — start fresh message
+					// Priestess finished one block — enqueue for TTS, then start fresh message
+					if ($ttsEnabled && audioQueue) {
+						const msgs = get(messages);
+						const last = msgs.at(-1);
+						if (last?.role === 'assistant' && last.content) {
+							audioQueue.enqueue(last.content);
+						}
+					}
 					messages.update(m => [...m, { role: 'assistant', content: '' }]);
 				}
 			})) { /* yield */ }
+		} catch (e: unknown) {
+			const msg = e instanceof Error ? e.message : String(e);
+			if (msg.includes('guest_limit')) {
+				guestTurns.set(GUEST_LIMIT);
+			}
 		} finally {
 			// Remove any trailing empty assistant message
 			messages.update(m => m.filter((msg, i) => !(msg.role === 'assistant' && msg.content === '' && i === m.length - 1)));
+			// Enqueue last assistant message for TTS (catches streams with no 'break' event)
+			if ($ttsEnabled && audioQueue) {
+				const msgs = get(messages);
+				const last = msgs.at(-1);
+				if (last?.role === 'assistant' && last.content) {
+					audioQueue.enqueue(last.content);
+				}
+			}
 			streaming.set(false);
 		}
 	}
 
 	// Open session on mount — /chat with no session_id bootstraps it
-	onMount(() => send(''));
+	onMount(async () => {
+		if (guestMode) await ensureGuestToken();
+		if ($authed && $creds) {
+			const c = $creds as Credentials;
+			audioQueue = createAudioQueue((t) => tts(t, c.access_token));
+			totemSession = new TotemSession(c.access_token, c.seeker_id);
+			totemSession.load().catch(() => {}); // non-blocking, non-fatal
+		}
+		send('');
+	});
+
+	onDestroy(() => {
+		audioQueue?.flush();
+		audioQueue = null;
+		if (totemSession && sessionId) {
+			totemSession.distillAndSave(sessionId).catch(() => {});
+		}
+	});
 
 	function handleKey(e: KeyboardEvent) {
 		if (e.key === 'Enter' && !e.shiftKey) {
@@ -119,7 +181,7 @@
 			{#if msg.role !== 'system'}
 				<div class="msg {msg.role}">
 					<span class="label">{msg.role === 'user' ? 'you' : 'ouracle'}</span>
-					<p>{msg.content}</p>
+					<div class="prose">{@html renderMarkdown(msg.content)}</div>
 				</div>
 			{/if}
 		{/each}
@@ -149,8 +211,12 @@
 		</button>
 	</div>
 
-	<!-- ambience slider -->
+	<!-- ambience slider + TTS toggle -->
 	<div class="controls">
+		<label class="tts-toggle" title={$ttsEnabled ? 'mute voice' : 'enable voice'}>
+			<input type="checkbox" bind:checked={$ttsEnabled} />
+			<span>{$ttsEnabled ? '◈' : '◇'}</span>
+		</label>
 		<input
 			type="range" min="0" max="1" step="0.01"
 			bind:value={$ambience}
@@ -194,11 +260,35 @@
 
 .msg.user .label { color: var(--accent); }
 
-.msg p {
+.prose {
 	font-size: 0.95rem;
 	line-height: 1.6;
-	white-space: pre-wrap;
 	word-break: break-word;
+}
+
+.prose :global(p) { margin: 0; line-height: 1.6; }
+.prose :global(p + p) { margin-top: 0.75rem; }
+.prose :global(strong) { color: var(--text); font-weight: 600; }
+.prose :global(em) { color: var(--muted); font-style: italic; }
+.prose :global(code) {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 2px;
+	font-size: 0.85em;
+	padding: 0.1em 0.3em;
+}
+.prose :global(pre) {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	overflow-x: auto;
+	padding: 0.75rem 1rem;
+	margin-top: 0.5rem;
+}
+.prose :global(a) { color: var(--accent); }
+.prose :global(ul), .prose :global(ol) {
+	padding-left: 1.4rem;
+	margin-top: 0.4rem;
 }
 
 .thinking {
@@ -280,4 +370,14 @@ input[type="range"]::-webkit-slider-thumb {
 	height: 10px;
 	width: 10px;
 }
+
+.tts-toggle {
+	display: grid;
+	place-items: center;
+	cursor: pointer;
+	color: var(--muted);
+	font-size: 1rem;
+}
+.tts-toggle input { display: none; }
+.tts-toggle:has(input:checked) { color: var(--accent); }
 </style>
