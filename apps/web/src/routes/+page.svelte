@@ -41,13 +41,11 @@
   <canvas bind:this={canvas} aria-hidden="true"></canvas>
   <div class="content">
     <h1>Ouracle</h1>
-    <p class="tagline">A mirror that speaks.</p>
+    <p class="tagline">A palace of echoes and mirrors</p>
     <p class="body">
-      Ouracle is a reflective presence — not a task assistant, but a companion
-      that pays attention. It listens, reflects, and offers the kind of clarity
-      that comes from being truly heard.
+      This is a place to reflect. Our priestesses will be right with you. Please come in.
     </p>
-    <a href="/chat" class="enter">begin</a>
+    <a href="/chat" class="enter">enter</a>
   </div>
 </div>
 

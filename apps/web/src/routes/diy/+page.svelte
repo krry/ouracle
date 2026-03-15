@@ -1,7 +1,7 @@
 <script lang="ts">
   import { renderMarkdown } from '$lib/markdown';
 
-  const raw = `# Aspire — Run Your Own Ouracle
+  const raw = `# DIY — Make It Yours(acle)
 
 Ouracle is open infrastructure. If you'd rather not use the hosted service, you can run the full stack on your own machine with a local language model. No API keys required for the core experience.
 
