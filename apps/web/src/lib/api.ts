@@ -75,7 +75,7 @@ export async function tts(text: string, token: string): Promise<ArrayBuffer> {
 // ── STT ───────────────────────────────────────────────────────────────────────
 export async function stt(blob: Blob, token: string): Promise<string> {
 	const form = new FormData();
-	form.append('audio', blob, 'recording.webm');
+	form.append('audio', blob, 'recording.wav');
 	const r = await fetch(`${BASE}/stt`, {
 		method: 'POST',
 		headers: { Authorization: `Bearer ${token}` },

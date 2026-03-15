@@ -9,7 +9,7 @@
 <div class="veil" role="dialog" aria-modal="true" aria-label="session ended">
   <div class="inner">
     <p class="quip">{quip}</p>
-    <button onclick={() => dispatch('signin')}>enter your name</button>
+    <button onclick={() => dispatch('signin')}>enter the temple</button>
     <p class="sub">or close this tab and carry the questions with you</p>
   </div>
 </div>

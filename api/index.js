@@ -81,7 +81,14 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 // Mount BetterAuth — handles /api/auth/* routes (Express 4 wildcard)
-app.all('/api/auth/*', toNodeHandler(auth));
+app.all('/api/auth/*', async (req, res, next) => {
+  try {
+    await toNodeHandler(auth)(req, res);
+  } catch (err) {
+    console.error('[BetterAuth error]', err);
+    next(err);
+  }
+});
 
 const ADMIN_KEY = process.env.OURACLE_ADMIN_KEY;
 
@@ -1078,7 +1085,7 @@ app.post('/chat', authenticateOrGuest, async (req, res) => {
 });
 
 // ── POST /tts — proxy Fish Audio TTS; returns MP3 audio ──────────────────────
-app.post('/tts', authenticate, async (req, res) => {
+app.post('/tts', authenticateOrGuest, async (req, res) => {
   const { text } = req.body || {};
   if (!text) return res.status(400).json({ error: 'text required.' });
   if (!hasFishKey()) return res.status(503).json({ error: 'TTS not configured.' });

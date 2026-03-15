@@ -1,10 +1,12 @@
 import { betterAuth } from 'better-auth';
 import { Pool } from '@neondatabase/serverless';
+import { Kysely, PostgresDialect } from 'kysely';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const db = new Kysely({ dialect: new PostgresDialect({ pool }) });
 
 export const auth = betterAuth({
-  database: { db: pool, type: 'pg' },
+  database: { db, type: 'postgres' },
   baseURL: process.env.BETTER_AUTH_URL ?? 'https://api.ouracle.kerry.ink',
   emailAndPassword: { enabled: true },
   socialProviders: {

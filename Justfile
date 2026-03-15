@@ -5,20 +5,11 @@ greet name:
 
 set shell := ["fish", "-c"]
 
-dev:
-    fish -c 'cd api; bun dev' & fish -c 'cd apps/web; bun run dev'
-
-apid:
-    cd api; bun dev
-
-webd:
+web:
     cd apps/web; bun run dev
 
 api:
-    cd api; bun start
+    cd api; bun dev
 
 tui:
-    cd apps/ripltui; cargo run
-
-tuiw:
-    cd apps/ripltui; cargo watch -x 'run'
+    cd apps/tui; cargo watch -x 'run'

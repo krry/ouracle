@@ -11,6 +11,12 @@ export class AudioQueue {
 
   constructor(private fetchAudio: FetchFn) {}
 
+  /** Call from a user-gesture handler (e.g. send button, PTT) to unlock the AudioContext. */
+  prime() {
+    this.ctx ??= new AudioContext();
+    this.ctx.resume().catch(() => {});
+  }
+
   get length() { return this.queue.length; }
   get playing() { return this._playing; }
 
@@ -48,6 +54,7 @@ export class AudioQueue {
     return new Promise((resolve) => {
       this.ctx ??= new AudioContext();
       const ctx = this.ctx;
+      ctx.resume().catch(() => {});
 
       if (!this.analyser) {
         this.analyser = ctx.createAnalyser();

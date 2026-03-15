@@ -9,6 +9,7 @@
 	import { TotemSession } from './totemSession';
 	import { renderMarkdown } from './markdown';
 	import { createAudioQueue, type AudioQueue } from './audio';
+	import { blobToWav } from './audio-convert';
 
 	export let guestMode = false;
 
@@ -42,6 +43,7 @@
 
 	async function send(text: string) {
 		if ($streaming) return;
+		audioQueue?.prime();
 		const token = !guestMode ? ($creds as Credentials | null)?.access_token ?? '' : guestToken ?? '';
 		// Only push user message if there's actual text (first turn may be empty — opens the session)
 		if (text.trim()) {
@@ -98,8 +100,10 @@
 
 	// Open session on mount — /chat with no session_id bootstraps it
 	onMount(async () => {
-		if (guestMode) await ensureGuestToken();
-		if ($authed && $creds) {
+		if (guestMode) {
+			await ensureGuestToken();
+			audioQueue = createAudioQueue((t) => tts(t, guestToken ?? ''));
+		} else if ($authed && $creds) {
 			const c = $creds as Credentials;
 			audioQueue = createAudioQueue((t) => tts(t, c.access_token));
 			totemSession = new TotemSession(c.access_token, c.seeker_id);
@@ -153,13 +157,14 @@
 			waveform.set(buf.slice());
 			requestAnimationFrame(tick);
 		}
-		tick();
 
 		chunks = [];
 		mediaRecorder = new MediaRecorder(stream);
-		mediaRecorder.ondataavailable = e => chunks.push(e.data);
+		mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
 		mediaRecorder.start();
+		audioQueue?.prime();
 		voiceState.set('listening');
+		tick();
 	}
 
 	async function stopListening() {
@@ -168,7 +173,10 @@
 		mediaRecorder.stop();
 		const token = guestMode ? (guestToken ?? '') : (($creds as Credentials | null)?.access_token ?? '');
 		await new Promise<void>(res => { mediaRecorder!.onstop = () => res(); });
-		const blob = new Blob(chunks, { type: 'audio/webm' });
+		const mimeType = mediaRecorder.mimeType || 'audio/webm';
+		const raw = new Blob(chunks, { type: mimeType });
+		if (raw.size === 0) { voiceState.set('idle'); return; }
+		const blob = await blobToWav(raw, audioCtx);
 		mediaRecorder.stream.getTracks().forEach(t => t.stop());
 		mediaRecorder = null;
 
