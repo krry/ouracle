@@ -18,7 +18,7 @@
 	--bg:        hsl(var(--hue), 12%, 5%);
 	--surface:   hsl(var(--hue), 10%, 9%);
 	--border:    hsl(var(--hue), 10%, 16%);
-	--muted:     hsl(var(--hue), 8%, 55%);
+	--muted:     hsl(var(--hue), 8%, 62%);
 	--text:      hsl(var(--hue), 10%, 88%);
 	--accent:    hsl(var(--accent-hue), 60%, 65%);
 
@@ -26,13 +26,14 @@
 	animation: accent-breathe 90s ease-in-out infinite;
 
 	--radius: 4px;
-	--font-mono: 'Fira Code', 'Fira Mono', 'Menlo', monospace;
-	--font-sans: 'Inter', system-ui, sans-serif;
+	--leading: 1.382;
+	--font-mono: "SF Mono", 'Fira Code', 'Fira Mono', 'Menlo', monospace;
+	--font-sans: "SF Pro", system-ui, sans-serif;
 
 	/* ambience slider: 0 = bare, 1 = full */
 	--ambience: 1;
 
-	--font-display: 'Crimson Pro', 'Georgia', serif;
+	--font-display: "New York", "Georgia", serif;
 	--space-xs: 0.5rem;
 	--space-sm: 1rem;
 	--space-md: 2rem;
@@ -85,6 +86,7 @@ body {
 
 code, pre, kbd, samp {
 	font-family: var(--font-mono);
+	font-size: 0.8em;
 }
 
 button, input, select, textarea, nav, label {
