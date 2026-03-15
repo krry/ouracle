@@ -60,8 +60,10 @@ const app = express();
 const ALLOWED_ORIGINS = [
   'https://ouracle.kerry.ink',
   'http://localhost:2532',
+  'https://localhost:2532',
   'http://localhost:5173',
   'http://souvenir.local:2532',
+  'https://souvenir.local:2532',
 ];
 
 app.use((req, res, next) => {
