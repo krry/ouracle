@@ -242,7 +242,7 @@ fn cmd_ambiance(cfg: &mut Config, on: bool) -> Result<()> {
 
 fn cmd_help() {
     println!(
-        r#"Clea — Chief Priestess of Ouracle
+        r#"Clea — chief priestess of Ouracle. CLI/TUI
 
 USAGE
   clea                        start a session
