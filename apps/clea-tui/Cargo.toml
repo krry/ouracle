@@ -2,7 +2,7 @@
 name = "clea-tui"
 version = "0.2.0"
 edition = "2024"
-description = "Clea — a terminal oracle powered by Ouracle. macOS only."
+description = "Clea — Chief Priestess of Ouracle. macOS only."
 
 [[bin]]
 name = "clea"
