@@ -33,22 +33,33 @@
     return new THREE.CanvasTexture(cvs);
   }
 
-  function makeStarGroup(nPoints: number, count: number, color: number, size: number) {
-    const geo = new THREE.BufferGeometry();
-    const pos = new Float32Array(count * 3);
-    for (let i = 0; i < count * 3; i++) pos[i] = (Math.random() - 0.5) * 6;
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    const mat = new THREE.PointsMaterial({
-      map: makeStarTexture(nPoints),
-      color,
-      size,
-      transparent: true,
-      opacity: 0.65,
-      alphaTest: 0.01,
-      depthWrite: false,
-      sizeAttenuation: true,
-    });
-    return new THREE.Points(geo, mat);
+  interface StarGroup {
+    cloud: THREE.Group;
+    sprites: { sprite: THREE.Sprite; rate: number }[];
+  }
+
+  function makeStarGroup(nPoints: number, count: number, color: number, size: number): StarGroup {
+    const tex = makeStarTexture(nPoints);
+    const cloud = new THREE.Group();
+    const sprites: { sprite: THREE.Sprite; rate: number }[] = [];
+
+    for (let i = 0; i < count; i++) {
+      const mat = new THREE.SpriteMaterial({
+        map: tex, color, transparent: true, opacity: 0.65, depthWrite: false,
+        rotation: Math.random() * Math.PI * 2,
+      });
+      const sprite = new THREE.Sprite(mat);
+      sprite.position.set(
+        (Math.random() - 0.5) * 6,
+        (Math.random() - 0.5) * 6,
+        (Math.random() - 0.5) * 6,
+      );
+      sprite.scale.setScalar(size);
+      cloud.add(sprite);
+      const rate = (0.002 + Math.random() * 0.004) * (Math.random() < 0.5 ? 1 : -1);
+      sprites.push({ sprite, rate });
+    }
+    return { cloud, sprites };
   }
 
   onMount(() => {
@@ -63,14 +74,14 @@
     camera.position.z = 3;
 
     // Star groups: [points, count, color, size]
-    const groups = [
+    const groups: StarGroup[] = [
       makeStarGroup(5, 80, 0x8ab4d4, 0.07),  // 5-pt, steel blue
       makeStarGroup(4, 50, 0xb4a8e8, 0.06),  // 4-pt, lavender
       makeStarGroup(6, 40, 0x6abfbf, 0.08),  // 6-pt, teal
       makeStarGroup(3, 20, 0x9ecde8, 0.10),  // 3-pt, light blue, larger
       makeStarGroup(8, 15, 0xd4b8f0, 0.05),  // 8-pt, soft violet, small
     ];
-    groups.forEach(g => scene.add(g));
+    groups.forEach(({ cloud }) => scene.add(cloud));
 
     const onResize = () => {
       const nw = canvas.clientWidth, nh = canvas.clientHeight;
@@ -83,10 +94,12 @@
     let raf: number;
     function tick() {
       raf = requestAnimationFrame(tick);
-      groups.forEach((g, i) => {
-        g.rotation.y += 0.0003 + i * 0.00004;
-        g.rotation.x += 0.0001 + i * 0.00002;
-        g.rotation.z += 0.00015 * (i % 2 === 0 ? 1 : -1);
+      groups.forEach(({ cloud, sprites }, i) => {
+        cloud.rotation.y += 0.0003 + i * 0.00004;
+        cloud.rotation.x += 0.0001 + i * 0.00002;
+        sprites.forEach(({ sprite, rate }) => {
+          (sprite.material as THREE.SpriteMaterial).rotation += rate;
+        });
       });
       renderer.render(scene, camera);
     }
@@ -174,7 +187,7 @@ h1 {
 }
 .body {
   font-size: 0.95rem;
-  line-height: 1.7;
+  line-height: var(--leading);
   color: var(--muted);
   max-width: 420px;
 }
