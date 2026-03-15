@@ -19,6 +19,26 @@ jobs:
         with:
           targets: aarch64-apple-darwin,x86_64-apple-darwin
 
+      - name: import signing certificate
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: |
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain"
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          echo "$APPLE_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" \
+            -k "$KEYCHAIN_PATH" \
+            -P "$APPLE_CERTIFICATE_PASSWORD" \
+            -T /usr/bin/codesign
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+          security set-key-partition-list \
+            -S apple-tool:,apple: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
       - name: build arm64
         working-directory: apps/clea-tui
         run: cargo build --release --target aarch64-apple-darwin
@@ -27,13 +47,31 @@ jobs:
         working-directory: apps/clea-tui
         run: cargo build --release --target x86_64-apple-darwin
 
-      - name: lipo universal binary
+      - name: lipo + sign + notarize
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
         run: |
           lipo -create \
             apps/clea-tui/target/aarch64-apple-darwin/release/clea \
             apps/clea-tui/target/x86_64-apple-darwin/release/clea \
             -output clea
-          codesign --sign - --force clea
+
+          codesign \
+            --sign "Developer ID Application: Kerry Snyder ($APPLE_TEAM_ID)" \
+            --options runtime \
+            --timestamp \
+            --force \
+            clea
+
+          zip clea-notarize.zip clea
+          xcrun notarytool submit clea-notarize.zip \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait
+
           tar czf clea-macos.tar.gz clea
 
       - name: upload release
