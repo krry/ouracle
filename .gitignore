@@ -11,3 +11,4 @@ data/tts_cache/
 .worktrees/
 .vercel
 .env*.local
+apps/web/.svelte-kit/
