@@ -2448,6 +2448,7 @@ dependencies = [
  "chrono",
  "color-eyre",
  "crossterm",
+ "libc",
  "rand",
  "ratatui",
  "reqwest",

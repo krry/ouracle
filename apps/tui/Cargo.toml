@@ -15,3 +15,4 @@ serde_json = "1.0.140"
 tokio = "1.50.0"
 reqwest = { version = "0.12.14", features = ["blocking", "json"] }
 sha2 = "0.10.8"
+libc = "0.2.183"

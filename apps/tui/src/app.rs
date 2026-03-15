@@ -112,6 +112,7 @@ pub struct App {
     pub ptt_space_last_repeat: Option<Instant>,
     pub stt_active_ptt: bool,
     pub stt_ripple_accum_ms: f32,
+    ambient_proc: Option<Child>,
 }
 
 impl App {
@@ -148,7 +149,7 @@ impl App {
             totem: None,
             voice_intensity: 0.0,
             voice_target: 0.0,
-            voice_mode: VoiceMode::Say,
+            voice_mode: VoiceMode::Fish,
             priestess_display: String::new(),
             priestess_prev: String::new(),
             priestess_transition_ms: 0.0,
@@ -157,7 +158,7 @@ impl App {
             priestess_queue: Vec::new(),
             priestess_accum_ms: 0.0,
             seeker_fade_ms: 0.0,
-            seeker_fade_duration_ms: 480.0,
+            seeker_fade_duration_ms: 1200.0,
             seeker_fade_line: String::new(),
             priestess_typing: false,
             cursor_visible: false,
@@ -189,7 +190,9 @@ impl App {
             ptt_space_last_repeat: None,
             stt_active_ptt: false,
             stt_ripple_accum_ms: 0.0,
+            ambient_proc: None,
         };
+        app.ambient_proc = spawn_ambient();
         app.start_priestess_line("Welcome, traveler...\n\nHow are you arriving?".to_string());
         app
     }
@@ -221,6 +224,8 @@ impl App {
                         return (false, None);
                     }
                     self.push_history(&line);
+                    self.seeker_fade_line = line.clone();
+                    self.seeker_fade_ms = 1.0;
                     let (req, echo) = self.parse_input(&line);
                     if let Some(msg) = echo {
                         self.push_message(msg);
@@ -384,11 +389,6 @@ impl App {
 
         if self.priestess_typing && self.priestess_queue.is_empty() {
             self.priestess_typing = false;
-            if !self.seeker_last_line.is_empty() {
-                self.seeker_fade_line = self.seeker_last_line.clone();
-                self.seeker_fade_ms = 1.0;
-            }
-            self.seeker_last_line.clear();
             if !self.priestess_line_queue.is_empty() {
                 let delay_ms = self.priestess_display.chars().count() as f32 * pace_to_char_ms(self.pace);
                 self.priestess_next_delay_ms = delay_ms.max(0.0);
@@ -400,6 +400,7 @@ impl App {
             if self.seeker_fade_ms >= self.seeker_fade_duration_ms {
                 self.seeker_fade_ms = 0.0;
                 self.seeker_fade_line.clear();
+                self.seeker_last_line.clear();
             }
         }
 
@@ -1149,7 +1150,7 @@ impl App {
         } else if msg.starts_with("You:") {
             self.voice_target = 0.0;
         }
-        self.messages.push(msg);
+        self.messages.push(strip_audio_tags(&msg));
         if self.history_offset == 0 {
             self.history_offset = 0;
         }
@@ -1196,6 +1197,20 @@ impl App {
     }
 }
 
+impl Drop for App {
+    fn drop(&mut self) {
+        if let Some(mut child) = self.ambient_proc.take() {
+            let _ = child.kill();
+        }
+    }
+}
+
+impl App {
+    pub fn ambient_pid(&self) -> Option<u32> {
+        self.ambient_proc.as_ref().map(|c| c.id())
+    }
+}
+
 impl App {
     fn queue_priestess_line(&mut self, line: String) {
         if self.priestess_typing || !self.priestess_queue.is_empty() {
@@ -1210,21 +1225,22 @@ impl App {
     }
 
     fn start_priestess_line(&mut self, line: String) {
+        let display_line = strip_audio_tags(&line);
         self.voice_target = 1.0;
         self.aura.launch_ripples(0.7, self.pace);
         match self.voice_mode {
             VoiceMode::Off => {}
             VoiceMode::Say => {
-                speak_line(&line);
+                speak_line(&display_line);
             }
             VoiceMode::Fish => {
                 self.tts_error = None;
-                self.tts_duration_rx = spawn_tts(line.clone());
+                self.tts_duration_rx = spawn_tts(line);
                 if self.tts_duration_rx.is_none() {
                     let msg = "Fish TTS spawn failed.".to_string();
                     log_tts_error(&msg);
                     self.tts_error = Some(msg);
-                    speak_line(&line);
+                    speak_line(&display_line);
                 }
             }
         }
@@ -1233,12 +1249,12 @@ impl App {
             self.priestess_transition_ms = 1.0;
         }
         self.priestess_display.clear();
-        self.priestess_queue = line.chars().collect();
+        self.priestess_queue = display_line.chars().collect();
         self.priestess_accum_ms = 0.0;
         self.priestess_typing = true;
         self.priestess_next_delay_ms = 0.0;
         self.priestess_target_duration_ms = None;
-        self.priestess_line_chars = line.chars().count().max(1);
+        self.priestess_line_chars = display_line.chars().count().max(1);
         self.priestess_elapsed_ms = 0.0;
     }
 
@@ -1381,7 +1397,7 @@ impl App {
             let remaining_chars = self.priestess_line_chars.saturating_sub(typed).max(1) as f32;
             let remaining_ms = (target_ms - self.priestess_elapsed_ms).max(0.0);
             let per_char = remaining_ms / remaining_chars;
-            return per_char.clamp(15.0, 220.0);
+            return per_char.clamp(20.0, 200.0);
         }
         pace_to_char_ms(self.pace)
     }
@@ -1404,6 +1420,9 @@ impl App {
             return false;
         }
         if self.awaiting_consent || self.awaiting_name || self.awaiting_password {
+            return false;
+        }
+        if !self.input.is_empty() && !self.stt_recording {
             return false;
         }
         match kind {
@@ -1467,6 +1486,35 @@ fn normalize_priestess_line(msg: &str) -> Option<String> {
     if line.is_empty() { None } else { Some(line) }
 }
 
+/// Strip Fish.audio inline prosody tags (e.g. [laugh], [pause], [breath]) before display.
+/// Tags are kept in the raw text sent to fish_tts so the voice model interprets them.
+fn strip_audio_tags(text: &str) -> String {
+    let mut result = String::with_capacity(text.len());
+    let mut chars = text.chars().peekable();
+    while let Some(ch) = chars.next() {
+        if ch == '[' {
+            // Collect until ']' — only strip if content looks like a tag identifier
+            let mut inner = String::new();
+            let mut closed = false;
+            for c in chars.by_ref() {
+                if c == ']' { closed = true; break; }
+                inner.push(c);
+            }
+            let is_tag = closed
+                && !inner.is_empty()
+                && inner.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '=' || c == '.' || c == ' ' || c == '-' || c == ',');
+            if !is_tag {
+                result.push('[');
+                result.push_str(&inner);
+                if closed { result.push(']'); }
+            }
+        } else {
+            result.push(ch);
+        }
+    }
+    result.trim().to_string()
+}
+
 fn is_ptt_key(code: KeyCode, modifiers: KeyModifiers) -> bool {
     let mod_only = modifiers.contains(KeyModifiers::SUPER) || modifiers.contains(KeyModifiers::ALT);
     matches!(code, KeyCode::F(9))
@@ -1497,6 +1545,34 @@ fn stt_record_path() -> PathBuf {
         .unwrap_or(0);
     let key = random_hex(4);
     stt_record_dir().join(format!("stt_{}_{}.wav", ts, key))
+}
+
+fn spawn_ambient() -> Option<Child> {
+    let runner = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../api/scripts/ambient-runner.js");
+    let log_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../logs/ambient.log");
+    let log = std::fs::OpenOptions::new().create(true).append(true).open(&log_path);
+    if !runner.exists() {
+        if let Ok(mut f) = log { let _ = std::io::Write::write_all(&mut f, b"ambient-runner.js not found\n"); }
+        return None;
+    }
+    let bun = std::env::var("BUN_PATH")
+        .unwrap_or_else(|_| "/Users/kerry/.bun/bin/bun".to_string());
+    let result = Command::new(&bun)
+        .arg(&runner)
+        .stdout(std::process::Stdio::null())
+        .stderr(match std::fs::OpenOptions::new().create(true).append(true).open(&log_path) {
+            Ok(f) => std::process::Stdio::from(f),
+            Err(_) => std::process::Stdio::null(),
+        })
+        .spawn();
+    if let Ok(mut f) = log {
+        match &result {
+            Ok(c) => { let _ = std::io::Write::write_fmt(&mut f, format_args!("ambient spawned pid={}\n", c.id())); }
+            Err(e) => { let _ = std::io::Write::write_fmt(&mut f, format_args!("ambient spawn error: {e}\n")); }
+        }
+    }
+    result.ok()
 }
 
 fn spawn_stt_recorder(path: &Path) -> Result<Child, String> {
@@ -1664,7 +1740,7 @@ fn spawn_tts(line: String) -> Option<Receiver<Result<f32, String>>> {
         }
     };
     let model = std::env::var("FISH_AUDIO_MODEL").unwrap_or_else(|_| "s1".to_string());
-    let model_id = std::env::var("FISH_AUDIO_VOICE_OPRAH").ok();
+    let model_id = std::env::var("FISH_AUDIO_VOICE_GALADRIEL").ok();
     let (tx, rx) = mpsc::channel();
     thread::spawn(move || {
         let duration = match fish_tts(&line, &api_key, &model, model_id.as_deref()) {

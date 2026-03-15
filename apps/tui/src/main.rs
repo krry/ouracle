@@ -1,11 +1,13 @@
 // src/main.rs
 
 use std::io;
+use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::mpsc;
 use std::thread;
 use std::time::{Duration, Instant};
 
 use color_eyre::eyre::Result;
+use libc;
 use crossterm::{
     // event::{self, Event, KeyCode},
     event::{self, DisableMouseCapture, EnableMouseCapture},
@@ -27,9 +29,39 @@ mod totem;
 use crate::app::App;
 use crate::api::{ApiRequest, ApiResponse, execute as execute_api};
 
+// Global ambient PID so SIGTERM handler can kill it (process::exit skips Drop)
+static AMBIENT_PID: AtomicI32 = AtomicI32::new(0);
+
+fn restore_terminal() {
+    let _ = disable_raw_mode();
+    let _ = execute!(io::stdout(), DisableMouseCapture, LeaveAlternateScreen);
+}
+
 fn main() -> Result<()> {
     color_eyre::install()?;
+
+    // Restore terminal on panic
+    let default_hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        restore_terminal();
+        default_hook(info);
+    }));
+
+    // Restore terminal on SIGTERM (cargo watch kills with SIGTERM on recompile)
+    unsafe {
+        libc::signal(libc::SIGTERM, sigterm_handler as libc::sighandler_t);
+    }
+
     run()
+}
+
+extern "C" fn sigterm_handler(_: libc::c_int) {
+    restore_terminal();
+    let pid = AMBIENT_PID.load(Ordering::Relaxed);
+    if pid > 0 {
+        unsafe { libc::kill(pid, libc::SIGTERM); }
+    }
+    std::process::exit(0);
 }
 
 fn run() -> Result<()> {
@@ -56,6 +88,9 @@ fn app_loop(
     terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
 ) -> Result<()> {
     let mut app = App::new();
+    if let Some(pid) = app.ambient_pid() {
+        AMBIENT_PID.store(pid as i32, Ordering::Relaxed);
+    }
     let (req_tx, req_rx) = mpsc::channel::<ApiRequest>();
     let (resp_tx, resp_rx) = mpsc::channel::<ApiResponse>();
 
