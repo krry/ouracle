@@ -24,12 +24,14 @@
 	let totemSession: TotemSession | null = null;
 
 	async function ensureGuestToken(): Promise<void> {
-		const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('clea_guest_token') : null;
-		if (stored) { guestToken = stored; return; }
+		const stored = localStorage.getItem('clea_guest_token');
+		if (stored && stored !== 'undefined') { guestToken = stored; return; }
+		localStorage.removeItem('clea_guest_token');
 		const BASE = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
 		const res = await fetch(`${BASE}/aspire`, { method: 'POST' });
+		if (!res.ok) throw new Error(`/aspire failed: ${res.status}`);
 		const { guest_token } = await res.json();
-		if (typeof localStorage !== 'undefined') localStorage.setItem('clea_guest_token', guest_token);
+		localStorage.setItem('clea_guest_token', guest_token);
 		guestToken = guest_token;
 	}
 

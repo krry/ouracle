@@ -111,6 +111,7 @@ async function authenticateOrGuest(req, res, next) {
     req.is_guest = true;
     next();
   } catch (e) {
+    console.error('[authenticateOrGuest]', e);
     res.status(500).json({ error: e.message });
   }
 }
