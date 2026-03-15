@@ -2,7 +2,7 @@
 
 **Chief Priestess of Ouracle.**
 
-Clea is a terminal chat client for [Ouracle](https://ouracle.kerry.ink) — a reflective AI that helps you understand yourself through conversation. She runs in your macOS terminal, speaks and listens with Fish Audio, and remembers your sessions.
+Clea is a shell chat client for [Ouracle](https://ouracle.kerry.ink) — a reflective AI that helps you understand yourself through conversation. She runs in your macOS shell, speaks and listens with Fish Audio, and remembers your sessions.
 
 Built on [ripl-tui](https://crates.io/crates/ripl-tui) — a ratatui TUI framework for AI chat.
 
