@@ -39,6 +39,10 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+html {
+	font-size: 20px;
+}
+
 html, body {
 	min-height: 100%;
 	background: var(--bg);
