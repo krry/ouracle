@@ -1092,7 +1092,7 @@ app.post('/tts', authenticate, async (req, res) => {
 });
 
 // ── POST /stt — proxy Fish Audio STT; returns { text } ───────────────────────
-app.post('/stt', authenticate, async (req, res) => {
+app.post('/stt', authenticateOrGuest, async (req, res) => {
   if (!hasFishKey()) return res.status(503).json({ error: 'STT not configured.' });
   const fishKey = process.env.FISH_AUDIO_API_KEY || process.env.FISH_API_KEY;
   try {
