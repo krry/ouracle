@@ -2,7 +2,7 @@
 name = "clea-tui"
 version = "0.2.0"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.94"
 description = "Clea — Chief Priestess of Ouracle. CLI/TUI for macOS."
 license = "MIT"
 repository = "https://github.com/krry/ouracle"
