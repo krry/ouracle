@@ -140,7 +140,9 @@ fn cmd_config() -> Result<()> {
         fs::write(&path, SETTINGS_TEMPLATE)?;
         println!("Created {}", path.display());
     }
-    let editor = std::env::var("EDITOR").unwrap_or_else(|_| "open".to_string());
+    let editor = std::env::var("EDITOR").unwrap_or_else(|_| {
+        if cfg!(target_os = "macos") { "open".to_string() } else { "vi".to_string() }
+    });
     Command::new(&editor).arg(&path).status()?;
     Ok(())
 }

@@ -2,7 +2,7 @@
 
 **Chief Priestess of Ouracle.**
 
-Clea is a shell chat client for [Ouracle](https://ouracle.kerry.ink) — a reflective AI that helps you understand yourself through conversation. She runs in your macOS shell, speaks and listens with Fish Audio, and remembers your sessions.
+Clea is a shell chat client for [Ouracle](https://ouracle.kerry.ink) — a reflective AI that helps you understand yourself through conversation. She runs in your shell, speaks and listens with Fish Audio, and remembers your sessions.
 
 Built on [ripl-tui](https://crates.io/crates/ripl-tui) — a ratatui TUI framework for AI chat.
 
@@ -16,7 +16,7 @@ cargo install clea-tui
 
 Or download a pre-built universal macOS binary from [releases](https://github.com/krry/ouracle/releases).
 
-**macOS only for now.** Audio features depend on `afplay` and Fish Audio.
+Audio features require platform tools: `afplay` on macOS or `paplay`/`aplay`/`mpv`/`ffplay` on Linux. TTS uses `say` (macOS) or `espeak`/`espeak-ng` (Linux).
 
 ---
 
