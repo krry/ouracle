@@ -56,6 +56,26 @@ import { auth } from './auth-config.js';
 import { toNodeHandler } from 'better-auth/node';
 
 const app = express();
+
+const ALLOWED_ORIGINS = [
+  'https://ouracle.kerry.ink',
+  'http://localhost:2532',
+  'http://localhost:5173',
+  'http://souvenir.local:2532',
+];
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 app.use(express.json());
 
 // Mount BetterAuth — handles /api/auth/* routes (Express 4 wildcard)

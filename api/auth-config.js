@@ -24,7 +24,9 @@ export const auth = betterAuth({
   // passkey plugin requires better-auth ≥2.x; deferred until upgrade
   trustedOrigins: [
     'https://ouracle.kerry.ink',
+    'http://localhost:2532',
     'http://localhost:5173',
+    'http://souvenir.local:2532',
   ],
 });
 
