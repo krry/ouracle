@@ -1,15 +1,17 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
-	import { creds, messages, streaming, voiceState, waveform, ambience, guestTurns } from './stores';
+	import { creds, authed, messages, streaming, voiceState, waveform, ambience, guestTurns, ttsEnabled } from './stores';
 	import { chat, tts, stt } from './api';
 	import Breath from './Breath.svelte';
 	import type { Credentials } from './stores';
 	import { incrementGuestTurns, getGuestTurns, GUEST_LIMIT } from './guestSession';
 	import { renderMarkdown } from './markdown';
+	import { createAudioQueue, type AudioQueue } from './audio';
 
 	export let guestMode = false;
 
+	let audioQueue: AudioQueue | null = null;
 	let sessionId: string | null = null;
 	let input = '';
 	let msgList: HTMLElement;
@@ -59,7 +61,14 @@
 						return [...m];
 					});
 				} else if (event.type === 'break') {
-					// Priestess finished one block — start fresh message
+					// Priestess finished one block — enqueue for TTS, then start fresh message
+					if ($ttsEnabled && audioQueue) {
+						const msgs = get(messages);
+						const last = msgs.at(-1);
+						if (last?.role === 'assistant' && last.content) {
+							audioQueue.enqueue(last.content);
+						}
+					}
 					messages.update(m => [...m, { role: 'assistant', content: '' }]);
 				}
 			})) { /* yield */ }
@@ -71,6 +80,14 @@
 		} finally {
 			// Remove any trailing empty assistant message
 			messages.update(m => m.filter((msg, i) => !(msg.role === 'assistant' && msg.content === '' && i === m.length - 1)));
+			// Enqueue last assistant message for TTS (catches streams with no 'break' event)
+			if ($ttsEnabled && audioQueue) {
+				const msgs = get(messages);
+				const last = msgs.at(-1);
+				if (last?.role === 'assistant' && last.content) {
+					audioQueue.enqueue(last.content);
+				}
+			}
 			streaming.set(false);
 		}
 	}
@@ -78,7 +95,16 @@
 	// Open session on mount — /chat with no session_id bootstraps it
 	onMount(async () => {
 		if (guestMode) await ensureGuestToken();
+		if ($authed && $creds) {
+			const c = $creds as Credentials;
+			audioQueue = createAudioQueue((t) => tts(t, c.access_token));
+		}
 		send('');
+	});
+
+	onDestroy(() => {
+		audioQueue?.flush();
+		audioQueue = null;
 	});
 
 	function handleKey(e: KeyboardEvent) {
@@ -178,8 +204,12 @@
 		</button>
 	</div>
 
-	<!-- ambience slider -->
+	<!-- ambience slider + TTS toggle -->
 	<div class="controls">
+		<label class="tts-toggle" title={$ttsEnabled ? 'mute voice' : 'enable voice'}>
+			<input type="checkbox" bind:checked={$ttsEnabled} />
+			<span>{$ttsEnabled ? '◈' : '◇'}</span>
+		</label>
 		<input
 			type="range" min="0" max="1" step="0.01"
 			bind:value={$ambience}
@@ -333,4 +363,14 @@ input[type="range"]::-webkit-slider-thumb {
 	height: 10px;
 	width: 10px;
 }
+
+.tts-toggle {
+	display: grid;
+	place-items: center;
+	cursor: pointer;
+	color: var(--muted);
+	font-size: 1rem;
+}
+.tts-toggle input { display: none; }
+.tts-toggle:has(input:checked) { color: var(--accent); }
 </style>
