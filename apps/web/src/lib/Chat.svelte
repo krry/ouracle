@@ -166,17 +166,18 @@
 		if (!mediaRecorder) return;
 		voiceState.set('transcribing');
 		mediaRecorder.stop();
-		const c = $creds as Credentials;
+		const token = guestMode ? (guestToken ?? '') : (($creds as Credentials | null)?.access_token ?? '');
 		await new Promise<void>(res => { mediaRecorder!.onstop = () => res(); });
 		const blob = new Blob(chunks, { type: 'audio/webm' });
 		mediaRecorder.stream.getTracks().forEach(t => t.stop());
 		mediaRecorder = null;
 
 		try {
-			const text = await stt(blob, c.access_token);
+			const text = await stt(blob, token);
 			voiceState.set('idle');
 			if (text) send(text);
-		} catch {
+		} catch (e) {
+			console.error('STT failed:', e);
 			voiceState.set('idle');
 		}
 	}
