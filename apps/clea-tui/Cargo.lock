@@ -141,6 +141,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "clea-tui"
+version = "0.2.0"
+dependencies = [
+ "chrono",
+ "color-eyre",
+ "crossterm 0.28.1",
+ "ratatui",
+ "reqwest",
+ "ripl",
+ "serde",
+ "serde_json",
+ "toml",
+]
+
+[[package]]
 name = "color-eyre"
 version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1266,21 +1281,6 @@ dependencies = [
  "serde_json",
  "sha2",
  "textwrap",
- "toml",
-]
-
-[[package]]
-name = "ripltui"
-version = "0.2.0"
-dependencies = [
- "chrono",
- "color-eyre",
- "crossterm 0.28.1",
- "ratatui",
- "reqwest",
- "ripl",
- "serde",
- "serde_json",
  "toml",
 ]
 
