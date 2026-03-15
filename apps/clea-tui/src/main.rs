@@ -227,7 +227,7 @@ fn cmd_ambiance(cfg: &mut Config, on: bool) -> Result<()> {
         );
         let player = AMBIENT_PLAYER.replace(
             "join(import.meta.dir, 'data', 'ambient')",
-            "join(import.meta.dir, 'data')",
+            "join(import.meta.dir)",
         );
         fs::write(dir.join("ambient-runner.js"), runner)?;
         fs::write(dir.join("ambient-player.js"), player)?;
@@ -235,7 +235,7 @@ fn cmd_ambiance(cfg: &mut Config, on: bool) -> Result<()> {
         cfg.settings.ambiance = Some(true);
         save_settings(&cfg.settings)?;
         println!("Ambiance on. Scripts written to {}", dir.display());
-        println!("Audio files needed in {}/data/", dir.display());
+        println!("Audio files needed in {}/", dir.display());
     } else {
         cfg.settings.ambiance = Some(false);
         save_settings(&cfg.settings)?;
