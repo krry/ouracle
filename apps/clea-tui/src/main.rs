@@ -111,7 +111,7 @@ fn resolve_base_url(cfg: &Config) -> String {
     std::env::var("OURACLE_BASE_URL")
         .ok()
         .or_else(|| cfg.settings.base_url.clone())
-        .unwrap_or_else(|| "http://127.0.0.1:3737".to_string())
+        .unwrap_or_else(|| "https://api.ouracle.kerry.ink".to_string())
 }
 
 fn resolve_voice_id(cfg: &Config) -> Option<String> {

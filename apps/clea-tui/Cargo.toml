@@ -3,6 +3,11 @@ name = "clea-tui"
 version = "0.2.0"
 edition = "2024"
 description = "Clea — Chief Priestess of Ouracle. CLI/TUI for macOS."
+license = "MIT"
+repository = "https://github.com/krry/ouracle"
+homepage = "https://clea.kerry.ink"
+keywords = ["tui", "ai", "chat", "terminal", "ratatui"]
+categories = ["command-line-interface", "command-line-utilities"]
 
 [[bin]]
 name = "clea"
