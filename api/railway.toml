@@ -1,5 +1,6 @@
 [build]
 builder = "nixpacks"
+buildCommand = "bun install"
 
 [deploy]
 startCommand = "bun start"
