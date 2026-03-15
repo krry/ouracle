@@ -5,8 +5,14 @@ greet name:
 
 set shell := ["fish", "-c"]
 
+dev:
+    fish -c 'cd api; bun dev' & fish -c 'cd apps/web; bun run dev'
+
 apid:
     cd api; bun dev
+
+webd:
+    cd apps/web; bun run dev
 
 api:
     cd api; bun start
