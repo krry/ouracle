@@ -6,6 +6,7 @@
 	import Breath from './Breath.svelte';
 	import type { Credentials } from './stores';
 	import { incrementGuestTurns, getGuestTurns, GUEST_LIMIT } from './guestSession';
+	import { TotemSession } from './totemSession';
 	import { renderMarkdown } from './markdown';
 	import { createAudioQueue, type AudioQueue } from './audio';
 
@@ -20,6 +21,7 @@
 	let chunks: Blob[] = [];
 
 	let guestToken: string | null = null;
+	let totemSession: TotemSession | null = null;
 
 	async function ensureGuestToken(): Promise<void> {
 		const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('clea_guest_token') : null;
@@ -98,6 +100,8 @@
 		if ($authed && $creds) {
 			const c = $creds as Credentials;
 			audioQueue = createAudioQueue((t) => tts(t, c.access_token));
+			totemSession = new TotemSession(c.access_token, c.seeker_id);
+			totemSession.load().catch(() => {}); // non-blocking, non-fatal
 		}
 		send('');
 	});
@@ -105,6 +109,9 @@
 	onDestroy(() => {
 		audioQueue?.flush();
 		audioQueue = null;
+		if (totemSession && sessionId) {
+			totemSession.distillAndSave(sessionId).catch(() => {});
+		}
 	});
 
 	function handleKey(e: KeyboardEvent) {
