@@ -67,7 +67,7 @@
     }
   }
 
-  async function socialSignIn(provider: 'google' | 'github') {
+  async function socialSignIn(provider: 'google' | 'github' | 'apple') {
     error = '';
     busy = true;
     try {
@@ -101,6 +101,7 @@
   </header>
 
   <div class="social-row">
+    <button class="social" onclick={() => socialSignIn('apple')} disabled={busy}>Apple</button>
     <button class="social" onclick={() => socialSignIn('google')} disabled={busy}>Google</button>
     <button class="social" onclick={() => socialSignIn('github')} disabled={busy}>GitHub</button>
     <button class="social" onclick={passkeySignIn} disabled={busy}>Passkey</button>

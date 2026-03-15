@@ -17,7 +17,10 @@ export const auth = betterAuth({
       clientId: process.env.OAUTH_GITHUB_CLIENT_ID,
       clientSecret: process.env.OAUTH_GITHUB_CLIENT_SECRET,
     },
-    // Apple OAuth deferred
+    apple: {
+      clientId: process.env.OAUTH_APPLE_CLIENT_ID,
+      clientSecret: process.env.OAUTH_APPLE_CLIENT_SECRET,
+    },
   },
   plugins: [passkey()],
   trustedOrigins: [
