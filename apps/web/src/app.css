@@ -5,7 +5,7 @@
 	--bg:        hsl(var(--hue), 12%, 5%);
 	--surface:   hsl(var(--hue), 10%, 9%);
 	--border:    hsl(var(--hue), 10%, 16%);
-	--muted:     hsl(var(--hue), 8%, 40%);
+	--muted:     hsl(var(--hue), 8%, 55%);
 	--text:      hsl(var(--hue), 10%, 88%);
 	--accent:    hsl(var(--hue), 60%, 65%);
 
@@ -31,7 +31,7 @@
     --bg:      hsl(var(--hue), 12%, 97%);
     --surface: hsl(var(--hue), 10%, 92%);
     --border:  hsl(var(--hue), 10%, 82%);
-    --muted:   hsl(var(--hue), 8%, 50%);
+    --muted:   hsl(var(--hue), 8%, 38%);
     --text:    hsl(var(--hue), 10%, 10%);
     --accent:  hsl(var(--hue), 60%, 40%);
   }
