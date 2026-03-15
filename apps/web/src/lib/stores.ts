@@ -43,3 +43,13 @@ export const waveform = writable<Float32Array>(new Float32Array(64));
 
 // ── Ambience ─────────────────────────────────────────────────────────────────
 export const ambience = writable(1.0);      // 0 = bare, 1 = full
+
+// ── Guest session ─────────────────────────────────────────────────────────────
+import { getGuestTurns } from './guestSession';
+
+// Reactive view of the guest turn counter. Updated by Chat.svelte after each turn.
+export const guestTurns = writable<number>(
+  typeof localStorage !== 'undefined' ? getGuestTurns() : 0
+);
+
+export const ttsEnabled = writable(false);  // opt-in; user toggles in controls

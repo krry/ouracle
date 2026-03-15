@@ -1,9 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { creds, messages, streaming, voiceState, waveform, ambience } from './stores';
+	import { get } from 'svelte/store';
+	import { creds, messages, streaming, voiceState, waveform, ambience, guestTurns } from './stores';
 	import { chat, tts, stt } from './api';
 	import Breath from './Breath.svelte';
 	import type { Credentials } from './stores';
+	import { incrementGuestTurns, getGuestTurns, GUEST_LIMIT } from './guestSession';
+	import { renderMarkdown } from './markdown';
+
+	export let guestMode = false;
 
 	let sessionId: string | null = null;
 	let input = '';
@@ -12,6 +17,18 @@
 	let mediaRecorder: MediaRecorder | null = null;
 	let chunks: Blob[] = [];
 
+	let guestToken: string | null = null;
+
+	async function ensureGuestToken(): Promise<void> {
+		const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('clea_guest_token') : null;
+		if (stored) { guestToken = stored; return; }
+		const BASE = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
+		const res = await fetch(`${BASE}/aspire`, { method: 'POST' });
+		const { guest_token } = await res.json();
+		if (typeof localStorage !== 'undefined') localStorage.setItem('clea_guest_token', guest_token);
+		guestToken = guest_token;
+	}
+
 	// scroll to bottom on new messages
 	$: if ($messages && msgList) {
 		setTimeout(() => msgList.scrollTo({ top: msgList.scrollHeight, behavior: 'smooth' }), 50);
@@ -19,16 +36,20 @@
 
 	async function send(text: string) {
 		if ($streaming) return;
-		const c = $creds as Credentials;
+		const token = !guestMode ? ($creds as Credentials | null)?.access_token ?? '' : guestToken ?? '';
 		// Only push user message if there's actual text (first turn may be empty — opens the session)
 		if (text.trim()) {
 			messages.update(m => [...m, { role: 'user', content: text }]);
+			if (guestMode) {
+				incrementGuestTurns();
+				guestTurns.set(getGuestTurns());
+			}
 		}
 		messages.update(m => [...m, { role: 'assistant', content: '' }]);
 		streaming.set(true);
 
 		try {
-			for await (const _ of chat(c.access_token, text, sessionId, (event) => {
+			for await (const _ of chat(token, text, sessionId, (event) => {
 				if (event.type === 'session') {
 					sessionId = event.session_id as string;
 				} else if (event.type === 'token') {
@@ -42,6 +63,11 @@
 					messages.update(m => [...m, { role: 'assistant', content: '' }]);
 				}
 			})) { /* yield */ }
+		} catch (e: unknown) {
+			const msg = e instanceof Error ? e.message : String(e);
+			if (msg.includes('guest_limit')) {
+				guestTurns.set(GUEST_LIMIT);
+			}
 		} finally {
 			// Remove any trailing empty assistant message
 			messages.update(m => m.filter((msg, i) => !(msg.role === 'assistant' && msg.content === '' && i === m.length - 1)));
@@ -50,7 +76,10 @@
 	}
 
 	// Open session on mount — /chat with no session_id bootstraps it
-	onMount(() => send(''));
+	onMount(async () => {
+		if (guestMode) await ensureGuestToken();
+		send('');
+	});
 
 	function handleKey(e: KeyboardEvent) {
 		if (e.key === 'Enter' && !e.shiftKey) {
@@ -119,7 +148,7 @@
 			{#if msg.role !== 'system'}
 				<div class="msg {msg.role}">
 					<span class="label">{msg.role === 'user' ? 'you' : 'ouracle'}</span>
-					<p>{msg.content}</p>
+					<div class="prose">{@html renderMarkdown(msg.content)}</div>
 				</div>
 			{/if}
 		{/each}
@@ -194,11 +223,35 @@
 
 .msg.user .label { color: var(--accent); }
 
-.msg p {
+.prose {
 	font-size: 0.95rem;
 	line-height: 1.6;
-	white-space: pre-wrap;
 	word-break: break-word;
+}
+
+.prose :global(p) { margin: 0; line-height: 1.6; }
+.prose :global(p + p) { margin-top: 0.75rem; }
+.prose :global(strong) { color: var(--text); font-weight: 600; }
+.prose :global(em) { color: var(--muted); font-style: italic; }
+.prose :global(code) {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 2px;
+	font-size: 0.85em;
+	padding: 0.1em 0.3em;
+}
+.prose :global(pre) {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	overflow-x: auto;
+	padding: 0.75rem 1rem;
+	margin-top: 0.5rem;
+}
+.prose :global(a) { color: var(--accent); }
+.prose :global(ul), .prose :global(ol) {
+	padding-left: 1.4rem;
+	margin-top: 0.4rem;
 }
 
 .thinking {
