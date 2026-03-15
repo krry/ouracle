@@ -1,10 +1,10 @@
 [package]
-name = "ripltui"
+name = "clea-tui"
 version = "0.2.0"
 edition = "2024"
 
 [[bin]]
-name = "ripltui"
+name = "clea"
 path = "src/main.rs"
 
 [dependencies]
