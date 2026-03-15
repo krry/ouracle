@@ -57,7 +57,7 @@ pub fn ensure_credentials(
     base_url: &str,
 ) -> Result<Option<Credentials>> {
     // Fast path: try saved refresh token.
-    if let Some(rt) = &cfg.refresh_token {
+    if let Some(rt) = cfg.refresh_token() {
         let mut state = State::new(Step::Entry);
         state.connecting = true;
         terminal.draw(|f| draw(f, &mut state))?;
