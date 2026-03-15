@@ -95,8 +95,8 @@ fn resolve_voice_id(cfg: &Config) -> Option<String> {
     cfg.voice_id
         .clone()
         .filter(|v| !v.is_empty())
-        .or_else(|| std::env::var("FISH_AUDIO_VOICE_ONDREA").ok())
         .or_else(|| std::env::var("FISH_AUDIO_VOICE_GALADRIEL").ok())
+        .or_else(|| std::env::var("FISH_AUDIO_VOICE_ONDREA").ok())
         .or_else(|| std::env::var("FISH_AUDIO_VOICE_ID").ok())
 }
 
