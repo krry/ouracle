@@ -1,7 +1,10 @@
 <script lang="ts">
   import '../app.css';
+  import { inject } from '@vercel/analytics';
   import { page } from '$app/stores';
   import type { Snippet } from 'svelte';
+
+  inject();
 
   let { children }: { children: Snippet } = $props();
   const isChat = $derived($page.url.pathname.startsWith('/chat'));

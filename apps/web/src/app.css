@@ -10,7 +10,7 @@
 	--accent:    hsl(var(--hue), 60%, 65%);
 
 	--radius: 4px;
-	--font-mono: 'JetBrains Mono', 'Fira Mono', 'Menlo', monospace;
+	--font-mono: 'Fira Code', 'Fira Mono', 'Menlo', monospace;
 	--font-sans: 'Inter', system-ui, sans-serif;
 
 	/* ambience slider: 0 = bare, 1 = full */
@@ -43,11 +43,19 @@ html, body {
 	min-height: 100%;
 	background: var(--bg);
 	color: var(--text);
-	font-family: var(--font-mono);
+	font-family: var(--font-display);
 	-webkit-font-smoothing: antialiased;
 }
 
 /* safe area for notched phones / home bar */
 body {
 	padding-bottom: env(safe-area-inset-bottom);
+}
+
+code, pre, kbd, samp {
+	font-family: var(--font-mono);
+}
+
+button, input, select, textarea, nav, label {
+	font-family: var(--font-sans);
 }
