@@ -3,9 +3,11 @@
 // Refresh tokens stored hashed; never plaintext in the DB.
 
 import jwt from 'jsonwebtoken';
-import { createHash, randomBytes } from 'crypto';
+import { createHash, randomBytes, scrypt, timingSafeEqual } from 'crypto';
+import { promisify } from 'util';
 import { neon } from '@neondatabase/serverless';
-import argon2 from 'argon2';
+
+const scryptAsync = promisify(scrypt);
 
 const sql = neon(process.env.DATABASE_URL);
 
@@ -31,12 +33,17 @@ export function hashApiKey(apiKey) {
 }
 
 export async function hashPassword(password) {
-  return argon2.hash(password, { type: argon2.argon2id });
+  const salt = randomBytes(16).toString('hex');
+  const buf = await scryptAsync(password, salt, 64);
+  return `${buf.toString('hex')}.${salt}`;
 }
 
-export async function verifyPassword(password, hash) {
-  if (!hash) return false;
-  return argon2.verify(hash, password);
+export async function verifyPassword(password, stored) {
+  if (!stored) return false;
+  const [hashed, salt] = stored.split('.');
+  if (!hashed || !salt) return false;
+  const buf = await scryptAsync(password, salt, 64);
+  return timingSafeEqual(buf, Buffer.from(hashed, 'hex'));
 }
 
 async function verifyApiKey(apiKey) {
