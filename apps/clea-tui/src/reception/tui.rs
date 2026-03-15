@@ -7,12 +7,12 @@ use std::time::{Duration, Instant};
 use color_eyre::eyre::Result;
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
-use ratatui::style::Style;
+use ratatui::style::{Color, Style};
 use ratatui::widgets::{Block, Borders, Clear, Paragraph, Wrap};
 use ratatui::{backend::CrosstermBackend, Frame, Terminal};
 
 use ripl::aura::Aura;
-use ripl::theme::{text_accent, text_primary, text_secondary};
+use ripl::theme::text_accent;
 
 use super::http::{self, Credentials};
 use crate::Config;
@@ -368,7 +368,7 @@ fn draw_input_screen(frame: &mut Frame, state: &State) {
                 .title(title)
                 .border_style(Style::default().fg(text_accent())),
         )
-        .style(Style::default().fg(text_primary()))
+        .style(Style::default().fg(Color::Reset))
         .wrap(Wrap { trim: false });
     frame.render_widget(widget, area);
 
@@ -412,7 +412,7 @@ fn draw_covenant(frame: &mut Frame, lines: &[String], offset: usize) {
                 .title("The Covenant")
                 .border_style(Style::default().fg(text_accent())),
         )
-        .style(Style::default().fg(text_secondary()))
+        .style(Style::default().fg(Color::Reset))
         .wrap(Wrap { trim: true });
     frame.render_widget(widget, area);
 }
