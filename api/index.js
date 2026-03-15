@@ -10,6 +10,7 @@ import {
   hashApiKey,
   hashPassword,
   verifyPassword,
+  verifyAccessToken,
 } from './auth.js';
 import {
   infer,
@@ -47,6 +48,9 @@ import {
   upsertTotem,
   getDevices,
   addDevice,
+  createGuestSession,
+  getGuestSession,
+  incrementGuestTurn,
 } from './db.js';
 import { auth } from './auth-config.js';
 import { toNodeHandler } from 'better-auth/node';
@@ -59,6 +63,38 @@ app.all('/api/auth/*', toNodeHandler(auth));
 
 const ADMIN_KEY = process.env.OURACLE_ADMIN_KEY;
 
+// ─────────────────────────────────────────────
+// GUEST AUTH MIDDLEWARE
+// Accepts seeker JWT (sets req.seeker_id) or guest UUID (sets req.guest_session_id).
+// ─────────────────────────────────────────────
+
+async function authenticateOrGuest(req, res, next) {
+  const token = req.headers.authorization?.replace('Bearer ', '').trim();
+  if (!token) return res.status(401).json({ error: 'No token.' });
+
+  // Try seeker JWT first.
+  try {
+    const payload = verifyAccessToken(token);
+    req.seeker_id = payload.seeker_id;
+    req.is_guest = false;
+    return next();
+  } catch {}
+
+  // Try guest session UUID.
+  try {
+    const guest = await getGuestSession(token);
+    if (!guest) return res.status(401).json({ error: 'Invalid or expired session.' });
+    if (guest.turns_used >= guest.max_turns) {
+      return res.status(403).json({ error: 'Guest turn limit reached.', guest_limit: true });
+    }
+    req.guest_session_id = guest.id;
+    req.is_guest = true;
+    next();
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
+
 // Request logging (minimal, no body)
 app.use((req, res, next) => {
   const start = Date.now();
@@ -67,6 +103,20 @@ app.use((req, res, next) => {
     console.log(`${req.method} ${req.originalUrl} -> ${res.statusCode} ${ms}ms`);
   });
   next();
+});
+
+// ─────────────────────────────────────────────
+// GUEST SESSIONS
+// POST /aspire — issue a short-lived guest session token (no auth required)
+// ─────────────────────────────────────────────
+
+app.post('/aspire', async (req, res) => {
+  try {
+    const session = await createGuestSession();
+    res.json({ guest_token: session.id, max_turns: session.max_turns });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ─────────────────────────────────────────────
@@ -730,7 +780,7 @@ async function streamText(emit, text) {
   }
 }
 
-app.post('/chat', authenticate, async (req, res) => {
+app.post('/chat', authenticateOrGuest, async (req, res) => {
   const { session_id, message } = req.body || {};
   const seeker_id = req.seeker_id;
 
@@ -957,6 +1007,12 @@ app.post('/chat', authenticate, async (req, res) => {
   } catch (err) {
     console.error('/chat error:', err);
     fail(err?.message || 'Internal error.');
+  } finally {
+    if (req.is_guest && req.guest_session_id) {
+      await incrementGuestTurn(req.guest_session_id).catch((e) =>
+        console.error('[guest] incrementGuestTurn failed:', e.message)
+      );
+    }
   }
 });
 
@@ -1049,6 +1105,95 @@ app.post('/totem/devices', authenticate, async (req, res) => {
     await addDevice(req.seeker_id, device_name ?? null, public_key, wrapped_key ?? null);
     res.json({ ok: true });
   } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── POST /totem/distill — generate encrypted distillation for authenticated seeker ──
+app.post('/totem/distill', authenticate, async (req, res) => {
+  const { session_id } = req.body || {};
+  if (!session_id) return res.status(400).json({ error: 'session_id required.' });
+
+  try {
+    // Fetch the session conversation.
+    const session = await getSession(session_id);
+    if (!session || session.seeker_id !== req.seeker_id) {
+      return res.status(404).json({ error: 'Session not found.' });
+    }
+
+    // Fetch seeker's device public key.
+    const devices = await getDevices(req.seeker_id);
+    if (!devices.length) return res.status(400).json({ error: 'No device registered.' });
+    const devicePublicKeyJwk = JSON.parse(devices[0].public_key);
+
+    // LLM: generate distillation JSON.
+    const llm = makeLlmClient();
+    const conversation = session.conversation
+      .filter((e) => e.role === 'seeker' || e.role === 'priestess')
+      .map((e) => `${e.role}: ${e.text}`)
+      .join('\n');
+
+    const distillationPrompt = `Given this session, extract a brief distillation as JSON:
+{
+  "arc": "one sentence on the seeker's current arc",
+  "qualities": { "dominant": "octave quality", "current": "vagal state" },
+  "beliefs": ["belief patterns surfaced"],
+  "rite": { "name": "rite name", "act": "core act" },
+  "session_note": "1-2 sentence summary",
+  "context": "2-3 sentences Clea should remember at next session open"
+}
+Session:
+${conversation}
+
+Return only valid JSON.`;
+
+    const raw = await llm.chat({
+      system: 'You are a distillation engine. Return only valid JSON.',
+      messages: [{ role: 'user', content: distillationPrompt }],
+      temperature: 0.3,
+    });
+
+    let distillation;
+    try {
+      distillation = JSON.parse(raw);
+    } catch {
+      return res.status(500).json({ error: 'LLM returned invalid JSON.' });
+    }
+
+    // Encrypt distillation to seeker's device public key via ephemeral ECDH.
+    // Bun exposes globalThis.crypto (Web Crypto API) natively — no import needed.
+    const subtle = globalThis.crypto.subtle;
+    const getRandomValues = (arr) => globalThis.crypto.getRandomValues(arr);
+
+    const ephemeralKeyPair = await subtle.generateKey(
+      { name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']
+    );
+    const ephemeralPublicKeyJwk = await subtle.exportKey('jwk', ephemeralKeyPair.publicKey);
+
+    const recipientPublicKey = await subtle.importKey(
+      'jwk', devicePublicKeyJwk, { name: 'ECDH', namedCurve: 'P-256' }, false, []
+    );
+    const sharedKey = await subtle.deriveKey(
+      { name: 'ECDH', public: recipientPublicKey },
+      ephemeralKeyPair.privateKey,
+      { name: 'AES-GCM', length: 256 }, false, ['encrypt']
+    );
+
+    const plain = new TextEncoder().encode(JSON.stringify(distillation));
+    const iv = getRandomValues(new Uint8Array(12));
+    const ciphertext = await subtle.encrypt({ name: 'AES-GCM', iv }, sharedKey, plain);
+
+    const toBase64 = (buf) => Buffer.from(buf).toString('base64');
+
+    res.json({
+      encrypted_distillation: JSON.stringify({
+        iv: toBase64(iv),
+        ct: toBase64(new Uint8Array(ciphertext)),
+      }),
+      ephemeral_public_key: ephemeralPublicKeyJwk,
+    });
+  } catch (e) {
+    console.error('distill error:', e);
     res.status(500).json({ error: e.message });
   }
 });

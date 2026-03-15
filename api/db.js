@@ -377,3 +377,22 @@ export async function addDevice(seekerId, deviceName, publicKey, wrappedKey) {
     VALUES (${seekerId}, ${deviceName ?? null}, ${publicKey}, ${wrappedKey ?? null})
   `;
 }
+
+// ─────────────────────────────────────────────
+// GUEST SESSIONS
+// Short-lived, no-auth sessions for unauthenticated seekers.
+// ─────────────────────────────────────────────
+
+export async function createGuestSession() {
+  const rows = await sql`INSERT INTO guest_sessions DEFAULT VALUES RETURNING *`;
+  return rows[0];
+}
+
+export async function getGuestSession(id) {
+  const rows = await sql`SELECT * FROM guest_sessions WHERE id = ${id}::uuid AND expires_at > NOW()`;
+  return rows[0] ?? null;
+}
+
+export async function incrementGuestTurn(id) {
+  await sql`UPDATE guest_sessions SET turns_used = turns_used + 1 WHERE id = ${id}::uuid`;
+}
