@@ -33,6 +33,7 @@ jobs:
             apps/clea-tui/target/aarch64-apple-darwin/release/clea \
             apps/clea-tui/target/x86_64-apple-darwin/release/clea \
             -output clea
+          codesign --sign - --force clea
           tar czf clea-macos.tar.gz clea
 
       - name: upload release
