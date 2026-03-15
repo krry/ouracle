@@ -1,6 +1,6 @@
 <script lang="ts">
   import { renderMarkdown } from '$lib/markdown';
-  import raw from '../../../../../docs/diy.md?raw';
+  import raw from '../../content/diy.md?raw';
 
   const html = renderMarkdown(raw);
 </script>
