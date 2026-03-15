@@ -403,7 +403,7 @@ fn draw_covenant(frame: &mut Frame, lines: &[String], offset: usize) {
         .collect();
 
     let mut body = visible_lines.join("\n");
-    body.push_str("\n\n[y] accept   [n] decline   [j/k] scroll");
+    body.push_str("\n\n[y] accept   [n] decline");
 
     let widget = Paragraph::new(body)
         .block(
