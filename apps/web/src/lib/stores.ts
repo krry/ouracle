@@ -50,4 +50,15 @@ import { getGuestTurns } from './guestSession';
 // Reactive view of the guest turn counter. Updated by Chat.svelte after each turn.
 export const guestTurns = writable<number>(browser ? getGuestTurns() : 0);
 
-export const ttsEnabled = writable(false);  // opt-in; user toggles in controls
+function ttsStore() {
+	const stored = browser ? localStorage.getItem('clea_tts') : null;
+	const { subscribe, set } = writable<boolean>(stored === 'true');
+	return {
+		subscribe,
+		set(v: boolean) {
+			if (browser) localStorage.setItem('clea_tts', String(v));
+			set(v);
+		}
+	};
+}
+export const ttsEnabled = ttsStore();

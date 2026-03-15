@@ -74,12 +74,10 @@ export async function tts(text: string, token: string): Promise<ArrayBuffer> {
 
 // ── STT ───────────────────────────────────────────────────────────────────────
 export async function stt(blob: Blob, token: string): Promise<string> {
-	const form = new FormData();
-	form.append('audio', blob, 'recording.wav');
 	const r = await fetch(`${BASE}/stt`, {
 		method: 'POST',
-		headers: { Authorization: `Bearer ${token}` },
-		body: form
+		headers: { Authorization: `Bearer ${token}`, 'Content-Type': blob.type || 'audio/webm' },
+		body: blob
 	});
 	if (!r.ok) throw new Error(await r.text());
 	const json = await r.json();

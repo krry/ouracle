@@ -1098,31 +1098,30 @@ app.post('/tts', authenticateOrGuest, async (req, res) => {
   }
 });
 
-// ── POST /stt — proxy Fish Audio STT; returns { text } ───────────────────────
+// ── POST /stt — Groq Whisper STT; accepts raw audio bytes ────────────────────
 app.post('/stt', authenticateOrGuest, async (req, res) => {
-  if (!hasFishKey()) return res.status(503).json({ error: 'STT not configured.' });
-  const fishKey = process.env.FISH_AUDIO_API_KEY || process.env.FISH_API_KEY;
+  if (!process.env.GROQ_API_KEY) return res.status(503).json({ error: 'STT not configured.' });
   try {
-    // Forward the multipart audio blob to Fish Audio ASR
     const chunks = [];
     req.on('data', (chunk) => chunks.push(chunk));
     await new Promise((resolve) => req.on('end', resolve));
-    const rawBody = Buffer.concat(chunks);
-    const contentType = req.headers['content-type'] || 'multipart/form-data';
-    const upstream = await fetch('https://api.fish.audio/v1/asr', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${fishKey}`,
-        'Content-Type': contentType,
-      },
-      body: rawBody,
+    const audioBuffer = Buffer.concat(chunks);
+    if (audioBuffer.length === 0) return res.status(400).json({ error: 'Empty audio.' });
+
+    const contentType = req.headers['content-type'] || 'audio/webm';
+    const ext = contentType.includes('mp4') ? 'mp4' : contentType.includes('ogg') ? 'ogg' : contentType.includes('wav') ? 'wav' : 'webm';
+    const file = new File([audioBuffer], `recording.${ext}`, { type: contentType });
+
+    const { default: OpenAI } = await import('openai');
+    const groq = new OpenAI({
+      baseURL: 'https://api.groq.com/openai/v1',
+      apiKey: process.env.GROQ_API_KEY,
     });
-    if (!upstream.ok) {
-      const err = await upstream.text().catch(() => '');
-      return res.status(502).json({ error: `Fish ASR ${upstream.status}: ${err}` });
-    }
-    const json = await upstream.json();
-    res.json({ text: json.text ?? '' });
+    const result = await groq.audio.transcriptions.create({
+      file,
+      model: 'whisper-large-v3-turbo',
+    });
+    res.json({ text: result.text ?? '' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

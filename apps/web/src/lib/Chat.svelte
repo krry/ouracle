@@ -9,7 +9,6 @@
 	import { TotemSession } from './totemSession';
 	import { renderMarkdown } from './markdown';
 	import { createAudioQueue, type AudioQueue } from './audio';
-	import { blobToWav } from './audio-convert';
 
 	export let guestMode = false;
 
@@ -174,9 +173,8 @@
 		const token = guestMode ? (guestToken ?? '') : (($creds as Credentials | null)?.access_token ?? '');
 		await new Promise<void>(res => { mediaRecorder!.onstop = () => res(); });
 		const mimeType = mediaRecorder.mimeType || 'audio/webm';
-		const raw = new Blob(chunks, { type: mimeType });
-		if (raw.size === 0) { voiceState.set('idle'); return; }
-		const blob = await blobToWav(raw, audioCtx);
+		const blob = new Blob(chunks, { type: mimeType });
+		if (blob.size === 0) { voiceState.set('idle'); return; }
 		mediaRecorder.stream.getTracks().forEach(t => t.stop());
 		mediaRecorder = null;
 
