@@ -43,10 +43,19 @@ import {
   updateSeekerPassword,
   generateHandle,
   getSeekerByHandle,
+  getTotem,
+  upsertTotem,
+  getDevices,
+  addDevice,
 } from './db.js';
+import { auth } from './auth-config.js';
+import { toNodeHandler } from 'better-auth/node';
 
 const app = express();
 app.use(express.json());
+
+// Mount BetterAuth — handles /api/auth/* routes (Express 4 wildcard)
+app.all('/api/auth/*', toNodeHandler(auth));
 
 const ADMIN_KEY = process.env.OURACLE_ADMIN_KEY;
 
@@ -996,6 +1005,53 @@ app.post('/stt', authenticate, async (req, res) => {
 });
 
 app.get('/health', (_req, res) => res.json({ status: 'alive', version: '0.2.0' }));
+
+// ─────────────────────────────────────────────
+// TOTEM — encrypted per-seeker blob + device keys
+// ─────────────────────────────────────────────
+
+// GET /totem
+app.get('/totem', authenticate, async (req, res) => {
+  try {
+    const totem = await getTotem(req.seeker_id);
+    res.json(totem ?? { ciphertext: null, public_key: null, updated_at: null });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// PUT /totem
+app.put('/totem', authenticate, async (req, res) => {
+  const { ciphertext, public_key } = req.body || {};
+  if (!ciphertext || !public_key) return res.status(400).json({ error: 'ciphertext and public_key required.' });
+  try {
+    await upsertTotem(req.seeker_id, ciphertext, public_key);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /totem/devices
+app.get('/totem/devices', authenticate, async (req, res) => {
+  try {
+    res.json(await getDevices(req.seeker_id));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /totem/devices
+app.post('/totem/devices', authenticate, async (req, res) => {
+  const { device_name, public_key, wrapped_key } = req.body || {};
+  if (!public_key) return res.status(400).json({ error: 'public_key required.' });
+  try {
+    await addDevice(req.seeker_id, device_name ?? null, public_key, wrapped_key ?? null);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 const PORT = process.env.PORT || 3737;
 app.listen(PORT, () => console.log(`MEATAPI v0.2 on :${PORT}`));
