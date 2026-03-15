@@ -1,6 +1,7 @@
 [build]
 builder = "railpack"
 buildCommand = "bun install"
+watchPatterns = ["api/**"]
 
 [deploy]
 startCommand = "bun start"
