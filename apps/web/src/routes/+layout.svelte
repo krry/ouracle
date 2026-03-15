@@ -26,7 +26,7 @@
 
 {#if !isChat}
   <footer>
-    <span>© 2026 Kerry Snyder</span>
+    <span>© 2026 <a href="https://kerry.ink">Kerry Alan Snyder</a></span>
   </footer>
 {/if}
 

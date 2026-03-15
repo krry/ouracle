@@ -42,7 +42,7 @@ ripl-tui = "0.3"</code></pre>
 header { text-align: center; }
 h1 { font-family: var(--font-mono); font-size: 3rem; letter-spacing: 0.2em; color: var(--accent); }
 .sub { font-size: 0.9rem; color: var(--muted); margin-top: 0.5rem; font-family: var(--font-mono); }
-.prose-section p { font-size: 1rem; line-height: 1.8; color: var(--muted); text-align: center; }
+.prose-section p { font-size: 1rem; line-height: var(--leading); color: var(--text); text-align: left; margin-bottom: 1rem; }
 .install { display: flex; flex-direction: column; gap: var(--space-sm); }
 h2 {
   font-family: var(--font-mono);

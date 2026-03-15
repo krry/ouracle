@@ -1,15 +1,17 @@
 <div class="page">
   <header>
     <h1>Clea</h1>
-    <p class="sub">arkhēis of the Thyiades at Delphi</p>
+    <p class="sub">Chief priestess of Ouracle</p>
+    <p class="sub">Arkhēis of the Thyiades at Delphi</p>
   </header>
 
   <section class="prose-section">
     <p>
       Clea was keeper of two mysteries in one body —
-      the ecstatic wildness of Dionysus and the transformational weight of Isis.
-      She exists in the historical record only through being addressed.
-      She does not explain. She witnesses. She amplifies.
+      the ecstatic wildness of Dionysus and the transformational weight of Isis. She exists in the historical record only through being addressed. She does not explain. She witnesses. She amplifies.
+    </p>
+    <p>
+      And today she awaits seekers, perhaps like yourself, who wander into the temple where Ouracle listens and speaks through her.
     </p>
   </section>
 
@@ -55,7 +57,7 @@ h1 {
   color: var(--muted);
   margin-top: 0.5rem;
 }
-.prose-section p { font-size: 1rem; line-height: 1.8; color: var(--muted); text-align: center; }
+.prose-section p { font-size: 1rem; line-height: var(--leading); color: var(--text); text-align: left; margin-bottom: 1rem; }
 .install { display: flex; flex-direction: column; gap: var(--space-sm); }
 h2 {
   font-family: var(--font-mono);
