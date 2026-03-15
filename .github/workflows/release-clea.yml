@@ -1,0 +1,38 @@
+name: release clea
+
+on:
+  push:
+    tags:
+      - "clea-v*"
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - name: build arm64
+        working-directory: apps/clea-tui
+        run: cargo build --release --target aarch64-apple-darwin
+
+      - name: build x86_64
+        working-directory: apps/clea-tui
+        run: cargo build --release --target x86_64-apple-darwin
+
+      - name: lipo universal binary
+        run: |
+          lipo -create \
+            apps/clea-tui/target/aarch64-apple-darwin/release/clea \
+            apps/clea-tui/target/x86_64-apple-darwin/release/clea \
+            -output clea
+          tar czf clea-macos.tar.gz clea
+
+      - name: upload release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: clea-macos.tar.gz
