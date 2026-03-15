@@ -27,8 +27,8 @@ export default defineConfig({
     port: 2532,
     allowedHosts: ["souvenir.local"],
     https: {
-      key: './certs/souvenir.local-key.pem',
-      cert: './certs/souvenir.local.pem',
+      key: './certs/souvenir.local+2-key.pem',
+      cert: './certs/souvenir.local+2.pem',
     },
   },
   test: {
