@@ -382,6 +382,7 @@ fn main() -> Result<()> {
             label: Some("Ouracle".to_string()),
             ambient_cmd: resolve_ambient_cmd(&cfg),
             voice_id: resolve_voice_id(&cfg),
+            scaffold: false,
         })
     })
 }
