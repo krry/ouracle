@@ -8,22 +8,8 @@
 //   - Correlation ID only — for debugging, not for re-identification.
 //   - The text sent is the seeker's inquiry text only. Nothing else.
 
-import OpenAI from 'openai';
 import { randomUUID } from 'crypto';
-
-const OPENROUTER_API_KEY = process.env.OURACLE_OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
-if (!OPENROUTER_API_KEY) {
-  throw new Error('OpenRouter API key missing. Set OURACLE_OPENROUTER_API_KEY or OPENROUTER_API_KEY.');
-}
-
-const client = new OpenAI({
-  apiKey: OPENROUTER_API_KEY,
-  baseURL: 'https://openrouter.ai/api/v1',
-  defaultHeaders: {
-    ...(process.env.OPENROUTER_REFERER ? { 'HTTP-Referer': process.env.OPENROUTER_REFERER } : {}),
-    ...(process.env.OPENROUTER_TITLE ? { 'X-Title': process.env.OPENROUTER_TITLE } : {}),
-  },
-});
+import { makeRawClient } from './llm-client.js';
 
 // ─────────────────────────────────────────────
 // INFERENCE SCHEMA
@@ -148,27 +134,16 @@ CRITICAL RULES:
 export async function inferSemantics(text) {
   const correlationId = randomUUID();
   const startedAt = Date.now();
-  const providerOrder = (process.env.OURACLE_OPENROUTER_PROVIDER_ORDER || process.env.OPENROUTER_PROVIDER_ORDER || '')
-    .split(',')
-    .map((entry) => entry.trim())
-    .filter(Boolean);
+  const { openai, model } = makeRawClient();
 
   try {
-    const response = await client.chat.completions.create({
-      model: process.env.OURACLE_OPENROUTER_MODEL || process.env.OPENROUTER_MODEL || 'minimax/minimax-m2.5',
+    const response = await openai.chat.completions.create({
+      model,
       max_tokens: 1024,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: text },
       ],
-      ...(providerOrder.length
-        ? {
-            provider: {
-              order: providerOrder,
-              allow_fallbacks: false,
-            },
-          }
-        : {}),
       tools: [INFERENCE_TOOL],
       tool_choice: { type: 'function', function: { name: 'classify_seeker_state' } },
     });

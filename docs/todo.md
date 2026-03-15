@@ -1,13 +1,37 @@
 **TODO**
 
+# Prime directive
+- [x] >= 10 perfect opening questions for engine.js
+- [x] why is the api/engine in js?
+- [x] answering the opening question: 402 for openrouter, needs backup
+
+- [x] voice layer: Priestess character fully developed — see docs/clea.md
+
+## Post RIPL integration cleanup
+- [x] clickable ripples are not present in ripl
+- [x] text wrap for dev-less hole lines: seeker crash + wrap fixed; priestess wrap fixed
+- [x] priestess text hugs the hole edge — wrap_width has no visual margin (full area width)
+- [x] the space bar lag reduced (300ms→120ms) but dictation/STT still untested
+- [x] why is name password asked before and without aura?
+- [x] default to /dev off
+- [x] if missing all bootstrap files, just write them
+- [x] bootstrap scaffold dialog script should say
+  - title: Prepare for Agents?
+  - if files not present, just make them and don't show a dialog
+  - if files are present, multiple choice:
+    - "Do it:"
+      - "[C]lean - overwrite and start fresh"
+      - "[D]irty - append and mix it up"
+      - "[E]gotistically - I know what I'm doing already"
+      
+
 ## TUI tuneup
 - [ ] test speech to text and text to speech
 - [ ] toggle dev mode more easy; keymaps?
-- [ ] wire up TUI with openclaw?
 - [ ] figure out the covenant dance in the TUI
 - [ ] write a script for the typical ouracle consultation
-- [ ] find the priestess a better voice on fish.audio
-- [ ] pace the typewriter with the speech so it doesn't talk over itself
+- [x] find the priestess a better voice on fish.audio — FISH_AUDIO_VOICE_ONDREA (fallback: GALADRIEL)
+- [x] pace the typewriter with the speech so it doesn't talk over itself — priestess_target_duration_ms synced to TTS
 - [ ] have claude pass through the conversation UX after writing a script
 
 ## EMO DETECTOR

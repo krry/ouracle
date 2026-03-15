@@ -29,7 +29,12 @@ const EMOJI_POOL = [
 ];
 
 function slugify(name) {
-  return name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20) || 'seeker';
+  const normalized = String(name).normalize('NFC');
+  return normalized.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20) || 'seeker';
+}
+
+function normalizeHandle(value) {
+  return String(value).normalize('NFC');
 }
 
 export async function generateHandle(name) {
@@ -44,7 +49,7 @@ export async function generateHandle(name) {
   // Shuffle and try each emoji.
   const shuffled = [...EMOJI_POOL].sort(() => Math.random() - 0.5);
   for (const emoji of shuffled) {
-    const candidate = `${base}${emoji}`;
+    const candidate = normalizeHandle(`${base}${emoji}`);
     if (!taken.has(candidate)) {
       return { handle: candidate, handle_base: base };
     }
@@ -54,8 +59,9 @@ export async function generateHandle(name) {
 }
 
 export async function getSeekerByHandle(handle) {
+  const normalized = normalizeHandle(handle);
   const [seeker] = await sql`
-    SELECT * FROM seekers WHERE LOWER(handle) = LOWER(${handle})
+    SELECT * FROM seekers WHERE LOWER(handle) = LOWER(${normalized})
   `;
   return seeker ?? null;
 }
@@ -65,6 +71,8 @@ export async function getSeekerByHandle(handle) {
 // ─────────────────────────────────────────────
 
 export async function createSeeker({ device_id, email_hash, timezone, consent_version, name, password_hash, handle, handle_base }) {
+  const normalized_handle = normalizeHandle(handle);
+  const normalized_handle_base = slugify(handle_base);
   const [seeker] = await sql`
     INSERT INTO seekers (device_id, email_hash, timezone, consent_version, consented_at, name, password_hash, handle, handle_base)
     VALUES (
@@ -75,8 +83,8 @@ export async function createSeeker({ device_id, email_hash, timezone, consent_ve
       now(),
       ${name ?? null},
       ${password_hash ?? null},
-      ${handle},
-      ${handle_base}
+      ${normalized_handle},
+      ${normalized_handle_base}
     )
     RETURNING *
   `;

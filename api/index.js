@@ -1,4 +1,6 @@
 import express from 'express';
+import { makeLlmClient } from './llm-client.js';
+import { CLEA_SYSTEM_PROMPT } from './clea-prompt.js';
 import { randomUUID } from 'crypto';
 import {
   authenticate,
@@ -13,6 +15,7 @@ import {
   buildPrescription,
   variantRite,
   chooseOpeningQuestion,
+  getClosingDedication,
   drawDivinationSource,
   RITES,
   BELIEFS,
@@ -66,8 +69,10 @@ const COVENANT = {
   version: '1.0',
   effective_date: '2026-03-11',
   text: [
-    'I accept 100% responsibility for my actions — legal, lawful, moral, ethical, physical, and financial.',
-    'Ouracle listens. Ouracle speaks. I act as I will.',
+    'I accept 100% responsibility for my choices and actions;',
+    'be they legal, lawful, moral, ethical, financial, physical, or metaphysical,',
+    'only I can truly know whether my intent serves love or fear.',
+    'Ouracle listens. The priestess speaks. I act as I will.',
   ],
 };
 
@@ -147,9 +152,6 @@ app.post('/session/new', authenticate, async (req, res) => {
 
   const seeker = await getSeeker(seeker_id);
   if (!seeker) return res.status(404).json({ error: 'Seeker not found.' });
-  if (!seeker.consented_at) {
-    return res.status(403).json({ error: 'Consent not recorded. Complete POST /seeker/new with { consented: true } first.' });
-  }
   if (!covenant?.accepted) {
     return res.status(400).json({
       error: 'Covenant not accepted.',
@@ -291,7 +293,28 @@ app.post('/inquire', authenticate, async (req, res) => {
     "What would happen if you didn't do anything about it?",
     'Who else is in this with you, even invisibly?',
   ];
-  const nextQ = clarifiers[newTurn - 1] || 'What else wants to be said?';
+  const suggestion = clarifiers[newTurn - 1] || 'What else wants to be said?';
+
+  const systemWithSuggestion = `${CLEA_SYSTEM_PROMPT}
+
+--- Suggested direction (strong suggestion — take it, transform it, or release it entirely if the seeker's words demand something else):
+"${suggestion}"`;
+
+  const llmMessages = conversation
+    .filter((e) => e.role === 'seeker' || e.role === 'priestess')
+    .map((e) => ({
+      role: e.role === 'seeker' ? 'user' : 'assistant',
+      content: e.text,
+    }));
+
+  let nextQ = suggestion;
+  try {
+    const llm = makeLlmClient();
+    nextQ = await llm.chat({ system: systemWithSuggestion, messages: llmMessages, temperature: 0.85, maxTokens: 256 });
+    nextQ = nextQ.trim();
+  } catch (e) {
+    console.error('[clea] LLM error, falling back to clarifier:', e.message);
+  }
 
   conversation.push({ role: 'priestess', text: nextQ, at: new Date().toISOString() });
   await updateSession(session_id, { turn: newTurn, full_text: newText, conversation });
@@ -722,7 +745,6 @@ app.post('/chat', authenticate, async (req, res) => {
 
     // ── New session ──────────────────────────────
     if (!session_id) {
-      if (!seeker.consented_at) return fail('Consent not recorded.');
       if (!seeker.covenant_at) {
         await recordCovenant(seeker_id, COVENANT.version);
       }
@@ -848,7 +870,26 @@ app.post('/chat', authenticate, async (req, res) => {
         "What would happen if you didn't do anything about it?",
         'Who else is in this with you, even invisibly?',
       ];
-      const nextQ = clarifiers[newTurn - 1] || 'What else wants to be said?';
+      const suggestion = clarifiers[newTurn - 1] || 'What else wants to be said?';
+
+      const systemWithSuggestion = `${CLEA_SYSTEM_PROMPT}
+
+--- Suggested direction (strong suggestion — take it, transform it, or release it entirely if the seeker's words demand something else):
+"${suggestion}"`;
+
+      const llmMessages = conversation
+        .filter((e) => e.role === 'seeker' || e.role === 'priestess')
+        .map((e) => ({ role: e.role === 'seeker' ? 'user' : 'assistant', content: e.text }));
+
+      let nextQ = suggestion;
+      try {
+        const llm = makeLlmClient();
+        nextQ = await llm.chat({ system: systemWithSuggestion, messages: llmMessages, temperature: 0.85, maxTokens: 256 });
+        nextQ = nextQ.trim();
+      } catch (e) {
+        console.error('[clea] LLM error, falling back to clarifier:', e.message);
+      }
+
       conversation.push({ role: 'priestess', text: nextQ, at: new Date().toISOString() });
       await updateSession(session_id, { turn: newTurn, full_text: newText, conversation });
 
@@ -878,6 +919,19 @@ app.post('/chat', authenticate, async (req, res) => {
         ? 'You enacted the rite. Whatever arose — that was the rite working.'
         : 'You held the rite without enacting it. That resistance is itself information.';
       await streamText(emit, witness);
+
+      const openingQuestion = Array.isArray(session.conversation)
+        ? session.conversation.find((e) => e?.role === 'priestess')?.text
+        : null;
+      const closing = openingQuestion ? getClosingDedication(openingQuestion) : null;
+      if (closing) {
+        emit({ type: 'break' });
+        await streamText(emit, closing);
+      }
+
+      emit({ type: 'break' });
+      await streamText(emit, '[low warmth, certain and at peace, a quiet smile] Always as it will have been.');
+
       return finish('complete', { session_id });
     }
 

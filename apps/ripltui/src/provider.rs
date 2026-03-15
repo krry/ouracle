@@ -140,6 +140,16 @@ impl Provider for OuracleProvider {
     }
 
     fn handle_command(&self, cmd: &str, tx: mpsc::Sender<ApiResponse>) {
+        if cmd == "/signout" {
+            let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+            let config_path = std::path::PathBuf::from(home).join(".ouracle").join("ripl.toml");
+            let _ = std::fs::remove_file(&config_path);
+            let _ = tx.send(ApiResponse::TokenChunk { token: "Signing out…".to_string() });
+            let _ = tx.send(ApiResponse::TurnComplete);
+            std::thread::sleep(std::time::Duration::from_millis(800));
+            let _ = tx.send(ApiResponse::Exit);
+            return;
+        }
         if cmd != "/reset" {
             return;
         }
