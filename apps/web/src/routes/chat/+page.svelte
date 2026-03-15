@@ -10,13 +10,20 @@
   let wantsSignin = $state(false);
   $effect(() => { if ($authed) wantsSignin = false; });
 
-  // Sync BetterAuth session cookie → localStorage after OAuth redirect
+  // Sync BetterAuth session cookie → our JWT after OAuth redirect
   onMount(async () => {
     if ($authed) return;
+    const BASE = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
     const { data } = await authClient.getSession();
-    if (data?.session?.token && data?.user?.id) {
-      creds.login({ access_token: data.session.token, refresh_token: '', seeker_id: data.user.id });
-    }
+    if (!data?.session?.token) return;
+    const r = await fetch(`${BASE}/auth/social-exchange`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_token: data.session.token }),
+    });
+    if (!r.ok) return;
+    const { seeker_id, access_token, refresh_token } = await r.json();
+    if (access_token && seeker_id) creds.login({ access_token, refresh_token: refresh_token ?? '', seeker_id });
   });
 </script>
 

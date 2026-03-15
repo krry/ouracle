@@ -51,6 +51,7 @@ import {
   createGuestSession,
   getGuestSession,
   incrementGuestTurn,
+  getOrCreateSeekerByAuthId,
 } from './db.js';
 import { auth } from './auth-config.js';
 import { toNodeHandler } from 'better-auth/node';
@@ -87,6 +88,25 @@ app.all('/api/auth/*', async (req, res, next) => {
   } catch (err) {
     console.error('[BetterAuth error]', err);
     next(err);
+  }
+});
+
+// POST /auth/social-exchange — trade a BetterAuth session token for our JWT
+// Called after OAuth redirect; creates a seeker row if first social login.
+app.post('/auth/social-exchange', async (req, res) => {
+  const { session_token } = req.body || {};
+  if (!session_token) return res.status(400).json({ error: 'session_token required.' });
+  try {
+    const sessionData = await auth.api.getSession({
+      headers: new Headers({ cookie: `better-auth.session_token=${session_token}` }),
+    });
+    if (!sessionData?.user?.id) return res.status(401).json({ error: 'Invalid session.' });
+    const { id: authUserId, name } = sessionData.user;
+    const seeker = await getOrCreateSeekerByAuthId(authUserId, name ?? null);
+    const tokens = await issueTokenPair(seeker.id);
+    res.json({ seeker_id: seeker.id, ...tokens });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
