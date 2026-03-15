@@ -242,7 +242,7 @@ fn cmd_ambiance(cfg: &mut Config, on: bool) -> Result<()> {
 
 fn cmd_help() {
     println!(
-        r#"Clea — terminal oracle
+        r#"Clea — Chief Priestess of Ouracle
 
 USAGE
   clea                        start a session
