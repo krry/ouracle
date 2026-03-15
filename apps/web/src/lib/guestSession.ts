@@ -10,8 +10,8 @@ export const ALTAR_QUIPS: string[] = [
 ];
 
 export function getGuestTurns(): number {
-  const v = typeof localStorage !== 'undefined'
-    ? localStorage.getItem(KEY) : null;
+  if (typeof window === 'undefined') return 0;
+  const v = localStorage.getItem(KEY);
   return v ? parseInt(v, 10) : 0;
 }
 

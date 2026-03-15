@@ -1,4 +1,5 @@
 import { writable, derived } from 'svelte/store';
+import { browser } from '$app/environment';
 
 // ── Auth ────────────────────────────────────────────────────────────────────
 export interface Credentials {
@@ -8,8 +9,7 @@ export interface Credentials {
 }
 
 function credStore() {
-	const stored = typeof localStorage !== 'undefined'
-		? localStorage.getItem('clea_creds') : null;
+	const stored = browser ? localStorage.getItem('clea_creds') : null;
 	const { subscribe, set } = writable<Credentials | null>(
 		stored ? JSON.parse(stored) : null
 	);
@@ -48,8 +48,6 @@ export const ambience = writable(1.0);      // 0 = bare, 1 = full
 import { getGuestTurns } from './guestSession';
 
 // Reactive view of the guest turn counter. Updated by Chat.svelte after each turn.
-export const guestTurns = writable<number>(
-  typeof localStorage !== 'undefined' ? getGuestTurns() : 0
-);
+export const guestTurns = writable<number>(browser ? getGuestTurns() : 0);
 
 export const ttsEnabled = writable(false);  // opt-in; user toggles in controls
