@@ -53,17 +53,17 @@ impl Config {
 
 const SETTINGS_TEMPLATE: &str = r#"# Clea — ~/.ripl/clea.toml
 
-# Ouracle API endpoint
+# # Ouracle API endpoint
 # base_url = "https://api.ouracle.kerry.ink"
 
-# Fish Audio voice ID — find one with `clea voices list`
-# voice_id = ""
-
-# Ambient sound during sessions (initialize with `clea ambiance on`)
+# # Ambient sound during sessions (`clea ambiance on|off`)
 # ambiance = true
 
-# Saved voice IDs — manage with `clea voices add/rm`
+# # Saved voice IDs — manage with `clea voices list|set|add|rm`
 # voices = []
+
+# # Fish Audio voice ID - overrides `clea voices set <voice_ID>`
+# voice_id = ""
 "#;
 
 fn ripl_dir() -> PathBuf {
