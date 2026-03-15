@@ -149,7 +149,7 @@ dependencies = [
  "crossterm 0.28.1",
  "ratatui",
  "reqwest",
- "ripl",
+ "ripl-tui",
  "serde",
  "serde_json",
  "toml",
@@ -1268,8 +1268,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "ripl"
+name = "ripl-tui"
 version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6cbd173c5dc29aa57e51418f98e0768ca9ea769c7cbd1f2f69cd35b4ef9d4c1e"
 dependencies = [
  "color-eyre",
  "crossterm 0.28.1",
