@@ -26,6 +26,9 @@ mkdir -p "$dest"
 mv "${tmp}/${BIN}" "${dest}/${BIN}"
 chmod +x "${dest}/${BIN}"
 
+# Remove macOS quarantine flag so Gatekeeper doesn't block the first run.
+xattr -dr com.apple.quarantine "${dest}/${BIN}" 2>/dev/null || true
+
 echo "installed: ${dest}/${BIN}"
 echo ""
 echo "make sure ${dest} is in your PATH, then run: clea"
