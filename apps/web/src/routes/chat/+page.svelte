@@ -9,6 +9,10 @@
   $effect(() => { if ($authed) wantsSignin = false; });
 </script>
 
+<svelte:head>
+  <style>html, body { height: 100%; overflow: hidden; }</style>
+</svelte:head>
+
 {#if $authed || !wantsSignin}
   <Chat guestMode={!$authed} />
   {#if !$authed && $guestTurns >= GUEST_LIMIT}
