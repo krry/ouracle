@@ -86,6 +86,7 @@
       groups.forEach((g, i) => {
         g.rotation.y += 0.0003 + i * 0.00004;
         g.rotation.x += 0.0001 + i * 0.00002;
+        g.rotation.z += 0.00015 * (i % 2 === 0 ? 1 : -1);
       });
       renderer.render(scene, camera);
     }
@@ -158,7 +159,7 @@ canvas {
 }
 h1 {
   font-family: var(--font-display);
-  font-size: clamp(3rem, 10vw, 6rem);
+  font-size: clamp(3rem, 10vw, 5rem);
   font-weight: 300;
   letter-spacing: 0.3em;
   color: var(--accent);

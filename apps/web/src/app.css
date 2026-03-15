@@ -1,13 +1,29 @@
+/* ── Jing · Qi · Shen — three treasures ────────────────────────────────── */
+/* Jing (精) root hue — substantial, structural                             */
+/* Shen (神) root + 137.5° golden angle — divine, luminous                  */
+/* Qi  (氣) root + 222.5° — flowing, connective                             */
+@property --accent-hue {
+	syntax: '<number>';
+	inherits: true;
+	initial-value: 217;
+}
+
 /* ── Ouracle design tokens ─────────────────────────────────────────────── */
 :root {
-	--hue: 217;
+	--hue-jing: 217;
+	--hue-shen: 354;
+	--hue-qi:    80;
+	--hue: var(--hue-jing);
 
 	--bg:        hsl(var(--hue), 12%, 5%);
 	--surface:   hsl(var(--hue), 10%, 9%);
 	--border:    hsl(var(--hue), 10%, 16%);
 	--muted:     hsl(var(--hue), 8%, 55%);
 	--text:      hsl(var(--hue), 10%, 88%);
-	--accent:    hsl(var(--hue), 60%, 65%);
+	--accent:    hsl(var(--accent-hue), 60%, 65%);
+
+	--accent-hue: var(--hue-jing);
+	animation: accent-breathe 90s ease-in-out infinite;
 
 	--radius: 4px;
 	--font-mono: 'Fira Code', 'Fira Mono', 'Menlo', monospace;
@@ -26,6 +42,13 @@
 	--max-wide: 1024px;
 }
 
+@keyframes accent-breathe {
+	0%   { --accent-hue: 217; }  /* jing — steel blue */
+	33%  { --accent-hue: 354; }  /* shen — crimson    */
+	66%  { --accent-hue:  80; }  /* qi   — gold-green */
+	100% { --accent-hue: 217; }  /* jing — back home  */
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     --bg:      hsl(var(--hue), 12%, 97%);
@@ -33,8 +56,12 @@
     --border:  hsl(var(--hue), 10%, 82%);
     --muted:   hsl(var(--hue), 8%, 38%);
     --text:    hsl(var(--hue), 10%, 10%);
-    --accent:  hsl(var(--hue), 60%, 40%);
+    --accent:  hsl(var(--accent-hue), 60%, 40%);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { animation: none; }
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
