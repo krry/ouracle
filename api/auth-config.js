@@ -1,5 +1,4 @@
 import { betterAuth } from 'better-auth';
-import { passkey } from 'better-auth/plugins/passkey';
 import { Pool } from '@neondatabase/serverless';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -22,9 +21,11 @@ export const auth = betterAuth({
       clientSecret: process.env.OAUTH_APPLE_CLIENT_SECRET,
     },
   },
-  plugins: [passkey()],
+  // passkey plugin requires better-auth ≥2.x; deferred until upgrade
   trustedOrigins: [
     'https://ouracle.kerry.ink',
     'http://localhost:5173',
   ],
 });
+
+export default auth;
