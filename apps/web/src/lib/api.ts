@@ -1,53 +1,47 @@
 const BASE = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
 
-function headers(token?: string): HeadersInit {
-	const h: HeadersInit = { 'Content-Type': 'application/json' };
-	if (token) h['Authorization'] = `Bearer ${token}`;
-	return h;
+function authHeaders(token: string): HeadersInit {
+	return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 }
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 export async function signup(name: string, password: string) {
 	const r = await fetch(`${BASE}/seeker/new`, {
 		method: 'POST',
-		headers: headers(),
+		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ name, password })
 	});
 	if (!r.ok) throw new Error(await r.text());
 	return r.json();
 }
 
-export async function signin(name: string, password: string) {
-	const r = await fetch(`${BASE}/seeker/auth`, {
+export async function signin(handle: string, password: string) {
+	const r = await fetch(`${BASE}/auth/token`, {
 		method: 'POST',
-		headers: headers(),
-		body: JSON.stringify({ name, password })
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ handle, password })
 	});
 	if (!r.ok) throw new Error(await r.text());
 	return r.json();
 }
 
-// ── Session ───────────────────────────────────────────────────────────────────
-export async function newSession(token: string) {
-	const r = await fetch(`${BASE}/session/new`, {
-		method: 'POST',
-		headers: headers(token)
-	});
-	if (!r.ok) throw new Error(await r.text());
-	return r.json();
-}
-
-// ── Streaming chat ────────────────────────────────────────────────────────────
-export async function* streamChat(
-	sessionId: string,
+// ── Chat (SSE) ────────────────────────────────────────────────────────────────
+// /chat handles both new sessions (no session_id) and continuing ones.
+// Events: { type: 'session', session_id, stage }
+//         { type: 'token', text }
+//         { type: 'break' }
+//         { type: 'complete', stage, session_id? }
+//         { type: 'error', message }
+export async function* chat(
 	token: string,
 	message: string,
-	onChunk: (chunk: string) => void
+	sessionId: string | null,
+	onEvent: (event: Record<string, unknown>) => void
 ): AsyncGenerator<void> {
-	const r = await fetch(`${BASE}/session/${sessionId}/message`, {
+	const r = await fetch(`${BASE}/chat`, {
 		method: 'POST',
-		headers: { ...headers(token), Accept: 'text/event-stream' },
-		body: JSON.stringify({ message })
+		headers: authHeaders(token),
+		body: JSON.stringify({ message, session_id: sessionId ?? undefined })
 	});
 	if (!r.ok) throw new Error(await r.text());
 	const reader = r.body!.getReader();
@@ -57,10 +51,11 @@ export async function* streamChat(
 		if (done) break;
 		const text = dec.decode(value, { stream: true });
 		for (const line of text.split('\n')) {
-			if (line.startsWith('data: ')) {
-				const data = line.slice(6).trim();
-				if (data && data !== '[DONE]') onChunk(data);
-			}
+			if (!line.startsWith('data: ')) continue;
+			try {
+				const event = JSON.parse(line.slice(6));
+				onEvent(event);
+			} catch { /* skip malformed */ }
 		}
 		yield;
 	}
@@ -70,7 +65,7 @@ export async function* streamChat(
 export async function tts(text: string, token: string): Promise<ArrayBuffer> {
 	const r = await fetch(`${BASE}/tts`, {
 		method: 'POST',
-		headers: headers(token),
+		headers: authHeaders(token),
 		body: JSON.stringify({ text })
 	});
 	if (!r.ok) throw new Error(await r.text());

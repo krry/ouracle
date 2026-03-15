@@ -1,4 +1,5 @@
 import express from 'express';
+import { fetchAudio, hasFishKey } from './fish-tts.js';
 import { makeLlmClient } from './llm-client.js';
 import { CLEA_SYSTEM_PROMPT } from './clea-prompt.js';
 import { randomUUID } from 'crypto';
@@ -947,6 +948,50 @@ app.post('/chat', authenticate, async (req, res) => {
   } catch (err) {
     console.error('/chat error:', err);
     fail(err?.message || 'Internal error.');
+  }
+});
+
+// ── POST /tts — proxy Fish Audio TTS; returns MP3 audio ──────────────────────
+app.post('/tts', authenticate, async (req, res) => {
+  const { text } = req.body || {};
+  if (!text) return res.status(400).json({ error: 'text required.' });
+  if (!hasFishKey()) return res.status(503).json({ error: 'TTS not configured.' });
+  try {
+    const buffer = await fetchAudio(text);
+    res.set('Content-Type', 'audio/mpeg');
+    res.send(buffer);
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
+// ── POST /stt — proxy Fish Audio STT; returns { text } ───────────────────────
+app.post('/stt', authenticate, async (req, res) => {
+  if (!hasFishKey()) return res.status(503).json({ error: 'STT not configured.' });
+  const fishKey = process.env.FISH_AUDIO_API_KEY || process.env.FISH_API_KEY;
+  try {
+    // Forward the multipart audio blob to Fish Audio ASR
+    const chunks = [];
+    req.on('data', (chunk) => chunks.push(chunk));
+    await new Promise((resolve) => req.on('end', resolve));
+    const rawBody = Buffer.concat(chunks);
+    const contentType = req.headers['content-type'] || 'multipart/form-data';
+    const upstream = await fetch('https://api.fish.audio/v1/asr', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${fishKey}`,
+        'Content-Type': contentType,
+      },
+      body: rawBody,
+    });
+    if (!upstream.ok) {
+      const err = await upstream.text().catch(() => '');
+      return res.status(502).json({ error: `Fish ASR ${upstream.status}: ${err}` });
+    }
+    const json = await upstream.json();
+    res.json({ text: json.text ?? '' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

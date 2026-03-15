@@ -1,27 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { creds, messages, streaming, voiceState, waveform, ptt, ambience } from './stores';
-	import { newSession, streamChat, tts, stt } from './api';
+	import { creds, messages, streaming, voiceState, waveform, ambience } from './stores';
+	import { chat, tts, stt } from './api';
 	import Breath from './Breath.svelte';
 	import type { Credentials } from './stores';
 
-	let sessionId = '';
+	let sessionId: string | null = null;
 	let input = '';
 	let msgList: HTMLElement;
 	let audioCtx: AudioContext;
 	let mediaRecorder: MediaRecorder | null = null;
 	let chunks: Blob[] = [];
-
-	// init session on mount
-	onMount(async () => {
-		const c = $creds as Credentials;
-		try {
-			const s = await newSession(c.access_token);
-			sessionId = s.session_id;
-		} catch {
-			creds.logout();
-		}
-	});
 
 	// scroll to bottom on new messages
 	$: if ($messages && msgList) {
@@ -29,24 +18,39 @@
 	}
 
 	async function send(text: string) {
-		if (!text.trim() || $streaming) return;
+		if ($streaming) return;
 		const c = $creds as Credentials;
-		messages.update(m => [...m, { role: 'user', content: text }]);
+		// Only push user message if there's actual text (first turn may be empty — opens the session)
+		if (text.trim()) {
+			messages.update(m => [...m, { role: 'user', content: text }]);
+		}
 		messages.update(m => [...m, { role: 'assistant', content: '' }]);
 		streaming.set(true);
 
 		try {
-			for await (const _ of streamChat(sessionId, c.access_token, text, (chunk) => {
-				messages.update(m => {
-					const last = m[m.length - 1];
-					last.content += chunk;
-					return [...m];
-				});
+			for await (const _ of chat(c.access_token, text, sessionId, (event) => {
+				if (event.type === 'session') {
+					sessionId = event.session_id as string;
+				} else if (event.type === 'token') {
+					messages.update(m => {
+						const last = m[m.length - 1];
+						last.content += event.text as string;
+						return [...m];
+					});
+				} else if (event.type === 'break') {
+					// Priestess finished one block — start fresh message
+					messages.update(m => [...m, { role: 'assistant', content: '' }]);
+				}
 			})) { /* yield */ }
 		} finally {
+			// Remove any trailing empty assistant message
+			messages.update(m => m.filter((msg, i) => !(msg.role === 'assistant' && msg.content === '' && i === m.length - 1)));
 			streaming.set(false);
 		}
 	}
+
+	// Open session on mount — /chat with no session_id bootstraps it
+	onMount(() => send(''));
 
 	function handleKey(e: KeyboardEvent) {
 		if (e.key === 'Enter' && !e.shiftKey) {
