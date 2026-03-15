@@ -17,8 +17,8 @@ use ripl::providers::{Message, Role};
 use ripl::session::SessionCache;
 
 // Embedded ambient scripts — written to ~/.ripl/ambient/ by `clea ambiance on`
-const AMBIENT_RUNNER: &str = include_str!("../../../api/scripts/ambient-runner.js");
-const AMBIENT_PLAYER: &str = include_str!("../../../api/ambient-player.js");
+const AMBIENT_RUNNER: &str = include_str!("../assets/ambient-runner.js");
+const AMBIENT_PLAYER: &str = include_str!("../assets/ambient-player.js");
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
