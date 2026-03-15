@@ -25,7 +25,8 @@ export default defineConfig({
   ],
   server: {
     port: 2532,
-    allowedHosts: ["souvenir.local"]
+    allowedHosts: ["souvenir.local"],
+    https: true,
   },
   test: {
     environment: 'jsdom',

@@ -127,8 +127,19 @@
 
 	// ── PTT voice ─────────────────────────────────────────────────────────────
 	async function startListening() {
+		if (!navigator.mediaDevices?.getUserMedia) {
+			console.warn('getUserMedia not available — requires a secure context (HTTPS or localhost)');
+			return;
+		}
 		audioCtx ??= new AudioContext();
-		const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+		let stream: MediaStream;
+		try {
+			stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+		} catch (e) {
+			console.error('getUserMedia failed:', e);
+			voiceState.set('idle');
+			return;
+		}
 
 		// waveform analyser
 		const src = audioCtx.createMediaStreamSource(stream);
