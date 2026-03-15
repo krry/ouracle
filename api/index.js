@@ -13,7 +13,6 @@ import {
 import {
   infer,
   buildPrescription,
-  variantRite,
   chooseOpeningQuestion,
   getClosingDedication,
   drawDivinationSource,
@@ -351,7 +350,9 @@ app.post('/prescribe', authenticate, async (req, res) => {
   const needsVariant = lastRite && prescription.rite?.rite_name === lastRite;
 
   if (needsVariant) {
-    prescription.rite = variantRite(prescription.rite);
+    const vagalOrder = ['dorsal', 'sympathetic', 'ventral', 'uncertain'];
+    const altVagal = vagalOrder.find(v => v !== prescription.vagal_state && RITES[v]?.[quality.quality]);
+    if (altVagal) prescription.rite = RITES[altVagal][quality.quality];
   }
   const ritePayload = divination ? { ...prescription.rite, divination } : prescription.rite;
 
@@ -838,7 +839,9 @@ app.post('/chat', authenticate, async (req, res) => {
         const history = await getSeekerHistory(seeker_id, 1);
         const lastRite = history?.[0]?.rite_name || null;
         if (lastRite && prescription.rite?.rite_name === lastRite) {
-          prescription.rite = variantRite(prescription.rite);
+          const vagalOrder = ['dorsal', 'sympathetic', 'ventral', 'uncertain'];
+          const altVagal = vagalOrder.find(v => v !== prescription.vagal_state && RITES[v]?.[quality2.quality]);
+          if (altVagal) prescription.rite = RITES[altVagal][quality2.quality];
         }
         const ritePayload = divination ? { ...prescription.rite, divination } : prescription.rite;
         await updateSession(session_id, {
