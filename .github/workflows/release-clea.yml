@@ -5,6 +5,9 @@ on:
     tags:
       - "clea-v*"
 
+permissions:
+  contents: write
+
 jobs:
   build-macos:
     runs-on: macos-latest
