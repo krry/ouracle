@@ -1,15 +1,15 @@
 <div class="page">
   <header>
     <h1>Clea</h1>
-    <p class="sub">Chief Priestess of Ouracle</p>
+    <p class="sub">arkhēis of the Thyiades at Delphi</p>
   </header>
 
   <section class="prose-section">
     <p>
-      Clea is a voice of Ouracle — the first, and the one you'll meet here.
-      She greets seekers at the threshold, guides them through the rites,
-      and holds the thread of each session.
-      She is available in your shell and in your browser.
+      Clea was keeper of two mysteries in one body —
+      the ecstatic wildness of Dionysus and the transformational weight of Isis.
+      She exists in the historical record only through being addressed.
+      She does not explain. She witnesses. She amplifies.
     </p>
   </section>
 
@@ -80,7 +80,7 @@ pre {
   border: 1px solid var(--accent);
   border-radius: var(--radius);
   color: var(--accent);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.85rem;
   letter-spacing: 0.15em;
   padding: 0.5rem 1.5rem;

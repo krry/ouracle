@@ -1,15 +1,15 @@
 <div class="page">
   <header>
     <h1>ripl</h1>
-    <p class="sub">A living, breathing TUI framework for AI chat in the shell</p>
+    <p class="sub">the shell that listens back</p>
   </header>
 
   <section class="prose-section">
     <p>
-      ripl is the framework Clea is built on. It provides a full ratatui event loop
-      wired to any LLM provider — Anthropic, OpenAI, OpenRouter, Ollama — with
-      Fish Audio TTS/STT, ambient audio, hue-shifting themes, and session cache.
-      Use it to build your own AI shell experiences.
+      ripl is the nervous system Clea runs on —
+      a ratatui event loop wired to any LLM, with voice, ambient sound,
+      and themes that shift with the conversation.
+      Open source. Point it at your model. Build something that listens.
     </p>
   </section>
 
