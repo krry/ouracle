@@ -12,3 +12,4 @@ data/tts_cache/
 .vercel
 .env*.local
 apps/web/.svelte-kit/
+apps/web/*.pem
