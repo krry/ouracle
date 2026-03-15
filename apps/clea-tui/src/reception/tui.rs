@@ -371,6 +371,17 @@ fn draw_input_screen(frame: &mut Frame, state: &State) {
         .style(Style::default().fg(text_primary()))
         .wrap(Wrap { trim: false });
     frame.render_widget(widget, area);
+
+    // Show terminal cursor at end of input for text-entry steps.
+    let is_input_step = matches!(
+        state.step,
+        Step::Name | Step::Password { .. } | Step::ReturningHandle | Step::ReturningPassword { .. }
+    );
+    if is_input_step && !state.connecting {
+        let cursor_x = area.x + 1 + prompt.len() as u16 + 2 + displayed_input.len() as u16;
+        let cursor_y = area.y + 1;
+        frame.set_cursor(cursor_x.min(area.x + area.width - 2), cursor_y);
+    }
 }
 
 fn draw_covenant(frame: &mut Frame, lines: &[String], offset: usize) {
