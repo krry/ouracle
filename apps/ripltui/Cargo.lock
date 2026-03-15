@@ -1254,10 +1254,11 @@ dependencies = [
 
 [[package]]
 name = "ripl"
-version = "0.1.0"
+version = "0.3.0"
 dependencies = [
  "color-eyre",
  "crossterm 0.28.1",
+ "libc",
  "rand",
  "ratatui",
  "reqwest",
@@ -1270,7 +1271,7 @@ dependencies = [
 
 [[package]]
 name = "ripltui"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "color-eyre",

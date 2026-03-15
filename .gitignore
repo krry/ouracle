@@ -2,7 +2,7 @@ node_modules/
 .env
 *.env.local
 .DS_Store
-apps/tui/target
+apps/*/target
 research/*.zip
 research/ExportBlock*
 !api/migrations/*.sql

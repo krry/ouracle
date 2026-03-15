@@ -12,10 +12,7 @@ api:
     cd api; bun start
 
 tui:
-    cd apps/tui; cargo run
+    cd apps/ripltui; cargo run
 
-tuid:
-    cd apps/tui; cargo watch -x 'run'
-
-tuich:
-    cd apps/tui; cargo check
+tuiw:
+    cd apps/ripltui; cargo watch -x 'run'

@@ -6,6 +6,8 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
 
+use ripl::RunOptions;
+
 use color_eyre::eyre::{bail, Result};
 use serde::{Deserialize, Serialize};
 
@@ -168,6 +170,16 @@ fn main() -> Result<()> {
             creds.access_token.clone(),
             Some(bootstrap.session_id),
         ));
-        ripl::run_in_terminal(terminal, Some(provider), Some("Ouracle".to_string()))
+        let ambient_cmd = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../api/scripts/ambient-runner.js");
+        let voice_id = std::env::var("FISH_AUDIO_VOICE_ONDREA").ok()
+            .or_else(|| std::env::var("FISH_AUDIO_VOICE_GALADRIEL").ok())
+            .or_else(|| std::env::var("FISH_AUDIO_VOICE_ID").ok());
+        ripl::run_in_terminal(terminal, RunOptions {
+            provider: Some(provider),
+            label: Some("Ouracle".to_string()),
+            ambient_cmd: Some(ambient_cmd),
+            voice_id,
+        })
     })
 }
