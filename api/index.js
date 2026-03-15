@@ -774,7 +774,7 @@ async function streamText(emit, text) {
   const chunks = text.split(/(\s+)/);
   for (const chunk of chunks) {
     if (chunk) {
-      emit({ type: 'token', token: chunk });
+      emit({ type: 'token', text: chunk });
       await new Promise((r) => setTimeout(r, 22));
     }
   }
@@ -799,6 +799,44 @@ app.post('/chat', authenticateOrGuest, async (req, res) => {
     emit({ type: 'error', message });
     res.end();
   };
+
+  // ── Guest path ──────────────────────────────────────────
+  if (req.is_guest) {
+    const GUEST_TURN_LIMIT = 5;
+    const guest = await getGuestSession(req.guest_session_id);
+    if (!guest) return fail('Guest session not found.');
+    if (guest.turns_used >= GUEST_TURN_LIMIT) return fail('guest_limit');
+
+    if (!message) {
+      // First load: Clea's opening line for new visitors
+      await streamText(emit, 'Speak. What brings you to the threshold?');
+      return finish('guest');
+    }
+
+    const llm = makeLlmClient();
+    const stream = await llm.chat({
+      system: CLEA_SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: message }],
+      temperature: 0.9,
+      maxTokens: 512,
+      stream: true,
+    });
+
+    try {
+      for await (const chunk of stream) {
+        const text = chunk.choices?.[0]?.delta?.content;
+        if (text) emit({ type: 'token', text });
+      }
+    } catch (streamErr) {
+      console.error('/chat guest stream error:', streamErr);
+    } finally {
+      await incrementGuestTurn(req.guest_session_id).catch((e) =>
+        console.error('[guest] incrementGuestTurn failed:', e.message)
+      );
+    }
+
+    return finish('guest');
+  }
 
   try {
     const seeker = await getSeeker(seeker_id);
