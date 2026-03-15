@@ -951,3 +951,5 @@ app.get('/health', (_req, res) => res.json({ status: 'alive', version: '0.2.0' }
 
 const PORT = process.env.PORT || 3737;
 app.listen(PORT, () => console.log(`MEATAPI v0.2 on :${PORT}`));
+
+export default app;
