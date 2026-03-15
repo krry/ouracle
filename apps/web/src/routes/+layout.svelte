@@ -15,8 +15,8 @@
     <a href="/" class="wordmark">Ouracle</a>
     <div class="links">
       <a href="/clea">Clea</a>
-      <a href="/ripl">ripl</a>
-      <a href="/diy">diy</a>
+      <a href="/ripl">RIPL</a>
+      <a href="/diy">D.I.Y.</a>
       <a href="/chat" class="cta">enter</a>
     </div>
   </nav>
@@ -27,7 +27,6 @@
 {#if !isChat}
   <footer>
     <span>© 2026 Kerry Snyder</span>
-    <a href="https://github.com/krry/ouracle">source</a>
   </footer>
 {/if}
 
