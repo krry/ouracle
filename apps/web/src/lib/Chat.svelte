@@ -17,7 +17,7 @@
 
 	let audioQueue: AudioQueue | null = null;
 	let sessionId: string | null = null;
-	let input = \$state('');
+	let input = $state('');
 	let msgList: HTMLElement;
 	let audioCtx: AudioContext;
 	let mediaRecorder: MediaRecorder | null = null;
