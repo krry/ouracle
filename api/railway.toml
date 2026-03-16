@@ -1,10 +1,10 @@
 [build]
 builder = "railpack"
-buildCommand = "bun install"
+buildCommand = "bun install && bun run sync-decks"
 watchPatterns = ["api/**"]
 
 [deploy]
-startCommand = "bun run sync-decks && bun start"
+startCommand = "bun start"
 healthcheckPath = "/health"
 healthcheckTimeout = 10
 restartPolicyType = "on_failure"
