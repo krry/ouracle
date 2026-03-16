@@ -22,8 +22,8 @@
       body: JSON.stringify({ session_token: data.session.token }),
     });
     if (!r.ok) return;
-    const { seeker_id, access_token, refresh_token } = await r.json();
-    if (access_token && seeker_id) creds.login({ access_token, refresh_token: refresh_token ?? '', seeker_id });
+    const { seeker_id, access_token, refresh_token, handle } = await r.json();
+    if (access_token && seeker_id) creds.login({ access_token, refresh_token: refresh_token ?? '', seeker_id, handle });
   });
 </script>
 

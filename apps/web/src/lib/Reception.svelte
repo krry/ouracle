@@ -52,9 +52,9 @@
       error = 'authentication failed — please try again';
       return;
     }
-    const { seeker_id, access_token, refresh_token } = await r.json();
+    const { seeker_id, access_token, refresh_token, handle } = await r.json();
     if (access_token && seeker_id) {
-      creds.login({ access_token, refresh_token: refresh_token ?? '', seeker_id });
+      creds.login({ access_token, refresh_token: refresh_token ?? '', seeker_id, handle });
       await registerDeviceKey(access_token);
     }
   }
@@ -110,7 +110,7 @@
 <main>
   <header>
     <h1>Ouracle</h1>
-    <p class="sub">speak. listen. know.</p>
+    <p class="sub">hear and be heard.</p>
   </header>
 
   <div class="social-row">

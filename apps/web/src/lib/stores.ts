@@ -6,6 +6,7 @@ export interface Credentials {
 	seeker_id: string;
 	access_token: string;
 	refresh_token: string;
+	handle?: string;
 }
 
 function credStore() {

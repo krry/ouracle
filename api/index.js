@@ -115,7 +115,7 @@ app.post('/auth/social-exchange', async (req, res) => {
     const { authUserId, name } = row;
     const seeker = await getOrCreateSeekerByAuthId(authUserId, name ?? null);
     const tokens = await issueTokenPair(seeker.id);
-    res.json({ seeker_id: seeker.id, ...tokens });
+    res.json({ seeker_id: seeker.id, handle: seeker.handle, ...tokens });
   } catch (err) {
     console.error('[social-exchange]', err);
     res.status(500).json({ error: err.message });

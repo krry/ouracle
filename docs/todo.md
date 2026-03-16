@@ -1,12 +1,5 @@
 **TODO**
 
-# Web Polish v0.1.1
-
-- [ ] body text should be the `font-serif` Crimson Pro, not `font-mono`
-- [ ] `font-mono` should be Fira Code first, remove JetBrains
-- [ ] the floating particles are cool, but look like sharp rectangles; can we make them star-shaped? stars with a varied number of points from 3 to 9 would be cool, and some variance in color the way we vary colors in the aura of ripl?
-- [ ] when I hit begin or enter I go to /chat but nothing happens when I submit text, and I don't think the STT is working; is it supposed to start an Ouracle /aspire session?
-
 # Prime directive
 - [x] >= 10 perfect opening questions for engine.js
 - [x] why is the api/engine in js?

@@ -23,6 +23,7 @@
 	let chunks: Blob[] = [];
 
 	let guestToken: string | null = null;
+	let handle: string | null = null;
 	let totemSession: TotemSession | null = null;
 
 	async function ensureGuestToken(): Promise<void> {
@@ -198,7 +199,12 @@
 
 <div class="shell">
 	{#if !guestMode}
-		<button class="leave" onclick={leave} title="leave">⌁</button>
+		<div class="identity">
+			{#if ($creds as Credentials | null)?.handle}
+				<span class="handle">{($creds as Credentials | null)?.handle}</span>
+			{/if}
+			<button class="leave" onclick={leave} title="leave">⌁</button>
+		</div>
 	{/if}
 
 	<!-- ambient waveform layer -->
@@ -225,7 +231,7 @@
 	<div class="bar">
 		<textarea
 			bind:value={input}
-			on:keydown={handleKey}
+			onkeydown={handleKey}
 			placeholder="speak…"
 			rows="1"
 			disabled={$streaming}
@@ -236,8 +242,8 @@
 				class="ptt"
 				class:active={$voiceState === 'listening'}
 				class:transcribing={$voiceState === 'transcribing'}
-				on:pointerdown={startListening}
-				on:pointerup={stopListening}
+				onpointerdown={startListening}
+				onpointerup={stopListening}
 				aria-label="hold to speak"
 			>
 				{$voiceState === 'listening' ? '◉' : $voiceState === 'transcribing' ? '…' : '◎'}
@@ -291,11 +297,24 @@
 	position: relative;
 }
 
-.leave {
+.identity {
 	position: absolute;
 	top: 0.75rem;
 	right: 0.75rem;
 	z-index: 10;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.handle {
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	letter-spacing: 0.08em;
+	color: var(--muted);
+}
+
+.leave {
 	background: none;
 	border: 1px solid transparent;
 	border-radius: var(--radius);
