@@ -230,15 +230,25 @@
 			disabled={$streaming}
 		></textarea>
 
-		<button
-			class="ptt"
-			class:active={$voiceState === 'listening'}
-			on:pointerdown={startListening}
-			on:pointerup={stopListening}
-			aria-label="hold to speak"
-		>
-			{$voiceState === 'listening' ? '◉' : $voiceState === 'transcribing' ? '…' : '◎'}
-		</button>
+		<div class="ptt-wrap">
+			<button
+				class="ptt"
+				class:active={$voiceState === 'listening'}
+				class:transcribing={$voiceState === 'transcribing'}
+				on:pointerdown={startListening}
+				on:pointerup={stopListening}
+				aria-label="hold to speak"
+			>
+				{$voiceState === 'listening' ? '◉' : $voiceState === 'transcribing' ? '…' : '◎'}
+			</button>
+			{#if $voiceState === 'idle'}
+				<span class="ptt-hint">hold to speak</span>
+			{:else if $voiceState === 'listening'}
+				<span class="ptt-hint listening">listening…</span>
+			{:else if $voiceState === 'transcribing'}
+				<span class="ptt-hint">transcribing…</span>
+			{/if}
+		</div>
 	</div>
 
 	<!-- ambience slider + TTS toggle -->
@@ -373,6 +383,28 @@ textarea {
 
 textarea:focus { border-color: var(--accent); }
 
+.ptt-wrap {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.ptt-hint {
+	font-size: 0.6rem;
+	letter-spacing: 0.12em;
+	color: var(--muted);
+	text-transform: uppercase;
+	white-space: nowrap;
+	opacity: 0.6;
+	transition: opacity 0.15s, color 0.15s;
+}
+
+.ptt-hint.listening {
+	color: var(--accent);
+	opacity: 1;
+}
+
 .ptt {
 	background: var(--surface);
 	border: 1px solid var(--border);
@@ -384,15 +416,23 @@ textarea:focus { border-color: var(--accent); }
 	width: 2.5rem;
 	display: grid;
 	place-items: center;
-	transition: all 0.1s;
+	transition: all 0.15s;
 	touch-action: none;
 	user-select: none;
 }
 
 .ptt.active {
+	background: hsl(var(--hue), 55%, 18%);
 	border-color: var(--accent);
 	color: var(--accent);
-	box-shadow: 0 0 0 3px hsl(var(--hue), 60%, 65%, 0.2);
+	box-shadow: 0 0 0 4px hsl(var(--hue), 60%, 65%, 0.25), 0 0 16px hsl(var(--hue), 60%, 65%, 0.3);
+	transform: scale(1.15);
+}
+
+.ptt.transcribing {
+	border-color: var(--muted);
+	color: var(--muted);
+	opacity: 0.7;
 }
 
 .controls {
