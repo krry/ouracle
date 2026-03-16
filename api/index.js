@@ -91,6 +91,19 @@ app.use('/ambient', express.static(join(__dirname, 'data/ambient'), {
   setHeaders: (res) => res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin'),
 }));
 
+// Root + error fallback → redirect to the web app
+app.get('/', (req, res) => {
+  const dest = new URL('https://ouracle.kerry.ink');
+  if (req.query.error) dest.searchParams.set('error', req.query.error);
+  res.redirect(302, dest.toString());
+});
+
+// Apple domain verification — Apple fetches this exact path
+app.get('/.well-known/apple-developer-domain-association.txt', async (req, res) => {
+  req.url = '/api/auth/.well-known/apple-developer-domain-association.txt';
+  await toNodeHandler(auth)(req, res);
+});
+
 // Mount BetterAuth — handles /api/auth/* routes (Express 4 wildcard)
 app.all('/api/auth/*', async (req, res, next) => {
   try {

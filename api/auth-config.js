@@ -21,10 +21,15 @@ async function appleClientSecret() {
     .sign(key);
 }
 
-// Apple client secret must be a JWT — generate it synchronously-ish by
-// falling back to the raw p8 key when KEY_ID / TEAM_ID aren't set yet.
-// Callers that need the live JWT can use appleClientSecret() directly.
-const appleSecret = process.env.OAUTH_APPLE_CLIENT_SECRET ?? '';
+// Apple client secret must be a signed JWT — generate at startup.
+let appleSecret;
+try {
+  appleSecret = await appleClientSecret();
+  console.log('[apple] client secret JWT generated, kid prefix:', appleSecret.slice(0, 20));
+} catch (e) {
+  console.error('[apple] client secret generation failed:', e.message);
+  appleSecret = '';
+}
 
 export const auth = betterAuth({
   database: { db, type: 'postgres' },
