@@ -1,15 +1,14 @@
 <script lang="ts">
   import { randomQuip } from './guestSession';
-  import { createEventDispatcher } from 'svelte';
 
-  const dispatch = createEventDispatcher<{ signin: void }>();
+  let { onsignin }: { onsignin: () => void } = $props();
   const quip = randomQuip();
 </script>
 
 <div class="veil" role="dialog" aria-modal="true" aria-label="session ended">
   <div class="inner">
     <p class="quip">{quip}</p>
-    <button onclick={() => dispatch('signin')}>enter the temple</button>
+    <button onclick={onsignin}>enter the temple</button>
     <p class="sub">or close this tab and carry the questions with you</p>
   </div>
 </div>

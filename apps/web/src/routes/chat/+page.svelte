@@ -40,7 +40,7 @@
 {#if $authed || !wantsSignin}
   <Chat guestMode={!$authed} />
   {#if !$authed && !exchanging && $guestTurns >= GUEST_LIMIT}
-    <AltarOverlay on:signin={() => (wantsSignin = true)} />
+    <AltarOverlay onsignin={() => (wantsSignin = true)} />
   {/if}
 {:else}
   <Reception />

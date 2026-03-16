@@ -13,3 +13,4 @@ data/tts_cache/
 .env*.local
 apps/web/.svelte-kit/
 apps/web/*.pem
+api/data/decks/
