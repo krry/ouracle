@@ -6,6 +6,12 @@
 - **DB**: Neon Postgres (dev branch: `br-purple-mouse-aezaj7nh`)
 - **Auth**: BetterAuth 1.x
 
+## Deploying
+
+- **Web (Vercel)**: push to `main` — Vercel auto-deploys `apps/web`
+- **API (Railway)**: push to `main` — Railway auto-deploys `api/`
+- **TUI binary**: build with `asdf exec cargo build --release` from `apps/tui`, then package with `tar czf apps/web/static/clea-macos.tar.gz -C apps/tui/target/release clea`, commit, and push to `main`
+
 ## Key Conventions
 
 ### Svelte 5 — mandatory
