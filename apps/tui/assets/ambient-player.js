@@ -5,14 +5,12 @@
  *   1. Persistent: singing-bowls loops forever at low volume
  *   2. Cycling: 5 soundscapes play in sequence, one at a time, then loop the set
  *
- * Files expected in data/ambient/
+ * DATA_DIR is patched to the API /ambient URL by `clea ambiance on`.
  */
 
 import { spawn } from 'child_process';
-import { existsSync } from 'fs';
-import { join } from 'path';
 
-const DATA_DIR = join(import.meta.dir, 'data', 'ambient');
+const DATA_DIR = 'AMBIENT_BASE_URL';
 
 const BOWLS = [
   { file: 'bowl-reverb.mp3', volume: 0.18 },
@@ -51,10 +49,7 @@ export class AmbientPlayer {
   }
 
   _strikeBowl() {
-    const available = BOWLS.filter((b) => existsSync(join(DATA_DIR, b.file)));
-    if (!available.length) return;
-
-    const bowl = available[this._bowlIndex % available.length];
+    const bowl = BOWLS[this._bowlIndex % BOWLS.length];
     this._bowlIndex++;
 
     this._bowlProc = spawn('ffplay', [
@@ -62,7 +57,7 @@ export class AmbientPlayer {
       '-t', '25',
       '-af', `volume=${bowl.volume}`,
       '-loglevel', 'quiet',
-      join(DATA_DIR, bowl.file),
+      `${DATA_DIR}/${bowl.file}`,
     ]);
 
     this._bowlProc.on('close', () => {
@@ -73,17 +68,12 @@ export class AmbientPlayer {
   }
 
   _startScene() {
-    const available = SOUNDSCAPES.filter((s) => existsSync(join(DATA_DIR, s.file)));
-    if (!available.length) return;
-
-    const scene = available[this._sceneIndex % available.length];
-    const path = join(DATA_DIR, scene.file);
-
+    const scene = SOUNDSCAPES[this._sceneIndex % SOUNDSCAPES.length];
     this._sceneProc = spawn('ffplay', [
       '-nodisp', '-loop', '1',
       '-af', `volume=${scene.volume}`,
       '-loglevel', 'quiet',
-      path,
+      `${DATA_DIR}/${scene.file}`,
     ]);
 
     this._sceneProc.on('close', () => {
