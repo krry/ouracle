@@ -36,12 +36,13 @@ export async function* chat(
 	token: string,
 	message: string,
 	sessionId: string | null,
-	onEvent: (event: Record<string, unknown>) => void
+	onEvent: (event: Record<string, unknown>) => void,
+	mode?: string
 ): AsyncGenerator<void> {
 	const r = await fetch(`${BASE}/chat`, {
 		method: 'POST',
 		headers: authHeaders(token),
-		body: JSON.stringify({ message, session_id: sessionId ?? undefined })
+		body: JSON.stringify({ message, session_id: sessionId ?? undefined, ...(mode ? { mode } : {}) })
 	});
 	if (!r.ok) throw new Error(await r.text());
 	const reader = r.body!.getReader();

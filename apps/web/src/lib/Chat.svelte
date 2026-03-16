@@ -88,7 +88,7 @@
 				: msg
 		));
 		const text = `I drew a card — **${card.title}** from the ${card.deckLabel}.\n\nKeywords: ${card.keywords.join(' · ')}\n\n${card.body}\n\nPlease interpret this for me.`;
-		send(text);
+		send(text, 'interpret');
 	}
 
 	// The last uninterpreted card — gates input
@@ -115,7 +115,7 @@
 		}
 	});
 
-	async function send(text: string) {
+	async function send(text: string, mode?: string) {
 		if ($streaming) return;
 		audioQueue?.prime();
 		const token = !guestMode ? ($creds as Credentials | null)?.access_token ?? '' : guestToken ?? '';
@@ -151,7 +151,7 @@
 					}
 					messages.update(m => [...m, { role: 'assistant', content: '' }]);
 				}
-			})) { /* yield */ }
+			}), mode)) { /* yield */ }
 		} catch (e: unknown) {
 			const msg = e instanceof Error ? e.message : String(e);
 			if (msg.includes('guest_limit')) {
@@ -350,7 +350,7 @@
 				</div>
 			{:else if msg.role !== 'system' && msg.role !== 'card'}
 				<div class="msg {msg.role}">
-					<span class="label">{msg.role === 'user' ? 'you' : 'ouracle'}</span>
+					<span class="label">{msg.role === 'user' ? 'you' : 'clea'}</span>
 					<div class="prose">{@html renderMarkdown(msg.content)}</div>
 				</div>
 			{/if}

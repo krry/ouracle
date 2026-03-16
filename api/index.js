@@ -883,7 +883,7 @@ async function streamText(emit, text) {
 }
 
 app.post('/chat', authenticateOrGuest, async (req, res) => {
-  const { session_id, message } = req.body || {};
+  const { session_id, message, mode } = req.body || {};
   const seeker_id = req.seeker_id;
 
   res.writeHead(200, {
@@ -1002,6 +1002,28 @@ app.post('/chat', authenticateOrGuest, async (req, res) => {
     // ── Continue existing session ─────────────────
     const session = await getSession(session_id);
     if (!session) return fail('Session not found.');
+
+    // ── Card interpretation — bypass OCTAVE, respond as Clea directly ────────
+    if (mode === 'interpret' && message) {
+      const conversation = Array.isArray(session.conversation) ? [...session.conversation] : [];
+      const llmMessages = conversation
+        .filter((e) => e.role === 'seeker' || e.role === 'priestess')
+        .map((e) => ({ role: e.role === 'seeker' ? 'user' : 'assistant', content: e.text }));
+      llmMessages.push({ role: 'user', content: message });
+      const llm = makeLlmClient();
+      const stream = await llm.chat({
+        system: `${CLEA_SYSTEM_PROMPT}\n\n--- The seeker has drawn a divination card and is asking for your interpretation. Respond as Clea — do not prescribe a rite, do not run an assessment. Simply receive the card and the seeker together, and speak.`,
+        messages: llmMessages,
+        temperature: 0.9,
+        maxTokens: 512,
+        stream: true,
+      });
+      for await (const chunk of stream) {
+        const token = chunk.choices?.[0]?.delta?.content;
+        if (token) emit({ type: 'token', text: token });
+      }
+      return finish(session.stage, { session_id });
+    }
 
     const stage = session.stage;
 
