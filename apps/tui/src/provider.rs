@@ -125,6 +125,23 @@ impl Provider for OuracleProvider {
                     let _ = tx.send(ApiResponse::TurnComplete);
                     break;
                 }
+                Some("draw") => {
+                    if let Some(card) = event.get("card") {
+                        let deck  = card.get("deckLabel").and_then(|v| v.as_str()).unwrap_or("Oracle");
+                        let title = card.get("title").and_then(|v| v.as_str()).unwrap_or("");
+                        let kws: Vec<&str> = card.get("keywords")
+                            .and_then(|v| v.as_array())
+                            .map(|a| a.iter().filter_map(|k| k.as_str()).collect())
+                            .unwrap_or_default();
+                        let body  = card.get("body").and_then(|v| v.as_str()).unwrap_or("");
+                        let bar   = "─".repeat(40);
+                        let block = format!(
+                            "\n\n◈ {deck}\n{bar}\n{title}\n{}\n\n{body}\n{bar}",
+                            kws.join(" · "),
+                        );
+                        let _ = tx.send(ApiResponse::TokenChunk { token: block });
+                    }
+                }
                 Some("error") => {
                     let msg = event
                         .get("message")
