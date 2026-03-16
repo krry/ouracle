@@ -107,7 +107,7 @@ impl Provider for OuracleProvider {
                     }
                 }
                 Some("token") => {
-                    if let Some(token) = event.get("token").and_then(|t| t.as_str()) {
+                    if let Some(token) = event.get("text").and_then(|t| t.as_str()) {
                         let _ = tx.send(ApiResponse::TokenChunk { token: token.to_string() });
                     }
                 }
