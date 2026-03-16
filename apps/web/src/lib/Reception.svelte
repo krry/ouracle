@@ -28,7 +28,8 @@
   }
 
   // BetterAuth 1.x returns { data, error } — data.token is the session token,
-  // data.user has { id, name, email, ... }. We store token as access_token.
+  // data.user has { id, name, email, ... }.
+  // We must exchange the BetterAuth session token for our custom JWT via /auth/social-exchange.
   type AuthResult = {
     data?: { token?: string; user?: { id: string; name?: string } } | null;
     error?: { message?: string } | null;
@@ -39,13 +40,22 @@
       error = result.error.message ?? 'something went wrong';
       return;
     }
-    const token = result.data?.token ?? '';
-    const user = result.data?.user;
-    if (token && user) {
-      // BetterAuth uses session tokens, not JWTs.
-      // Store as access_token; refresh_token left empty (BetterAuth manages sessions server-side).
-      creds.login({ access_token: token, refresh_token: '', seeker_id: user.id });
-      await registerDeviceKey(token);
+    const betterAuthToken = result.data?.token ?? '';
+    if (!betterAuthToken) return;
+    // Exchange BetterAuth session token for our custom JWT
+    const r = await fetch(`${BASE}/auth/social-exchange`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_token: betterAuthToken }),
+    });
+    if (!r.ok) {
+      error = 'authentication failed — please try again';
+      return;
+    }
+    const { seeker_id, access_token, refresh_token } = await r.json();
+    if (access_token && seeker_id) {
+      creds.login({ access_token, refresh_token: refresh_token ?? '', seeker_id });
+      await registerDeviceKey(access_token);
     }
   }
 

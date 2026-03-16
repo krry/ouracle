@@ -129,7 +129,10 @@ async function authenticateOrGuest(req, res, next) {
     return next();
   } catch {}
 
-  // Try guest session UUID.
+  // Try guest session UUID (must be UUID format — non-UUID tokens cause a DB cast error).
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_RE.test(token)) return res.status(401).json({ error: 'Invalid or expired session.' });
+
   try {
     const guest = await getGuestSession(token);
     if (!guest) return res.status(401).json({ error: 'Invalid or expired session.' });
