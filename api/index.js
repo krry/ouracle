@@ -108,6 +108,7 @@ app.post('/auth/social-exchange', async (req, res) => {
     const tokens = await issueTokenPair(seeker.id);
     res.json({ seeker_id: seeker.id, ...tokens });
   } catch (err) {
+    console.error('[social-exchange]', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -1136,6 +1137,7 @@ app.post('/stt', authenticateOrGuest, async (req, res) => {
     const contentType = req.headers['content-type'] || 'audio/webm';
     const baseType = contentType.split(';')[0].trim(); // strip codecs params e.g. audio/webm;codecs=opus
     const ext = baseType.includes('mp4') ? 'mp4' : baseType.includes('ogg') ? 'ogg' : baseType.includes('wav') ? 'wav' : 'webm';
+    console.log(`[stt] bytes=${audioBuffer.length} type=${baseType} ext=${ext}`);
     const file = new File([audioBuffer], `recording.${ext}`, { type: baseType });
 
     const { default: OpenAI } = await import('openai');
@@ -1149,6 +1151,7 @@ app.post('/stt', authenticateOrGuest, async (req, res) => {
     });
     res.json({ text: result.text ?? '' });
   } catch (err) {
+    console.error('[stt]', err);
     res.status(500).json({ error: err.message });
   }
 });
