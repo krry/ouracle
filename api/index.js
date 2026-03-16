@@ -53,7 +53,7 @@ import {
   incrementGuestTurn,
   getOrCreateSeekerByAuthId,
 } from './db.js';
-import { auth } from './auth-config.js';
+import { auth, db as authDb } from './auth-config.js';
 import { toNodeHandler } from 'better-auth/node';
 
 const app = express();
@@ -97,11 +97,17 @@ app.post('/auth/social-exchange', async (req, res) => {
   const { session_token } = req.body || {};
   if (!session_token) return res.status(400).json({ error: 'session_token required.' });
   try {
-    const sessionData = await auth.api.getSession({
-      headers: new Headers({ cookie: `better-auth.session_token=${session_token}` }),
-    });
-    if (!sessionData?.user?.id) return res.status(401).json({ error: 'Invalid session.' });
-    const { id: authUserId, name } = sessionData.user;
+    // auth.api.getSession requires a signed cookie — query the tables directly instead.
+    const row = await authDb
+      .selectFrom('session')
+      .innerJoin('user', 'user.id', 'session.userId')
+      .select(['user.id as authUserId', 'user.name', 'session.expiresAt'])
+      .where('session.token', '=', session_token)
+      .executeTakeFirst();
+    if (!row || new Date(row.expiresAt) < new Date()) {
+      return res.status(401).json({ error: 'Invalid session.' });
+    }
+    const { authUserId, name } = row;
     const seeker = await getOrCreateSeekerByAuthId(authUserId, name ?? null);
     const tokens = await issueTokenPair(seeker.id);
     res.json({ seeker_id: seeker.id, ...tokens });

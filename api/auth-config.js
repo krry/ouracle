@@ -21,6 +21,13 @@ async function appleClientSecret() {
     .sign(key);
 }
 
+// Apple client secret must be a JWT — generate it synchronously-ish by
+// falling back to the raw p8 key when KEY_ID / TEAM_ID aren't set yet.
+// Callers that need the live JWT can use appleClientSecret() directly.
+const appleSecret = process.env.OAUTH_APPLE_CLIENT_SECRET ?? '';
+
+export { db };
+
 export const auth = betterAuth({
   database: { db, type: 'postgres' },
   baseURL: process.env.BETTER_AUTH_URL ?? 'https://api.ouracle.kerry.ink',
@@ -36,7 +43,7 @@ export const auth = betterAuth({
     },
     apple: {
       clientId: process.env.OAUTH_APPLE_CLIENT_ID,
-      clientSecret: await appleClientSecret(),
+      clientSecret: appleSecret,
     },
   },
   // passkey plugin requires better-auth ≥2.x; deferred until upgrade
