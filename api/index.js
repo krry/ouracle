@@ -1132,8 +1132,9 @@ app.post('/stt', authenticateOrGuest, async (req, res) => {
     if (audioBuffer.length === 0) return res.status(400).json({ error: 'Empty audio.' });
 
     const contentType = req.headers['content-type'] || 'audio/webm';
-    const ext = contentType.includes('mp4') ? 'mp4' : contentType.includes('ogg') ? 'ogg' : contentType.includes('wav') ? 'wav' : 'webm';
-    const file = new File([audioBuffer], `recording.${ext}`, { type: contentType });
+    const baseType = contentType.split(';')[0].trim(); // strip codecs params e.g. audio/webm;codecs=opus
+    const ext = baseType.includes('mp4') ? 'mp4' : baseType.includes('ogg') ? 'ogg' : baseType.includes('wav') ? 'wav' : 'webm';
+    const file = new File([audioBuffer], `recording.${ext}`, { type: baseType });
 
     const { default: OpenAI } = await import('openai');
     const groq = new OpenAI({
