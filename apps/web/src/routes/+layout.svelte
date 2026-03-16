@@ -28,6 +28,12 @@
   <footer>
     <span>© 2026 <a href="https://kerry.ink">Kerry Alan Snyder</a></span>
   </footer>
+  <webring-widget
+    data-source="https://kerry.ink/widgets/webring/webring.json"
+    mode="compact"
+    theme="auto"
+    style="position: fixed; bottom: 2rem; right: 2rem; max-width: 320px; z-index: 1000;"
+  ></webring-widget>
 {/if}
 
 <style>
