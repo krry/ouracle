@@ -92,3 +92,8 @@ code, pre, kbd, samp {
 button, input, select, textarea, nav, label {
 	font-family: var(--font-sans);
 }
+
+p {
+	line-height: var(--leading);
+	color: var(--text);
+}
