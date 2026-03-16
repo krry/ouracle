@@ -229,6 +229,50 @@
 
 	<!-- input bar -->
 	<div class="bar">
+		<div class="bar-leading">
+			<div class="ptt-wrap">
+				<button
+					class="ptt"
+					class:active={$voiceState === 'listening'}
+					class:transcribing={$voiceState === 'transcribing'}
+					onpointerdown={startListening}
+					onpointerup={stopListening}
+					aria-label="hold to speak"
+				>
+					{$voiceState === 'listening' ? '◉' : $voiceState === 'transcribing' ? '…' : '◎'}
+				</button>
+				{#if $voiceState === 'idle'}
+					<span class="ptt-hint">hold to speak</span>
+				{:else if $voiceState === 'listening'}
+					<span class="ptt-hint listening">listening…</span>
+				{:else if $voiceState === 'transcribing'}
+					<span class="ptt-hint">transcribing…</span>
+				{/if}
+			</div>
+
+			<div class="ambient-controls">
+				<button
+					class="ambient-toggle"
+					class:on={$ambientOn}
+					onclick={() => toggleAmbient($ambience)}
+					title={$ambientOn ? 'stop ambient' : 'play ambient'}
+				>♪</button>
+				{#if $ambientOn}
+					<button
+						class="ambient-track"
+						onclick={() => cycleTrack($ambience)}
+						title="next track"
+					>{TRACKS.find(t => t.id === $ambientTrack)?.label ?? '~'}</button>
+				{/if}
+				<input
+					type="range" min="0" max="1" step="0.01"
+					bind:value={$ambience}
+					oninput={() => setVolume($ambience)}
+					aria-label="ambience volume"
+				/>
+			</div>
+		</div>
+
 		<textarea
 			bind:value={input}
 			onkeydown={handleKey}
@@ -237,55 +281,10 @@
 			disabled={$streaming}
 		></textarea>
 
-		<div class="ptt-wrap">
-			<button
-				class="ptt"
-				class:active={$voiceState === 'listening'}
-				class:transcribing={$voiceState === 'transcribing'}
-				onpointerdown={startListening}
-				onpointerup={stopListening}
-				aria-label="hold to speak"
-			>
-				{$voiceState === 'listening' ? '◉' : $voiceState === 'transcribing' ? '…' : '◎'}
-			</button>
-			{#if $voiceState === 'idle'}
-				<span class="ptt-hint">hold to speak</span>
-			{:else if $voiceState === 'listening'}
-				<span class="ptt-hint listening">listening…</span>
-			{:else if $voiceState === 'transcribing'}
-				<span class="ptt-hint">transcribing…</span>
-			{/if}
-		</div>
-	</div>
-
-	<!-- controls row -->
-	<div class="controls">
 		<label class="tts-toggle" title={$ttsEnabled ? 'mute voice' : 'enable voice'}>
 			<input type="checkbox" bind:checked={$ttsEnabled} />
 			<span>{$ttsEnabled ? '◈' : '◇'}</span>
 		</label>
-
-		<div class="ambient-controls">
-			<button
-				class="ambient-toggle"
-				class:on={$ambientOn}
-				onclick={() => toggleAmbient($ambience)}
-				title={$ambientOn ? 'stop ambient' : 'play ambient'}
-			>♪</button>
-			{#if $ambientOn}
-				<button
-					class="ambient-track"
-					onclick={() => cycleTrack($ambience)}
-					title="next track"
-				>{TRACKS.find(t => t.id === $ambientTrack)?.label ?? '~'}</button>
-			{/if}
-			<input
-				type="range" min="0" max="1" step="0.01"
-				bind:value={$ambience}
-				oninput={() => setVolume($ambience)}
-				aria-label="ambience volume"
-			/>
-		</div>
 	</div>
 </div>
 
@@ -506,12 +505,12 @@ textarea:focus { border-color: var(--accent); }
 }
 .ambient-track:hover { color: var(--accent); }
 
-.controls {
+.bar-leading {
 	display: flex;
-	justify-content: flex-end;
+	flex-direction: column;
 	align-items: center;
-	gap: 0.75rem;
-	padding: 0.25rem 1rem 0.5rem;
+	gap: 0.5rem;
+	flex-shrink: 0;
 }
 
 input[type="range"] {
