@@ -122,8 +122,8 @@
     );
     sprite.scale.setScalar(size);
     const rotRate   = (0.001 + h(seed, 506) * 0.004) * (h(seed, 507) > 0.5 ? 1 : -1);
-    const twinkleHz = 0.3 + h(seed, 508) * 1.4;   // 0.3..1.7 Hz
-    const twinkleAmp= 0.12 + h(seed, 509) * 0.25; // depth of pulse
+    const twinkleHz = 0.04 + h(seed, 508) * 0.12;  // 0.04..0.16 Hz (~6–25s cycle)
+    const twinkleAmp= 0.04 + h(seed, 509) * 0.08; // depth of pulse (gentle)
     const twinkleOff= h(seed, 510) * Math.PI * 2;  // phase offset
     return { sprite, rotRate, opacity, size, twinkleHz, twinkleAmp, twinkleOff };
   }
