@@ -107,10 +107,31 @@ fn save_auth(a: &Auth) -> Result<()> {
     Ok(())
 }
 
-fn resolve_base_url(cfg: &Config) -> String {
-    std::env::var("OURACLE_BASE_URL")
+fn is_alive(base_url: &str) -> bool {
+    use reqwest::blocking::Client;
+    Client::builder()
+        .timeout(Duration::from_millis(400))
+        .build()
         .ok()
-        .or_else(|| cfg.settings.base_url.clone())
+        .and_then(|c| c.get(format!("{base_url}/health")).send().ok())
+        .map(|r| r.status().is_success())
+        .unwrap_or(false)
+}
+
+fn resolve_base_url(cfg: &Config) -> String {
+    // Explicit env override wins unconditionally.
+    if let Ok(url) = std::env::var("OURACLE_BASE_URL") {
+        return url;
+    }
+    // Probe local dev server first.
+    let local = "http://localhost:3737";
+    if is_alive(local) {
+        return local.to_string();
+    }
+    // Fall back to saved config or production.
+    cfg.settings.base_url
+        .clone()
+        .filter(|u| u != local) // don't re-use local if it was saved and is down
         .unwrap_or_else(|| "https://api.ouracle.kerry.ink".to_string())
 }
 

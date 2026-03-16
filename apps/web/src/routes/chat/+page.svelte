@@ -6,6 +6,7 @@
   import Reception from '$lib/Reception.svelte';
   import Chat from '$lib/Chat.svelte';
   import AltarOverlay from '$lib/AltarOverlay.svelte';
+  import Covenant from '$lib/Covenant.svelte';
 
   let wantsSignin = $state(false);
   let exchanging = $state(false);
@@ -25,8 +26,8 @@
         body: JSON.stringify({ session_token: data.session.token }),
       });
       if (!r.ok) return;
-      const { seeker_id, access_token, refresh_token, handle } = await r.json();
-      if (access_token && seeker_id) creds.login({ access_token, refresh_token: refresh_token ?? '', seeker_id, handle });
+      const { seeker_id, access_token, refresh_token, handle, stage } = await r.json();
+      if (access_token && seeker_id) creds.login({ access_token, refresh_token: refresh_token ?? '', seeker_id, handle, stage });
     } finally {
       exchanging = false;
     }
@@ -41,6 +42,9 @@
   <Chat guestMode={!$authed} />
   {#if !$authed && !exchanging && $guestTurns >= GUEST_LIMIT}
     <AltarOverlay onsignin={() => (wantsSignin = true)} />
+  {/if}
+  {#if $authed && $creds?.stage !== 'covenanted'}
+    <Covenant onaccept={() => {}} />
   {/if}
 {:else}
   <Reception />

@@ -7,6 +7,7 @@ export interface Credentials {
 	access_token: string;
 	refresh_token: string;
 	handle?: string;
+	stage?: string;
 }
 
 function credStore() {
