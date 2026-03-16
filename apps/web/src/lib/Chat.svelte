@@ -4,21 +4,20 @@
 	import { creds, authed, messages, streaming, voiceState, waveform, ambience, guestTurns, ttsEnabled, ttsVoice } from './stores';
 	import type { CardData, TtsVoice } from './stores';
 	import { signOut } from './auth';
-	import { setVolume } from './ambientPlayer';
+	import { startAmbient, stopAmbient, setVolume, ambientRunning, ambientScene, SCENES } from './ambientEngine';
+	import type { SceneId } from './ambientEngine';
 
-	// ── mynoise generators ────────────────────────────────────────────────────
-	const GENERATORS = [
-		{ id: 'japanese-garden',  label: 'japanese garden',  url: 'https://mynoise.net/NoiseMachines/japaneseGardenSoundscapeGenerator.php' },
-		{ id: 'tibetan-bowls',    label: 'tibetan bowls',    url: 'https://mynoise.net/NoiseMachines/tibetanBowlsMeditationGenerator.php' },
-		{ id: 'waterfall',        label: 'waterfall',        url: 'https://mynoise.net/NoiseMachines/waterfallSoundscapeGenerator.php' },
-		{ id: 'rain',             label: 'rain',             url: 'https://mynoise.net/NoiseMachines/rainSoundscapeGenerator.php' },
-		{ id: 'forest',           label: 'forest',           url: 'https://mynoise.net/NoiseMachines/forestSoundscapeGenerator.php' },
-	] as const;
-	type GeneratorId = typeof GENERATORS[number]['id'];
+	let activeScene = $state<SceneId>('rain');
 
-	let mynoiseOpen = $state(false);
-	let generatorId = $state<GeneratorId>('japanese-garden');
-	const generatorUrl = $derived(GENERATORS.find(g => g.id === generatorId)!.url);
+	function toggleAmbient() {
+		if ($ambientRunning) stopAmbient();
+		else startAmbient(activeScene, $ambience);
+	}
+
+	function switchScene(scene: SceneId) {
+		activeScene = scene;
+		if ($ambientRunning) startAmbient(scene, $ambience);
+	}
 	import { chat, tts, stt } from './api';
 	import Breath from './Breath.svelte';
 	import type { Credentials } from './stores';
@@ -319,39 +318,27 @@
 </script>
 
 <div class="shell">
-	<!-- mynoise floating panel -->
-	{#if mynoiseOpen}
-		<div class="mynoise-panel">
-			<div class="mynoise-bar">
-				<select
-					class="generator-select"
-					value={generatorId}
-					onchange={(e) => generatorId = (e.target as HTMLSelectElement).value as GeneratorId}
-					aria-label="sound generator"
-				>
-					{#each GENERATORS as g}
-						<option value={g.id}>{g.label}</option>
-					{/each}
-				</select>
-				<button class="mynoise-close" onclick={() => mynoiseOpen = false} aria-label="close">✕</button>
-			</div>
-			<iframe
-				src={generatorUrl}
-				title="mynoise ambient sound"
-				allow="autoplay"
-				loading="lazy"
-			></iframe>
-		</div>
-	{/if}
 
 	<div class="topbar">
 		<div class="ambient-controls">
 			<button
 				class="ambient-toggle"
-				class:on={mynoiseOpen}
-				onclick={() => mynoiseOpen = !mynoiseOpen}
-				title={mynoiseOpen ? 'hide ambient' : 'open ambient'}
+				class:on={$ambientRunning}
+				onclick={toggleAmbient}
+				title={$ambientRunning ? 'stop' : 'play ambient'}
 			>♪</button>
+			{#if $ambientRunning}
+				<select
+					class="scene-select"
+					value={activeScene}
+					onchange={(e) => switchScene((e.target as HTMLSelectElement).value as SceneId)}
+					aria-label="ambient scene"
+				>
+					{#each SCENES as s}
+						<option value={s.id}>{s.label}</option>
+					{/each}
+				</select>
+			{/if}
 			<input
 				type="range" min="0" max="1" step="0.01"
 				bind:value={$ambience}
@@ -745,30 +732,7 @@ textarea:focus { border-color: var(--accent); }
 }
 .ambient-toggle.on { color: var(--accent); }
 
-/* ── mynoise panel ─────────────────────────────────────────────────────── */
-.mynoise-panel {
-	position: fixed;
-	bottom: 5rem;
-	left: 1rem;
-	width: min(340px, calc(100vw - 2rem));
-	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	overflow: hidden;
-	z-index: 30;
-	box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-}
-
-.mynoise-bar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 0.4rem 0.6rem;
-	border-bottom: 1px solid var(--border);
-	gap: 0.5rem;
-}
-
-.generator-select {
+.scene-select {
 	appearance: none;
 	background: none;
 	border: none;
@@ -777,31 +741,11 @@ textarea:focus { border-color: var(--accent); }
 	font-family: var(--font-mono);
 	font-size: 0.65rem;
 	letter-spacing: 0.08em;
-	flex: 1;
 	padding: 0;
 	transition: color 0.15s;
 }
-.generator-select:hover, .generator-select:focus { color: var(--accent); outline: none; }
-.generator-select option { background: var(--bg); color: var(--text); }
-
-.mynoise-close {
-	background: none;
-	border: none;
-	color: var(--muted);
-	cursor: pointer;
-	font-size: 0.7rem;
-	line-height: 1;
-	padding: 0.1rem 0.2rem;
-	transition: color 0.15s;
-}
-.mynoise-close:hover { color: var(--text); }
-
-.mynoise-panel iframe {
-	display: block;
-	width: 100%;
-	height: 220px;
-	border: none;
-}
+.scene-select:hover, .scene-select:focus { color: var(--accent); outline: none; }
+.scene-select option { background: var(--bg); color: var(--text); }
 
 .voice-select {
 	appearance: none;
