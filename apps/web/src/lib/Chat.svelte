@@ -232,7 +232,7 @@
 		<textarea
 			bind:value={input}
 			onkeydown={handleKey}
-			placeholder="speak…"
+			placeholder="Type to speak…"
 			rows="1"
 			disabled={$streaming}
 		></textarea>
