@@ -30,8 +30,23 @@ export const creds = credStore();
 export const authed = derived(creds, $c => $c !== null);
 
 // ── Chat ────────────────────────────────────────────────────────────────────
-export type Role = 'user' | 'assistant' | 'system';
-export interface Message { role: Role; content: string; }
+export type Role = 'user' | 'assistant' | 'system' | 'card';
+
+export interface CardData {
+	id: string;
+	deck: string;
+	deckLabel: string;
+	title: string;
+	keywords: string[];
+	body: string;
+}
+
+export interface Message {
+	role: Role;
+	content: string;
+	card?: CardData;
+	interpreted?: boolean; // true once seeker has asked for interpretation
+}
 
 export const messages = writable<Message[]>([]);
 export const streaming = writable(false);

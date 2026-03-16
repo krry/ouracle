@@ -2,25 +2,22 @@ import OpenAI from 'openai';
 import { VAGAL_CLUE_MAP, BELIEF_CLUE_MAP } from './engine.js';
 import { OCTAVE_SCHEMA, getOctaveByQuality } from './octave-schema.js';
 
-const OPENROUTER_API_KEY = process.env.OURACLE_OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
-if (!OPENROUTER_API_KEY) {
-  throw new Error('OpenRouter API key missing. Set OURACLE_OPENROUTER_API_KEY or OPENROUTER_API_KEY.');
+// Embedding via Cloudflare Workers AI (OpenAI-compatible)
+// Required env vars: CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN
+const cfAccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+const cfApiToken = process.env.CLOUDFLARE_API_TOKEN;
+if (!cfAccountId || !cfApiToken) {
+  throw new Error('Embeddings: set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN.');
 }
 
 const client = new OpenAI({
-  apiKey: OPENROUTER_API_KEY,
-  baseURL: 'https://openrouter.ai/api/v1',
-  defaultHeaders: {
-    ...(process.env.OPENROUTER_REFERER ? { 'HTTP-Referer': process.env.OPENROUTER_REFERER } : {}),
-    ...(process.env.OPENROUTER_TITLE ? { 'X-Title': process.env.OPENROUTER_TITLE } : {}),
-  },
+  apiKey: cfApiToken,
+  baseURL: `https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/ai/v1`,
 });
 
-const EMBED_MODEL = process.env.OURACLE_OPENROUTER_EMBEDDING_MODEL || process.env.OPENROUTER_EMBEDDING_MODEL || 'openai/text-embedding-3-small';
-const EMBED_PROVIDER_ORDER = (process.env.OURACLE_OPENROUTER_EMBEDDING_PROVIDER_ORDER || process.env.OPENROUTER_EMBEDDING_PROVIDER_ORDER || '')
-  .split(',')
-  .map((entry) => entry.trim())
-  .filter(Boolean);
+// bge-base: 768-dim, good quality/speed balance. Override with EMBEDDING_MODEL.
+const EMBED_MODEL = process.env.EMBEDDING_MODEL || '@cf/baai/bge-base-en-v1.5';
+const EMBED_PROVIDER_ORDER = [];
 
 const CACHE = {
   phraseEmbeddings: new Map(),

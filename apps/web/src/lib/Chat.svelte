@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
 	import { creds, authed, messages, streaming, voiceState, waveform, ambience, guestTurns, ttsEnabled } from './stores';
+	import type { CardData } from './stores';
 	import { signOut } from './auth';
 	import { ambientOn, ambientTrack, toggleAmbient, cycleTrack, setVolume, TRACKS } from './ambientPlayer';
 	import { chat, tts, stt } from './api';
@@ -12,7 +13,7 @@
 	import { renderMarkdown } from './markdown';
 	import { createAudioQueue, type AudioQueue } from './audio';
 
-	export let guestMode = false;
+	let { guestMode = false } = $props<{ guestMode?: boolean }>();
 
 	let audioQueue: AudioQueue | null = null;
 	let sessionId: string | null = null;
@@ -25,6 +26,75 @@
 	let guestToken: string | null = null;
 	let handle: string | null = null;
 	let totemSession: TotemSession | null = null;
+
+	// ── Deck picker ───────────────────────────────────────────────────────────
+	type DeckMeta = { id: string; meta: { name?: string; description?: string }; count: number };
+	let availableDecks = $state<DeckMeta[]>([]);
+	let selectedDecks = $state<Set<string>>(new Set());
+	let deckPickerOpen = $state(false);
+	let drawing = $state(false);
+
+	// ── PTT hint ──────────────────────────────────────────────────────────────
+	// Hide the "hold to speak" hint after first successful transcription
+	const PTT_SEEN_KEY = 'clea_ptt_seen';
+	let pttSeen = $state(typeof localStorage !== 'undefined' && !!localStorage.getItem(PTT_SEEN_KEY));
+
+	const BASE_URL = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
+
+	async function fetchDecks() {
+		try {
+			const r = await fetch(`${BASE_URL}/decks`);
+			if (!r.ok) return;
+			availableDecks = await r.json();
+			selectedDecks = new Set(availableDecks.map(d => d.id));
+		} catch { /* non-fatal */ }
+	}
+
+	async function drawCard() {
+		if (drawing || $streaming || pendingCard) return;
+		drawing = true;
+		try {
+			const params = new URLSearchParams();
+			if (selectedDecks.size > 0 && selectedDecks.size < availableDecks.length) {
+				params.set('decks', Array.from(selectedDecks).join(','));
+			}
+			const r = await fetch(`${BASE_URL}/draw?${params}`);
+			if (!r.ok) return;
+			const { cards } = await r.json();
+			if (!cards?.length) return;
+			const raw = cards[0];
+			const deckMeta = availableDecks.find(d => d.id === raw.deck);
+			const card: CardData = {
+				id: raw.id,
+				deck: raw.deck,
+				deckLabel: deckMeta?.meta?.name ?? raw.deck,
+				title: raw.title,
+				keywords: raw.keywords ?? [],
+				body: raw.body ?? '',
+			};
+			messages.update(m => [...m, { role: 'card', content: '', card, interpreted: false }]);
+		} catch (e) {
+			console.error('draw failed:', e);
+		} finally {
+			drawing = false;
+		}
+	}
+
+	function interpret(card: CardData) {
+		// Mark the card as interpreted
+		messages.update(m => m.map(msg =>
+			msg.role === 'card' && msg.card?.id === card.id && !msg.interpreted
+				? { ...msg, interpreted: true }
+				: msg
+		));
+		const text = `I drew a card — **${card.title}** from the ${card.deckLabel}.\n\nKeywords: ${card.keywords.join(' · ')}\n\n${card.body}\n\nPlease interpret this for me.`;
+		send(text);
+	}
+
+	// The last uninterpreted card — gates input
+	const pendingCard = $derived(
+		$messages.slice().reverse().find(m => m.role === 'card' && !m.interpreted)?.card ?? null
+	);
 
 	async function ensureGuestToken(): Promise<void> {
 		const stored = localStorage.getItem('clea_guest_token');
@@ -39,9 +109,11 @@
 	}
 
 	// scroll to bottom on new messages
-	$: if ($messages && msgList) {
-		setTimeout(() => msgList.scrollTo({ top: msgList.scrollHeight, behavior: 'smooth' }), 50);
-	}
+	$effect(() => {
+		if ($messages && msgList) {
+			setTimeout(() => msgList.scrollTo({ top: msgList.scrollHeight, behavior: 'smooth' }), 50);
+		}
+	});
 
 	async function send(text: string) {
 		if ($streaming) return;
@@ -102,6 +174,8 @@
 
 	// Open session on mount — /chat with no session_id bootstraps it
 	onMount(async () => {
+		window.addEventListener('keydown', handleGlobalKey);
+		window.addEventListener('keyup', handleGlobalKey);
 		if (guestMode) {
 			await ensureGuestToken();
 			audioQueue = createAudioQueue((t) => tts(t, guestToken ?? ''));
@@ -111,10 +185,13 @@
 			totemSession = new TotemSession(c.access_token, c.seeker_id);
 			totemSession.load().catch(() => {}); // non-blocking, non-fatal
 		}
+		fetchDecks();
 		send('');
 	});
 
 	onDestroy(() => {
+		window.removeEventListener('keydown', handleGlobalKey);
+		window.removeEventListener('keyup', handleGlobalKey);
 		audioQueue?.flush();
 		audioQueue = null;
 		if (totemSession && sessionId) {
@@ -189,23 +266,63 @@
 		try {
 			const text = await stt(blob, token);
 			voiceState.set('idle');
-			if (text) send(text);
+			if (text) {
+				if (!pttSeen) {
+					pttSeen = true;
+					localStorage.setItem(PTT_SEEN_KEY, '1');
+				}
+				send(text);
+			}
 		} catch (e) {
 			console.error('STT failed:', e);
 			voiceState.set('idle');
 		}
 	}
+
+	// ── PTT keyboard shortcut (Space, held) ───────────────────────────────────
+	function handleGlobalKey(e: KeyboardEvent) {
+		// Only when textarea is not focused
+		if (document.activeElement?.tagName === 'TEXTAREA') return;
+		if (e.code === 'Space' && !e.repeat) {
+			e.preventDefault();
+			if (e.type === 'keydown') startListening();
+			else stopListening();
+		}
+	}
 </script>
 
 <div class="shell">
-	{#if !guestMode}
-		<div class="identity">
-			{#if ($creds as Credentials | null)?.handle}
-				<span class="handle">{($creds as Credentials | null)?.handle}</span>
+	<div class="topbar">
+		<div class="ambient-controls">
+			<button
+				class="ambient-toggle"
+				class:on={$ambientOn}
+				onclick={() => toggleAmbient($ambience)}
+				title={$ambientOn ? 'stop ambient' : 'play ambient'}
+			>♪</button>
+			{#if $ambientOn}
+				<button
+					class="ambient-track"
+					onclick={() => cycleTrack($ambience)}
+					title="next track"
+				>{TRACKS.find(t => t.id === $ambientTrack)?.label ?? '~'}</button>
 			{/if}
-			<button class="leave" onclick={leave} title="leave">⌁</button>
+			<input
+				type="range" min="0" max="1" step="0.01"
+				bind:value={$ambience}
+				oninput={() => setVolume($ambience)}
+				aria-label="ambience volume"
+			/>
 		</div>
-	{/if}
+		{#if !guestMode}
+			<div class="identity">
+				{#if ($creds as Credentials | null)?.handle}
+					<span class="handle">{($creds as Credentials | null)?.handle}</span>
+				{/if}
+				<button class="leave" onclick={leave} title="leave">⌁</button>
+			</div>
+		{/if}
+	</div>
 
 	<!-- ambient waveform layer -->
 	<div class="breath-layer">
@@ -215,7 +332,23 @@
 	<!-- message list -->
 	<div class="msgs" bind:this={msgList}>
 		{#each $messages as msg}
-			{#if msg.role !== 'system'}
+			{#if msg.role === 'card' && msg.card}
+				<div class="msg card-msg">
+					<span class="label card-label">◈ {msg.card.deckLabel}</span>
+					<div class="card-body">
+						<div class="card-title">{msg.card.title}</div>
+						{#if msg.card.keywords.length}
+							<div class="card-keywords">{msg.card.keywords.join(' · ')}</div>
+						{/if}
+						<div class="card-text">{msg.card.body}</div>
+						{#if !msg.interpreted}
+							<button class="card-interpret" onclick={() => interpret(msg.card!)}>
+								interpret
+							</button>
+						{/if}
+					</div>
+				</div>
+			{:else if msg.role !== 'system' && msg.role !== 'card'}
 				<div class="msg {msg.role}">
 					<span class="label">{msg.role === 'user' ? 'you' : 'ouracle'}</span>
 					<div class="prose">{@html renderMarkdown(msg.content)}</div>
@@ -230,6 +363,10 @@
 	<!-- input bar -->
 	<div class="bar">
 		<div class="bar-leading">
+			<label class="tts-toggle" title={$ttsEnabled ? 'mute Clea\'s voice' : 'enable Clea\'s voice'}>
+				<input type="checkbox" bind:checked={$ttsEnabled} />
+				<span>〲</span>
+			</label>
 			<div class="ptt-wrap">
 				<button
 					class="ptt"
@@ -241,50 +378,70 @@
 				>
 					{$voiceState === 'listening' ? '◉' : $voiceState === 'transcribing' ? '…' : '◎'}
 				</button>
-				{#if $voiceState === 'idle'}
-					<span class="ptt-hint">hold to speak</span>
-				{:else if $voiceState === 'listening'}
-					<span class="ptt-hint listening">listening…</span>
-				{:else if $voiceState === 'transcribing'}
-					<span class="ptt-hint">transcribing…</span>
+				{#if !pttSeen || $voiceState !== 'idle'}
+					<div class="ptt-hint-pop" class:listening={$voiceState === 'listening'} class:transcribing={$voiceState === 'transcribing'}>
+						{#if $voiceState === 'listening'}listening…
+						{:else if $voiceState === 'transcribing'}transcribing…
+						{:else}hold to speak · space{/if}
+					</div>
 				{/if}
-			</div>
-
-			<div class="ambient-controls">
-				<button
-					class="ambient-toggle"
-					class:on={$ambientOn}
-					onclick={() => toggleAmbient($ambience)}
-					title={$ambientOn ? 'stop ambient' : 'play ambient'}
-				>♪</button>
-				{#if $ambientOn}
-					<button
-						class="ambient-track"
-						onclick={() => cycleTrack($ambience)}
-						title="next track"
-					>{TRACKS.find(t => t.id === $ambientTrack)?.label ?? '~'}</button>
-				{/if}
-				<input
-					type="range" min="0" max="1" step="0.01"
-					bind:value={$ambience}
-					oninput={() => setVolume($ambience)}
-					aria-label="ambience volume"
-				/>
 			</div>
 		</div>
 
 		<textarea
 			bind:value={input}
 			onkeydown={handleKey}
-			placeholder="Type to speak…"
+			placeholder={pendingCard ? '— card drawn —' : 'Type to speak…'}
 			rows="1"
-			disabled={$streaming}
+			disabled={$streaming || !!pendingCard}
 		></textarea>
 
-		<label class="tts-toggle" title={$ttsEnabled ? 'mute voice' : 'enable voice'}>
-			<input type="checkbox" bind:checked={$ttsEnabled} />
-			<span>{$ttsEnabled ? '◈' : '◇'}</span>
-		</label>
+		<div class="bar-trailing">
+
+			<div class="draw-wrap">
+				{#if deckPickerOpen}
+					<div class="deck-picker">
+						<div class="deck-picker-header">
+							<button onclick={() => { selectedDecks = new Set(availableDecks.map(d => d.id)); }}>all</button>
+							<span class="deck-picker-sep">·</span>
+							<button onclick={() => { selectedDecks = new Set(); }}>none</button>
+						</div>
+						<div class="deck-list">
+							{#each availableDecks as deck}
+								<label class="deck-item">
+									<input
+										type="checkbox"
+										checked={selectedDecks.has(deck.id)}
+										onchange={(e) => {
+											const next = new Set(selectedDecks);
+											if ((e.target as HTMLInputElement).checked) next.add(deck.id);
+											else next.delete(deck.id);
+											selectedDecks = next;
+										}}
+									/>
+									<span>{deck.meta?.name ?? deck.id}</span>
+									<span class="deck-count">{deck.count}</span>
+								</label>
+							{/each}
+						</div>
+					</div>
+				{/if}
+				<div class="draw-btn-row">
+					<button
+						class="deck-toggle"
+						class:open={deckPickerOpen}
+						onclick={() => { deckPickerOpen = !deckPickerOpen; }}
+						title="choose decks"
+					>Divination Decks ▾</button>
+					<button
+						class="draw-btn"
+						class:drawing
+						onclick={drawCard}
+						disabled={drawing || $streaming || !!pendingCard || selectedDecks.size === 0}
+					>draw card</button>
+				</div>
+			</div>
+		</div>
 	</div>
 </div>
 
@@ -296,11 +453,17 @@
 	position: relative;
 }
 
-.identity {
-	position: absolute;
-	top: 0.75rem;
-	right: 0.75rem;
+.topbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.5rem 1rem;
+	border-bottom: 1px solid var(--border);
 	z-index: 10;
+	background: var(--bg);
+}
+
+.identity {
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
@@ -420,29 +583,47 @@ textarea {
 textarea:focus { border-color: var(--accent); }
 
 .ptt-wrap {
+	position: relative;
 	display: flex;
-	flex-direction: column;
 	align-items: center;
-	gap: 0.25rem;
+	flex-shrink: 0;
 }
 
-.ptt-hint {
+.ptt-hint-pop {
+	position: absolute;
+	bottom: calc(100% + 0.5rem);
+	left: 50%;
+	transform: translateX(-50%);
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	color: var(--muted);
 	font-family: var(--font-sans, system-ui, sans-serif);
 	font-size: 0.6rem;
 	letter-spacing: 0.08em;
-	color: var(--muted);
 	text-transform: uppercase;
 	white-space: nowrap;
-	width: 6rem;
-	text-align: center;
-	opacity: 0.6;
-	transition: opacity 0.15s, color 0.15s;
+	padding: 0.3rem 0.6rem;
+	pointer-events: none;
+	opacity: 0.8;
+	transition: color 0.15s, opacity 0.15s;
 }
-
-.ptt-hint.listening {
+.ptt-hint-pop::after {
+	content: '';
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	transform: translateX(-50%);
+	border: 4px solid transparent;
+	border-top-color: var(--border);
+}
+.ptt-hint-pop.listening {
 	color: var(--accent);
+	border-color: var(--accent);
 	opacity: 1;
 }
+.ptt-hint-pop.listening::after { border-top-color: var(--accent); }
+.ptt-hint-pop.transcribing { opacity: 0.5; }
 
 .ptt {
 	background: var(--surface);
@@ -507,7 +688,6 @@ textarea:focus { border-color: var(--accent); }
 
 .bar-leading {
 	display: flex;
-	flex-direction: column;
 	align-items: center;
 	gap: 0.5rem;
 	flex-shrink: 0;
@@ -530,13 +710,195 @@ input[type="range"]::-webkit-slider-thumb {
 	width: 10px;
 }
 
+.bar-trailing {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-shrink: 0;
+}
+
 .tts-toggle {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 50%;
+	color: var(--muted);
+	cursor: pointer;
+	font-size: 1.1rem;
+	height: 2.5rem;
+	width: 2.5rem;
 	display: grid;
 	place-items: center;
-	cursor: pointer;
-	color: var(--muted);
-	font-size: 1rem;
+	opacity: 0.4;
+	transition: all 0.15s;
+	flex-shrink: 0;
 }
 .tts-toggle input { display: none; }
-.tts-toggle:has(input:checked) { color: var(--accent); }
+.tts-toggle:has(input:checked) {
+	border-color: var(--accent);
+	color: var(--accent);
+	opacity: 1;
+}
+
+/* ── Draw controls ─────────────────────────────────────────────────────── */
+.draw-wrap {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.draw-btn-row {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.2rem;
+}
+
+.draw-btn {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	color: var(--muted);
+	cursor: pointer;
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	letter-spacing: 0.08em;
+	padding: 0.4rem 0.75rem;
+	transition: border-color 0.15s, color 0.15s;
+	white-space: nowrap;
+}
+.draw-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.draw-btn:disabled { opacity: 0.35; cursor: default; }
+.draw-btn.drawing { animation: pulse 0.8s ease-in-out infinite; }
+
+.deck-toggle {
+	background: none;
+	border: none;
+	color: var(--muted);
+	cursor: pointer;
+	font-family: var(--font-mono);
+	font-size: 0.6rem;
+	letter-spacing: 0.06em;
+	line-height: 1;
+	padding: 0;
+	opacity: 0.45;
+	transition: opacity 0.15s, color 0.15s;
+	white-space: nowrap;
+}
+.deck-toggle:hover, .deck-toggle.open { opacity: 1; color: var(--accent); }
+
+.deck-picker {
+	position: absolute;
+	bottom: calc(100% + 0.5rem);
+	right: 0;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	min-width: 200px;
+	max-height: 260px;
+	overflow-y: auto;
+	z-index: 20;
+	box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.deck-picker-header {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.5rem 0.75rem;
+	border-bottom: 1px solid var(--border);
+}
+.deck-picker-header button {
+	background: none;
+	border: none;
+	color: var(--muted);
+	cursor: pointer;
+	font-family: var(--font-mono);
+	font-size: 0.7rem;
+	letter-spacing: 0.08em;
+	padding: 0;
+	transition: color 0.15s;
+}
+.deck-picker-header button:hover { color: var(--accent); }
+.deck-picker-sep { color: var(--border); }
+
+.deck-list { padding: 0.25rem 0; }
+
+.deck-item {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.35rem 0.75rem;
+	cursor: pointer;
+	font-size: 0.75rem;
+	color: var(--muted);
+	transition: background 0.1s, color 0.1s;
+}
+.deck-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+.deck-item input { accent-color: var(--accent); cursor: pointer; }
+.deck-item span:nth-child(2) { flex: 1; }
+.deck-count {
+	font-size: 0.65rem;
+	opacity: 0.4;
+}
+
+/* ── Card message ──────────────────────────────────────────────────────── */
+.card-msg { max-width: 480px; }
+
+.card-label {
+	color: var(--accent) !important;
+	letter-spacing: 0.12em;
+}
+
+.card-body {
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	padding: 1rem 1.25rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	background: rgba(255,255,255,0.02);
+}
+
+.card-title {
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--text);
+	letter-spacing: 0.05em;
+}
+
+.card-keywords {
+	font-size: 0.72rem;
+	color: var(--muted);
+	letter-spacing: 0.1em;
+}
+
+.card-text {
+	font-size: 0.88rem;
+	line-height: 1.6;
+	color: var(--text);
+	opacity: 0.85;
+	white-space: pre-wrap;
+}
+
+.card-interpret {
+	align-self: flex-start;
+	background: none;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	color: var(--accent);
+	cursor: pointer;
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	letter-spacing: 0.1em;
+	margin-top: 0.25rem;
+	padding: 0.35rem 0.75rem;
+	transition: border-color 0.15s, background 0.15s;
+}
+.card-interpret:hover {
+	background: rgba(255,255,255,0.04);
+	border-color: var(--accent);
+}
+
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 </style>

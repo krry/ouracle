@@ -56,6 +56,7 @@ import {
 } from './db.js';
 import { auth } from './auth-config.js';
 import { toNodeHandler } from 'better-auth/node';
+import { draw, listDecks } from './decks.js';
 
 const app = express();
 
@@ -218,6 +219,29 @@ function deriveStage(seeker) {
 }
 
 app.get('/covenant/current', (_req, res) => res.json(COVENANT));
+
+// ── Divination ───────────────────────────────────────────────────────────────
+
+app.get('/decks', async (_req, res) => {
+  try {
+    res.json(await listDecks());
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /draw?n=3&decks=tarot,iching  (decks = comma-separated IDs, omit = all)
+app.get('/draw', async (req, res) => {
+  try {
+    const n = Math.min(Math.max(parseInt(req.query.n) || 1, 1), 10);
+    const deckIds = req.query.decks ? req.query.decks.split(',').map(s => s.trim()).filter(Boolean) : null;
+    const cards = await draw(n, deckIds);
+    if (cards.length === 0) return res.status(404).json({ error: 'No cards found.' });
+    res.json({ cards });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 // ─────────────────────────────────────────────
 // PREREQUISITE MAP

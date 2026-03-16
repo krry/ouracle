@@ -4,7 +4,7 @@ buildCommand = "bun install"
 watchPatterns = ["api/**"]
 
 [deploy]
-startCommand = "bun start"
+startCommand = "bun run sync-decks && bun start"
 healthcheckPath = "/health"
 healthcheckTimeout = 10
 restartPolicyType = "on_failure"
