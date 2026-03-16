@@ -164,7 +164,7 @@
 					};
 					messages.update(m => [...m, { role: 'card', content: '', card: cardData, interpreted: false }]);
 				}
-			}), mode)) { /* yield */ }
+			}, mode)) { /* yield */ }
 		} catch (e: unknown) {
 			const msg = e instanceof Error ? e.message : String(e);
 			if (msg.includes('guest_limit')) {
