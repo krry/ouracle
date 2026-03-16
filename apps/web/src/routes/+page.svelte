@@ -93,7 +93,15 @@
   }
 
   // ── Star field ──────────────────────────────────────────────────────────────
-  interface Star { sprite: THREE.Sprite; rotRate: number }
+  interface Star {
+    sprite: THREE.Sprite;
+    rotRate: number;
+    opacity: number;
+    size: number;
+    twinkleHz: number;
+    twinkleAmp: number;
+    twinkleOff: number;
+  }
 
   function makeStar(seed: number): Star {
     const tex = makeSigilTexture(seed);
@@ -113,8 +121,11 @@
       (h(seed, 505) - 0.5) * 7,
     );
     sprite.scale.setScalar(size);
-    const rotRate = (0.001 + h(seed, 506) * 0.004) * (h(seed, 507) > 0.5 ? 1 : -1);
-    return { sprite, rotRate };
+    const rotRate   = (0.001 + h(seed, 506) * 0.004) * (h(seed, 507) > 0.5 ? 1 : -1);
+    const twinkleHz = 0.3 + h(seed, 508) * 1.4;   // 0.3..1.7 Hz
+    const twinkleAmp= 0.12 + h(seed, 509) * 0.25; // depth of pulse
+    const twinkleOff= h(seed, 510) * Math.PI * 2;  // phase offset
+    return { sprite, rotRate, opacity, size, twinkleHz, twinkleAmp, twinkleOff };
   }
 
   onMount(() => {
@@ -150,14 +161,23 @@
     window.addEventListener('resize', onResize);
 
     let raf: number;
+    let t = 0;
     function tick() {
       raf = requestAnimationFrame(tick);
+      t += 0.016; // ~60fps seconds accumulator
       groupA.rotation.y += 0.00025;
       groupA.rotation.x += 0.00008;
       groupB.rotation.y -= 0.00015;
       groupB.rotation.x += 0.00012;
-      stars.forEach(({ sprite, rotRate }) => {
-        (sprite.material as THREE.SpriteMaterial).rotation += rotRate;
+      stars.forEach(({ sprite, rotRate, opacity, size, twinkleHz, twinkleAmp, twinkleOff }) => {
+        const mat = sprite.material as THREE.SpriteMaterial;
+        mat.rotation += rotRate;
+        // Sinusoidal opacity twinkle — each sigil on its own phase/frequency
+        const pulse = Math.sin(t * twinkleHz * Math.PI * 2 + twinkleOff);
+        mat.opacity = Math.max(0.05, opacity + pulse * twinkleAmp);
+        // Subtle scale breathe — 15% of twinkle amplitude
+        const breathe = 1 + pulse * twinkleAmp * 0.15;
+        sprite.scale.setScalar(size * breathe);
       });
       renderer.render(scene, camera);
     }
