@@ -238,6 +238,18 @@ fn cmd_voices_rm(cfg: &mut Config, id: &str) -> Result<()> {
     Ok(())
 }
 
+const AMBIENT_FILES: &[&str] = &[
+    "bowl-reverb.mp3",
+    "bowl-mid.mp3",
+    "bowl-3.mp3",
+    "bowl-deep.mp3",
+    "scene-storm-arrives.mp3",
+    "scene-deluge.mp3",
+    "scene-forest-edge.mp3",
+    "scene-drops.mp3",
+    "scene-deep-jungle.mp3",
+];
+
 fn cmd_ambiance(cfg: &mut Config, on: bool) -> Result<()> {
     if on {
         let dir = ambient_dir();
@@ -255,10 +267,35 @@ fn cmd_ambiance(cfg: &mut Config, on: bool) -> Result<()> {
         fs::write(dir.join("ambient-runner.js"), runner)?;
         fs::write(dir.join("ambient-player.js"), player)?;
 
+        // Download audio files from the API if not already present.
+        let base_url = resolve_base_url(cfg);
+        let client = reqwest::blocking::Client::builder()
+            .timeout(Duration::from_secs(60))
+            .build()?;
+        let mut downloaded = 0usize;
+        for file in AMBIENT_FILES {
+            let dest = dir.join(file);
+            if dest.exists() { continue; }
+            print!("  downloading {file}…");
+            std::io::Write::flush(&mut std::io::stdout())?;
+            match client.get(format!("{base_url}/ambient/{file}")).send() {
+                Ok(resp) if resp.status().is_success() => {
+                    let bytes = resp.bytes()?;
+                    fs::write(&dest, &bytes)?;
+                    println!(" done ({} KB)", bytes.len() / 1024);
+                    downloaded += 1;
+                }
+                Ok(resp) => println!(" skipped (HTTP {})", resp.status().as_u16()),
+                Err(e)   => println!(" failed: {e}"),
+            }
+        }
+
         cfg.settings.ambiance = Some(true);
         save_settings(&cfg.settings)?;
-        println!("Ambiance on. Scripts written to {}", dir.display());
-        println!("Audio files needed in {}/", dir.display());
+        if downloaded > 0 {
+            println!("Downloaded {downloaded} audio file(s) to {}", dir.display());
+        }
+        println!("Ambiance on.");
     } else {
         cfg.settings.ambiance = Some(false);
         save_settings(&cfg.settings)?;
