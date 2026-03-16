@@ -82,6 +82,15 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
+// Serve ambient audio files — no auth required, public CDN-style
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+const __dirname = dirname(fileURLToPath(import.meta.url));
+app.use('/ambient', express.static(join(__dirname, 'data/ambient'), {
+  maxAge: '7d',
+  setHeaders: (res) => res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin'),
+}));
+
 // Mount BetterAuth — handles /api/auth/* routes (Express 4 wildcard)
 app.all('/api/auth/*', async (req, res, next) => {
   try {

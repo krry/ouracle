@@ -3,6 +3,7 @@
 	import { get } from 'svelte/store';
 	import { creds, authed, messages, streaming, voiceState, waveform, ambience, guestTurns, ttsEnabled } from './stores';
 	import { signOut } from './auth';
+	import { ambientOn, ambientTrack, toggleAmbient, cycleTrack, setVolume, TRACKS } from './ambientPlayer';
 	import { chat, tts, stt } from './api';
 	import Breath from './Breath.svelte';
 	import type { Credentials } from './stores';
@@ -251,17 +252,34 @@
 		</div>
 	</div>
 
-	<!-- ambience slider + TTS toggle -->
+	<!-- controls row -->
 	<div class="controls">
 		<label class="tts-toggle" title={$ttsEnabled ? 'mute voice' : 'enable voice'}>
 			<input type="checkbox" bind:checked={$ttsEnabled} />
 			<span>{$ttsEnabled ? '◈' : '◇'}</span>
 		</label>
-		<input
-			type="range" min="0" max="1" step="0.01"
-			bind:value={$ambience}
-			aria-label="ambience"
-		/>
+
+		<div class="ambient-controls">
+			<button
+				class="ambient-toggle"
+				class:on={$ambientOn}
+				onclick={() => toggleAmbient($ambience)}
+				title={$ambientOn ? 'stop ambient' : 'play ambient'}
+			>♪</button>
+			{#if $ambientOn}
+				<button
+					class="ambient-track"
+					onclick={() => cycleTrack($ambience)}
+					title="next track"
+				>{TRACKS.find(t => t.id === $ambientTrack)?.label ?? '~'}</button>
+			{/if}
+			<input
+				type="range" min="0" max="1" step="0.01"
+				bind:value={$ambience}
+				oninput={() => setVolume($ambience)}
+				aria-label="ambience volume"
+			/>
+		</div>
 	</div>
 </div>
 
@@ -435,9 +453,42 @@ textarea:focus { border-color: var(--accent); }
 	opacity: 0.7;
 }
 
+.ambient-controls {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.ambient-toggle {
+	background: none;
+	border: none;
+	color: var(--muted);
+	cursor: pointer;
+	font-size: 1rem;
+	line-height: 1;
+	padding: 0.1rem 0.2rem;
+	transition: color 0.15s;
+}
+.ambient-toggle.on { color: var(--accent); }
+
+.ambient-track {
+	background: none;
+	border: none;
+	color: var(--muted);
+	cursor: pointer;
+	font-family: var(--font-mono);
+	font-size: 0.65rem;
+	letter-spacing: 0.1em;
+	padding: 0;
+	transition: color 0.15s;
+}
+.ambient-track:hover { color: var(--accent); }
+
 .controls {
 	display: flex;
 	justify-content: flex-end;
+	align-items: center;
+	gap: 0.75rem;
 	padding: 0.25rem 1rem 0.5rem;
 }
 
