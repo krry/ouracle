@@ -37,6 +37,12 @@ apps/web/src/
   routes/+layout.svelte — nav, footer, analytics
 ```
 
+## Deploying
+
+- **Web (Vercel)**: push to `main` — auto-deploys `apps/web`
+- **API (Railway)**: push to `main` — auto-deploys `api/`
+- **TUI binary**: build with `asdf exec cargo build --release` from `apps/tui`, package with `tar czf apps/web/static/clea-macos.tar.gz -C apps/tui/target/release clea`, commit and push to `main`
+
 ## Conventions
 
 - **Bun** everywhere: `bun install`, `bun run dev`, `bun test.js`
