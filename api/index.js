@@ -1078,18 +1078,21 @@ app.post('/chat', authenticateOrGuest, async (req, res) => {
           prescribed_at: new Date().toISOString(),
         });
 
-        // Stream the rite.
-        const riteText = [
-          ritePayload.rite_name,
-          ritePayload.act,
-          ritePayload.invocation,
-          ...(ritePayload.textures || []),
-        ].filter(Boolean).join('  ·  ');
+        // Stream the rite — each section as its own block.
         if (quality.seeker_language) {
           await streamText(emit, quality.seeker_language);
           emit({ type: 'break' });
         }
-        await streamText(emit, riteText);
+        const riteBlocks = [
+          ritePayload.rite_name,
+          ritePayload.act,
+          ritePayload.invocation,
+          ritePayload.textures?.length ? ritePayload.textures.join('\n') : null,
+        ].filter(Boolean);
+        for (let i = 0; i < riteBlocks.length; i++) {
+          await streamText(emit, riteBlocks[i]);
+          if (i < riteBlocks.length - 1) emit({ type: 'break' });
+        }
         return finish('prescribed', { session_id, rite_name: prescription.rite?.rite_name });
       }
 
