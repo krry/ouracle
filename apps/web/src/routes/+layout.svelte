@@ -19,7 +19,7 @@
     <a href="/" class="wordmark" onclick={closeMenu}>Ouracle</a>
     <div class="links">
       <a href="/clea">Clea</a>
-      <a href="/ripl">RIPL</a>
+      <a href="/ripl">ripl</a>
       <a href="/diy">D.I.Y.</a>
       <a href="/chat" class="cta">enter</a>
     </div>
@@ -36,7 +36,7 @@
 
   <div class="drawer" class:open={menuOpen}>
     <a href="/clea" onclick={closeMenu}>Clea</a>
-    <a href="/ripl" onclick={closeMenu}>RIPL</a>
+    <a href="/ripl" onclick={closeMenu}>ripl</a>
     <a href="/diy" onclick={closeMenu}>D.I.Y.</a>
     <a href="/chat" class="cta" onclick={closeMenu}>enter</a>
   </div>
