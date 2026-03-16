@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
-	import { creds, authed, messages, streaming, voiceState, waveform, ambience, guestTurns, ttsEnabled } from './stores';
-	import type { CardData } from './stores';
+	import { creds, authed, messages, streaming, voiceState, waveform, ambience, guestTurns, ttsEnabled, ttsVoice } from './stores';
+	import type { CardData, TtsVoice } from './stores';
 	import { signOut } from './auth';
 	import { ambientOn, ambientTrack, toggleAmbient, cycleTrack, setVolume, TRACKS } from './ambientPlayer';
 	import { chat, tts, stt } from './api';
@@ -191,10 +191,10 @@
 		window.addEventListener('keyup', handleGlobalKey);
 		if (guestMode) {
 			await ensureGuestToken();
-			audioQueue = createAudioQueue((t) => tts(t, guestToken ?? ''));
+			audioQueue = createAudioQueue((t) => tts(t, guestToken ?? '', get(ttsVoice)));
 		} else if ($authed && $creds) {
 			const c = $creds as Credentials;
-			audioQueue = createAudioQueue((t) => tts(t, c.access_token));
+			audioQueue = createAudioQueue((t) => tts(t, c.access_token, get(ttsVoice)));
 			totemSession = new TotemSession(c.access_token, c.seeker_id);
 			totemSession.load().catch(() => {}); // non-blocking, non-fatal
 		}
@@ -326,6 +326,18 @@
 				oninput={() => setVolume($ambience)}
 				aria-label="ambience volume"
 			/>
+			<select
+				class="voice-select"
+				value={$ttsVoice}
+				onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value as TtsVoice)}
+				aria-label="Clea's voice"
+				title="Clea's voice"
+			>
+				<option value="elf">Elf</option>
+				<option value="poet">Poet</option>
+				<option value="alien">Alien</option>
+				<option value="president">President</option>
+			</select>
 		</div>
 		{#if !guestMode}
 			<div class="identity">
@@ -698,6 +710,21 @@ textarea:focus { border-color: var(--accent); }
 	transition: color 0.15s;
 }
 .ambient-track:hover { color: var(--accent); }
+
+.voice-select {
+	appearance: none;
+	background: none;
+	border: none;
+	color: var(--muted);
+	cursor: pointer;
+	font-family: var(--font-mono);
+	font-size: 0.65rem;
+	letter-spacing: 0.08em;
+	padding: 0;
+	transition: color 0.15s;
+}
+.voice-select:hover, .voice-select:focus { color: var(--accent); outline: none; }
+.voice-select option { background: var(--bg); color: var(--text); }
 
 .bar-leading {
 	display: flex;

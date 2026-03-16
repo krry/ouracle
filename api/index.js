@@ -1223,11 +1223,11 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
 
 // ── POST /tts — proxy Fish Audio TTS; returns MP3 audio ──────────────────────
 app.post('/tts', authenticateOrGuest, async (req, res) => {
-  const { text } = req.body || {};
+  const { text, voice } = req.body || {};
   if (!text) return res.status(400).json({ error: 'text required.' });
   if (!hasFishKey()) return res.status(503).json({ error: 'TTS not configured.' });
   try {
-    const buffer = await fetchAudio(text);
+    const buffer = await fetchAudio(text, voice);
     res.set('Content-Type', 'audio/mpeg');
     res.send(buffer);
   } catch (err) {

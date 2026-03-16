@@ -15,8 +15,16 @@ function fishApiKey() {
   return key;
 }
 
-function fishVoiceId() {
-  return process.env.FISH_AUDIO_VOICE_GALADRIEL || undefined;
+const VOICE_ENV = {
+  elf:     'FISH_AUDIO_VOICE_GALADRIEL',
+  poet:    'FISH_AUDIO_VOICE_ONDREA',
+  alien:   'FISH_AUDIO_VOICE_ALF',
+  president: 'FISH_AUDIO_VOICE_OPRAH',
+};
+
+function fishVoiceId(voice) {
+  const key = VOICE_ENV[voice] || VOICE_ENV.elf;
+  return process.env[key] || undefined;
 }
 
 function fishModel() {
@@ -24,8 +32,8 @@ function fishModel() {
   return m === 's2' ? 's2-pro' : m;
 }
 
-function fishBody(text) {
-  const voiceId = fishVoiceId();
+function fishBody(text, voice) {
+  const voiceId = fishVoiceId(voice);
   return JSON.stringify({
     text,
     format: 'mp3',
@@ -46,11 +54,11 @@ function fishHeaders() {
  * Fetches MP3 bytes from Fish.audio. Does not play.
  * Fire this early so bytes are ready when you need them.
  */
-export async function fetchAudio(text) {
+export async function fetchAudio(text, voice) {
   const res = await fetch('https://api.fish.audio/v1/tts', {
     method: 'POST',
     headers: fishHeaders(),
-    body: fishBody(text),
+    body: fishBody(text, voice),
   });
   if (!res.ok) {
     const err = await res.text().catch(() => '');

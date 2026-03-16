@@ -63,11 +63,11 @@ export async function* chat(
 }
 
 // ── TTS ───────────────────────────────────────────────────────────────────────
-export async function tts(text: string, token: string): Promise<ArrayBuffer> {
+export async function tts(text: string, token: string, voice?: string): Promise<ArrayBuffer> {
 	const r = await fetch(`${BASE}/tts`, {
 		method: 'POST',
 		headers: authHeaders(token),
-		body: JSON.stringify({ text })
+		body: JSON.stringify({ text, ...(voice ? { voice } : {}) })
 	});
 	if (!r.ok) throw new Error(await r.text());
 	return r.arrayBuffer();

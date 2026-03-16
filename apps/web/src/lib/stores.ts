@@ -78,3 +78,18 @@ function ttsStore() {
 	};
 }
 export const ttsEnabled = ttsStore();
+
+export type TtsVoice = 'elf' | 'poet' | 'alien' | 'president';
+
+function ttsVoiceStore() {
+	const stored = browser ? (localStorage.getItem('clea_tts_voice') as TtsVoice | null) : null;
+	const { subscribe, set } = writable<TtsVoice>(stored ?? 'elf');
+	return {
+		subscribe,
+		set(v: TtsVoice) {
+			if (browser) localStorage.setItem('clea_tts_voice', v);
+			set(v);
+		}
+	};
+}
+export const ttsVoice = ttsVoiceStore();
