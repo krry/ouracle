@@ -18,7 +18,7 @@
   // Each sigil has irregular arm lengths, perturbed valley angles,
   // optional circle caps, and a hue drawn from the three treasures.
   function makeSigilTexture(seed: number): THREE.CanvasTexture {
-    const size = 96;
+    const size = 192;
     const cvs = document.createElement('canvas');
     cvs.width = cvs.height = size;
     const ctx = cvs.getContext('2d')!;
@@ -26,7 +26,7 @@
     const maxR = size * 0.44;
 
     // Derive arms (3..8) and hue from seed
-    const nArms = 3 + Math.floor(h(seed, 0) * 6);
+    const nArms = 5 + Math.floor(h(seed, 0) * 4); // 5..8 — no sparse triangles/quads
     const hues = [217, 354, 80] as const;   // jing · shen · qi
     const hue = hues[Math.floor(h(seed, 99) * 3)];
     const lit = 55 + Math.floor(h(seed, 98) * 25);  // 55..80%
