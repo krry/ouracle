@@ -351,9 +351,13 @@ export async function getOrCreateSeekerByAuthId(authUserId, name) {
     SELECT * FROM seekers WHERE auth_user_id = ${authUserId}
   `;
   if (existing) return existing;
+
+  const handleResult = await generateHandle(name ?? 'seeker');
+  if (!handleResult) throw new Error('Handle pool exhausted.');
+
   const [created] = await sql`
-    INSERT INTO seekers (auth_user_id, name, consent_version, consented_at)
-    VALUES (${authUserId}, ${name ?? null}, ${'1.0'}, now())
+    INSERT INTO seekers (auth_user_id, name, consent_version, consented_at, handle, handle_base)
+    VALUES (${authUserId}, ${name ?? null}, ${'1.0'}, now(), ${handleResult.handle}, ${handleResult.handle_base})
     RETURNING *
   `;
   return created;
