@@ -1,7 +1,7 @@
 <script lang="ts">
   import { renderMarkdown } from '$lib/markdown';
 
-  const raw = `# DIY — Make It Yours(acle)
+  const raw = `# DIY
 
 Ouracle is open infrastructure. If you'd rather not use the hosted service, you can run the full stack on your own machine with a local language model. No API keys required for the core experience.
 
@@ -184,8 +184,6 @@ Check \`DATABASE_URL\` is set and the Postgres instance is reachable. Run \`bun 
 }
 .prose-page :global(p) {
   font-size: 0.95rem;
-  line-height: 1.8;
-  color: var(--muted);
   margin-bottom: var(--space-sm);
 }
 .prose-page :global(pre) {

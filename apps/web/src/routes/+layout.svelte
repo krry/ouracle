@@ -3,44 +3,71 @@
   import { inject } from '@vercel/analytics';
   import { page } from '$app/stores';
   import type { Snippet } from 'svelte';
+  import AmbientControls from '$lib/AmbientControls.svelte';
 
   inject();
 
   let { children }: { children: Snippet } = $props();
   const isChat = $derived($page.url.pathname.startsWith('/chat'));
 
-  let menuOpen = $state(false);
-  function toggleMenu() { menuOpen = !menuOpen; }
-  function closeMenu() { menuOpen = false; }
+  let drawerOpen = $state(false);
+  function openDrawer()  { drawerOpen = true; }
+  function closeDrawer() { drawerOpen = false; }
 </script>
 
 {#if !isChat}
   <nav>
-    <a href="/" class="wordmark" onclick={closeMenu}>Ouracle</a>
-    <div class="links">
-      <a href="/clea">Clea</a>
-      <a href="/ripl">ripl</a>
-      <a href="/diy">D.I.Y.</a>
-      <a href="/chat" class="cta">enter</a>
-    </div>
-    <button class="hamburger" onclick={toggleMenu} aria-label="Menu" aria-expanded={menuOpen}>
-      <span class:open={menuOpen}></span>
-      <span class:open={menuOpen}></span>
-      <span class:open={menuOpen}></span>
+    <button class="menu-btn" onclick={openDrawer} aria-label="Open menu" aria-expanded={drawerOpen}>
+      <span></span>
+      <span></span>
+      <span></span>
     </button>
+
+    <a href="/" class="wordmark" onclick={closeDrawer}>Ouracle</a>
+
+    <div class="nav-trail">
+      <AmbientControls />
+      <a href="/chat" class="enter">enter</a>
+    </div>
+  </nav>
+{/if}
+
+<!-- Drawer backdrop -->
+{#if drawerOpen}
+  <div
+    class="backdrop"
+    role="presentation"
+    onclick={closeDrawer}
+    onkeydown={(e) => e.key === 'Escape' && closeDrawer()}
+  ></div>
+{/if}
+
+<!-- Left drawer — slides from left on all widths -->
+<div class="drawer" class:open={drawerOpen} aria-hidden={!drawerOpen}>
+  <div class="drawer-header">
+    <a href="/" class="drawer-wordmark" onclick={closeDrawer}>Ouracle</a>
+    <button class="drawer-close" onclick={closeDrawer} aria-label="Close menu">✕</button>
+  </div>
+
+  <nav class="drawer-nav">
+    <a href="/clea" onclick={closeDrawer}>
+      <span class="drawer-icon">⌬</span>
+      <span>Clea</span>
+    </a>
+    <a href="/ripl" onclick={closeDrawer}>
+      <span class="drawer-icon">◎</span>
+      <span>ripl</span>
+    </a>
+    <a href="/diy" onclick={closeDrawer}>
+      <span class="drawer-icon">◈</span>
+      <span>D.I.Y.</span>
+    </a>
   </nav>
 
-  {#if menuOpen}
-    <div class="backdrop" role="presentation" onclick={closeMenu} onkeydown={closeMenu}></div>
-  {/if}
-
-  <div class="drawer" class:open={menuOpen}>
-    <a href="/clea" onclick={closeMenu}>Clea</a>
-    <a href="/ripl" onclick={closeMenu}>ripl</a>
-    <a href="/diy" onclick={closeMenu}>D.I.Y.</a>
-    <a href="/chat" class="cta" onclick={closeMenu}>enter</a>
+  <div class="drawer-footer">
+    <a href="/chat" class="drawer-enter" onclick={closeDrawer}>enter</a>
   </div>
-{/if}
+</div>
 
 {@render children()}
 
@@ -57,43 +84,21 @@
 {/if}
 
 <style>
+/* ── Top nav ──────────────────────────────────────────────────────────── */
 nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-sm) var(--space-md);
+  padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   background: var(--bg);
-  z-index: 20;
-}
-.wordmark {
-  font-family: var(--font-display);
-  font-size: 1.2rem;
-  letter-spacing: 0.2em;
-  color: var(--accent);
-  text-decoration: none;
-}
-.links {
-  display: flex;
-  gap: var(--space-md);
-  align-items: center;
-  font-size: 0.85rem;
-  letter-spacing: 0.1em;
-}
-.links a { color: var(--muted); text-decoration: none; transition: color 0.15s; }
-.links a:hover { color: var(--text); }
-.cta {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--accent) !important;
-  padding: 0.3rem 0.8rem;
+  z-index: 30;
 }
 
-/* ── Hamburger button ─────────────────────────────────────── */
-.hamburger {
-  display: none;
+.menu-btn {
+  display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 5px;
@@ -101,76 +106,177 @@ nav {
   border: none;
   cursor: pointer;
   padding: 4px;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
 }
-.hamburger span {
+.menu-btn span {
   display: block;
   width: 100%;
   height: 1px;
   background: var(--muted);
-  transform-origin: center;
-  transition: transform 0.22s ease, opacity 0.22s ease, background 0.15s;
+  transition: background 0.15s;
 }
-.hamburger:hover span { background: var(--text); }
-/* X morphing */
-.hamburger span:nth-child(1).open { transform: translateY(6px) rotate(45deg); }
-.hamburger span:nth-child(2).open { opacity: 0; transform: scaleX(0); }
-.hamburger span:nth-child(3).open { transform: translateY(-6px) rotate(-45deg); }
+.menu-btn:hover span { background: var(--text); }
 
-/* ── Mobile drawer ────────────────────────────────────────── */
-.backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 18;
-  background: hsl(0 0% 0% / 0.4);
-  backdrop-filter: blur(2px);
-}
-.drawer {
-  display: none;
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: min(72vw, 260px);
-  background: var(--surface);
-  border-left: 1px solid var(--border);
-  z-index: 19;
-  flex-direction: column;
-  padding: calc(var(--space-xl) * 0.6) var(--space-md) var(--space-md);
-  gap: var(--space-sm);
-  transform: translateX(100%);
-  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.drawer a {
+.wordmark {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   font-family: var(--font-display);
-  font-size: 1.15rem;
-  letter-spacing: 0.08em;
-  color: var(--muted);
+  font-size: 1.1rem;
+  letter-spacing: 0.22em;
+  color: var(--accent);
   text-decoration: none;
-  padding: 0.4rem 0;
-  border-bottom: 1px solid var(--border);
-  transition: color 0.15s;
+  white-space: nowrap;
 }
-.drawer a:hover { color: var(--text); }
-.drawer .cta {
-  margin-top: var(--space-sm);
+
+.nav-trail {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.enter {
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  color: var(--accent) !important;
-  padding: 0.5rem 1rem;
-  text-align: center;
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  padding: 0.3rem 0.9rem;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.enter:hover { background: var(--accent); color: var(--bg); }
+
+/* ── Drawer backdrop ──────────────────────────────────────────────────── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 38;
+  background: hsl(0 0% 0% / 0.5);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+/* ── Left drawer ──────────────────────────────────────────────────────── */
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(76vw, 300px);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  z-index: 39;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.30s cubic-bezier(0.4, 0, 0.2, 1);
+  /* safe area: notched phones, Android nav bar */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .drawer.open { transform: translateX(0); }
 
-@media (max-width: 600px) {
-  .links { display: none; }
-  .hamburger { display: flex; }
-  .backdrop { display: block; }
-  .drawer { display: flex; }
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border);
+  /* safe area: iOS status bar / notch */
+  padding-top: max(1.25rem, calc(1.25rem + env(safe-area-inset-top, 0px)));
 }
 
+.drawer-wordmark {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.drawer-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0.4rem;
+  min-width: 36px;
+  min-height: 36px;
+  display: grid;
+  place-items: center;
+  transition: color 0.15s;
+}
+.drawer-close:hover { color: var(--text); }
+
+.drawer-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 0;
+  overflow-y: auto;
+}
+
+.drawer-nav a {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.5rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s;
+  /* min touch target */
+  min-height: 48px;
+}
+.drawer-nav a:hover,
+.drawer-nav a:focus-visible {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  color: var(--text);
+  outline: none;
+}
+
+.drawer-icon {
+  font-size: 0.9rem;
+  color: var(--accent);
+  opacity: 0.7;
+  width: 1.2rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.drawer-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.drawer-enter {
+  display: block;
+  text-align: center;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  color: var(--accent);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  padding: 0.65rem;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  min-height: 48px;
+  display: grid;
+  place-items: center;
+}
+.drawer-enter:hover { background: var(--accent); color: var(--bg); }
+
+/* ── Footer ───────────────────────────────────────────────────────────── */
 footer {
   display: flex;
   justify-content: space-between;

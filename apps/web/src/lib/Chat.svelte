@@ -1,23 +1,10 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
-	import { creds, authed, messages, streaming, voiceState, waveform, ambience, guestTurns, ttsEnabled, ttsVoice } from './stores';
+	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice } from './stores';
 	import type { CardData, TtsVoice } from './stores';
 	import { signOut } from './auth';
-	import { startAmbient, stopAmbient, setVolume, ambientRunning, ambientScene, SCENES } from './ambientEngine';
-	import type { SceneId } from './ambientEngine';
-
-	let activeScene = $state<SceneId>('drizzle');
-
-	function toggleAmbient() {
-		if ($ambientRunning) stopAmbient();
-		else startAmbient(activeScene, $ambience);
-	}
-
-	function switchScene(scene: SceneId) {
-		activeScene = scene;
-		if ($ambientRunning) startAmbient(scene, $ambience);
-	}
+	import AmbientControls from './AmbientControls.svelte';
 	import { chat, tts, stt } from './api';
 	import Breath from './Breath.svelte';
 	import type { Credentials } from './stores';
@@ -320,54 +307,19 @@
 <div class="shell">
 
 	<div class="topbar">
-		<div class="ambient-controls">
-			<button
-				class="ambient-toggle"
-				class:on={$ambientRunning}
-				onclick={toggleAmbient}
-				title={$ambientRunning ? 'stop' : 'play ambient'}
-			>♪</button>
-			{#if $ambientRunning}
-				<select
-					class="scene-select"
-					value={activeScene}
-					onchange={(e) => switchScene((e.target as HTMLSelectElement).value as SceneId)}
-					aria-label="ambient scene"
-				>
-					{#each SCENES as s}
-						<option value={s.id}>{s.label}</option>
-					{/each}
-				</select>
-			{/if}
-			<input
-				type="range" min="0" max="1" step="0.01"
-				bind:value={$ambience}
-				oninput={() => setVolume($ambience)}
-				aria-label="ambience volume"
-				title="breath intensity"
-			/>
-			<select
-				class="voice-select"
-				value={$ttsVoice}
-				onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value as TtsVoice)}
-				aria-label="Clea's voice"
-				title="Clea's voice"
-			>
-				<option value="elf">Elf</option>
-				<option value="poet">Poet</option>
-				<option value="alien">Alien</option>
-				<option value="president">President</option>
-			</select>
-		</div>
+		<div class="topbar-left"></div>
 		<a href="/" class="wordmark" title="home">Ouracle</a>
-		{#if !guestMode}
-			<div class="identity">
-				{#if ($creds as Credentials | null)?.handle}
-					<span class="handle">{($creds as Credentials | null)?.handle}</span>
-				{/if}
-				<button class="leave" onclick={leave} title="leave">⌁</button>
-			</div>
-		{/if}
+		<div class="topbar-right">
+			{#if !guestMode}
+				<div class="identity">
+					{#if ($creds as Credentials | null)?.handle}
+						<span class="handle">{($creds as Credentials | null)?.handle}</span>
+					{/if}
+					<button class="leave" onclick={leave} title="leave">⌁</button>
+				</div>
+			{/if}
+			<AmbientControls />
+		</div>
 	</div>
 
 	<!-- ambient waveform layer -->
@@ -404,15 +356,56 @@
 		{#if $streaming}
 			<div class="thinking">▋</div>
 		{/if}
+
+		<!-- floating divination widget — sticks to bottom-right of visible msgs area -->
+		<div class="divination-float">
+			{#if deckPickerOpen}
+				<div class="deck-picker">
+					<div class="deck-picker-header">
+						<button onclick={() => { selectedDecks = new Set(availableDecks.map(d => d.id)); }}>all</button>
+						<span class="deck-picker-sep">·</span>
+						<button onclick={() => { selectedDecks = new Set(); }}>none</button>
+					</div>
+					<div class="deck-list">
+						{#each availableDecks as deck}
+							<label class="deck-item">
+								<input
+									type="checkbox"
+									checked={selectedDecks.has(deck.id)}
+									onchange={(e) => {
+										const next = new Set(selectedDecks);
+										if ((e.target as HTMLInputElement).checked) next.add(deck.id);
+										else next.delete(deck.id);
+										selectedDecks = next;
+									}}
+								/>
+								<span>{deck.meta?.name ?? deck.id}</span>
+								<span class="deck-count">{deck.count}</span>
+							</label>
+						{/each}
+					</div>
+				</div>
+			{/if}
+			<div class="divination-actions">
+				<button
+					class="deck-toggle"
+					class:open={deckPickerOpen}
+					onclick={() => { deckPickerOpen = !deckPickerOpen; }}
+					title="choose decks"
+				>Divination Decks ▾</button>
+				<button
+					class="draw-btn"
+					class:drawing
+					onclick={drawCard}
+					disabled={drawing || $streaming || !!pendingCard || selectedDecks.size === 0}
+				>draw card</button>
+			</div>
+		</div>
 	</div>
 
 	<!-- input bar -->
 	<div class="bar">
 		<div class="bar-leading">
-			<label class="tts-toggle" title={$ttsEnabled ? 'mute Clea\'s voice' : 'enable Clea\'s voice'}>
-				<input type="checkbox" bind:checked={$ttsEnabled} />
-				<span>〲</span>
-			</label>
 			<div class="ptt-wrap">
 				<button
 					class="ptt"
@@ -443,50 +436,22 @@
 		></textarea>
 
 		<div class="bar-trailing">
-
-			<div class="draw-wrap">
-				{#if deckPickerOpen}
-					<div class="deck-picker">
-						<div class="deck-picker-header">
-							<button onclick={() => { selectedDecks = new Set(availableDecks.map(d => d.id)); }}>all</button>
-							<span class="deck-picker-sep">·</span>
-							<button onclick={() => { selectedDecks = new Set(); }}>none</button>
-						</div>
-						<div class="deck-list">
-							{#each availableDecks as deck}
-								<label class="deck-item">
-									<input
-										type="checkbox"
-										checked={selectedDecks.has(deck.id)}
-										onchange={(e) => {
-											const next = new Set(selectedDecks);
-											if ((e.target as HTMLInputElement).checked) next.add(deck.id);
-											else next.delete(deck.id);
-											selectedDecks = next;
-										}}
-									/>
-									<span>{deck.meta?.name ?? deck.id}</span>
-									<span class="deck-count">{deck.count}</span>
-								</label>
-							{/each}
-						</div>
-					</div>
-				{/if}
-				<div class="draw-btn-row">
-					<button
-						class="deck-toggle"
-						class:open={deckPickerOpen}
-						onclick={() => { deckPickerOpen = !deckPickerOpen; }}
-						title="choose decks"
-					>Divination Decks ▾</button>
-					<button
-						class="draw-btn"
-						class:drawing
-						onclick={drawCard}
-						disabled={drawing || $streaming || !!pendingCard || selectedDecks.size === 0}
-					>draw card</button>
-				</div>
-			</div>
+			<label class="tts-toggle" title={$ttsEnabled ? 'mute Clea\'s voice' : 'enable Clea\'s voice'}>
+				<input type="checkbox" bind:checked={$ttsEnabled} />
+				<span>〲</span>
+			</label>
+			<select
+				class="voice-select"
+				value={$ttsVoice}
+				onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value as TtsVoice)}
+				aria-label="Clea's voice"
+				title="Clea's voice"
+			>
+				<option value="elf">Elf</option>
+				<option value="poet">Poet</option>
+				<option value="alien">Alien</option>
+				<option value="president">President</option>
+			</select>
 		</div>
 	</div>
 </div>
@@ -507,6 +472,15 @@
 	border-bottom: 1px solid var(--border);
 	z-index: 10;
 	background: var(--bg);
+	position: relative;
+}
+
+.topbar-left,
+.topbar-right {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	min-width: 0;
 }
 
 .identity {
@@ -550,6 +524,33 @@
 	flex-direction: column;
 	gap: 1.5rem;
 	scroll-behavior: smooth;
+	position: relative;
+}
+
+/* ── Floating divination widget ─────────────────────────────────────────── */
+.divination-float {
+	position: sticky;
+	bottom: 0.75rem;
+	align-self: flex-end;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0;
+	z-index: 5;
+}
+
+.divination-actions {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+	background: color-mix(in srgb, var(--bg) 85%, transparent);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+	padding: 0.5rem 0.75rem;
 }
 
 .msg { display: flex; flex-direction: column; gap: 0.25rem; }
@@ -638,8 +639,7 @@ textarea:focus { border-color: var(--accent); }
 .ptt-hint-pop {
 	position: absolute;
 	bottom: calc(100% + 0.5rem);
-	left: 50%;
-	transform: translateX(-50%);
+	left: 0;
 	background: var(--surface);
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
@@ -658,8 +658,7 @@ textarea:focus { border-color: var(--accent); }
 	content: '';
 	position: absolute;
 	top: 100%;
-	left: 50%;
-	transform: translateX(-50%);
+	left: 1rem;
 	border: 4px solid transparent;
 	border-top-color: var(--border);
 }
@@ -701,12 +700,6 @@ textarea:focus { border-color: var(--accent); }
 	opacity: 0.7;
 }
 
-.ambient-controls {
-	display: flex;
-	align-items: center;
-	gap: 0.4rem;
-}
-
 .wordmark {
 	position: absolute;
 	left: 50%;
@@ -719,33 +712,6 @@ textarea:focus { border-color: var(--accent); }
 	transition: color 0.15s;
 }
 .wordmark:hover { color: var(--accent); }
-
-.ambient-toggle {
-	background: none;
-	border: none;
-	color: var(--muted);
-	cursor: pointer;
-	font-size: 1rem;
-	line-height: 1;
-	padding: 0.1rem 0.2rem;
-	transition: color 0.15s;
-}
-.ambient-toggle.on { color: var(--accent); }
-
-.scene-select {
-	appearance: none;
-	background: none;
-	border: none;
-	color: var(--muted);
-	cursor: pointer;
-	font-family: var(--font-mono);
-	font-size: 0.65rem;
-	letter-spacing: 0.08em;
-	padding: 0;
-	transition: color 0.15s;
-}
-.scene-select:hover, .scene-select:focus { color: var(--accent); outline: none; }
-.scene-select option { background: var(--bg); color: var(--text); }
 
 .voice-select {
 	appearance: none;
@@ -767,23 +733,6 @@ textarea:focus { border-color: var(--accent); }
 	align-items: center;
 	gap: 0.5rem;
 	flex-shrink: 0;
-}
-
-input[type="range"] {
-	appearance: none;
-	background: var(--border);
-	border-radius: 2px;
-	height: 2px;
-	width: 80px;
-	cursor: pointer;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-	appearance: none;
-	background: var(--muted);
-	border-radius: 50%;
-	height: 10px;
-	width: 10px;
 }
 
 .bar-trailing {
@@ -816,19 +765,6 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 /* ── Draw controls ─────────────────────────────────────────────────────── */
-.draw-wrap {
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}
-
-.draw-btn-row {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 0.2rem;
-}
 
 .draw-btn {
 	background: var(--surface);
@@ -865,9 +801,11 @@ input[type="range"]::-webkit-slider-thumb {
 
 .deck-picker {
 	position: absolute;
-	bottom: calc(100% + 0.5rem);
+	bottom: calc(100% + 0.4rem);
 	right: 0;
-	background: var(--surface);
+	background: color-mix(in srgb, var(--surface) 95%, transparent);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	min-width: 200px;
