@@ -150,6 +150,19 @@
 						}
 					}
 					messages.update(m => [...m, { role: 'assistant', content: '' }]);
+				} else if (event.type === 'draw' && event.card) {
+					// Clea triggered a contextual card draw server-side
+					const raw = event.card as any;
+					const deckMeta = availableDecks.find(d => d.id === raw.deck);
+					const cardData: CardData = {
+						id: raw.id,
+						deck: raw.deck,
+						deckLabel: raw.deckLabel ?? deckMeta?.meta?.name ?? raw.deck,
+						title: raw.title,
+						keywords: raw.keywords ?? [],
+						body: raw.body ?? '',
+					};
+					messages.update(m => [...m, { role: 'card', content: '', card: cardData, interpreted: false }]);
 				}
 			}), mode)) { /* yield */ }
 		} catch (e: unknown) {

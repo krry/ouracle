@@ -56,7 +56,7 @@ import {
 } from './db.js';
 import { auth } from './auth-config.js';
 import { toNodeHandler } from 'better-auth/node';
-import { draw, listDecks } from './decks.js';
+import { draw, listDecks, drawContextual, loadDecks } from './decks.js';
 
 const app = express();
 
@@ -230,12 +230,16 @@ app.get('/decks', async (_req, res) => {
   }
 });
 
-// GET /draw?n=3&decks=tarot,iching  (decks = comma-separated IDs, omit = all)
+// GET /draw?n=3&decks=tarot,iching&context=...
+// context = seeker's full text for semantic card selection (keyword match)
 app.get('/draw', async (req, res) => {
   try {
     const n = Math.min(Math.max(parseInt(req.query.n) || 1, 1), 10);
     const deckIds = req.query.decks ? req.query.decks.split(',').map(s => s.trim()).filter(Boolean) : null;
-    const cards = await draw(n, deckIds);
+    const context = req.query.context ? String(req.query.context).trim() : null;
+    const cards = context
+      ? await drawContextual(context, n, deckIds)
+      : await draw(n, deckIds);
     if (cards.length === 0) return res.status(404).json({ error: 'No cards found.' });
     res.json({ cards });
   } catch (e) {
@@ -1100,17 +1104,29 @@ app.post('/chat', authenticateOrGuest, async (req, res) => {
       const systemWithSuggestion = `${CLEA_SYSTEM_PROMPT}
 
 --- Suggested direction (strong suggestion — take it, transform it, or release it entirely if the seeker's words demand something else):
-"${suggestion}"`;
+"${suggestion}"
+
+--- Divination draw signal
+If this moment calls for a card — a fork the seeker can't reason through, a symbol that needs to surface, a question only the oracle can ask — append [DRAW] as the very last thing you write. If a specific deck feels right (tarot, iching, osho_zen, runes, etc.), use [DRAW:deck_id] instead. Use this sparingly. Most responses will not include it.`;
 
       const llmMessages = conversation
         .filter((e) => e.role === 'seeker' || e.role === 'priestess')
         .map((e) => ({ role: e.role === 'seeker' ? 'user' : 'assistant', content: e.text }));
 
       let nextQ = suggestion;
+      let drawSignal = false;
+      let drawDeck = null;
       try {
         const llm = makeLlmClient();
-        nextQ = await llm.chat({ system: systemWithSuggestion, messages: llmMessages, temperature: 0.85, maxTokens: 256 });
+        nextQ = await llm.chat({ system: systemWithSuggestion, messages: llmMessages, temperature: 0.85, maxTokens: 300 });
         nextQ = nextQ.trim();
+        // Detect and strip draw signal
+        const drawMatch = nextQ.match(/\s*\[DRAW(?::([^\]]+))?\]\s*$/i);
+        if (drawMatch) {
+          drawSignal = true;
+          drawDeck = drawMatch[1]?.trim().toLowerCase() || null;
+          nextQ = nextQ.replace(/\s*\[DRAW(?::[^\]]+)?\]\s*$/i, '').trim();
+        }
       } catch (e) {
         console.error('[clea] LLM error, falling back to clarifier:', e.message);
       }
@@ -1119,6 +1135,30 @@ app.post('/chat', authenticateOrGuest, async (req, res) => {
       await updateSession(session_id, { turn: newTurn, full_text: newText, conversation });
 
       await streamText(emit, nextQ);
+
+      // Clea requested a draw — pick a contextually relevant card server-side
+      if (drawSignal) {
+        try {
+          const allDecks = await loadDecks();
+          const validDeckId = drawDeck && allDecks.some(d => d.id === drawDeck) ? drawDeck : null;
+          const cards = await drawContextual(newText, 1, validDeckId ? [validDeckId] : null);
+          if (cards.length > 0) {
+            const card = cards[0];
+            const deckMeta = allDecks.find(d => d.id === card.deck);
+            emit({ type: 'draw', card: {
+              id: card.id,
+              deck: card.deck,
+              deckLabel: deckMeta?.meta?.name ?? card.deck,
+              title: card.title,
+              keywords: card.keywords ?? [],
+              body: card.body ?? '',
+            }});
+          }
+        } catch (e) {
+          console.error('[clea] draw signal card fetch failed:', e.message);
+        }
+      }
+
       return finish('inquiry', { session_id, turn: newTurn });
     }
 

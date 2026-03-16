@@ -143,6 +143,73 @@ export async function draw(n = 1, deckIds = null) {
   return drawn;
 }
 
+// ── Contextual (semantic) draw ────────────────────────────────────────────────
+
+/**
+ * Score a card against a set of context words via keyword overlap.
+ * @param {object} card
+ * @param {Set<string>} contextWords
+ * @returns {number} 0–1
+ */
+function scoreCard(card, contextWords) {
+  if (!card.keywords?.length) return 0;
+  let hits = 0;
+  for (const kw of card.keywords) {
+    const parts = kw.toLowerCase().split(/\s+/);
+    for (const part of parts) {
+      if (part.length > 3 && contextWords.has(part)) {
+        hits++;
+        break; // count keyword once even if multiple parts match
+      }
+    }
+  }
+  return hits / card.keywords.length;
+}
+
+/**
+ * Draw n cards most relevant to the given context string.
+ * Scores by keyword overlap; falls back to random if no card scores > 0.
+ */
+export async function drawContextual(context, n = 1, deckIds = null) {
+  if (!context) return draw(n, deckIds);
+
+  const decks = await loadDecks();
+  const ids = Array.isArray(deckIds) && deckIds.length > 0 ? new Set(deckIds) : null;
+  const pool = ids
+    ? decks.filter(d => ids.has(d.id)).flatMap(d => d.cards)
+    : decks.flatMap(d => d.cards);
+
+  if (pool.length === 0) return [];
+
+  // Build word set from context
+  const contextWords = new Set(
+    context.toLowerCase()
+      .replace(/[^\w\s]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 3)
+  );
+
+  // Score each card, sort descending
+  const scored = pool.map(card => ({ card, score: scoreCard(card, contextWords) }));
+  scored.sort((a, b) => b.score - a.score);
+
+  const best = scored.filter(x => x.score > 0);
+  if (best.length === 0) return draw(n, deckIds); // fallback: random
+
+  // Sample from cards scoring >= 40% of the top score
+  const threshold = best[0].score * 0.4;
+  const candidates = best.filter(x => x.score >= threshold);
+
+  const copy = candidates.slice();
+  const drawn = [];
+  for (let i = 0; i < Math.min(n, copy.length); i++) {
+    const j = i + Math.floor(Math.random() * (copy.length - i));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+    drawn.push(copy[i].card);
+  }
+  return drawn;
+}
+
 /** List available decks (id + meta). */
 export async function listDecks() {
   const decks = await loadDecks();

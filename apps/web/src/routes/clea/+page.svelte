@@ -24,12 +24,12 @@
     <pre><code>curl -fsSL https://ouracle.kerry.ink/install.sh | sh</code></pre>
 
     <h2>In your browser</h2>
-    <a href="/chat" class="cta">open Clea</a>
+    <a href="/chat" class="cta">meet Clea</a>
 
     <h2>Roll your own</h2>
     <p class="note">
-      Want to run Ouracle on your own machine with a local LLM?
-      <a href="/diy">Learn how →</a>
+      Want to hold Ouracle in the palm of your GPU and pet it like a llama?
+      <a href="/diy">learn how →</a>
     </p>
   </section>
 </div>
