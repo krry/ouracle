@@ -26,8 +26,6 @@ async function appleClientSecret() {
 // Callers that need the live JWT can use appleClientSecret() directly.
 const appleSecret = process.env.OAUTH_APPLE_CLIENT_SECRET ?? '';
 
-export { db };
-
 export const auth = betterAuth({
   database: { db, type: 'postgres' },
   baseURL: process.env.BETTER_AUTH_URL ?? 'https://api.ouracle.kerry.ink',

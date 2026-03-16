@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
 	import { creds, authed, messages, streaming, voiceState, waveform, ambience, guestTurns, ttsEnabled } from './stores';
+	import { signOut } from './auth';
 	import { chat, tts, stt } from './api';
 	import Breath from './Breath.svelte';
 	import type { Credentials } from './stores';
@@ -119,6 +120,11 @@
 		}
 	});
 
+	async function leave() {
+		await signOut({ fetchOptions: { onSuccess: () => creds.logout() } });
+		creds.logout();
+	}
+
 	function handleKey(e: KeyboardEvent) {
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
@@ -190,6 +196,10 @@
 </script>
 
 <div class="shell">
+	{#if !guestMode}
+		<button class="leave" onclick={leave} title="leave">⌁</button>
+	{/if}
+
 	<!-- ambient waveform layer -->
 	<div class="breath-layer">
 		<Breath />
@@ -252,6 +262,23 @@
 	flex-direction: column;
 	position: relative;
 }
+
+.leave {
+	position: absolute;
+	top: 0.75rem;
+	right: 0.75rem;
+	z-index: 10;
+	background: none;
+	border: 1px solid transparent;
+	border-radius: var(--radius);
+	color: var(--muted);
+	cursor: pointer;
+	font-size: 1rem;
+	line-height: 1;
+	padding: 0.3rem 0.5rem;
+	transition: border-color 0.15s, color 0.15s;
+}
+.leave:hover { border-color: var(--border); color: var(--text); }
 
 .breath-layer {
 	position: absolute;

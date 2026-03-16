@@ -336,6 +336,16 @@ export async function updateApiKey(id, { active, expires_at, label }) {
 // BETTERAUTH BRIDGE + TOTEM
 // ─────────────────────────────────────────────
 
+export async function findBetterAuthSession(token) {
+  const [row] = await sql`
+    SELECT s.token, s."expiresAt", u.id AS "authUserId", u.name
+    FROM session s
+    JOIN "user" u ON u.id = s."userId"
+    WHERE s.token = ${token}
+  `;
+  return row ?? null;
+}
+
 export async function getOrCreateSeekerByAuthId(authUserId, name) {
   const [existing] = await sql`
     SELECT * FROM seekers WHERE auth_user_id = ${authUserId}
