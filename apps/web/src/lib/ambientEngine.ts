@@ -9,20 +9,28 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 
-export type SceneId = 'rain' | 'bowls' | 'forest' | 'river' | 'drone';
+export type SceneId =
+  | 'drizzle' | 'storm'  | 'river' | 'wind'
+  | 'leaves'  | 'fire'   | 'asmr'  | 'bowls'
+  | 'earth'   | 'drone';
 
 export const SCENES: { id: SceneId; label: string }[] = [
-  { id: 'rain',   label: 'rain'   },
-  { id: 'bowls',  label: 'bowls'  },
-  { id: 'forest', label: 'forest' },
-  { id: 'river',  label: 'river'  },
-  { id: 'drone',  label: 'drone'  },
+  { id: 'drizzle', label: 'drizzle' },
+  { id: 'storm',   label: 'storm'   },
+  { id: 'river',   label: 'river'   },
+  { id: 'wind',    label: 'wind'    },
+  { id: 'leaves',  label: 'leaves'  },
+  { id: 'fire',    label: 'fire'    },
+  { id: 'asmr',    label: 'asmr'    },
+  { id: 'bowls',   label: 'bowls'   },
+  { id: 'earth',   label: 'earth'   },
+  { id: 'drone',   label: 'drone'   },
 ];
 
 // ── Stores ───────────────────────────────────────────────────────────────────
 
 export const ambientRunning = writable(false);
-export const ambientScene   = writable<SceneId>('rain');
+export const ambientScene   = writable<SceneId>('drizzle');
 
 // ── Engine state ─────────────────────────────────────────────────────────────
 
@@ -130,76 +138,130 @@ function noiseBand(
 
 // ── Scenes ────────────────────────────────────────────────────────────────────
 
-function buildRain(ctx: AudioContext, master: GainNode) {
-  const rev = makeReverb(ctx, 1.4, 3);
+/** Tin roof drizzle — delicate, each drop distinct. */
+function buildDrizzle(ctx: AudioContext, master: GainNode) {
+  const rev = makeReverb(ctx, 1.8, 3.5);
   rev.connect(master);
 
-  // Low rumble — ground presence
-  const rumble = noiseBand(ctx, makeNoiseBuf(ctx, 5), 'lowpass', 180, 0.8, 0.45, rev);
-  lfo(ctx, 0.04, 22, rumble.filter.frequency);
+  // Thin metallic tap layer — the tin roof
+  const tap = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'bandpass', 2800, 1.5, 0.35, rev);
+  lfo(ctx, 0.06, 0.08, tap.gain.gain);
 
-  // Mid splatter — the actual rainfall
-  const splatter = noiseBand(ctx, makeNoiseBuf(ctx, 4), 'bandpass', 1600, 0.6, 0.55, rev);
-  lfo(ctx, 0.07, 0.07, splatter.gain.gain);
+  // Barrel resonance — hollow low thud of collected drops
+  const barrel = noiseBand(ctx, makeNoiseBuf(ctx, 4), 'bandpass', 220, 2.0, 0.3, rev);
+  lfo(ctx, 0.09, 30, barrel.filter.frequency);
+  lfo(ctx, 0.05, 0.07, barrel.gain.gain);
 
-  // High hiss — fine droplets, distant
-  const hiss = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'highpass', 6000, 0.5, 0.18, rev);
-  lfo(ctx, 0.11, 0.05, hiss.gain.gain);
+  // Fine mist hiss
+  const mist = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'highpass', 7000, 0.4, 0.12, rev);
+  lfo(ctx, 0.13, 0.04, mist.gain.gain);
 }
 
-function buildForest(ctx: AudioContext, master: GainNode) {
-  const rev = makeReverb(ctx, 2.8, 4);
+/** Storm — heavy pour, distant thunder presence. */
+function buildStorm(ctx: AudioContext, master: GainNode) {
+  const rev = makeReverb(ctx, 2.5, 2.5);
   rev.connect(master);
 
-  // Wind body — low, slow gusts
-  const wind = noiseBand(ctx, makeNoiseBuf(ctx, 6), 'bandpass', 320, 0.4, 0.45, rev);
-  lfo(ctx, 0.025, 80, wind.filter.frequency);
-  lfo(ctx, 0.04, 0.08, wind.gain.gain);
+  // Thunder sub-presence — felt more than heard
+  const thunder = noiseBand(ctx, makeNoiseBuf(ctx, 6), 'lowpass', 90, 0.6, 0.55, rev);
+  lfo(ctx, 0.02, 25, thunder.filter.frequency);
+  lfo(ctx, 0.015, 0.18, thunder.gain.gain); // distant roll
 
-  // Canopy rustle — mid-high
-  const rustle = noiseBand(ctx, makeNoiseBuf(ctx, 4), 'bandpass', 2400, 1.2, 0.14, rev);
-  lfo(ctx, 0.06, 0.07, rustle.gain.gain);
+  // Heavy rain body
+  const pour = noiseBand(ctx, makeNoiseBuf(ctx, 4), 'bandpass', 1200, 0.5, 0.65, rev);
+  lfo(ctx, 0.05, 0.09, pour.gain.gain);
 
-  // Distant birds — barely there, resonant peaks
-  const birds = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'bandpass', 4200, 4.0, 0.055, rev);
-  lfo(ctx, 0.19, 0.04, birds.gain.gain);
+  // Driving surface noise
+  const drive = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'highpass', 4500, 0.6, 0.25, rev);
+  lfo(ctx, 0.08, 0.07, drive.gain.gain);
 }
 
+/** River rushing — perpetual, with gurgling depth. */
 function buildRiver(ctx: AudioContext, master: GainNode) {
   const rev = makeReverb(ctx, 2.2, 3.5);
   rev.connect(master);
 
-  // Deep body — subsonic current
   const body = noiseBand(ctx, makeNoiseBuf(ctx, 5), 'lowpass', 380, 0.5, 0.5, rev);
   lfo(ctx, 0.05, 55, body.filter.frequency);
 
-  // Gurgling mid — the interesting part
   const gurgle = noiseBand(ctx, makeNoiseBuf(ctx, 4), 'bandpass', 900, 1.0, 0.42, rev);
   lfo(ctx, 0.13, 160, gurgle.filter.frequency);
   lfo(ctx, 0.08, 0.06, gurgle.gain.gain);
 
-  // Surface shimmer — fine water catching light
   const surface = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'bandpass', 3800, 0.7, 0.16, rev);
   lfo(ctx, 0.09, 0.05, surface.gain.gain);
 }
 
-function buildDrone(ctx: AudioContext, master: GainNode) {
-  const rev = makeReverb(ctx, 5, 5);
+/** Wind — breeze through curtains, open window, light and spacious. */
+function buildWind(ctx: AudioContext, master: GainNode) {
+  const rev = makeReverb(ctx, 3.5, 5);
   rev.connect(master);
 
-  // 111 Hz — ancient/sacred base frequency, with fifth, octave, and 12th
-  const freqs = [111, 166.5, 222, 333];
-  freqs.forEach((f, i) => {
-    // Left and right slightly detuned for binaural beating (~2–5 Hz diff)
-    [-0.6, 0.6].forEach((pan, ch) => {
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
+  // Main breeze body — fabric moving
+  const breeze = noiseBand(ctx, makeNoiseBuf(ctx, 6), 'bandpass', 480, 0.35, 0.42, rev);
+  lfo(ctx, 0.022, 120, breeze.filter.frequency); // slow gust sweeps
+  lfo(ctx, 0.035, 0.10, breeze.gain.gain);
+
+  // Curtain flutter — higher, lighter
+  const flutter = noiseBand(ctx, makeNoiseBuf(ctx, 4), 'bandpass', 2200, 0.9, 0.13, rev);
+  lfo(ctx, 0.07, 0.07, flutter.gain.gain);
+
+  // Distant open air — barely there sub-breath
+  const air = noiseBand(ctx, makeNoiseBuf(ctx, 5), 'lowpass', 160, 0.5, 0.28, rev);
+  lfo(ctx, 0.018, 18, air.filter.frequency);
+}
+
+/** Leaves — footsteps in moss, crunch, trees dancing. */
+function buildLeaves(ctx: AudioContext, master: GainNode) {
+  const rev = makeReverb(ctx, 1.5, 4);
+  rev.connect(master);
+
+  // Soft moss underfoot — low, absorbent
+  const moss = noiseBand(ctx, makeNoiseBuf(ctx, 5), 'lowpass', 280, 0.6, 0.38, rev);
+  lfo(ctx, 0.06, 40, moss.filter.frequency);
+
+  // Leaf crunch — brittle, textured mid
+  const crunch = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'bandpass', 1800, 1.8, 0.32, rev);
+  lfo(ctx, 0.22, 0.12, crunch.gain.gain); // faster flutter = crunchy randomness
+
+  // Canopy shimmer — leaves dancing above
+  const canopy = noiseBand(ctx, makeNoiseBuf(ctx, 4), 'bandpass', 4800, 2.0, 0.10, rev);
+  lfo(ctx, 0.14, 0.06, canopy.gain.gain);
+}
+
+/**
+ * Bowls — sacred Solfeggio frequencies, crystal bowls + gong.
+ * 174 Hz: foundation/pain relief (gong root)
+ * 396 Hz: liberation from fear
+ * 528 Hz: transformation, the love frequency
+ * 741 Hz: awakening intuition
+ * 963 Hz: crown, divine consciousness (lightest shimmer)
+ * Each split L/R with theta-range binaural beat for deep meditation.
+ */
+function buildBowls(ctx: AudioContext, master: GainNode) {
+  const rev = makeReverb(ctx, 6, 6);
+  rev.connect(master);
+
+  // [hz, binauralBeatHz, gain, panWidth]
+  const bowls: [number, number, number, number][] = [
+    [174,  6,   0.30, 0.8],  // gong — deep, wide
+    [396,  4,   0.22, 0.65],
+    [528,  3.5, 0.20, 0.6],  // love frequency — centered
+    [741,  4,   0.15, 0.7],
+    [963,  5,   0.09, 0.75], // crown shimmer — barely there
+  ];
+
+  bowls.forEach(([hz, beat, gainVal, width], i) => {
+    [-width, width].forEach((pan, ch) => {
+      const osc    = ctx.createOscillator();
+      const gain   = ctx.createGain();
       const panner = ctx.createStereoPanner();
       osc.type = 'sine';
-      osc.frequency.value = f + ch * (2 + i * 0.8);
-      gain.gain.value = 0.14 / (i + 1);
+      osc.frequency.value = hz + ch * beat;
+      gain.gain.value = gainVal;
       panner.pan.value = pan;
-      lfo(ctx, 0.013 + i * 0.006, 0.35, osc.frequency);
+      // Very slow pitch drift — bowl sustain waver
+      lfo(ctx, 0.008 + i * 0.003, 0.6, osc.frequency);
       osc.connect(gain);
       gain.connect(panner);
       panner.connect(rev);
@@ -209,43 +271,97 @@ function buildDrone(ctx: AudioContext, master: GainNode) {
   });
 }
 
-/**
- * Bowls — singing bowl resonances with binaural beating.
- *
- * Your turn, Chef. The structure is ready — fill in the frequencies and feel.
- * Suggested: stack sines at Solfège / Pythagorean frequencies.
- * Each split L/R with a ~4 Hz binaural beat difference.
- * Long reverb. Very slow pitch LFO (0.01 Hz, depth ~1 Hz).
- */
-export function buildBowls(ctx: AudioContext, master: GainNode) {
-  const rev = makeReverb(ctx, 5, 6);
+/** Earth — crunchy static, grounded, mineral. */
+function buildEarth(ctx: AudioContext, master: GainNode) {
+  const rev = makeReverb(ctx, 1.2, 4);
   rev.connect(master);
 
-  // TODO: define your bowl frequencies here
-  // Each entry: [rootHz, binauralBeatHz, relativeGain]
-  const bowls: [number, number, number][] = [
-    // e.g. [174, 4, 0.25],
-    // e.g. [285, 3, 0.20],
-    // e.g. [396, 4, 0.18],
-    // e.g. [528, 5, 0.14],
-  ];
+  // Sub-earth presence — stone, weight
+  const sub = noiseBand(ctx, makeNoiseBuf(ctx, 6), 'lowpass', 120, 0.7, 0.5, rev);
+  lfo(ctx, 0.03, 15, sub.filter.frequency);
 
-  if (bowls.length === 0) {
-    // Fallback until Chef implements
-    buildDrone(ctx, master);
-    return;
-  }
+  // Crunchy static texture — the mineral grain
+  const grain = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'bandpass', 2600, 2.5, 0.28, rev);
+  lfo(ctx, 0.28, 400, grain.filter.frequency); // fast sweep = crunch character
+  lfo(ctx, 0.11, 0.09, grain.gain.gain);
 
-  bowls.forEach(([rootHz, beatHz, gainVal]) => {
-    [-0.7, 0.7].forEach((pan, ch) => {
+  // Deep gravel resonance
+  const gravel = noiseBand(ctx, makeNoiseBuf(ctx, 4), 'bandpass', 600, 1.2, 0.35, rev);
+  lfo(ctx, 0.07, 0.07, gravel.gain.gain);
+}
+
+/**
+ * Fire — fireplace crackling. Crackle lives in sharp transients:
+ * fast LFO on a resonant bandpass sweeps through crinkle frequencies,
+ * over a warm low-mid roar bed.
+ */
+function buildFire(ctx: AudioContext, master: GainNode) {
+  const rev = makeReverb(ctx, 1.0, 3);
+  rev.connect(master);
+
+  // Warm roar — the fire body, slow breathing
+  const roar = noiseBand(ctx, makeNoiseBuf(ctx, 5), 'lowpass', 340, 0.5, 0.48, rev);
+  lfo(ctx, 0.03, 50, roar.filter.frequency);
+  lfo(ctx, 0.025, 0.08, roar.gain.gain);
+
+  // Crackle band — the wood popping, fast chaotic sweeps
+  const crackle = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'bandpass', 1400, 3.5, 0.22, rev);
+  lfo(ctx, 0.45, 800, crackle.filter.frequency); // fast = crackle texture
+  lfo(ctx, 0.31, 0.14, crackle.gain.gain);       // irregular bursts
+
+  // High ember hiss — fine sparks
+  const embers = noiseBand(ctx, makeNoiseBuf(ctx, 2), 'bandpass', 5500, 2.0, 0.08, rev);
+  lfo(ctx, 0.52, 0.06, embers.gain.gain);
+
+  // Sub warmth — hearth stone
+  const hearth = noiseBand(ctx, makeNoiseBuf(ctx, 6), 'lowpass', 80, 0.8, 0.30, rev);
+  lfo(ctx, 0.018, 10, hearth.filter.frequency);
+}
+
+/**
+ * ASMR — blankets on your ears. Ultra-close textures:
+ * soft fabric, slow breath, gentle page turns, warm static.
+ * Everything very high-passed and intimate — no room, no reverb.
+ */
+function buildAsmr(ctx: AudioContext, master: GainNode) {
+  // ASMR is dry — tiny room, very close
+  const rev = makeReverb(ctx, 0.4, 6);
+  rev.connect(master);
+
+  // Fabric softness — the blanket, slow
+  const fabric = noiseBand(ctx, makeNoiseBuf(ctx, 5), 'bandpass', 3200, 1.2, 0.30, rev);
+  lfo(ctx, 0.04, 0.09, fabric.gain.gain);
+  lfo(ctx, 0.025, 200, fabric.filter.frequency);
+
+  // Warm breath presence — low, intimate
+  const breath = noiseBand(ctx, makeNoiseBuf(ctx, 6), 'bandpass', 380, 0.6, 0.28, rev);
+  lfo(ctx, 0.15, 0.12, breath.gain.gain); // slow breath rhythm
+
+  // Micro-texture — like fingertips on paper, or whisper air
+  const paper = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'bandpass', 7500, 1.8, 0.14, rev);
+  lfo(ctx, 0.08, 0.06, paper.gain.gain);
+
+  // Sub hum — very faint, like a quiet room has weight
+  const hum = noiseBand(ctx, makeNoiseBuf(ctx, 4), 'lowpass', 140, 0.9, 0.18, rev);
+  lfo(ctx, 0.012, 12, hum.filter.frequency);
+}
+
+/** Drone — 111 Hz sacred base, pure harmonic overtones, binaural. */
+function buildDrone(ctx: AudioContext, master: GainNode) {
+  const rev = makeReverb(ctx, 5, 5);
+  rev.connect(master);
+
+  const freqs = [111, 166.5, 222, 333];
+  freqs.forEach((f, i) => {
+    [-0.6, 0.6].forEach((pan, ch) => {
       const osc    = ctx.createOscillator();
       const gain   = ctx.createGain();
       const panner = ctx.createStereoPanner();
       osc.type = 'sine';
-      osc.frequency.value = rootHz + ch * beatHz;
-      gain.gain.value = gainVal;
+      osc.frequency.value = f + ch * (2 + i * 0.8);
+      gain.gain.value = 0.14 / (i + 1);
       panner.pan.value = pan;
-      lfo(ctx, 0.01, 1.0, osc.frequency);
+      lfo(ctx, 0.013 + i * 0.006, 0.35, osc.frequency);
       osc.connect(gain);
       gain.connect(panner);
       panner.connect(rev);
@@ -276,11 +392,16 @@ export function startAmbient(scene: SceneId, volume: number) {
   masterGain.connect(audioCtx.destination);
 
   switch (scene) {
-    case 'rain':   buildRain(audioCtx, masterGain);   break;
-    case 'forest': buildForest(audioCtx, masterGain); break;
-    case 'river':  buildRiver(audioCtx, masterGain);  break;
-    case 'drone':  buildDrone(audioCtx, masterGain);  break;
-    case 'bowls':  buildBowls(audioCtx, masterGain);  break;
+    case 'drizzle': buildDrizzle(audioCtx, masterGain); break;
+    case 'storm':   buildStorm(audioCtx, masterGain);   break;
+    case 'river':   buildRiver(audioCtx, masterGain);   break;
+    case 'wind':    buildWind(audioCtx, masterGain);    break;
+    case 'leaves':  buildLeaves(audioCtx, masterGain);  break;
+    case 'fire':    buildFire(audioCtx, masterGain);    break;
+    case 'asmr':    buildAsmr(audioCtx, masterGain);    break;
+    case 'bowls':   buildBowls(audioCtx, masterGain);   break;
+    case 'earth':   buildEarth(audioCtx, masterGain);   break;
+    case 'drone':   buildDrone(audioCtx, masterGain);   break;
   }
 
   ambientRunning.set(true);

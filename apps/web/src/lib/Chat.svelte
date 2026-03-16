@@ -7,7 +7,7 @@
 	import { startAmbient, stopAmbient, setVolume, ambientRunning, ambientScene, SCENES } from './ambientEngine';
 	import type { SceneId } from './ambientEngine';
 
-	let activeScene = $state<SceneId>('rain');
+	let activeScene = $state<SceneId>('drizzle');
 
 	function toggleAmbient() {
 		if ($ambientRunning) stopAmbient();
