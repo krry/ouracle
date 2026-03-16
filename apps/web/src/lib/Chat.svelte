@@ -340,7 +340,7 @@
 						{#if msg.card.keywords.length}
 							<div class="card-keywords">{msg.card.keywords.join(' · ')}</div>
 						{/if}
-						<div class="card-text">{msg.card.body}</div>
+						<pre class="card-text">{msg.card.body}</pre>
 						{#if !msg.interpreted}
 							<button class="card-interpret" onclick={() => interpret(msg.card!)}>
 								interpret
@@ -874,11 +874,13 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .card-text {
-	font-size: 0.88rem;
-	line-height: 1.6;
+	font-family: var(--font-mono);
+	font-size: 0.82rem;
+	line-height: 1.7;
 	color: var(--text);
 	opacity: 0.85;
 	white-space: pre-wrap;
+	margin: 0;
 }
 
 .card-interpret {
