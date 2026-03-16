@@ -395,7 +395,7 @@
 .bar {
 	display: flex;
 	align-items: flex-end;
-	gap: 0.5rem;
+	gap: 1rem;
 	padding: 0.75rem 1rem;
 	border-top: 1px solid var(--border);
 	background: var(--bg);
@@ -428,11 +428,14 @@ textarea:focus { border-color: var(--accent); }
 }
 
 .ptt-hint {
+	font-family: var(--font-sans, system-ui, sans-serif);
 	font-size: 0.6rem;
-	letter-spacing: 0.12em;
+	letter-spacing: 0.08em;
 	color: var(--muted);
 	text-transform: uppercase;
 	white-space: nowrap;
+	width: 6rem;
+	text-align: center;
 	opacity: 0.6;
 	transition: opacity 0.15s, color 0.15s;
 }
