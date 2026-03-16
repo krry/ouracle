@@ -261,7 +261,9 @@ impl Provider for OuracleProvider {
         }
         let _ = tx.send(ApiResponse::TurnComplete);
     }
+}
 
+impl OuracleProvider {
     // ── /draw [deck_id] ───────────────────────────────────────────────────────
 
     fn cmd_draw(&self, deck_id: Option<&str>, tx: &mpsc::Sender<ApiResponse>) {
