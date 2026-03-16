@@ -1,16 +1,37 @@
 <script lang="ts">
-  import { startAmbient, stopAmbient, ambientRunning, ambientScene, SCENES, binauralBeat } from './ambientEngine';
+  import { startAmbient, stopAmbient, ambientRunning, ambientScene, SCENES, binauralBeat, updateBinauralBeat } from './ambientEngine';
   import type { SceneId } from './ambientEngine';
 
-  // Beat frequency presets: [label, hz]
-  const BEATS: [string, number][] = [
-    ['δ 1', 1], ['δ 4', 4], ['θ 6', 6], ['θ 8', 8],
-    ['α 10', 10], ['α 13', 13], ['β 20', 20], ['β 30', 30],
-  ];
+  const MIN_HZ = 0.5;
+  const MAX_HZ = 100;
+  const LOG_RANGE = Math.log(MAX_HZ / MIN_HZ);
 
-  function setBeat(hz: number) {
-    binauralBeat.set(hz);
-    if ($ambientRunning && $ambientScene === 'binaural') startAmbient('binaural', 0.75);
+  function sliderToHz(pos: number): number {
+    return MIN_HZ * Math.exp((pos / 1000) * LOG_RANGE);
+  }
+
+  function hzToSlider(hz: number): number {
+    return Math.log(hz / MIN_HZ) / LOG_RANGE * 1000;
+  }
+
+  function band(hz: number): string {
+    if (hz < 4)  return 'δ';
+    if (hz < 8)  return 'θ';
+    if (hz < 13) return 'α';
+    if (hz < 30) return 'β';
+    return 'γ';
+  }
+
+  const sliderPos  = $derived(hzToSlider($binauralBeat));
+  const beatLabel  = $derived(`${band($binauralBeat)} · ${$binauralBeat < 10 ? $binauralBeat.toFixed(1) : Math.round($binauralBeat)} Hz`);
+
+  function onSlide(e: Event) {
+    const hz = Math.round(sliderToHz(Number((e.target as HTMLInputElement).value)) * 10) / 10;
+    if ($ambientRunning && $ambientScene === 'binaural') {
+      updateBinauralBeat(hz);
+    } else {
+      binauralBeat.set(hz);
+    }
   }
 
   function toggle() {
@@ -44,17 +65,17 @@
   </select>
 
   {#if $ambientScene === 'binaural'}
-    <select
-      class="scene beat"
-      value={$binauralBeat}
-      onchange={(e) => setBeat(Number((e.target as HTMLSelectElement).value))}
-      aria-label="binaural beat frequency"
-      title="beat frequency"
-    >
-      {#each BEATS as [label, hz]}
-        <option value={hz}>{label} Hz</option>
-      {/each}
-    </select>
+    <div class="beat-ctrl">
+      <span class="beat-label">{beatLabel}</span>
+      <input
+        type="range"
+        class="beat-slider"
+        min="0" max="1000" step="1"
+        value={sliderPos}
+        oninput={onSlide}
+        aria-label="binaural beat frequency"
+      />
+    </div>
   {/if}
 </div>
 
@@ -91,4 +112,36 @@
 }
 .scene:hover, .scene:focus { color: var(--accent); outline: none; }
 .scene option { background: var(--bg); color: var(--text); }
+
+.beat-ctrl {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.2rem;
+  width: 96px;
+}
+
+.beat-slider {
+  appearance: none;
+  background: var(--border);
+  border-radius: 2px;
+  height: 2px;
+  width: 100%;
+  cursor: pointer;
+}
+.beat-slider::-webkit-slider-thumb {
+  appearance: none;
+  background: var(--accent);
+  border-radius: 50%;
+  height: 10px;
+  width: 10px;
+}
+
+.beat-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  white-space: nowrap;
+}
 </style>

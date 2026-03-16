@@ -89,7 +89,7 @@ code, pre, kbd, samp {
 	font-size: 0.8em;
 }
 
-button, input, select, textarea, nav, label {
+button, input, select, textarea, label, .cta {
 	font-family: var(--font-sans);
 }
 

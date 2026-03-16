@@ -44,7 +44,7 @@ export const binauralBeat = writable(6);
 // ── Stores ────────────────────────────────────────────────────────────────────
 
 export const ambientRunning = writable(false);
-export const ambientScene   = writable<SceneId>('drizzle');
+export const ambientScene   = writable<SceneId>('binaural');
 
 // ── Engine state ──────────────────────────────────────────────────────────────
 
@@ -53,6 +53,8 @@ let masterGain: GainNode | null = null;
 let liveOscillators: OscillatorNode[] = [];
 let liveSources: AudioBufferSourceNode[] = [];
 let liveSchedulers: Array<() => void> = [];
+// Right-channel oscillators for binaural, paired with their base frequency
+let liveBinauralR: Array<{ osc: OscillatorNode; base: number }> = [];
 
 // ── Core helpers ──────────────────────────────────────────────────────────────
 
@@ -626,49 +628,86 @@ function buildDrone(ctx: AudioContext, master: GainNode) {
  *   Alpha  8–13 Hz — relaxed focus
  *   Beta  13–30 Hz — alert thinking
  *
- * Layered with a soft pink noise bed to mask tinnitus and ease entrainment.
+ * Texture layers:
+ *   - Per-carrier amplitude tremolo at different rates → each harmonic breathes independently
+ *   - Sub-bass cardiac pulse: two coprime LFOs (1.1 + 0.9 Hz) create irregular heartbeat feel
+ *   - High shimmer (pink highpass) + overtone cluster (166.5 / 277.5 Hz) for warmth
+ *   - Pink noise bed with slow breath and rhythmic pulse
+ *
  * The seeker controls beatHz via the binauralBeat store.
+ * Pitch LFOs on R channel are additive — updateBinauralBeat still works live.
  */
 function buildBinaural(ctx: AudioContext, master: GainNode, beatHz: number) {
-  const rev = makeReverb(ctx, 4, 5);
+  const rev = makeReverb(ctx, 5, 4.5);
   rev.connect(master);
 
-  // Carrier frequencies — stack of harmonics for richness
+  // Carrier stack — 111 / 222 / 333 Hz harmonics
   const carriers = [111, 222, 333];
   carriers.forEach((base, i) => {
-    const gainVal = 0.22 / (i + 1);
+    const gainVal = 0.20 / (i + 1);
 
-    // Left channel — base frequency
-    const oscL = ctx.createOscillator();
-    const gL   = ctx.createGain();
+    // Left channel
+    const oscL  = ctx.createOscillator();
+    const gL    = ctx.createGain();
     const panL  = ctx.createStereoPanner();
     oscL.type = 'sine';
     oscL.frequency.value = base;
     gL.gain.value = gainVal;
     panL.pan.value = -1;
-    // Slow drift on pitch — 0.3 cents per cycle, very gentle
-    lfo(ctx, 0.011 + i * 0.004, 0.25, oscL.frequency);
+    lfo(ctx, 0.013 + i * 0.005, 0.28, oscL.frequency);               // pitch drift
+    lfo(ctx, 0.07 + i * 0.03, gainVal * 0.25, gL.gain);              // tremolo
     oscL.connect(gL); gL.connect(panL); panL.connect(rev);
     oscL.start();
     liveOscillators.push(oscL);
 
-    // Right channel — base + beatHz
-    const oscR = ctx.createOscillator();
-    const gR   = ctx.createGain();
+    // Right channel — base + beatHz (tracked for live updates)
+    const oscR  = ctx.createOscillator();
+    const gR    = ctx.createGain();
     const panR  = ctx.createStereoPanner();
     oscR.type = 'sine';
     oscR.frequency.value = base + beatHz;
     gR.gain.value = gainVal;
     panR.pan.value = 1;
-    lfo(ctx, 0.011 + i * 0.004, 0.25, oscR.frequency);
+    lfo(ctx, 0.013 + i * 0.005, 0.28, oscR.frequency);               // same drift as L
+    lfo(ctx, 0.07 + i * 0.03, gainVal * 0.25, gR.gain);              // same tremolo as L
     oscR.connect(gR); gR.connect(panR); panR.connect(rev);
     oscR.start();
     liveOscillators.push(oscR);
+    liveBinauralR.push({ osc: oscR, base });
   });
 
-  // Pink noise bed — soft, keeps the ears comfortable for long sessions
-  const bed = noiseBand(ctx, makePinkBuf(ctx, 8), 'lowpass', 800, 0.3, 0.08, rev);
-  lfo(ctx, 0.02, 0.03, bed.gain.gain);
+  // Warm overtone cluster — perfect-fifth harmonics, very quiet, adds body
+  // 166.5 = 111 * 1.5 (3rd harmonic), 277.5 = 222 * 1.25 (5th partial)
+  [166.5, 277.5].forEach((hz, i) => {
+    [-0.45, 0.45].forEach((pan) => {
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      const p   = ctx.createStereoPanner();
+      osc.type = 'sine';
+      osc.frequency.value = hz;
+      g.gain.value = 0.05 / (i + 1);
+      p.pan.value = pan;
+      lfo(ctx, 0.009 + i * 0.004, 0.20, osc.frequency);
+      osc.connect(g); g.connect(p); p.connect(rev);
+      osc.start();
+      liveOscillators.push(osc);
+    });
+  });
+
+  // Pink noise bed — slow breath + rhythmic pulse
+  const bed = noiseBand(ctx, makePinkBuf(ctx, 8), 'lowpass', 800, 0.3, 0.06, rev);
+  lfo(ctx, 0.083, 0.04, bed.gain.gain);   // 12-second breath swell
+  lfo(ctx, 0.5,   0.02, bed.gain.gain);   // subtle 0.5 Hz pulse (30 bpm undercurrent)
+
+  // Sub-bass cardiac pulse — two coprime LFOs beat for an irregular heartbeat
+  const pulse = noiseBand(ctx, makePinkBuf(ctx, 6), 'lowpass', 65, 0.9, 0.0, rev);
+  pulse.gain.gain.value = 0.07;
+  lfo(ctx, 1.1, 0.055, pulse.gain.gain);  // ~66 bpm
+  lfo(ctx, 0.9, 0.030, pulse.gain.gain);  // beats against 1.1 → irregular, alive
+
+  // High shimmer — air and space, very quiet
+  const shimmer = noiseBand(ctx, makePinkBuf(ctx, 4), 'highpass', 6500, 0.5, 0.022, rev);
+  lfo(ctx, 0.04, 0.012, shimmer.gain.gain);
 }
 
 // ── Public API ─────────────────────────────────────────────────────────────────
@@ -680,6 +719,7 @@ function teardown() {
   liveSources.forEach(s => { try { s.stop(); } catch { /* already stopped */ } });
   liveOscillators = [];
   liveSources = [];
+  liveBinauralR = [];
 }
 
 export function startAmbient(scene: SceneId, volume: number) {
@@ -725,6 +765,19 @@ export function stopAmbient() {
 /** Smooth volume change — 100ms ramp to avoid clicks. */
 export function setVolume(v: number) {
   if (masterGain && ctx) masterGain.gain.setTargetAtTime(v, ctx.currentTime, 0.1);
+}
+
+/**
+ * Live binaural beat update — ramps right-channel oscillators to base + hz
+ * without restarting the audio graph. 50ms time constant avoids clicks.
+ */
+export function updateBinauralBeat(hz: number) {
+  if (!ctx || liveBinauralR.length === 0) return;
+  binauralBeat.set(hz);
+  const t = ctx.currentTime;
+  liveBinauralR.forEach(({ osc, base }) => {
+    osc.frequency.setTargetAtTime(base + hz, t, 0.05);
+  });
 }
 
 export function setScene(scene: SceneId, volume: number) {

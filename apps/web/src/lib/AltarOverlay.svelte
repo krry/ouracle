@@ -17,7 +17,7 @@
 .veil {
   position: fixed;
   inset: 0;
-  background: hsla(217, 12%, 5%, 0.88);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;

@@ -30,6 +30,7 @@
   <a href="/" class="wordmark">Ouracle</a>
 
   <div class="trail">
+    <AmbientControls />
     {#if isChat && $authed && $creds}
       <div class="identity">
         {#if ($creds as Credentials | null)?.handle}
@@ -40,7 +41,6 @@
     {:else if !isChat}
       <a href="/chat" class="enter">enter</a>
     {/if}
-    <AmbientControls />
   </div>
 </header>
 
