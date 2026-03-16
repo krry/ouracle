@@ -238,6 +238,20 @@ fn cmd_voices_rm(cfg: &mut Config, id: &str) -> Result<()> {
     Ok(())
 }
 
+fn write_ambient_scripts(dir: &std::path::Path, ambient_url: &str) -> Result<()> {
+    let runner = AMBIENT_RUNNER.replace(
+        "from '../ambient-player.js'",
+        "from './ambient-player.js'",
+    );
+    let player = AMBIENT_PLAYER.replace(
+        "'AMBIENT_BASE_URL'",
+        &format!("'{ambient_url}'"),
+    );
+    fs::write(dir.join("ambient-runner.js"), runner)?;
+    fs::write(dir.join("ambient-player.js"), player)?;
+    Ok(())
+}
+
 fn cmd_ambiance(cfg: &mut Config, on: bool) -> Result<()> {
     if on {
         let dir = ambient_dir();
@@ -245,18 +259,7 @@ fn cmd_ambiance(cfg: &mut Config, on: bool) -> Result<()> {
 
         let base_url = resolve_base_url(cfg);
         let ambient_url = format!("{base_url}/ambient");
-
-        // Patch runner import + inject API ambient URL into player.
-        let runner = AMBIENT_RUNNER.replace(
-            "from '../ambient-player.js'",
-            "from './ambient-player.js'",
-        );
-        let player = AMBIENT_PLAYER.replace(
-            "'AMBIENT_BASE_URL'",
-            &format!("'{ambient_url}'"),
-        );
-        fs::write(dir.join("ambient-runner.js"), runner)?;
-        fs::write(dir.join("ambient-player.js"), player)?;
+        write_ambient_scripts(&dir, &ambient_url)?;
 
         cfg.settings.ambiance = Some(true);
         save_settings(&cfg.settings)?;
@@ -387,6 +390,14 @@ fn main() -> Result<()> {
     }
 
     let base_url = resolve_base_url(&cfg);
+
+    // Re-patch ambient scripts with the resolved URL on every launch.
+    if cfg.settings.ambiance != Some(false) {
+        let dir = ambient_dir();
+        if dir.exists() {
+            let _ = write_ambient_scripts(&dir, &format!("{base_url}/ambient"));
+        }
+    }
 
     ripl::with_terminal(|terminal| {
         let creds = reception::tui::ensure_credentials(terminal, &cfg, &base_url)?;
