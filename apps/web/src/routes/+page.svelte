@@ -4,62 +4,117 @@
 
   let canvas: HTMLCanvasElement;
 
-  function makeStarTexture(nPoints: number): THREE.CanvasTexture {
-    const size = 64;
+  // ── Deterministic hash ──────────────────────────────────────────────────────
+  // Avalanche-quality 32-bit hash — seed × salt → float [0, 1)
+  function h(seed: number, salt: number): number {
+    let v = (seed ^ (salt * 0x9e3779b9)) >>> 0;
+    v = Math.imul(v ^ (v >>> 16), 0x85ebca6b) >>> 0;
+    v = Math.imul(v ^ (v >>> 13), 0xc2b2ae35) >>> 0;
+    return ((v ^ (v >>> 16)) >>> 0) / 0xffffffff;
+  }
+
+  // ── Sigil texture ───────────────────────────────────────────────────────────
+  // Generates a unique AOS-style radial glyph from an integer seed.
+  // Each sigil has irregular arm lengths, perturbed valley angles,
+  // optional circle caps, and a hue drawn from the three treasures.
+  function makeSigilTexture(seed: number): THREE.CanvasTexture {
+    const size = 96;
     const cvs = document.createElement('canvas');
     cvs.width = cvs.height = size;
     const ctx = cvs.getContext('2d')!;
     const cx = size / 2, cy = size / 2;
-    const outer = size * 0.46, inner = outer * 0.38;
+    const maxR = size * 0.44;
 
-    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, outer);
-    grd.addColorStop(0, 'rgba(255,255,255,1)');
-    grd.addColorStop(0.2, 'rgba(255,255,255,0.9)');
-    grd.addColorStop(0.6, 'rgba(255,255,255,0.2)');
-    grd.addColorStop(1, 'rgba(255,255,255,0)');
+    // Derive arms (3..8) and hue from seed
+    const nArms = 3 + Math.floor(h(seed, 0) * 6);
+    const hues = [217, 354, 80] as const;   // jing · shen · qi
+    const hue = hues[Math.floor(h(seed, 99) * 3)];
+    const lit = 55 + Math.floor(h(seed, 98) * 25);  // 55..80%
+    const alpha0 = 0.75 + h(seed, 97) * 0.25;        // 0.75..1.0
 
-    ctx.beginPath();
-    for (let i = 0; i < nPoints * 2; i++) {
-      const angle = (i * Math.PI) / nPoints - Math.PI / 2;
-      const r = i % 2 === 0 ? outer : inner;
-      const x = cx + r * Math.cos(angle);
-      const y = cy + r * Math.sin(angle);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    // Radial gradient for glow
+    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+    grd.addColorStop(0,   `hsla(${hue},60%,${lit}%,${alpha0})`);
+    grd.addColorStop(0.25,`hsla(${hue},60%,${lit}%,${(alpha0 * 0.85).toFixed(2)})`);
+    grd.addColorStop(0.65,`hsla(${hue},55%,${lit}%,0.3)`);
+    grd.addColorStop(1,   `hsla(${hue},50%,${lit}%,0)`);
+
+    // Build star path — alternating outer (arm tip) and inner (valley) points
+    const pts: [number, number][] = [];
+    for (let i = 0; i < nArms; i++) {
+      const baseOuter = (i * 2 * Math.PI) / nArms - Math.PI / 2;
+      const baseInner = baseOuter + Math.PI / nArms;
+
+      // Outer tip: varying length
+      const outerR = maxR * (0.55 + h(seed, i * 4 + 1) * 0.45);
+      pts.push([cx + outerR * Math.cos(baseOuter), cy + outerR * Math.sin(baseOuter)]);
+
+      // Inner valley: perturbed angle + shorter, variable depth
+      const innerR = maxR * (0.12 + h(seed, i * 4 + 2) * 0.22);
+      const angleShift = (h(seed, i * 4 + 3) - 0.5) * 0.55;
+      pts.push([cx + innerR * Math.cos(baseInner + angleShift), cy + innerR * Math.sin(baseInner + angleShift)]);
     }
+
+    // Draw filled sigil path
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
     ctx.closePath();
     ctx.fillStyle = grd;
     ctx.fill();
 
+    // Optional: small circle caps at arm tips (AOS-style terminal marks)
+    const capChance = h(seed, 200);
+    if (capChance > 0.35) {
+      ctx.fillStyle = `hsla(${hue},70%,${Math.min(lit + 15, 95)}%,0.6)`;
+      for (let i = 0; i < nArms; i++) {
+        const [px, py] = pts[i * 2];
+        const capR = 1.5 + h(seed, i + 300) * 2.5;
+        ctx.beginPath();
+        ctx.arc(px, py, capR, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Optional: cross-stroke through center (AOS signature element)
+    if (h(seed, 400) > 0.55) {
+      const strokeHue = hues[Math.floor(h(seed, 401) * 3)];
+      const strokeAngle = h(seed, 402) * Math.PI;
+      const strokeLen = maxR * (0.5 + h(seed, 403) * 0.5);
+      ctx.strokeStyle = `hsla(${strokeHue},60%,${lit + 10}%,0.4)`;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(cx + strokeLen * Math.cos(strokeAngle), cy + strokeLen * Math.sin(strokeAngle));
+      ctx.lineTo(cx - strokeLen * Math.cos(strokeAngle), cy - strokeLen * Math.sin(strokeAngle));
+      ctx.stroke();
+    }
+
     return new THREE.CanvasTexture(cvs);
   }
 
-  interface StarGroup {
-    cloud: THREE.Group;
-    sprites: { sprite: THREE.Sprite; rate: number }[];
-  }
+  // ── Star field ──────────────────────────────────────────────────────────────
+  interface Star { sprite: THREE.Sprite; rotRate: number }
 
-  function makeStarGroup(nPoints: number, count: number, color: number, size: number): StarGroup {
-    const tex = makeStarTexture(nPoints);
-    const cloud = new THREE.Group();
-    const sprites: { sprite: THREE.Sprite; rate: number }[] = [];
-
-    for (let i = 0; i < count; i++) {
-      const mat = new THREE.SpriteMaterial({
-        map: tex, color, transparent: true, opacity: 0.65, depthWrite: false,
-        rotation: Math.random() * Math.PI * 2,
-      });
-      const sprite = new THREE.Sprite(mat);
-      sprite.position.set(
-        (Math.random() - 0.5) * 6,
-        (Math.random() - 0.5) * 6,
-        (Math.random() - 0.5) * 6,
-      );
-      sprite.scale.setScalar(size);
-      cloud.add(sprite);
-      const rate = (0.002 + Math.random() * 0.004) * (Math.random() < 0.5 ? 1 : -1);
-      sprites.push({ sprite, rate });
-    }
-    return { cloud, sprites };
+  function makeStar(seed: number): Star {
+    const tex = makeSigilTexture(seed);
+    const opacity = 0.35 + h(seed, 500) * 0.45;
+    const size    = 0.04 + h(seed, 501) * 0.12;
+    const mat = new THREE.SpriteMaterial({
+      map: tex,
+      transparent: true,
+      opacity,
+      depthWrite: false,
+      rotation: h(seed, 502) * Math.PI * 2,
+    });
+    const sprite = new THREE.Sprite(mat);
+    sprite.position.set(
+      (h(seed, 503) - 0.5) * 7,
+      (h(seed, 504) - 0.5) * 7,
+      (h(seed, 505) - 0.5) * 7,
+    );
+    sprite.scale.setScalar(size);
+    const rotRate = (0.001 + h(seed, 506) * 0.004) * (h(seed, 507) > 0.5 ? 1 : -1);
+    return { sprite, rotRate };
   }
 
   onMount(() => {
@@ -68,20 +123,23 @@
     renderer.setClearColor(0x000000, 0);
 
     const scene = new THREE.Scene();
-    const w = canvas.clientWidth, h = canvas.clientHeight;
-    renderer.setSize(w, h, false);
-    const camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 100);
+    const w = canvas.clientWidth, h_px = canvas.clientHeight;
+    renderer.setSize(w, h_px, false);
+    const camera = new THREE.PerspectiveCamera(60, w / h_px, 0.1, 100);
     camera.position.z = 3;
 
-    // Star groups: [points, count, color, size]
-    const groups: StarGroup[] = [
-      makeStarGroup(5, 80, 0x8ab4d4, 0.07),  // 5-pt, steel blue
-      makeStarGroup(4, 50, 0xb4a8e8, 0.06),  // 4-pt, lavender
-      makeStarGroup(6, 40, 0x6abfbf, 0.08),  // 6-pt, teal
-      makeStarGroup(3, 20, 0x9ecde8, 0.10),  // 3-pt, light blue, larger
-      makeStarGroup(8, 15, 0xd4b8f0, 0.05),  // 8-pt, soft violet, small
-    ];
-    groups.forEach(({ cloud }) => scene.add(cloud));
+    // Two slow-rotation groups for parallax feel
+    const groupA = new THREE.Group();
+    const groupB = new THREE.Group();
+    scene.add(groupA, groupB);
+
+    const TOTAL = 220;
+    const stars: Star[] = [];
+    for (let i = 0; i < TOTAL; i++) {
+      const star = makeStar(i + 1); // seed 0 reserved
+      (i % 3 === 0 ? groupB : groupA).add(star.sprite);
+      stars.push(star);
+    }
 
     const onResize = () => {
       const nw = canvas.clientWidth, nh = canvas.clientHeight;
@@ -94,12 +152,12 @@
     let raf: number;
     function tick() {
       raf = requestAnimationFrame(tick);
-      groups.forEach(({ cloud, sprites }, i) => {
-        cloud.rotation.y += 0.0003 + i * 0.00004;
-        cloud.rotation.x += 0.0001 + i * 0.00002;
-        sprites.forEach(({ sprite, rate }) => {
-          (sprite.material as THREE.SpriteMaterial).rotation += rate;
-        });
+      groupA.rotation.y += 0.00025;
+      groupA.rotation.x += 0.00008;
+      groupB.rotation.y -= 0.00015;
+      groupB.rotation.x += 0.00012;
+      stars.forEach(({ sprite, rotRate }) => {
+        (sprite.material as THREE.SpriteMaterial).rotation += rotRate;
       });
       renderer.render(scene, camera);
     }
@@ -117,9 +175,9 @@
   <canvas bind:this={canvas} aria-hidden="true"></canvas>
   <div class="content">
     <h1>Ouracle</h1>
-    <p class="tagline">A palace of echoes and mirrors</p>
+    <p class="tagline">Plot the next step</p>
     <p class="body">
-      This is a place to reflect. Our priestesses will be right with you. Please come in.
+      Our priestesses will be with you shortly.<br/>Please come in.
     </p>
     <a href="/chat" class="enter">enter</a>
   </div>
