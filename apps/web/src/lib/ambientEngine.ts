@@ -132,7 +132,7 @@ function lfo(
   g.gain.value = depth;
   osc.connect(g);
   g.connect(target);
-  osc.start(ctx.currentTime - phase / (Math.PI * 2 * hz));
+  osc.start(Math.max(0, ctx.currentTime - phase / (Math.PI * 2 * hz)));
   liveOscillators.push(osc);
   return osc;
 }

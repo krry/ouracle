@@ -3,7 +3,7 @@
   import { inject } from '@vercel/analytics';
   import { page } from '$app/stores';
   import type { Snippet } from 'svelte';
-  import AmbientControls from '$lib/AmbientControls.svelte';
+  import TopBar from '$lib/TopBar.svelte';
 
   inject();
 
@@ -11,146 +11,81 @@
   const isChat = $derived($page.url.pathname.startsWith('/chat'));
 
   let drawerOpen = $state(false);
-  function openDrawer()  { drawerOpen = true; }
+  function toggleDrawer() { drawerOpen = !drawerOpen; }
   function closeDrawer() { drawerOpen = false; }
 </script>
 
-{#if !isChat}
-  <nav>
-    <button class="menu-btn" onclick={openDrawer} aria-label="Open menu" aria-expanded={drawerOpen}>
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
+<div class="app">
+  <TopBar {drawerOpen} ontoggle={toggleDrawer} />
 
-    <a href="/" class="wordmark" onclick={closeDrawer}>Ouracle</a>
+  <!-- Drawer backdrop -->
+  {#if drawerOpen}
+    <div
+      class="backdrop"
+      role="presentation"
+      onclick={closeDrawer}
+      onkeydown={(e) => e.key === 'Escape' && closeDrawer()}
+    ></div>
+  {/if}
 
-    <div class="nav-trail">
-      <AmbientControls />
-      <a href="/chat" class="enter">enter</a>
+  <!-- Left drawer -->
+  <div class="drawer" class:open={drawerOpen} aria-hidden={!drawerOpen}>
+    <div class="drawer-header">
+      <a href="/" class="drawer-wordmark" onclick={closeDrawer}>Ouracle</a>
+      <button class="drawer-close" onclick={closeDrawer} aria-label="Close menu">✕</button>
     </div>
-  </nav>
-{/if}
 
-<!-- Drawer backdrop -->
-{#if drawerOpen}
-  <div
-    class="backdrop"
-    role="presentation"
-    onclick={closeDrawer}
-    onkeydown={(e) => e.key === 'Escape' && closeDrawer()}
-  ></div>
-{/if}
+    <nav class="drawer-nav">
+      <a href="/clea" onclick={closeDrawer}>
+        <span class="drawer-icon">⌬</span>
+        <span>Clea</span>
+      </a>
+      <a href="/ripl" onclick={closeDrawer}>
+        <span class="drawer-icon">◎</span>
+        <span>ripl</span>
+      </a>
+      <a href="/diy" onclick={closeDrawer}>
+        <span class="drawer-icon">◈</span>
+        <span>D.I.Y.</span>
+      </a>
+    </nav>
 
-<!-- Left drawer — slides from left on all widths -->
-<div class="drawer" class:open={drawerOpen} aria-hidden={!drawerOpen}>
-  <div class="drawer-header">
-    <a href="/" class="drawer-wordmark" onclick={closeDrawer}>Ouracle</a>
-    <button class="drawer-close" onclick={closeDrawer} aria-label="Close menu">✕</button>
+    <div class="drawer-footer">
+      <a href="/chat" class="drawer-enter" onclick={closeDrawer}>enter</a>
+    </div>
   </div>
 
-  <nav class="drawer-nav">
-    <a href="/clea" onclick={closeDrawer}>
-      <span class="drawer-icon">⌬</span>
-      <span>Clea</span>
-    </a>
-    <a href="/ripl" onclick={closeDrawer}>
-      <span class="drawer-icon">◎</span>
-      <span>ripl</span>
-    </a>
-    <a href="/diy" onclick={closeDrawer}>
-      <span class="drawer-icon">◈</span>
-      <span>D.I.Y.</span>
-    </a>
-  </nav>
+  <main class="app-content">
+    {@render children()}
+  </main>
 
-  <div class="drawer-footer">
-    <a href="/chat" class="drawer-enter" onclick={closeDrawer}>enter</a>
-  </div>
+  {#if !isChat}
+    <footer>
+      <span>© 2026 <a href="https://kerry.ink">Kerry Alan Snyder</a></span>
+    </footer>
+    <webring-widget
+      data-source="https://kerry.ink/widgets/webring/webring.json"
+      mode="compact"
+      theme="auto"
+      style="position: fixed; bottom: 2rem; right: 2rem; max-width: 320px; z-index: 1000;"
+    ></webring-widget>
+  {/if}
 </div>
 
-{@render children()}
-
-{#if !isChat}
-  <footer>
-    <span>© 2026 <a href="https://kerry.ink">Kerry Alan Snyder</a></span>
-  </footer>
-  <webring-widget
-    data-source="https://kerry.ink/widgets/webring/webring.json"
-    mode="compact"
-    theme="auto"
-    style="position: fixed; bottom: 2rem; right: 2rem; max-width: 320px; z-index: 1000;"
-  ></webring-widget>
-{/if}
-
 <style>
-/* ── Top nav ──────────────────────────────────────────────────────────── */
-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  background: var(--bg);
-  z-index: 30;
-}
-
-.menu-btn {
+/* ── App shell ────────────────────────────────────────────────────────── */
+.app {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-}
-.menu-btn span {
-  display: block;
-  width: 100%;
-  height: 1px;
-  background: var(--muted);
-  transition: background 0.15s;
-}
-.menu-btn:hover span { background: var(--text); }
-
-.wordmark {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  letter-spacing: 0.22em;
-  color: var(--accent);
-  text-decoration: none;
-  white-space: nowrap;
+  height: 100dvh;
+  overflow: hidden;
 }
 
-.nav-trail {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-left: auto;
+.app-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
-
-.enter {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--accent);
-  font-family: var(--font-sans);
-  font-size: 0.8rem;
-  letter-spacing: 0.15em;
-  padding: 0.3rem 0.9rem;
-  text-decoration: none;
-  transition: background 0.15s, color 0.15s;
-  white-space: nowrap;
-}
-.enter:hover { background: var(--accent); color: var(--bg); }
 
 /* ── Drawer backdrop ──────────────────────────────────────────────────── */
 .backdrop {
@@ -176,7 +111,6 @@ nav {
   flex-direction: column;
   transform: translateX(-100%);
   transition: transform 0.30s cubic-bezier(0.4, 0, 0.2, 1);
-  /* safe area: notched phones, Android nav bar */
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .drawer.open { transform: translateX(0); }
@@ -187,7 +121,6 @@ nav {
   justify-content: space-between;
   padding: 1.25rem 1.25rem 1rem;
   border-bottom: 1px solid var(--border);
-  /* safe area: iOS status bar / notch */
   padding-top: max(1.25rem, calc(1.25rem + env(safe-area-inset-top, 0px)));
 }
 
@@ -205,8 +138,6 @@ nav {
   color: var(--muted);
   cursor: pointer;
   font-size: 0.9rem;
-  line-height: 1;
-  padding: 0.4rem;
   min-width: 36px;
   min-height: 36px;
   display: grid;
@@ -234,7 +165,6 @@ nav {
   color: var(--muted);
   text-decoration: none;
   transition: background 0.12s, color 0.12s;
-  /* min touch target */
   min-height: 48px;
 }
 .drawer-nav a:hover,
@@ -259,8 +189,6 @@ nav {
 }
 
 .drawer-enter {
-  display: block;
-  text-align: center;
   border: 1px solid var(--accent);
   border-radius: var(--radius);
   color: var(--accent);
@@ -284,6 +212,7 @@ footer {
   font-size: 0.75rem;
   color: var(--muted);
   border-top: 1px solid var(--border);
+  flex-shrink: 0;
 }
 footer a { color: var(--muted); }
 </style>

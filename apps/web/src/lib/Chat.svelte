@@ -3,8 +3,6 @@
 	import { get } from 'svelte/store';
 	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice } from './stores';
 	import type { CardData, TtsVoice } from './stores';
-	import { signOut } from './auth';
-	import AmbientControls from './AmbientControls.svelte';
 	import { chat, tts, stt } from './api';
 	import Breath from './Breath.svelte';
 	import type { Credentials } from './stores';
@@ -212,11 +210,6 @@
 		}
 	});
 
-	async function leave() {
-		await signOut({ fetchOptions: { onSuccess: () => creds.logout() } });
-		creds.logout();
-	}
-
 	function handleKey(e: KeyboardEvent) {
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
@@ -306,22 +299,6 @@
 
 <div class="shell">
 
-	<div class="topbar">
-		<div class="topbar-left"></div>
-		<a href="/" class="wordmark" title="home">Ouracle</a>
-		<div class="topbar-right">
-			{#if !guestMode}
-				<div class="identity">
-					{#if ($creds as Credentials | null)?.handle}
-						<span class="handle">{($creds as Credentials | null)?.handle}</span>
-					{/if}
-					<button class="leave" onclick={leave} title="leave">⌁</button>
-				</div>
-			{/if}
-			<AmbientControls />
-		</div>
-	</div>
-
 	<!-- ambient waveform layer -->
 	<div class="breath-layer">
 		<Breath />
@@ -357,49 +334,50 @@
 			<div class="thinking">▋</div>
 		{/if}
 
-		<!-- floating divination widget — sticks to bottom-right of visible msgs area -->
-		<div class="divination-float">
-			{#if deckPickerOpen}
-				<div class="deck-picker">
-					<div class="deck-picker-header">
-						<button onclick={() => { selectedDecks = new Set(availableDecks.map(d => d.id)); }}>all</button>
-						<span class="deck-picker-sep">·</span>
-						<button onclick={() => { selectedDecks = new Set(); }}>none</button>
-					</div>
-					<div class="deck-list">
-						{#each availableDecks as deck}
-							<label class="deck-item">
-								<input
-									type="checkbox"
-									checked={selectedDecks.has(deck.id)}
-									onchange={(e) => {
-										const next = new Set(selectedDecks);
-										if ((e.target as HTMLInputElement).checked) next.add(deck.id);
-										else next.delete(deck.id);
-										selectedDecks = next;
-									}}
-								/>
-								<span>{deck.meta?.name ?? deck.id}</span>
-								<span class="deck-count">{deck.count}</span>
-							</label>
-						{/each}
-					</div>
+	</div>
+
+	<!-- floating divination widget — absolute bottom-right, above the bar -->
+	<div class="divination-float">
+		{#if deckPickerOpen}
+			<div class="deck-picker">
+				<div class="deck-picker-header">
+					<button onclick={() => { selectedDecks = new Set(availableDecks.map(d => d.id)); }}>all</button>
+					<span class="deck-picker-sep">·</span>
+					<button onclick={() => { selectedDecks = new Set(); }}>none</button>
 				</div>
-			{/if}
-			<div class="divination-actions">
-				<button
-					class="deck-toggle"
-					class:open={deckPickerOpen}
-					onclick={() => { deckPickerOpen = !deckPickerOpen; }}
-					title="choose decks"
-				>Divination Decks ▾</button>
-				<button
-					class="draw-btn"
-					class:drawing
-					onclick={drawCard}
-					disabled={drawing || $streaming || !!pendingCard || selectedDecks.size === 0}
-				>draw card</button>
+				<div class="deck-list">
+					{#each availableDecks as deck}
+						<label class="deck-item">
+							<input
+								type="checkbox"
+								checked={selectedDecks.has(deck.id)}
+								onchange={(e) => {
+									const next = new Set(selectedDecks);
+									if ((e.target as HTMLInputElement).checked) next.add(deck.id);
+									else next.delete(deck.id);
+									selectedDecks = next;
+								}}
+							/>
+							<span>{deck.meta?.name ?? deck.id}</span>
+							<span class="deck-count">{deck.count}</span>
+						</label>
+					{/each}
+				</div>
 			</div>
+		{/if}
+		<div class="divination-actions">
+			<button
+				class="deck-toggle"
+				class:open={deckPickerOpen}
+				onclick={() => { deckPickerOpen = !deckPickerOpen; }}
+				title="choose decks"
+			>Divination Decks ▾</button>
+			<button
+				class="draw-btn"
+				class:drawing
+				onclick={drawCard}
+				disabled={drawing || $streaming || !!pendingCard || selectedDecks.size === 0}
+			>draw card</button>
 		</div>
 	</div>
 
@@ -458,56 +436,11 @@
 
 <style>
 .shell {
-	height: 100dvh;
+	height: 100%;
 	display: flex;
 	flex-direction: column;
 	position: relative;
 }
-
-.topbar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 0.5rem 1rem;
-	border-bottom: 1px solid var(--border);
-	z-index: 10;
-	background: var(--bg);
-	position: relative;
-}
-
-.topbar-left,
-.topbar-right {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	min-width: 0;
-}
-
-.identity {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-}
-
-.handle {
-	font-family: var(--font-mono);
-	font-size: 0.72rem;
-	letter-spacing: 0.08em;
-	color: var(--muted);
-}
-
-.leave {
-	background: none;
-	border: 1px solid transparent;
-	border-radius: var(--radius);
-	color: var(--muted);
-	cursor: pointer;
-	font-size: 1rem;
-	line-height: 1;
-	padding: 0.3rem 0.5rem;
-	transition: border-color 0.15s, color 0.15s;
-}
-.leave:hover { border-color: var(--border); color: var(--text); }
 
 .breath-layer {
 	position: absolute;
@@ -519,19 +452,18 @@
 .msgs {
 	flex: 1;
 	overflow-y: auto;
-	padding: 2rem 1.5rem 1rem;
+	padding: 2rem 1.5rem 5rem; /* bottom padding leaves room for float widget */
 	display: flex;
 	flex-direction: column;
 	gap: 1.5rem;
 	scroll-behavior: smooth;
-	position: relative;
 }
 
 /* ── Floating divination widget ─────────────────────────────────────────── */
 .divination-float {
-	position: sticky;
-	bottom: 0.75rem;
-	align-self: flex-end;
+	position: absolute;
+	bottom: 5.5rem;  /* clears the bar */
+	right: 1.25rem;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-end;
@@ -699,19 +631,6 @@ textarea:focus { border-color: var(--accent); }
 	color: var(--muted);
 	opacity: 0.7;
 }
-
-.wordmark {
-	position: absolute;
-	left: 50%;
-	transform: translateX(-50%);
-	font-family: var(--font-display);
-	font-size: 0.85rem;
-	letter-spacing: 0.2em;
-	color: var(--muted);
-	text-decoration: none;
-	transition: color 0.15s;
-}
-.wordmark:hover { color: var(--accent); }
 
 .voice-select {
 	appearance: none;
