@@ -1,6 +1,6 @@
 [build]
 builder = "railpack"
-buildCommand = "bun install && bun run sync-decks"
+buildCommand = "bun install && bun run sync-decks && bun run download-ambient"
 watchPatterns = ["api/**"]
 
 [deploy]

@@ -6,7 +6,8 @@
     "start": "bun index.js",
     "dev": "bun --watch index.js",
     "test": "bun test.js",
-    "sync-decks": "bun scripts/sync-decks.js"
+    "sync-decks": "bun scripts/sync-decks.js",
+    "download-ambient": "bun scripts/download-ambient.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",

@@ -33,6 +33,8 @@ const LAYERS = [
   { name: 'scene-forest-edge',   id: 670033, label: 'Forest night with cicadas + rain (felix.blume)' },
   { name: 'scene-drops',         id: 670037, label: 'Light rain on foliage at night (felix.blume)' },
   { name: 'scene-deep-jungle',   id: 635951, label: 'Jungle night, St Lucia (el_boss)' },
+  { name: 'water',               id: 95568,  label: 'Stream in forest (juskiddink)' },
+  { name: 'birdsong',            id: 263722, label: 'Dawn chorus in forest (felix.blume)' },
 ];
 
 async function fetchPreviewUrl(id) {
