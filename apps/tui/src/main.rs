@@ -411,7 +411,6 @@ fn main() -> Result<()> {
         save_settings(&cfg.settings)?;
 
         let bootstrap = bootstrap_session(&base_url, &creds.access_token)?;
-        crate::provider::dbg_log(&format!("[main] bootstrapped session_id={}", &bootstrap.session_id[..8.min(bootstrap.session_id.len())]));
         seed_ripl_session(&bootstrap);
 
         let provider = Arc::new(OuracleProvider::new(

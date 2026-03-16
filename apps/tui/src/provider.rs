@@ -83,8 +83,9 @@ impl Provider for OuracleProvider {
             }
         };
 
+        let status = resp.status().as_u16();
+
         if !resp.status().is_success() {
-            let status = resp.status().as_u16();
             let body = resp.text().unwrap_or_default();
             let _ = tx.send(ApiResponse::Error {
                 message: format!("HTTP {status}: {body}"),
@@ -93,6 +94,7 @@ impl Provider for OuracleProvider {
         }
 
         let reader = BufReader::new(resp);
+        let mut token_count = 0usize;
         for line in reader.lines().flatten() {
             let Some(json_str) = line.strip_prefix("data: ") else {
                 continue;
@@ -108,6 +110,7 @@ impl Provider for OuracleProvider {
                 }
                 Some("token") => {
                     if let Some(token) = event.get("text").and_then(|t| t.as_str()) {
+                        token_count += 1;
                         let _ = tx.send(ApiResponse::TokenChunk { token: token.to_string() });
                     }
                 }
