@@ -372,6 +372,7 @@
 				<option value="president">President</option>
 			</select>
 		</div>
+		<a href="/" class="wordmark" title="home">Ouracle</a>
 		{#if !guestMode}
 			<div class="identity">
 				{#if ($creds as Credentials | null)?.handle}
@@ -718,6 +719,19 @@ textarea:focus { border-color: var(--accent); }
 	align-items: center;
 	gap: 0.4rem;
 }
+
+.wordmark {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	font-family: var(--font-display);
+	font-size: 0.85rem;
+	letter-spacing: 0.2em;
+	color: var(--muted);
+	text-decoration: none;
+	transition: color 0.15s;
+}
+.wordmark:hover { color: var(--accent); }
 
 .ambient-toggle {
 	background: none;
