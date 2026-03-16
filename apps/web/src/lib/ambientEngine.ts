@@ -10,21 +10,27 @@ import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 
 export type SceneId =
-  | 'drizzle' | 'storm'  | 'river' | 'wind'
-  | 'leaves'  | 'fire'   | 'asmr'  | 'bowls'
-  | 'earth'   | 'drone';
+  | 'drizzle' | 'storm'     | 'river'  | 'wind'
+  | 'leaves'  | 'fire'      | 'asmr'   | 'bowls'
+  | 'earth'   | 'drone'     | 'ocean'  | 'desert'
+  | 'waterfall'| 'night'    | 'jungle';
 
 export const SCENES: { id: SceneId; label: string }[] = [
-  { id: 'drizzle', label: 'drizzle' },
-  { id: 'storm',   label: 'storm'   },
-  { id: 'river',   label: 'river'   },
-  { id: 'wind',    label: 'wind'    },
-  { id: 'leaves',  label: 'leaves'  },
-  { id: 'fire',    label: 'fire'    },
-  { id: 'asmr',    label: 'asmr'    },
-  { id: 'bowls',   label: 'bowls'   },
-  { id: 'earth',   label: 'earth'   },
-  { id: 'drone',   label: 'drone'   },
+  { id: 'drizzle',   label: 'drizzle'   },
+  { id: 'storm',     label: 'storm'     },
+  { id: 'river',     label: 'river'     },
+  { id: 'ocean',     label: 'ocean'     },
+  { id: 'waterfall', label: 'waterfall' },
+  { id: 'wind',      label: 'wind'      },
+  { id: 'desert',    label: 'desert'    },
+  { id: 'leaves',    label: 'leaves'    },
+  { id: 'night',     label: 'night'     },
+  { id: 'jungle',    label: 'jungle'    },
+  { id: 'fire',      label: 'fire'      },
+  { id: 'asmr',      label: 'asmr'      },
+  { id: 'bowls',     label: 'bowls'     },
+  { id: 'earth',     label: 'earth'     },
+  { id: 'drone',     label: 'drone'     },
 ];
 
 // ── Stores ───────────────────────────────────────────────────────────────────
@@ -346,6 +352,140 @@ function buildAsmr(ctx: AudioContext, master: GainNode) {
   lfo(ctx, 0.012, 12, hum.filter.frequency);
 }
 
+/** Ocean — long wave swell, shore wash, salt spray. */
+function buildOcean(ctx: AudioContext, master: GainNode) {
+  const rev = makeReverb(ctx, 3.0, 3);
+  rev.connect(master);
+
+  // Deep swell — the ocean breathing, very slow
+  const swell = noiseBand(ctx, makeNoiseBuf(ctx, 8), 'lowpass', 260, 0.4, 0.55, rev);
+  lfo(ctx, 0.012, 80, swell.filter.frequency);  // 80s wave cycle
+  lfo(ctx, 0.012, 0.20, swell.gain.gain);        // volume rise and fall of each wave
+
+  // Shore wash — mid, the foam and retreat
+  const wash = noiseBand(ctx, makeNoiseBuf(ctx, 5), 'bandpass', 800, 0.5, 0.40, rev);
+  lfo(ctx, 0.018, 120, wash.filter.frequency);
+  lfo(ctx, 0.016, 0.15, wash.gain.gain);
+
+  // Salt spray — high shimmer at the break
+  const spray = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'highpass', 5500, 0.5, 0.13, rev);
+  lfo(ctx, 0.014, 0.07, spray.gain.gain);
+}
+
+/** Waterfall — crashing, perpetual, white noise wall with deep resonance. */
+function buildWaterfall(ctx: AudioContext, master: GainNode) {
+  const rev = makeReverb(ctx, 2.8, 2.5);
+  rev.connect(master);
+
+  // The wall of water — broad spectrum noise
+  const wall = noiseBand(ctx, makeNoiseBuf(ctx, 5), 'bandpass', 1100, 0.3, 0.65, rev);
+  lfo(ctx, 0.03, 60, wall.filter.frequency);
+
+  // Deep plunge pool resonance — the base roar
+  const plunge = noiseBand(ctx, makeNoiseBuf(ctx, 6), 'lowpass', 200, 0.6, 0.55, rev);
+  lfo(ctx, 0.025, 30, plunge.filter.frequency);
+
+  // Fine mist — high, constant
+  const mist = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'highpass', 7000, 0.4, 0.16, rev);
+  lfo(ctx, 0.07, 0.04, mist.gain.gain);
+
+  // Turbulent splash — irregular mid bursts
+  const splash = noiseBand(ctx, makeNoiseBuf(ctx, 4), 'bandpass', 2800, 1.2, 0.22, rev);
+  lfo(ctx, 0.19, 0.10, splash.gain.gain);
+}
+
+/** Desert — wind across open sand, vast space, hot silence. */
+function buildDesert(ctx: AudioContext, master: GainNode) {
+  const rev = makeReverb(ctx, 4.5, 6); // huge open space
+  rev.connect(master);
+
+  // Hot dry wind — thin, filtered
+  const wind = noiseBand(ctx, makeNoiseBuf(ctx, 7), 'bandpass', 560, 0.3, 0.38, rev);
+  lfo(ctx, 0.015, 140, wind.filter.frequency); // slow dune-scale gusts
+  lfo(ctx, 0.02, 0.12, wind.gain.gain);
+
+  // Sand grain texture — high, dry, barely there
+  const sand = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'highpass', 6500, 0.6, 0.09, rev);
+  lfo(ctx, 0.11, 0.05, sand.gain.gain);
+
+  // Sub distance — the vast emptiness has weight
+  const vast = noiseBand(ctx, makeNoiseBuf(ctx, 6), 'lowpass', 110, 0.7, 0.28, rev);
+  lfo(ctx, 0.009, 12, vast.filter.frequency);
+}
+
+/**
+ * Night — crickets, frogs, owls, the chorus of a warm night.
+ * Insects live in fast resonant peaks; frogs in slow rhythmic pops;
+ * owls in low melodic sine drifts.
+ */
+function buildNight(ctx: AudioContext, master: GainNode) {
+  const rev = makeReverb(ctx, 2.5, 4);
+  rev.connect(master);
+
+  // Cricket bed — dense high-frequency resonant chirp
+  const crickets = noiseBand(ctx, makeNoiseBuf(ctx, 4), 'bandpass', 4800, 4.5, 0.18, rev);
+  lfo(ctx, 0.55, 0.10, crickets.gain.gain);   // fast chirp rhythm
+  lfo(ctx, 0.08, 200, crickets.filter.frequency);
+
+  // Frog chorus — lower, rhythmic, wet
+  const frogs = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'bandpass', 680, 2.5, 0.20, rev);
+  lfo(ctx, 0.25, 0.14, frogs.gain.gain);      // ribbit pulse
+  lfo(ctx, 0.12, 80, frogs.filter.frequency);
+
+  // Night air bed — the silence between calls
+  const air = noiseBand(ctx, makeNoiseBuf(ctx, 5), 'lowpass', 200, 0.5, 0.20, rev);
+  lfo(ctx, 0.02, 20, air.filter.frequency);
+
+  // Owl — two low sine drones, slightly detuned, mournful
+  [220, 329.6].forEach((hz, i) => {
+    const osc    = ctx.createOscillator();
+    const gain   = ctx.createGain();
+    const panner = ctx.createStereoPanner();
+    osc.type = 'sine';
+    osc.frequency.value = hz;
+    gain.gain.value = 0.07;
+    panner.pan.value = i === 0 ? -0.4 : 0.4;
+    lfo(ctx, 0.008, 1.5, osc.frequency);        // slow hooting drift
+    lfo(ctx, 0.05, 0.05, gain.gain);             // intermittent presence
+    osc.connect(gain); gain.connect(panner); panner.connect(rev);
+    osc.start(); liveOscillators.push(osc);
+  });
+}
+
+/** Jungle at night — dense, layered, alive. Everything at once. */
+function buildJungle(ctx: AudioContext, master: GainNode) {
+  const rev = makeReverb(ctx, 3.0, 3.5);
+  rev.connect(master);
+
+  // Dense insect layer — high, relentless
+  const insects = noiseBand(ctx, makeNoiseBuf(ctx, 4), 'bandpass', 5200, 3.0, 0.16, rev);
+  lfo(ctx, 0.65, 0.08, insects.gain.gain);
+
+  // Mid bug/frog layer — varied rhythmic life
+  const frogs = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'bandpass', 1200, 2.0, 0.22, rev);
+  lfo(ctx, 0.30, 0.12, frogs.gain.gain);
+  lfo(ctx, 0.18, 120, frogs.filter.frequency);
+
+  // Dripping canopy — water falling from leaves after rain
+  const drip = noiseBand(ctx, makeNoiseBuf(ctx, 3), 'bandpass', 2400, 3.5, 0.12, rev);
+  lfo(ctx, 0.22, 0.09, drip.gain.gain);
+
+  // Deep jungle floor — low hum of life
+  const floor = noiseBand(ctx, makeNoiseBuf(ctx, 5), 'lowpass', 180, 0.5, 0.30, rev);
+  lfo(ctx, 0.03, 25, floor.filter.frequency);
+
+  // Distant animal call — low melodic sine, rare
+  const call = ctx.createOscillator();
+  const callGain = ctx.createGain();
+  call.type = 'sine';
+  call.frequency.value = 180;
+  callGain.gain.value = 0.06;
+  lfo(ctx, 0.007, 15, call.frequency);
+  lfo(ctx, 0.04, 0.05, callGain.gain);
+  call.connect(callGain); callGain.connect(rev);
+  call.start(); liveOscillators.push(call);
+}
+
 /** Drone — 111 Hz sacred base, pure harmonic overtones, binaural. */
 function buildDrone(ctx: AudioContext, master: GainNode) {
   const rev = makeReverb(ctx, 5, 5);
@@ -397,7 +537,12 @@ export function startAmbient(scene: SceneId, volume: number) {
     case 'river':   buildRiver(audioCtx, masterGain);   break;
     case 'wind':    buildWind(audioCtx, masterGain);    break;
     case 'leaves':  buildLeaves(audioCtx, masterGain);  break;
-    case 'fire':    buildFire(audioCtx, masterGain);    break;
+    case 'ocean':      buildOcean(audioCtx, masterGain);     break;
+    case 'waterfall':  buildWaterfall(audioCtx, masterGain); break;
+    case 'desert':     buildDesert(audioCtx, masterGain);    break;
+    case 'night':      buildNight(audioCtx, masterGain);     break;
+    case 'jungle':     buildJungle(audioCtx, masterGain);    break;
+    case 'fire':       buildFire(audioCtx, masterGain);      break;
     case 'asmr':    buildAsmr(audioCtx, masterGain);    break;
     case 'bowls':   buildBowls(audioCtx, masterGain);   break;
     case 'earth':   buildEarth(audioCtx, masterGain);   break;
