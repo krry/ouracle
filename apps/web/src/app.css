@@ -19,21 +19,21 @@
 	--surface:   hsl(var(--hue), 10%, 9%);
 	--border:    hsl(var(--hue), 10%, 16%);
 	--muted:     hsl(var(--hue), 8%, 62%);
-	--text:      hsl(var(--hue), 10%, 88%);
+	--text:      hsl(var(--hue), 10%, 82%);
 	--accent:    hsl(var(--accent-hue), 60%, 65%);
 
 	--accent-hue: var(--hue-jing);
 	animation: accent-breathe 90s ease-in-out infinite;
 
 	--radius: 4px;
-	--leading: 1.382;
-	--font-mono: "SF Mono", 'Fira Code', 'Fira Mono', 'Menlo', monospace;
+	--leading: 1.618;
+	--font-mono: "SF Mono", 'Fira Code', 'Menlo', monospace;
 	--font-sans: "SF Pro", system-ui, sans-serif;
+	--font-display: "Piazzolla", "New York", "Georgia", serif;
 
 	/* ambience slider: 0 = bare, 1 = full */
 	--ambience: 1;
 
-	--font-display: "New York", "Georgia", serif;
 	--space-xs: 0.5rem;
 	--space-sm: 1rem;
 	--space-md: 2rem;
