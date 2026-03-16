@@ -258,7 +258,13 @@ USAGE
   clea voices add <id>        save a voice to your list
   clea voices rm <id>         remove a voice from your list
   clea ambiance on|off        toggle ambient sound
-  clea help                   show this message"#
+  clea help                   show this message
+
+IN-SESSION COMMANDS
+  /draw [deck_id]             draw a divination card (optionally from a specific deck)
+  /decks                      list available decks and their IDs
+  /reset                      start a new session
+  /signout                    sign out and exit"#
     );
 }
 
