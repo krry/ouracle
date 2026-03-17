@@ -94,7 +94,6 @@ impl Provider for OuracleProvider {
         }
 
         let reader = BufReader::new(resp);
-        let mut token_count = 0usize;
         for line in reader.lines().flatten() {
             let Some(json_str) = line.strip_prefix("data: ") else {
                 continue;
@@ -110,7 +109,6 @@ impl Provider for OuracleProvider {
                 }
                 Some("token") => {
                     if let Some(token) = event.get("text").and_then(|t| t.as_str()) {
-                        token_count += 1;
                         let _ = tx.send(ApiResponse::TokenChunk { token: token.to_string() });
                     }
                 }
