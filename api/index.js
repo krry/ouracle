@@ -1043,8 +1043,9 @@ app.post('/chat', authenticateOrGuest, async (req, res) => {
       const threshold = vagal.confidence === 'high' || (vagal.confidence === 'medium' && belief.confidence !== 'low');
 
       if (threshold || newTurn >= 3) {
+        // Save inference; move to offering — Clea asks if seeker is ready.
         await updateSession(session_id, {
-          stage: 'inquiry_complete',
+          stage: 'offering',
           turn: newTurn,
           full_text: newText,
           conversation,
@@ -1057,43 +1058,29 @@ app.post('/chat', authenticateOrGuest, async (req, res) => {
           quality_is_shock: quality.is_shock,
         });
 
-        // Auto-prescribe when inquiry is complete.
-        const belief2 = { pattern: session.belief_pattern || belief.pattern, confidence: belief.confidence, meta: BELIEFS[belief.pattern] };
-        const quality2 = { quality: quality.quality, confidence: quality.confidence, is_shock: quality.is_shock };
-        const prescription = buildPrescription(vagal.probable, belief2, quality2);
-        const divination = drawDivinationSource(null, quality2.quality);
-        const history = await getSeekerHistory(seeker_id, 1);
-        const lastRite = history?.[0]?.rite_name || null;
-        if (lastRite && prescription.rite?.rite_name === lastRite) {
-          const vagalOrder = ['dorsal', 'sympathetic', 'ventral', 'uncertain'];
-          const altVagal = vagalOrder.find(v => v !== prescription.vagal_state && RITES[v]?.[quality2.quality]);
-          if (altVagal) prescription.rite = RITES[altVagal][quality2.quality];
-        }
-        const ritePayload = divination ? { ...prescription.rite, divination } : prescription.rite;
-        await updateSession(session_id, {
-          stage: 'prescribed',
-          rite_name: prescription.rite?.rite_name,
-          rite_json: ritePayload,
-          love_fear_audit: prescription.love_fear_audit,
-          prescribed_at: new Date().toISOString(),
-        });
+        const offeringSystem = `${CLEA_SYSTEM_PROMPT}
 
-        // Stream the rite — each section as its own block.
-        if (quality.seeker_language) {
-          await streamText(emit, quality.seeker_language);
-          emit({ type: 'break' });
+--- Something has been heard. There is a practice — a rite — that wants to meet this moment.
+Offer it. Not as prescription, not as diagnosis. As an invitation. Ask if the seeker is open to receiving it.
+Brief — one or two sentences. Let it breathe. Do not describe the rite yet.`;
+
+        const offeringMsgs = conversation
+          .filter((e) => e.role === 'seeker' || e.role === 'priestess')
+          .map((e) => ({ role: e.role === 'seeker' ? 'user' : 'assistant', content: e.text }));
+
+        let offeringQ = 'Something is taking shape here. Are you open to a practice that might meet it?';
+        try {
+          const llm = makeLlmClient();
+          offeringQ = await llm.chat({ system: offeringSystem, messages: offeringMsgs, temperature: 0.9, maxTokens: 150 });
+          offeringQ = offeringQ.trim();
+        } catch (e) {
+          console.error('[clea] offering generation error:', e.message);
         }
-        const riteBlocks = [
-          ritePayload.rite_name,
-          ritePayload.act,
-          ritePayload.invocation,
-          ritePayload.textures?.length ? ritePayload.textures.join('\n') : null,
-        ].filter(Boolean);
-        for (let i = 0; i < riteBlocks.length; i++) {
-          await streamText(emit, riteBlocks[i]);
-          if (i < riteBlocks.length - 1) emit({ type: 'break' });
-        }
-        return finish('prescribed', { session_id, rite_name: prescription.rite?.rite_name });
+
+        conversation.push({ role: 'priestess', text: offeringQ, at: new Date().toISOString() });
+        await updateSession(session_id, { conversation });
+        await streamText(emit, offeringQ);
+        return finish('offering', { session_id });
       }
 
       const clarifiers = [
@@ -1165,46 +1152,147 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
       return finish('inquiry', { session_id, turn: newTurn });
     }
 
-    if (stage === 'prescribed') {
-      // Seeker is reporting reintegration. Any message counts as enacted = true.
-      const enacted = !!message;
-      await updateSession(session_id, {
-        stage: 'complete',
-        enacted,
-        report: { enacted, notes: message || '' },
-        completed_at: new Date().toISOString(),
-      });
-      await writeToCorpus({
-        belief_pattern: session.belief_pattern,
-        vagal_state: session.vagal_probable,
-        quality: session.quality,
-        quality_is_shock: session.quality_is_shock,
-        rite_name: session.rite_name,
-        enacted,
-      });
+    if (stage === 'offering') {
+      if (!message) return fail('message required during offering.');
 
-      const witness = enacted
-        ? 'You enacted the rite. Whatever arose — that was the rite working.'
-        : 'You held the rite without enacting it. That resistance is itself information.';
-      await streamText(emit, witness);
+      const conversation = Array.isArray(session.conversation) ? [...session.conversation] : [];
+      conversation.push({ role: 'seeker', text: message, at: new Date().toISOString() });
 
-      const openingQuestion = Array.isArray(session.conversation)
-        ? session.conversation.find((e) => e?.role === 'priestess')?.text
-        : null;
-      const closing = openingQuestion ? getClosingDedication(openingQuestion) : null;
-      if (closing) {
-        emit({ type: 'break' });
-        await streamText(emit, closing);
+      const offeringSystem = `${CLEA_SYSTEM_PROMPT}
+
+--- You have offered the seeker a rite. Now you are in conversation about whether they are ready to receive it.
+If the seeker is clearly ready and willing — consenting, open, present — end your response with [READY] on its own at the very end.
+If they are uncertain, resistant, or still processing, meet them there. Do not push. Do not rush.
+Most responses will NOT include [READY].`;
+
+      const llmMessages = conversation
+        .filter((e) => e.role === 'seeker' || e.role === 'priestess')
+        .map((e) => ({ role: e.role === 'seeker' ? 'user' : 'assistant', content: e.text }));
+
+      const llm = makeLlmClient();
+      const chunks = [];
+      try {
+        const stream = await llm.chat({ system: offeringSystem, messages: llmMessages, temperature: 0.9, maxTokens: 400, stream: true });
+        for await (const chunk of stream) {
+          const text = chunk.choices?.[0]?.delta?.content;
+          if (text) { chunks.push(text); emit({ type: 'token', text }); }
+        }
+      } catch (e) {
+        console.error('[clea] offering LLM error:', e.message);
       }
 
-      emit({ type: 'break' });
-      await streamText(emit, '[low warmth, certain and at peace, a quiet smile] Always as it will have been.');
+      let response = chunks.join('').trim();
+      const readySignal = /\s*\[READY\]\s*$/i.test(response);
+      if (readySignal) response = response.replace(/\s*\[READY\]\s*$/i, '').trim();
 
-      return finish('complete', { session_id });
+      conversation.push({ role: 'priestess', text: response, at: new Date().toISOString() });
+
+      if (readySignal) {
+        const belief = { pattern: session.belief_pattern, confidence: session.belief_confidence, meta: BELIEFS[session.belief_pattern] };
+        const quality = { quality: session.quality, confidence: session.quality_confidence, is_shock: session.quality_is_shock };
+        const prescription = buildPrescription(session.vagal_probable, belief, quality);
+        const divination = drawDivinationSource(null, quality.quality);
+        const history = await getSeekerHistory(seeker_id, 1);
+        const lastRite = history?.[0]?.rite_name || null;
+        if (lastRite && prescription.rite?.rite_name === lastRite) {
+          const altVagal = ['dorsal', 'sympathetic', 'ventral', 'uncertain'].find(v => v !== prescription.vagal_state && RITES[v]?.[quality.quality]);
+          if (altVagal) prescription.rite = RITES[altVagal][quality.quality];
+        }
+        const ritePayload = divination ? { ...prescription.rite, divination } : prescription.rite;
+        await updateSession(session_id, {
+          stage: 'prescribed',
+          conversation,
+          rite_name: prescription.rite?.rite_name,
+          rite_json: ritePayload,
+          love_fear_audit: prescription.love_fear_audit,
+          prescribed_at: new Date().toISOString(),
+        });
+        emit({ type: 'break' });
+        if (quality.seeker_language) { await streamText(emit, quality.seeker_language); emit({ type: 'break' }); }
+        const riteBlocks = [ritePayload.rite_name, ritePayload.act, ritePayload.invocation, ritePayload.textures?.length ? ritePayload.textures.join('\n') : null].filter(Boolean);
+        for (let i = 0; i < riteBlocks.length; i++) {
+          await streamText(emit, riteBlocks[i]);
+          if (i < riteBlocks.length - 1) emit({ type: 'break' });
+        }
+        return finish('prescribed', { session_id, rite_name: prescription.rite?.rite_name });
+      }
+
+      await updateSession(session_id, { conversation });
+      return finish('offering', { session_id });
+    }
+
+    if (stage === 'prescribed') {
+      if (!message) return fail('message required.');
+
+      const conversation = Array.isArray(session.conversation) ? [...session.conversation] : [];
+      conversation.push({ role: 'seeker', text: message, at: new Date().toISOString() });
+
+      const riteContext = session.rite_json
+        ? `The rite prescribed: "${session.rite_json.rite_name}" — ${session.rite_json.act}`
+        : '';
+      const prescribedSystem = `${CLEA_SYSTEM_PROMPT}
+
+--- ${riteContext}
+The seeker has been given a rite. They may be asking about it, sitting with it, or reporting back on what happened.
+If the seeker is clearly reporting — describing the experience of doing (or not doing) the rite — end your response with [REPORT] on its own at the very end.
+If they are still processing, questioning, or not yet reporting, simply respond as Clea.
+Most responses will NOT include [REPORT].`;
+
+      const llmMessages = conversation
+        .filter((e) => e.role === 'seeker' || e.role === 'priestess')
+        .map((e) => ({ role: e.role === 'seeker' ? 'user' : 'assistant', content: e.text }));
+
+      const llm = makeLlmClient();
+      const chunks = [];
+      try {
+        const stream = await llm.chat({ system: prescribedSystem, messages: llmMessages, temperature: 0.9, maxTokens: 400, stream: true });
+        for await (const chunk of stream) {
+          const text = chunk.choices?.[0]?.delta?.content;
+          if (text) { chunks.push(text); emit({ type: 'token', text }); }
+        }
+      } catch (e) {
+        console.error('[clea] prescribed LLM error:', e.message);
+      }
+
+      let response = chunks.join('').trim();
+      const reportSignal = /\s*\[REPORT\]\s*$/i.test(response);
+      if (reportSignal) response = response.replace(/\s*\[REPORT\]\s*$/i, '').trim();
+
+      conversation.push({ role: 'priestess', text: response, at: new Date().toISOString() });
+
+      if (reportSignal) {
+        const enacted = !!message;
+        await updateSession(session_id, {
+          stage: 'complete',
+          conversation,
+          enacted,
+          report: { enacted, notes: message },
+          completed_at: new Date().toISOString(),
+        });
+        await writeToCorpus({
+          belief_pattern: session.belief_pattern,
+          vagal_state: session.vagal_probable,
+          quality: session.quality,
+          quality_is_shock: session.quality_is_shock,
+          rite_name: session.rite_name,
+          enacted,
+        });
+        emit({ type: 'break' });
+        const openingQuestion = Array.isArray(session.conversation)
+          ? session.conversation.find((e) => e?.role === 'priestess')?.text
+          : null;
+        const closing = openingQuestion ? getClosingDedication(openingQuestion) : null;
+        if (closing) { await streamText(emit, closing); emit({ type: 'break' }); }
+        await streamText(emit, '[low warmth, certain and at peace, a quiet smile] Always as it will have been.');
+        return finish('complete', { session_id });
+      }
+
+      await updateSession(session_id, { conversation });
+      return finish('prescribed', { session_id });
     }
 
     if (stage === 'complete' || stage === 'inquiry_complete') {
-      return fail(`Session is in stage '${stage}'. Start a new session.`);
+      return fail(`Session is ${stage === 'complete' ? 'complete' : 'in an unresumable state'}. Start a new session.`);
     }
 
     return fail(`Unexpected session stage: ${stage}.`);
