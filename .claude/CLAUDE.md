@@ -41,7 +41,7 @@ apps/web/src/
 
 - **Web (Vercel)**: push to `main` — auto-deploys `apps/web`
 - **API (Railway)**: push to `main` — auto-deploys `api/`
-- **TUI binary**: build with `asdf exec cargo build --release` from `apps/tui`, package with `tar czf apps/web/static/clea-macos.tar.gz -C apps/tui/target/release clea`, commit and push to `main`
+- **TUI binary**: build with `cargo build --release` from `apps/tui`, package with `tar czf apps/web/static/clea-macos.tar.gz -C apps/tui/target/release clea`, commit and push to `main`
 
 ## Conventions
 
