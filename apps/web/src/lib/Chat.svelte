@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
-	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite } from './stores';
+	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered } from './stores';
 	import type { CardData, RiteData, TtsVoice } from './stores';
 	import { chat, tts, stt } from './api';
 	import Breath from './Breath.svelte';
@@ -126,6 +126,16 @@
 
 	async function send(text: string, mode?: string) {
 		if ($streaming) return;
+
+		// Fuzzy covenant readiness detection
+		if ($needsCovenant && !$covenantReady && text.trim()) {
+			const readyPattern = /^(yes|ready|sure|let'?s go|absolutely|of course|okay|ok|yeah|yep|i'?m ready|i accept|let'?s do it|let'?s begin|please|go ahead)/i;
+			if (readyPattern.test(text.trim())) {
+				covenantReady.set(true);
+				return;
+			}
+		}
+
 		audioQueue?.prime();
 		const token = !guestMode ? ($creds as Credentials | null)?.access_token ?? '' : guestToken ?? '';
 		// Only push user message if there's actual text (first turn may be empty — opens the session)
@@ -143,6 +153,8 @@
 			for await (const _ of chat(token, text, sessionId, (event) => {
 				if (event.type === 'session') {
 					sessionId = event.session_id as string;
+					needsCovenant.set(!!event.needs_covenant);
+					continueOffered.set(false);
 				} else if (event.type === 'token') {
 					messages.update(m => {
 						const last = m[m.length - 1];
@@ -158,7 +170,12 @@
 							audioQueue.enqueue(last.content);
 						}
 					}
-					messages.update(m => [...m, { role: 'assistant', content: '' }]);
+					// Append covenant reminder for non-covenanted seekers (client-side, after LLM breaks)
+					if (get(needsCovenant) && !get(covenantReady)) {
+						messages.update(m => [...m, { role: 'assistant', content: 'But, before we enter the temple, I must ask that you enter a covenant. Are you ready?', isCovenantReminder: true }]);
+					} else {
+						messages.update(m => [...m, { role: 'assistant', content: '' }]);
+					}
 				} else if (event.type === 'draw' && event.card) {
 					// Clea triggered a contextual card draw server-side
 					const raw = event.card as any;
@@ -180,6 +197,8 @@
 					if (stage === 'complete' || stage === 'reintegration_complete') {
 						pendingRite.set(null);
 					}
+				} else if (event.type === 'continue_offered') {
+					continueOffered.set(true);
 				}
 			}, mode)) { /* yield */ }
 		} catch (e: unknown) {
@@ -338,8 +357,10 @@
 					</div>
 				</div>
 			{:else if msg.role !== 'system' && msg.role !== 'card'}
-				<div class="msg {msg.role}">
-					<span class="label">{msg.role === 'user' ? 'you' : 'clea'}</span>
+				<div class="msg {msg.role}" class:covenant-reminder={msg.isCovenantReminder}>
+					{#if !msg.isCovenantReminder}
+						<span class="label">{msg.role === 'user' ? 'you' : 'clea'}</span>
+					{/if}
 					<div class="prose">{@html renderMarkdown(msg.content)}</div>
 				</div>
 			{/if}
@@ -458,6 +479,16 @@
 }
 
 .msg { display: flex; flex-direction: column; gap: 0.25rem; }
+
+.covenant-reminder {
+	opacity: 0.65;
+	margin-top: 0.5rem;
+}
+.covenant-reminder .prose {
+	font-size: 0.82rem;
+	font-style: italic;
+	color: var(--muted);
+}
 
 .label {
 	font-size: 0.65rem;

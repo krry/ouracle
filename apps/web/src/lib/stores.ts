@@ -47,10 +47,16 @@ export interface Message {
 	content: string;
 	card?: CardData;
 	interpreted?: boolean; // true once seeker has asked for interpretation
+	isCovenantReminder?: boolean; // true for covenant reminder messages
 }
 
 export const messages = writable<Message[]>([]);
 export const streaming = writable(false);
+
+// ── Covenant ────────────────────────────────────────────────────────────────
+export const needsCovenant = writable(false); // true until seeker has entered the covenant
+export const covenantReady = writable(false); // true when fuzzy readiness detected → show modal
+export const continueOffered = writable(false); // true when Clea offers to continue
 
 // ── Oracle Panel ─────────────────────────────────────────────────────────────
 export interface RiteData {
