@@ -25,6 +25,16 @@
     seekerState.reset();
     closeDrawer();
   }
+
+  // Sync handle from credentials → seekerState for the status panel
+  $effect(() => {
+    const c = $creds;
+    if (c?.handle) {
+      seekerState.setPartial({ handle: c.handle });
+    } else {
+      seekerState.setPartial({ handle: null });
+    }
+  });
 </script>
 
 <div class="app">
@@ -94,7 +104,6 @@
           {#if ($creds as Credentials | null)?.handle}
             <span class="dm-handle">{($creds as Credentials | null)?.handle}</span>
           {/if}
-          <button class="dm-leave" onclick={leave} title="leave">⌁ sign out</button>
         </div>
         <!-- Seeker status panel in drawer (shows brief) -->
         <div class="drawer-mobile-row dm-seeker-status">
@@ -104,7 +113,11 @@
     </div>
 
     <div class="drawer-footer">
-      <a href="/chat" class="drawer-enter" onclick={closeDrawer}>enter the temple</a>
+      {#if $authed}
+        <button class="drawer-exit" onclick={leave}>exit the temple</button>
+      {:else}
+        <a href="/chat" class="drawer-enter" onclick={closeDrawer}>enter the temple</a>
+      {/if}
     </div>
   </div>
 
@@ -257,6 +270,27 @@
 }
 .drawer-enter:hover { background: var(--accent); color: var(--bg); }
 
+.drawer-exit {
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  padding: 0.65rem;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  min-height: 48px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  cursor: pointer;
+}
+.drawer-exit:hover {
+  background: var(--muted);
+  color: var(--bg);
+}
+
 /* ── Drawer mobile controls ───────────────────────────────────────────── */
 .drawer-mobile {
   display: none; /* hidden on desktop */
@@ -329,21 +363,6 @@
   letter-spacing: 0.08em;
   color: var(--muted);
 }
-
-.dm-leave {
-  background: none;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
-  color: var(--muted);
-  cursor: pointer;
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  padding: 0.3rem 0.6rem;
-  transition: border-color 0.15s, color 0.15s;
-  min-height: 32px;
-}
-.dm-leave:hover { border-color: var(--border); color: var(--text); }
 
 /* ── Footer ───────────────────────────────────────────────────────────── */
 footer {
