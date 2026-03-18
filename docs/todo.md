@@ -2,7 +2,7 @@
 
 # Next to do for v0.3
 
-- [ ] covenant-rite — copy + staging redesign
+- [x] covenant-rite — copy + staging redesign
 - [ ] tui-torus — visual, self-contained
 - [ ] octave-ambiance — requires mapping work first
 - [ ] tui-stt — testing + wiring
