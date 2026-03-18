@@ -250,8 +250,10 @@
 }
 
 .drawer-footer {
+  display: flex;
   padding: 1rem 1.25rem;
   border-top: 1px solid var(--border);
+  justify-content: center;
 }
 
 .drawer-enter {

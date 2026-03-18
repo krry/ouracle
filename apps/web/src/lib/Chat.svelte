@@ -167,22 +167,18 @@
 						last.content += event.text as string;
 						return [...m];
 					});
-				} else if (event.type === 'break') {
-					// Priestess finished one block — enqueue for TTS, then start fresh message
-					if ($ttsEnabled && audioQueue) {
-						const msgs = get(messages);
-						const last = msgs.at(-1);
-						if (last?.role === 'assistant' && last.content) {
-							audioQueue.enqueue(last.content);
-						}
+			} else if (event.type === 'break') {
+				// Priestess finished one block — enqueue for TTS, then start fresh message
+				if ($ttsEnabled && audioQueue) {
+					const msgs = get(messages);
+					const last = msgs.at(-1);
+					if (last?.role === 'assistant' && last.content) {
+						audioQueue.enqueue(last.content);
 					}
-					// Append covenant reminder for non-covenanted seekers (client-side, after LLM breaks)
-					if (get(needsCovenant) && !get(covenantReady)) {
-						messages.update(m => [...m, { role: 'assistant', content: 'But, before we enter the temple, I must ask that we enter a covenant. Are you ready?', isCovenantReminder: true }]);
-					} else {
-						messages.update(m => [...m, { role: 'assistant', content: '' }]);
-					}
-				} else if (event.type === 'draw' && event.card) {
+				}
+				// Always add a fresh empty assistant message for the next turn
+				messages.update(m => [...m, { role: 'assistant', content: '' }]);
+			}else if (event.type === 'draw' && event.card) {
 					// Clea triggered a contextual card draw server-side
 					const raw = event.card as any;
 					const deckMeta = availableDecks.find(d => d.id === raw.deck);
