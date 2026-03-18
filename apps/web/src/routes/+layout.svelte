@@ -12,7 +12,7 @@
   inject();
 
   let { children }: { children: Snippet } = $props();
-  const isChat = $derived($page.url.pathname.startsWith('/chat'));
+  const isEnquire = $derived($page.url.pathname.startsWith('/enquire'));
 
   let drawerOpen = $state(false);
   function toggleDrawer() { drawerOpen = !drawerOpen; }
@@ -106,7 +106,7 @@
     {@render children()}
   </main>
 
-  {#if !isChat}
+  {#if !isEnquire}
     <footer>
       <span>© 2026 <a href="https://kerry.ink">Kerry Alan Snyder</a></span>
     </footer>

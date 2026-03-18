@@ -3,7 +3,7 @@
 	import { get } from 'svelte/store';
 	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered } from './stores';
 	import type { CardData, RiteData, TtsVoice } from './stores';
-	import { chat, tts, stt } from './api';
+	import { enquire, tts, stt } from './api';
 	import Breath from './Breath.svelte';
 	import OraclePanel from './OraclePanel.svelte';
 	import type { Credentials } from './stores';
@@ -150,7 +150,7 @@
 		streaming.set(true);
 
 		try {
-			for await (const _ of chat(token, text, sessionId, (event) => {
+			for await (const _ of enquire(token, text, sessionId, (event) => {
 				if (event.type === 'session') {
 					sessionId = event.session_id as string;
 					needsCovenant.set(!!event.needs_covenant);
@@ -221,7 +221,7 @@
 		}
 	}
 
-	// Open session on mount — /chat with no session_id bootstraps it
+	// Open session on mount — /enquire with no session_id bootstraps it
 	onMount(async () => {
 		window.addEventListener('keydown', handleGlobalKey);
 		window.addEventListener('keyup', handleGlobalKey);

@@ -7,7 +7,7 @@
 
   let { drawerOpen, ontoggle }: { drawerOpen: boolean; ontoggle: () => void } = $props();
 
-  const isChat = $derived($page.url.pathname.startsWith('/chat'));
+  const isEnquire = $derived($page.url.pathname.startsWith('/enquire'));
 
   async function leave() {
     await signOut({ fetchOptions: { onSuccess: () => creds.logout() } });
@@ -31,15 +31,15 @@
 
   <div class="trail">
     <div class="ambient-wrap"><AmbientControls /></div>
-    {#if isChat && $authed && $creds}
+    {#if isEnquire && $authed && $creds}
       <div class="identity">
         {#if ($creds as Credentials | null)?.handle}
           <span class="handle">{($creds as Credentials | null)?.handle}</span>
         {/if}
         <button class="leave" onclick={leave} title="leave">⌁</button>
       </div>
-    {:else if !isChat}
-      <a href="/chat" class="enter">enter the temple</a>
+    {:else if !isEnquire}
+      <a href="/enquire" class="enter">enter the temple</a>
     {/if}
   </div>
 </header>

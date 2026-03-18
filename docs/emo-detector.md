@@ -16,7 +16,7 @@ Affect data is stored in the `conversation` JSONB field, attached to each seeker
 
 ## API Changes
 
-### `/chat` (SSE)
+### `/enquire` (SSE)
 
 After affect inference completes, the server emits an additional SSE event:
 

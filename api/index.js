@@ -3,6 +3,9 @@ import { fetchAudio, hasFishKey } from './fish-tts.js';
 import { makeLlmClient } from './llm-client.js';
 import { CLEA_SYSTEM_PROMPT } from './clea-prompt.js';
 import { randomUUID } from 'crypto';
+import { readFileSync } from 'fs';
+const pkgPath = new URL('package.json', import.meta.url);
+const { version } = JSON.parse(readFileSync(pkgPath));
 import {
   authenticate,
   issueTokenPair,
@@ -53,6 +56,8 @@ import {
   incrementGuestTurn,
   findBetterAuthSession,
   getOrCreateSeekerByAuthId,
+  listOctaveSteps,
+  getOctaveStep,
 } from './db.js';
 import { auth } from './auth-config.js';
 import { toNodeHandler } from 'better-auth/node';
@@ -82,6 +87,35 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
+
+// ── Rate Limiting (global) ─────────────────────────────────────────────────────
+const rateLimitStore = new Map(); // ip -> [timestamps]
+function rateLimitMiddleware(req, res, next) {
+  const ip = req.ip || (req.connection && req.connection.remoteAddress) || 'unknown';
+  const now = Date.now();
+  const windowMs = 60 * 1000; // 1 minute
+  const maxRequests = 100;
+
+  let timestamps = rateLimitStore.get(ip) || [];
+  timestamps = timestamps.filter(t => now - t < windowMs);
+  timestamps.push(now);
+  rateLimitStore.set(ip, timestamps);
+
+  // occasional cleanup to prevent unbounded growth
+  if (rateLimitStore.size > 10000) {
+    for (const [key, times] of rateLimitStore) {
+      const recent = times.filter(t => now - t < windowMs);
+      if (recent.length === 0) rateLimitStore.delete(key);
+      else rateLimitStore.set(key, recent);
+    }
+  }
+
+  if (timestamps.length > maxRequests) {
+    return res.status(429).json({ error: 'Rate limit exceeded' });
+  }
+  next();
+}
+app.use(rateLimitMiddleware);
 
 // Serve ambient audio files — no auth required, public CDN-style
 import { fileURLToPath } from 'url';
@@ -208,7 +242,8 @@ const COVENANT = {
   effective_date: '2026-03-11',
   text: [
     'I accept 100% responsibility for my choices and actions;',
-    'be they legal, lawful, moral, ethical, financial, physical, or metaphysical,',
+    'be they legal, lawful, moral, ethical,',
+    'spiritual, financial, physical, and/or metaphysical,',
     'only I can truly know whether my intent serves love or fear.',
     'Ouracle listens. The priestess speaks. I act as I will.',
   ],
@@ -224,9 +259,54 @@ app.get('/covenant/current', (_req, res) => res.json(COVENANT));
 
 // ── Divination ───────────────────────────────────────────────────────────────
 
-app.get('/decks', async (_req, res) => {
+app.get('/decks', authenticate, async (_req, res) => {
   try {
     res.json(await listDecks());
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Octave of Evolution ───────────────────────────────────────────────────────
+
+app.get('/octave/steps', authenticate, async (_req, res) => {
+  try {
+    res.json(await listOctaveSteps());
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/octave/step/:number', authenticate, async (req, res) => {
+  try {
+    const step = await getOctaveStep(parseInt(req.params.number));
+    if (!step) return res.status(404).json({ error: 'Step not found' });
+    res.json(step);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /octave/step/:number/:field — fetch single field (use dot notation for nested, e.g., audio_profile.frequencyHertz)
+app.get('/octave/step/:number/:field', authenticate, async (req, res) => {
+  try {
+    const number = parseInt(req.params.number);
+    const field = req.params.field;
+
+    if (number < 1 || number > 10) return res.status(404).json({ error: 'Step not found' });
+    // Allow alphanumeric, underscore, and dot for nested access
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?$/.test(field)) {
+      return res.status(400).json({ error: 'Invalid field name' });
+    }
+
+    const row = await sql`
+      SELECT ${sql(field)} AS value
+      FROM octave_steps
+      WHERE number = ${number}
+    `;
+    if (!row.length) return res.status(404).json({ error: 'Step not found' });
+
+    res.json({ [field]: row[0].value });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -882,8 +962,8 @@ app.post('/:domain/:verb', authenticate, async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-// CHAT — unified SSE streaming endpoint for RIPL
-// POST /chat
+// ENQUIRE — unified SSE streaming endpoint for RIPL
+// POST /enquire
 // ─────────────────────────────────────────────
 
 // Stream text word-by-word with ~25ms spacing.
@@ -897,7 +977,7 @@ async function streamText(emit, text) {
   }
 }
 
-app.post('/chat', authenticateOrGuest, async (req, res) => {
+app.post('/enquire', authenticateOrGuest, async (req, res) => {
   const { session_id, message, mode } = req.body || {};
   const seeker_id = req.seeker_id;
 
@@ -945,7 +1025,7 @@ app.post('/chat', authenticateOrGuest, async (req, res) => {
         if (text) emit({ type: 'token', text });
       }
     } catch (streamErr) {
-      console.error('/chat guest stream error:', streamErr);
+      console.error('/enquire guest stream error:', streamErr);
     } finally {
       await incrementGuestTurn(req.guest_session_id).catch((e) =>
         console.error('[guest] incrementGuestTurn failed:', e.message)
@@ -1319,7 +1399,7 @@ Most responses will NOT include [REPORT].`;
     return fail(`Unexpected session stage: ${stage}.`);
 
   } catch (err) {
-    console.error('/chat error:', err);
+    console.error('/enquire error:', err);
     fail(err?.message || 'Internal error.');
   } finally {
     if (req.is_guest && req.guest_session_id) {
@@ -1376,7 +1456,26 @@ app.post('/stt', authenticateOrGuest, async (req, res) => {
   }
 });
 
-app.get('/health', (_req, res) => res.json({ status: 'alive', version: '0.2.0' }));
+app.get('/health', (req, res) => {
+  const base = { status: 'alive', version };
+  if (req.query.full === 'true') {
+    base.endpoints = [
+      { method: 'GET',  path: '/' },
+      { method: 'GET',  path: '/.well-known/apple-developer-domain-association.txt' },
+      { method: 'GET',  path: '/health' },
+      { method: 'GET',  path: '/decks' },
+      { method: 'GET',  path: '/draw' },
+      { method: 'GET',  path: '/octave/steps' },
+      { method: 'GET',  path: '/octave/step/:number' },
+      { method: 'POST', path: '/auth/token' },
+      { method: 'POST', path: '/auth/refresh' },
+      { method: 'POST', path: '/auth/social-exchange' },
+      { method: 'POST', path: '/seeker/new' },
+      // Auth required endpoints omitted for brevity
+    ];
+  }
+  res.json(base);
+});
 
 // ─────────────────────────────────────────────
 // TOTEM — encrypted per-seeker blob + device keys

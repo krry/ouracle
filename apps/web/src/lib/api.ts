@@ -25,8 +25,8 @@ export async function signin(handle: string, password: string) {
 	return r.json();
 }
 
-// ── Chat (SSE) ────────────────────────────────────────────────────────────────
-// /chat handles both new sessions (no session_id) and continuing ones.
+// ── Enquire (SSE) ──────────────────────────────────────────────────────────────
+// /enquire handles both new sessions (no session_id) and continuing ones.
 // Events: { type: 'session', session_id, stage }
 //         { type: 'token', text }
 //         { type: 'break' }
@@ -34,14 +34,14 @@ export async function signin(handle: string, password: string) {
 //         { type: 'rite', rite: RiteData }   — structured rite, rendered in OraclePanel
 //         { type: 'complete', stage, session_id? }
 //         { type: 'error', message }
-export async function* chat(
+export async function* enquire(
 	token: string,
 	message: string,
 	sessionId: string | null,
 	onEvent: (event: Record<string, unknown>) => void,
 	mode?: string
 ): AsyncGenerator<void> {
-	const r = await fetch(`${BASE}/chat`, {
+	const r = await fetch(`${BASE}/enquire`, {
 		method: 'POST',
 		headers: authHeaders(token),
 		body: JSON.stringify({ message, session_id: sessionId ?? undefined, ...(mode ? { mode } : {}) })

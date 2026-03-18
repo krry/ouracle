@@ -1,0 +1,1028 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Ouracle API",
+    "version": "0.2.0",
+    "description": "MEATAPI for Ouracle \u2014 multimodal divination engine with Octave of Evolution data, deck management, and Clea chat.",
+    "contact": {
+      "name": "Orfx Labs",
+      "url": "https://ouracle.kerry.ink"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.ouracle.kerry.ink",
+      "description": "Production"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Development"
+    }
+  ],
+  "paths": {
+    "/enquire": {
+      "post": {
+        "summary": "Converse with Clea",
+        "description": "Server-Sent Events (SSE) endpoint for the Clea conversation. Sends a seeker message and receives a stream of tokens, breaks, and final completion events. Requires authentication (Bearer token or guest token).",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "session_id": {
+                    "type": "string",
+                    "description": "Session ID (omit for new session)"
+                  },
+                  "message": {
+                    "type": "string",
+                    "description": "Seeker's message text"
+                  },
+                  "mode": {
+                    "type": "string",
+                    "description": "Optional mode (e.g., 'interpret' for card interpretation)"
+                  }
+                },
+                "required": [
+                  "message"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SSE stream of events",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string",
+                  "description": "Each SSE data line is a JSON object with a 'type' field. Event types: 'session' (new session), 'token' (text chunk), 'break' (end of block), 'draw' (card drawn), 'rite' (rite data), 'complete' (end of turn), 'error'."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Guest turn limit reached"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/decks": {
+      "get": {
+        "summary": "List all divination decks",
+        "description": "Returns an array of decks with their metadata and card counts.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of decks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "Deck identifier (directory name)"
+                      },
+                      "meta": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "Display name"
+                          },
+                          "description": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "count": {
+                        "type": "integer",
+                        "description": "Number of cards in the deck"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/draw": {
+      "get": {
+        "summary": "Draw cards from decks",
+        "description": "Randomly draws 1\u201310 cards. Optionally filter by deck IDs and use contextual selection.",
+        "parameters": [
+          {
+            "name": "n",
+            "in": "query",
+            "description": "Number of cards to draw (1\u201310)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "default": 1
+            }
+          },
+          {
+            "name": "decks",
+            "in": "query",
+            "description": "Comma-separated deck IDs to draw from. Omit for all decks.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "context",
+            "in": "query",
+            "description": "Seeker's full text for semantic card selection (keyword match). If provided, draws most relevant cards.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Drawn cards",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "cards": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "deck": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "number": {
+                            "type": "number"
+                          },
+                          "keywords": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "body": {
+                            "type": "string"
+                          },
+                          "asset_url": {
+                            "type": "string",
+                            "format": "uri"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No cards found"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "description": "Returns liveness status and API version. Use ?full=true to include endpoint list.",
+        "parameters": [
+          {
+            "name": "full",
+            "in": "query",
+            "description": "If 'true', includes endpoints array in response",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alive",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "alive"
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "0.2.0"
+                    },
+                    "endpoints": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "method": {
+                            "type": "string"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "version"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/octave/step/{number}": {
+      "get": {
+        "summary": "Get a single Octave step",
+        "description": "Retrieve one step by its numeric position (1\u201310).",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The step object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OctaveStep"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Step not found"
+          }
+        }
+      }
+    },
+    "/octave/step/{number}/{field}": {
+      "get": {
+        "summary": "Get a single field from an Octave step",
+        "description": "Retrieve one field from a step using dot notation for nested fields (e.g., `audio_profile.frequencyHertz`). Top-level fields: `id`, `number`, `name`, `element`, `chakra`, `aura`, `act`, `intent`, `quality`, `aspect`, `mantra`, `numerology`, `loveform_greek`, `dimension`, `timespace`, `visual_theme`, `audio_profile`, etc. Nested: `audio_profile.frequencyHertz`, `visual_theme.primary`, etc.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            }
+          },
+          {
+            "name": "field",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)?$",
+              "description": "Field name with optional dot notation for nested JSONB fields"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Field value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "example": {
+                    "audio_profile.frequencyHertz": 440
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid field name"
+          },
+          "404": {
+            "description": "Step not found"
+          }
+        }
+      }
+    },
+    "/octave/steps": {
+      "get": {
+        "summary": "List all Octave of Evolution steps",
+        "description": "Returns all 10 steps in ascending numeric order with full metadata including visual and audio themes.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of steps",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "number": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 10
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "element": {
+                        "type": "string"
+                      },
+                      "chakra": {
+                        "type": "string"
+                      },
+                      "aura": {
+                        "type": "string"
+                      },
+                      "act": {
+                        "type": "string"
+                      },
+                      "intent": {
+                        "type": "string"
+                      },
+                      "quality": {
+                        "type": "string"
+                      },
+                      "aspect": {
+                        "type": "string"
+                      },
+                      "mantra": {
+                        "type": "string"
+                      },
+                      "numerology": {
+                        "type": "string"
+                      },
+                      "loveform_greek": {
+                        "type": "string"
+                      },
+                      "dimension": {
+                        "type": "string"
+                      },
+                      "timespace": {
+                        "type": "string"
+                      },
+                      "early_direction": {
+                        "type": "string"
+                      },
+                      "late_direction": {
+                        "type": "string"
+                      },
+                      "early_season": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "later_season": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "modes_of_persuasion": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "hermetic_principle": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "major_arcana": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "loveforms": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "vedic_pantheon": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "bagua": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "sacred_bodies": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "stories_of_deep_well": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "dimensional_trinities": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "visual_theme": {
+                        "type": "object",
+                        "properties": {
+                          "primary": {
+                            "type": "string",
+                            "format": "color"
+                          },
+                          "secondary": {
+                            "type": "string",
+                            "format": "color"
+                          },
+                          "particle": {
+                            "type": "string"
+                          },
+                          "animation": {
+                            "type": "string"
+                          },
+                          "gradient": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "audio_profile": {
+                        "type": "object",
+                        "properties": {
+                          "voice": {
+                            "type": "string"
+                          },
+                          "voiceId": {
+                            "type": "string"
+                          },
+                          "ambient": {
+                            "type": "string"
+                          },
+                          "frequency": {
+                            "type": "string"
+                          },
+                          "frequencyHertz": {
+                            "type": "number"
+                          },
+                          "intensity": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      "next_step_number": {
+                        "type": "number"
+                      },
+                      "next_step_name": {
+                        "type": "string"
+                      },
+                      "previous_step_number": {
+                        "type": "number"
+                      },
+                      "previous_step_name": {
+                        "type": "string"
+                      },
+                      "changes_above": {
+                        "type": "string"
+                      },
+                      "changes_below": {
+                        "type": "string"
+                      },
+                      "tarot_themes": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "vedic_direction": {
+                        "type": "string"
+                      },
+                      "tarot_elements": {
+                        "type": "string"
+                      },
+                      "sense": {
+                        "type": "string"
+                      },
+                      "money_stage": {
+                        "type": "string"
+                      },
+                      "tarot_astrological_entities": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "rollup": {
+                        "type": "string"
+                      },
+                      "rollup_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "dimension_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "timespace_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "stories_of_deep_well_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "sacred_bodies_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "hermetic_principle_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "major_arcana_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "loveforms_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "vedic_pantheon_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "bagua_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "element_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "chakra_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "dimensional_trinities_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "created_time": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "last_edited_time": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter your API token as: Bearer <token>. Tokens are issued by the server admin."
+      }
+    },
+    "schemas": {
+      "OctaveStep": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "name": {
+            "type": "string"
+          },
+          "element": {
+            "type": "string"
+          },
+          "chakra": {
+            "type": "string"
+          },
+          "aura": {
+            "type": "string"
+          },
+          "act": {
+            "type": "string"
+          },
+          "intent": {
+            "type": "string"
+          },
+          "quality": {
+            "type": "string"
+          },
+          "aspect": {
+            "type": "string"
+          },
+          "mantra": {
+            "type": "string"
+          },
+          "numerology": {
+            "type": "string"
+          },
+          "loveform_greek": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "timespace": {
+            "type": "string"
+          },
+          "early_direction": {
+            "type": "string"
+          },
+          "late_direction": {
+            "type": "string"
+          },
+          "early_season": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "later_season": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "modes_of_persuasion": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hermetic_principle": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "major_arcana": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "loveforms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "vedic_pantheon": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "bagua": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sacred_bodies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "stories_of_deep_well": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dimensional_trinities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "visual_theme": {
+            "type": "object",
+            "properties": {
+              "primary": {
+                "type": "string",
+                "format": "color"
+              },
+              "secondary": {
+                "type": "string",
+                "format": "color"
+              },
+              "particle": {
+                "type": "string"
+              },
+              "animation": {
+                "type": "string"
+              },
+              "gradient": {
+                "type": "string"
+              }
+            }
+          },
+          "audio_profile": {
+            "type": "object",
+            "properties": {
+              "voice": {
+                "type": "string"
+              },
+              "voiceId": {
+                "type": "string"
+              },
+              "ambient": {
+                "type": "string"
+              },
+              "frequency": {
+                "type": "string"
+              },
+              "frequencyHertz": {
+                "type": "number"
+              },
+              "intensity": {
+                "type": "number"
+              }
+            }
+          },
+          "next_step_number": {
+            "type": "number"
+          },
+          "next_step_name": {
+            "type": "string"
+          },
+          "previous_step_number": {
+            "type": "number"
+          },
+          "previous_step_name": {
+            "type": "string"
+          },
+          "changes_above": {
+            "type": "string"
+          },
+          "changes_below": {
+            "type": "string"
+          },
+          "tarot_themes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "vedic_direction": {
+            "type": "string"
+          },
+          "tarot_elements": {
+            "type": "string"
+          },
+          "sense": {
+            "type": "string"
+          },
+          "money_stage": {
+            "type": "string"
+          },
+          "tarot_astrological_entities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rollup": {
+            "type": "string"
+          },
+          "rollup_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dimension_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timespace_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "stories_of_deep_well_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sacred_bodies_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hermetic_principle_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "major_arcana_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "loveforms_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "vedic_pantheon_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "bagua_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "element_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "chakra_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dimensional_trinities_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "created_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_edited_time": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Liveness and readiness probes"
+    },
+    {
+      "name": "Decks",
+      "description": "Divination deck management"
+    },
+    {
+      "name": "Drawing",
+      "description": "Card drawing and selection"
+    },
+    {
+      "name": "Octave",
+      "description": "Octave of Evolution data"
+    }
+  ]
+}

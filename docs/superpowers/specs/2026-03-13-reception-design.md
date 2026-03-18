@@ -13,7 +13,7 @@ A seeker has two derived states:
 - **known** — seeker record exists, no `covenant_at`
 - **covenanted** — seeker record exists, has `covenant_at`
 
-Only covenanted seekers can access `/chat`. Stage is derived as: `covenanted` if `covenant_at IS NOT NULL`, else `known`.
+Only covenanted seekers can access `/enquire`. Stage is derived as: `covenanted` if `covenant_at IS NOT NULL`, else `known`.
 
 Consent is absorbed into covenant acceptance. Showing and accepting the covenant text constitutes consent — `consented_at` is set at creation and is no longer a gate. `GET /consent` and `CONSENT_DISCLOSURES` are removed.
 

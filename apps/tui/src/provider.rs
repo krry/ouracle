@@ -27,6 +27,14 @@ impl OuracleProvider {
 }
 
 impl Provider for OuracleProvider {
+    fn help_lines(&self) -> &[&str] {
+        &[
+            "/draw [deck_id] — draw a divination card",
+            "/decks — list available decks",
+            "/signout — sign out and delete credentials",
+        ]
+    }
+
     fn stream(&self, messages: &[Message], tx: mpsc::Sender<ApiResponse>) {
         if self.stub {
             let question = messages
@@ -71,7 +79,7 @@ impl Provider for OuracleProvider {
         let body = serde_json::json!({ "session_id": session_id, "message": last_user });
 
         let resp = match client
-            .post(format!("{}/chat", self.base_url))
+            .post(format!("{}/enquire", self.base_url))
             .bearer_auth(&self.access_token)
             .json(&body)
             .send()
@@ -173,9 +181,14 @@ impl Provider for OuracleProvider {
 
         if cmd == "/signout" {
             let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
-            let config_path = std::path::PathBuf::from(home).join(".ouracle").join("ripl.toml");
-            let _ = std::fs::remove_file(&config_path);
-            let _ = tx.send(ApiResponse::TokenChunk { token: "Signing out…".to_string() });
+            let ripl_dir = std::path::PathBuf::from(home).join(".ripl");
+            let auth_path = ripl_dir.join("clea.auth");
+            let settings_path = ripl_dir.join("clea.toml");
+            let _ = std::fs::remove_file(&auth_path);
+            let _ = std::fs::remove_file(&settings_path);
+            let _ = tx.send(ApiResponse::TokenChunk {
+                token: "Signing out…".to_string(),
+            });
             let _ = tx.send(ApiResponse::TurnComplete);
             std::thread::sleep(std::time::Duration::from_millis(800));
             let _ = tx.send(ApiResponse::Exit);
@@ -346,7 +359,7 @@ impl OuracleProvider {
         for deck in decks {
             let id   = deck.get("id").and_then(|v| v.as_str()).unwrap_or("?");
             let name = deck.get("meta").and_then(|m| m.get("name")).and_then(|v| v.as_str()).unwrap_or(id);
-            let count = deck.get("cardCount").and_then(|v| v.as_u64()).unwrap_or(0);
+            let count = deck.get("count").and_then(|v| v.as_u64()).unwrap_or(0);
             lines.push(format!("  {id:<16} {name} ({count} cards)"));
         }
         lines.push("\nUsage: /draw <deck_id>".to_string());

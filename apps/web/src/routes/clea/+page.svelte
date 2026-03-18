@@ -24,7 +24,7 @@
     <pre><code>curl -fsSL https://ouracle.kerry.ink/install.sh | sh</code></pre>
 
     <h2>In your browser</h2>
-    <a href="/chat" class="cta">meet Clea</a>
+    <a href="/enquire" class="cta">meet Clea</a>
 
     <h2>Roll your own</h2>
     <p class="note">
