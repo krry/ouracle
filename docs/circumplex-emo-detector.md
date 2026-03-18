@@ -43,8 +43,8 @@ interface Affect {
 ### Storage & Emission
 
 - Attached to each seeker message in `conversation` array (JSONB).
-- Emitted via SSE as `{ type: 'affect', ... }` in `/chat`.
-- Included in `_meta.affect` for both `/inquire` and `/chat` complete events.
+- Emitted via SSE as `{ type: 'affect', ... }` in `/enquire`.
+- Included in `_meta.affect` for both `/inquire` and `/enquire` complete events.
 
 ---
 

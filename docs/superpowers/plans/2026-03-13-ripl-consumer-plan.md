@@ -208,7 +208,7 @@ refresh_token = "jwt"
 ### Provider runtime (RIPL → Shim → API)
 - On each user message:
   - If no `session_id`, fail fast and prompt “Restart the client to open a new session.”
-  - Call `POST /chat` with `{ session_id, message }`
+  - Call `POST /enquire` with `{ session_id, message }`
   - Stream SSE events to RIPL:
     - `token` → `ApiResponse::TokenChunk`
     - `break` → `"\n\n"` chunk

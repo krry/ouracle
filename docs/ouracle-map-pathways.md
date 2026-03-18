@@ -36,7 +36,7 @@ Guest sessions enter the inquiry loop but never reach offering or prescribed.
 
 **What it is.** The opening exchange. Clea listens, asks into the body and the moment. OCTAVE + RITES inference runs on the seeker's accumulated text after every turn.
 
-**Triggers entry.** A new session is created (via `/session` or first `/chat` with no `session_id`). The session stage is set to `inquiry`, turn 0.
+**Triggers entry.** A new session is created (via `/session` or first `/enquire` with no `session_id`). The session stage is set to `inquiry`, turn 0.
 
 | | What happens |
 |---|---|

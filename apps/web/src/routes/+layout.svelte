@@ -116,7 +116,7 @@
       {#if $authed}
         <button class="drawer-exit" onclick={leave}>exit the temple</button>
       {:else}
-        <a href="/chat" class="drawer-enter" onclick={closeDrawer}>enter the temple</a>
+        <a href="/enquire" class="drawer-enter" onclick={closeDrawer}>enter the temple</a>
       {/if}
     </div>
   </div>
