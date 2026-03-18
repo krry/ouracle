@@ -63,7 +63,12 @@
 
 	async function fetchDecks() {
 		try {
-			const r = await fetch(`${BASE_URL}/decks`);
+			const token = guestMode
+				? (guestToken ?? '')
+				: ($creds as { access_token?: string } | null)?.access_token ?? '';
+			const headers: Record<string, string> = {};
+			if (token) headers['Authorization'] = `Bearer ${token}`;
+			const r = await fetch(`${BASE_URL}/decks`, { headers });
 			if (!r.ok) return;
 			availableDecks = await r.json();
 			selectedDecks = new Set(availableDecks.map(d => d.id));
