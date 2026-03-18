@@ -172,7 +172,7 @@
 					}
 					// Append covenant reminder for non-covenanted seekers (client-side, after LLM breaks)
 					if (get(needsCovenant) && !get(covenantReady)) {
-						messages.update(m => [...m, { role: 'assistant', content: 'But, before we enter the temple, I must ask that you enter a covenant. Are you ready?', isCovenantReminder: true }]);
+						messages.update(m => [...m, { role: 'assistant', content: 'But, before we enter the temple, I must ask that we enter a covenant. Are you ready?', isCovenantReminder: true }]);
 					} else {
 						messages.update(m => [...m, { role: 'assistant', content: '' }]);
 					}

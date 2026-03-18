@@ -599,9 +599,47 @@ export async function infer(text) {
   if (process.env.SEMANTIC_INFERENCE === 'true') {
     const mode = (process.env.SEMANTIC_INFERENCE_MODE || 'llm').toLowerCase();
     try {
-      const result = mode === 'embeddings'
-        ? await (await import('./semantic-embeddings.js')).inferSemanticsEmbeddings(text)
-        : await (await import('./infer.js')).inferSemantics(text);
+      let result;
+      if (mode === 'embeddings') {
+        result = await (await import('./semantic-embeddings.js')).inferSemanticsEmbeddings(text);
+        // For embeddings mode, we cannot derive affect; use neutral fallback
+        result.affect = { valence: 0, arousal: 0, gloss: 'neutral', confidence: 'low', reasoning: 'embeddings mode; no affect inference' };
+      } else {
+        // Parallel LLM calls for semantics and affect
+        const [semantics, affect] = await Promise.all([
+          (await import('./infer.js')).inferSemantics(text),
+          (await import('./infer.js')).inferAffect(text),
+        ]);
+        result = { ...semantics, affect: affect.affect };
+
+        // Validation: clamp valence/arousal to [-1.0, 1.0]
+        const origV = result.affect.valence;
+        const origA = result.affect.arousal;
+        let clamped = false;
+        if (origV < -1.0 || origV > 1.0) {
+          result.affect.valence = Math.max(-1.0, Math.min(1.0, origV));
+          clamped = true;
+        }
+        if (origA < -1.0 || origA > 1.0) {
+          result.affect.arousal = Math.max(-1.0, Math.min(1.0, origA));
+          clamped = true;
+        }
+        if (clamped) {
+          result.affect.confidence = 'low';
+          result.affect.reasoning = `(clamped) ${result.affect.reasoning}`;
+        }
+
+        // Enforce gloss length ≤ 7 words
+        if (result.affect.gloss) {
+          const words = result.affect.gloss.trim().split(/\s+/);
+          if (words.length > 7) {
+            result.affect.gloss = words.slice(0, 7).join(' ');
+            result.affect.confidence = 'low';
+            result.affect.reasoning = `(truncated gloss) ${result.affect.reasoning}`;
+          }
+        }
+      }
+
       // Attach seeker_language from OCTAVE for the quality node
       if (result.quality.quality) {
         const node = Object.values(OCTAVE).find(n => n.quality === result.quality.quality);
@@ -619,7 +657,10 @@ export async function infer(text) {
     }
   }
 
-  return keywordInfer(text);
+  // SEMANTIC_INFERENCE off: static neutral affect
+  const keywordResult = keywordInfer(text);
+  keywordResult.affect = { valence: 0, arousal: 0, gloss: 'neutral', confidence: 'low', reasoning: 'inference disabled' };
+  return keywordResult;
 }
 
 // ─────────────────────────────────────────────

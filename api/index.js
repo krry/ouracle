@@ -214,7 +214,7 @@ const COVENANT = {
   ],
 };
 
-const COVENANT_REMINDER = 'But, before we enter the temple, I must ask that you enter a covenant. Are you ready?';
+const COVENANT_REMINDER = 'But, before we enter the temple, I must ask that we enter a covenant. Are you ready?';
 
 function deriveStage(seeker) {
   return seeker?.covenant_at ? 'covenanted' : 'known';
@@ -407,7 +407,14 @@ app.post('/inquire', authenticate, async (req, res) => {
     conversation.push({ role: 'seeker', text: response, at: new Date().toISOString() });
   }
 
-  const { vagal, belief, quality } = await infer(newText);
+  const { vagal, belief, quality, affect } = await infer(newText);
+  // Attach affect to the last seeker entry if present
+  if (response) {
+    const lastSeekerIdx = conversation.findLastIndex(e => e.role === 'seeker');
+    if (lastSeekerIdx !== -1) {
+      conversation[lastSeekerIdx] = { ...conversation[lastSeekerIdx], affect };
+    }
+  }
   const qualities = Object.values(OCTAVE).map((node) => node.quality).filter(Boolean);
   const overrideValid = octave_override && qualities.includes(octave_override);
   const octaveNode = Object.values(OCTAVE).find((node) => node.quality === (overrideValid ? octave_override : quality.quality));
@@ -432,6 +439,7 @@ app.post('/inquire', authenticate, async (req, res) => {
       quality: quality.quality,
       quality_confidence: quality.confidence,
       quality_is_shock: quality.is_shock,
+      affect,
     });
 
     return res.json({
@@ -450,6 +458,7 @@ app.post('/inquire', authenticate, async (req, res) => {
         belief_confidence: belief.confidence,
         quality: quality.quality,
         quality_is_shock: quality.is_shock,
+        affect,
       },
     });
   }
@@ -1045,7 +1054,15 @@ app.post('/chat', authenticateOrGuest, async (req, res) => {
       const conversation = Array.isArray(session.conversation) ? [...session.conversation] : [];
       conversation.push({ role: 'seeker', text: message, at: new Date().toISOString() });
 
-      const { vagal, belief, quality } = await infer(newText);
+      const { vagal, belief, quality, affect } = await infer(newText);
+      // Attach affect to the seeker entry
+      const lastSeekerIdx = conversation.findLastIndex(e => e.role === 'seeker');
+      if (lastSeekerIdx !== -1) {
+        conversation[lastSeekerIdx] = { ...conversation[lastSeekerIdx], affect };
+      }
+      // Emit affect SSE event for real-time UI updates
+      emit({ type: 'affect', valence: affect.valence, arousal: affect.arousal, gloss: affect.gloss, confidence: affect.confidence });
+
       const threshold = vagal.confidence === 'high' || (vagal.confidence === 'medium' && belief.confidence !== 'low');
 
       if (threshold || newTurn >= 3) {
@@ -1062,6 +1079,7 @@ app.post('/chat', authenticateOrGuest, async (req, res) => {
           quality: quality.quality,
           quality_confidence: quality.confidence,
           quality_is_shock: quality.is_shock,
+          affect,
         });
 
         const offeringSystem = `${CLEA_SYSTEM_PROMPT}

@@ -81,6 +81,47 @@ const INFERENCE_TOOL = {
   },
 };
 
+const AFFECT_TOOL = {
+  type: 'function',
+  function: {
+    name: 'classify_affect',
+    description: 'Classify affect using Russell\'s Circumplex model based on the seeker\'s text.',
+    parameters: {
+      type: 'object',
+      properties: {
+        valence: {
+          type: 'number',
+          minimum: -1.0,
+          maximum: 1.0,
+          description: 'Valence: negative (-1.0) to positive (+1.0)',
+        },
+        arousal: {
+          type: 'number',
+          minimum: -1.0,
+          maximum: 1.0,
+          description: 'Arousal: low/deactivated (-1.0) to high/activated (+1.0)',
+        },
+        gloss: {
+          type: 'string',
+          maxLength: 50, // Approx 7 words
+          description: 'Brief affect label (e.g., "anxious anticipation", "calm contentment")',
+        },
+        confidence: {
+          type: 'string',
+          enum: ['low', 'medium', 'high'],
+          description: 'Confidence in the affect inference',
+        },
+        reasoning: {
+          type: 'string',
+          description: 'One sentence: what in the text signals these coordinates',
+        },
+      },
+      required: ['valence', 'arousal', 'gloss', 'confidence', 'reasoning'],
+      additionalProperties: false,
+    },
+  },
+};
+
 // ─────────────────────────────────────────────
 // SYSTEM PROMPT
 // ⚠ This is the gem. Tune it carefully.
@@ -126,6 +167,24 @@ CRITICAL RULES:
 - One limiting belief at a time. Return the dominant one, or null.
 - Your reasoning should cite specific language from the text, not general theory.
 - If the text is very short or ambiguous, return low confidence across all three signals.`;
+
+// ─────────────────────────────────────────────
+// AFFECT SYSTEM PROMPT
+// ─────────────────────────────────────────────
+
+const AFFECT_SYSTEM_PROMPT = `You are an affect detector using Russell's Circumplex model.
+Given the seeker's text, assign:
+- valence: negative (-1.0) to positive (+1.0)
+- arousal: low/deactivated (-1.0) to high/activated (+1.0)
+Provide:
+- gloss: brief affect label (e.g., "calm contentment", "anxious dread")
+- confidence: low/medium/high
+- reasoning: one sentence citing text cues
+
+RULES:
+- Numbers must be within [-1.0, +1.0] to two decimals.
+- If affect is ambiguous or mixed, say so in gloss and still give best-guess coordinates with low confidence.
+- Do not project beyond what is in the text.`;
 
 // ─────────────────────────────────────────────
 // MAIN INFERENCE FUNCTION
@@ -192,6 +251,65 @@ export async function inferSemantics(text) {
   } catch (err) {
     console.error(JSON.stringify({
       event: 'inference_error',
+      correlation_id: correlationId,
+      error: err.message,
+    }));
+    throw err;
+  }
+}
+
+// ─────────────────────────────────────────────
+// AFFECT INFERENCE
+// ─────────────────────────────────────────────
+
+export async function inferAffect(text) {
+  const correlationId = randomUUID();
+  const startedAt = Date.now();
+  const { openai, model } = makeRawClient();
+
+  try {
+    const response = await openai.chat.completions.create({
+      model,
+      max_tokens: 1024,
+      messages: [
+        { role: 'system', content: AFFECT_SYSTEM_PROMPT },
+        { role: 'user', content: text },
+      ],
+      tools: [AFFECT_TOOL],
+      tool_choice: { type: 'function', function: { name: 'classify_affect' } },
+    });
+
+    const toolCall = response.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall) throw new Error('No tool call in affect inference response');
+
+    const result = JSON.parse(toolCall.function.arguments || '{}');
+    const durationMs = Date.now() - startedAt;
+
+    // Log — correlation ID only, no seeker data
+    console.log(JSON.stringify({
+      event: 'affect_inference',
+      correlation_id: correlationId,
+      duration_ms: durationMs,
+      input_tokens: response.usage?.prompt_tokens ?? null,
+      output_tokens: response.usage?.completion_tokens ?? null,
+      valence: result.valence,
+      arousal: result.arousal,
+      confidence: result.confidence,
+    }));
+
+    return {
+      affect: {
+        valence: result.valence,
+        arousal: result.arousal,
+        gloss: result.gloss,
+        confidence: result.confidence,
+        reasoning: result.reasoning,
+      },
+      _meta: { correlation_id: correlationId, duration_ms: durationMs },
+    };
+  } catch (err) {
+    console.error(JSON.stringify({
+      event: 'affect_inference_error',
       correlation_id: correlationId,
       error: err.message,
     }));
