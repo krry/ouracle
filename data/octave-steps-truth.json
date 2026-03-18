@@ -1,0 +1,3509 @@
+{
+  "metadata": {
+    "extracted_at": "2026-03-18T14:07:32.949Z",
+    "total_steps": 10,
+    "source": "The Octave of Evolution Notion Database",
+    "database_id": "2c5f600c4dd44cfd87f03cac143d9139",
+    "data_source_id": "f32bad00-1b18-4e19-ad98-f8801433f160",
+    "relations_resolved": 181,
+    "notes": "All properties captured generically; all relations resolved to display values"
+  },
+  "steps": [
+    {
+      "id": "241d833a-f1e2-4ad6-bf88-565ff731c374",
+      "number": 1,
+      "created_time": "2023-01-28T21:25:00.000Z",
+      "last_edited_time": "2023-04-18T06:09:00.000Z",
+      "act": "shock",
+      "early_direction": "Center",
+      "modes_of_persuasion": [
+        "pathos",
+        "logos"
+      ],
+      "early_season": [
+        "Winter",
+        "Spring"
+      ],
+      "powers_of_ego": null,
+      "note": "shock (air)",
+      "numerology": "aspire",
+      "loveform_greek": "εὐδαιμονία",
+      "quality": "pity",
+      "intent": "improve",
+      "late_direction": "Center",
+      "order": 5,
+      "tarot_astrological_entities": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "ae36ae94-c962-4b34-a23f-b2bdee22d916"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "9a989c4a-f9c3-44c4-9d9a-28ed46e9c7ea"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "diment": "choice",
+      "later_season": [
+        "Spring",
+        "Summer"
+      ],
+      "theme": "shock",
+      "changes_above": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": []
+          }
+        ],
+        "function": "show_original"
+      },
+      "aspect": "separation",
+      "mantra": "CACAO",
+      "vedic_direction": {
+        "type": "array",
+        "array": [
+          {
+            "type": "multi_select",
+            "multi_select": [
+              {
+                "id": "33d35837-4970-43c5-9f69-60b154777825",
+                "name": "Nadir",
+                "color": "orange"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "money_stage": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "d398d051-ab75-417e-a838-ff9c227b5b66"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "rollup": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "1aba0273-c7cc-497b-8ffc-21c26ae4e684"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "5ec2a1da-c9f1-4246-9dfc-fb6ddc4e309b"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "changes_below": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": []
+          }
+        ],
+        "function": "show_original"
+      },
+      "realm": "para",
+      "tarot_themes": {
+        "type": "array",
+        "array": [
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "bondage, materialism, oppression, excess",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "bondage, materialism, oppression, excess",
+                "href": null
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "chaos, disruption, upheaval, disaster, catastrophe, shock",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "chaos, disruption, upheaval, disaster, catastrophe, shock",
+                "href": null
+              }
+            ]
+          }
+        ],
+        "function": "show_unique"
+      },
+      "sense": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "b4501003-853c-4d20-94dd-3ac7af0d9152"
+              },
+              {
+                "id": "f47ee029-a0df-433c-acc8-22dc056ce2f9"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "text": null,
+      "aura": "white",
+      "tarot_elements": {
+        "type": "array",
+        "array": [
+          {
+            "type": "select",
+            "select": {
+              "id": "64355748-79d1-4c5d-8b10-58b39d16a4ab",
+              "name": "Earth",
+              "color": "green"
+            }
+          },
+          {
+            "type": "select",
+            "select": {
+              "id": "829f1391-d0f5-4969-80f1-e9421cb8f0b5",
+              "name": "Fire",
+              "color": "red"
+            }
+          }
+        ],
+        "function": "show_original"
+      },
+      "step": "Break 4/5",
+      "dimension_ids": [
+        "57f4d9b9-d9bb-4023-a3aa-c177977b0317"
+      ],
+      "dimension": "8-D",
+      "timespace_ids": [
+        "b4eb7d23-cc84-44d7-9b61-9ee6c48e767f"
+      ],
+      "timespace": "Epsilon ε time",
+      "stories_of_deep_well_ids": [
+        "889fcb14-9139-4052-abc5-e808b1f9c023",
+        "48d69a95-9661-442c-819c-e1b29cb6f547",
+        "79877ff9-193a-477d-ad7d-0d0f28363a9f",
+        "17f2ddb8-8139-80c1-ab06-ef1c79c02e42"
+      ],
+      "stories_of_deep_well": [
+        "Anu, Chapter 5",
+        "Oli, Chapter 5",
+        "Sol, Chapter 5",
+        "Fight for Earth"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-80b1-adca-f96818331769"
+      ],
+      "sacred_bodies": [
+        "Causal body"
+      ],
+      "next_step_ids": [
+        "ad679517-35a3-4009-b12e-2edf3cd65a32"
+      ],
+      "next_step": [
+        "[object Object]"
+      ],
+      "hermetic_principle_ids": [
+        "ee5e8788-c169-43f4-a4e8-f8c7d565183c",
+        "b4b62eff-d743-4f2e-aef4-03fd1f7f34da"
+      ],
+      "hermetic_principle": [
+        "Chirality",
+        "Polarity"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80eb-96db-e4cc9e4f6a0e"
+      ],
+      "dimensional_trinities": [
+        "Transcendence"
+      ],
+      "major_arcana_ids": [
+        "46d61882-f1f9-4c41-a83e-e9776712a6af",
+        "3d7c2262-2765-452c-8bb2-c1a5df09155c"
+      ],
+      "major_arcana": [
+        "The Devil",
+        "The Tower"
+      ],
+      "previous_step_ids": [
+        "91828741-a5bd-427a-bd83-dd79ab59de30"
+      ],
+      "previous_step": [
+        "[object Object]"
+      ],
+      "chakra_ids": [
+        "268a56f9-3c9e-4021-975d-0f56edf38b0c"
+      ],
+      "chakra": "Samsara",
+      "loveforms_ids": [
+        "b1e50399-f05f-405a-bea7-339b3ba1f6cf"
+      ],
+      "loveforms": [
+        "Eudaimonia"
+      ],
+      "vedic_pantheon_ids": [
+        "dff80407-0d53-4807-920c-c519a4e9a322"
+      ],
+      "vedic_pantheon": [
+        "Vishnu"
+      ],
+      "element_ids": [
+        "268af1d8-0e4f-4936-894a-eca343bdd1ef"
+      ],
+      "element": "Light",
+      "bagua_ids": [
+        "d29d2f64-4b8c-4952-acfe-f3766a3d1f44"
+      ],
+      "bagua": [
+        "Yang ⚊ Light"
+      ],
+      "relations_resolved": 14,
+      "name": "Break 4/5"
+    },
+    {
+      "id": "27d1695c-3849-4699-8681-7447da4a0027",
+      "number": 2,
+      "created_time": "2023-02-19T10:56:00.000Z",
+      "last_edited_time": "2023-04-18T06:09:00.000Z",
+      "act": "intend",
+      "early_direction": "Northeast",
+      "modes_of_persuasion": [
+        "kairos",
+        "ethos"
+      ],
+      "early_season": [
+        "Winter",
+        "Spring"
+      ],
+      "powers_of_ego": null,
+      "note": "si",
+      "numerology": "perfect",
+      "loveform_greek": "ἀγάπη",
+      "quality": "unity",
+      "intent": "know",
+      "late_direction": "East",
+      "order": 8,
+      "tarot_astrological_entities": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "0ff740aa-eac2-4b3a-933b-1cec8dcf065b"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "d80306e1-6fc6-4c6c-9e21-81dfe8480128"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "diment": "verse",
+      "later_season": [
+        "Spring"
+      ],
+      "theme": "universality",
+      "changes_above": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "3d44e309-24ee-442b-8a3c-0f242ab1cf35"
+              },
+              {
+                "id": "a5bda03d-7799-4091-8c3e-a409f8021203"
+              },
+              {
+                "id": "ecf6888e-bb20-403e-ab93-967d04cfbd1d"
+              },
+              {
+                "id": "8094e6fc-49f2-4518-8115-8b5e619481c6"
+              },
+              {
+                "id": "46415de4-5d60-4eff-84f7-49bade3bc1dc"
+              },
+              {
+                "id": "087c0dd5-238c-43d9-a00f-5f2dd85add29"
+              },
+              {
+                "id": "25630dd5-688f-4300-b358-9de3e1f6fb7a"
+              },
+              {
+                "id": "44016341-4500-4138-97f7-f3665fcbf199"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "aspect": "perspective",
+      "mantra": "AH",
+      "vedic_direction": {
+        "type": "array",
+        "array": [
+          {
+            "type": "multi_select",
+            "multi_select": [
+              {
+                "id": "f41b7433-b91e-4f7e-a9d1-5399eba3b07f",
+                "name": "East",
+                "color": "green"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "money_stage": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "e8a72c76-de80-446b-9a44-8bd1e8bea458"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "rollup": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "6731227a-199d-4b80-9932-21c3a20e9614"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "changes_below": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "12e3d470-8198-4446-81fe-234e979a6d4a"
+              },
+              {
+                "id": "226c0734-d127-4fd7-8ae8-b26770bf6e78"
+              },
+              {
+                "id": "45c33ebf-6a78-4447-b5a8-beacaaf4651f"
+              },
+              {
+                "id": "f87486fb-4b92-45df-b35e-1a150675d097"
+              },
+              {
+                "id": "34b5247f-b31b-4ae8-bad4-ae3a525dac09"
+              },
+              {
+                "id": "fe804c97-b2c8-495a-8aa8-e1713f75e8ba"
+              },
+              {
+                "id": "64220910-5e31-48a0-9ab5-fde6e9645607"
+              },
+              {
+                "id": "46415de4-5d60-4eff-84f7-49bade3bc1dc"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "realm": "spirit",
+      "tarot_themes": {
+        "type": "array",
+        "array": [
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "balance, fairness, accountability",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "balance, fairness, accountability",
+                "href": null
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "joy, enthusiasm, success, awakening",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "joy, enthusiasm, success, awakening",
+                "href": null
+              }
+            ]
+          }
+        ],
+        "function": "show_unique"
+      },
+      "sense": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "b0a7825a-cbff-48d9-8194-557212f62ee8"
+              },
+              {
+                "id": "9530cc1f-3ce2-4f5f-8849-98bde42e893f"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "text": null,
+      "aura": "rainbow",
+      "tarot_elements": {
+        "type": "array",
+        "array": [
+          {
+            "type": "select",
+            "select": {
+              "id": "f499d4c1-532b-4afd-8921-a9a03b3c0a94",
+              "name": "Air",
+              "color": "purple"
+            }
+          },
+          {
+            "type": "select",
+            "select": {
+              "id": "829f1391-d0f5-4969-80f1-e9421cb8f0b5",
+              "name": "Fire",
+              "color": "red"
+            }
+          }
+        ],
+        "function": "show_original"
+      },
+      "step": "Step 7",
+      "dimension_ids": [
+        "df4de8a7-4457-4685-924f-45c1517e4953"
+      ],
+      "dimension": "6-D",
+      "timespace_ids": [
+        "2205800d-b44e-4bac-aece-14b0d8a8da37"
+      ],
+      "timespace": "Theta θ time",
+      "stories_of_deep_well_ids": [
+        "d79354de-ae46-47fd-80d5-bff789017e22",
+        "6428b282-eaf0-4cb6-9637-f424533e45b7",
+        "25f4ce48-d3da-43b8-8137-fc6a0d7bb314"
+      ],
+      "stories_of_deep_well": [
+        "Anu, Chapter 8",
+        "Oli, Chapter 8",
+        "Sol, Chapter 8"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-8019-9008-c276119c9909"
+      ],
+      "sacred_bodies": [
+        "Monad body"
+      ],
+      "next_step_ids": [
+        "6484f8fe-68be-4451-9ec0-9add634e6006"
+      ],
+      "next_step": [
+        "[object Object]"
+      ],
+      "hermetic_principle_ids": [
+        "c115accc-8a7d-4ca9-933c-a1b5d666bdef"
+      ],
+      "hermetic_principle": [
+        "Mentality"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80e4-939a-e500e0a0e491"
+      ],
+      "dimensional_trinities": [
+        "Light"
+      ],
+      "major_arcana_ids": [
+        "1739d16c-c2bf-46fa-a15e-a261a64950f2",
+        "e1815774-0617-4c12-8cae-2d00c59d21a1"
+      ],
+      "major_arcana": [
+        "Justice",
+        "The Sun"
+      ],
+      "previous_step_ids": [
+        "75b79453-2f44-4365-bc14-e6e551a547ce"
+      ],
+      "previous_step": [
+        "[object Object]"
+      ],
+      "chakra_ids": [
+        "6731227a-199d-4b80-9932-21c3a20e9614"
+      ],
+      "chakra": "Crown",
+      "loveforms_ids": [
+        "a8c2de35-8e0a-4abf-8025-d74113bbf6b7"
+      ],
+      "loveforms": [
+        "Agápe"
+      ],
+      "vedic_pantheon_ids": [
+        "7c5d51b8-53a5-46ee-acd4-a440622462a9"
+      ],
+      "vedic_pantheon": [
+        "Indra"
+      ],
+      "element_ids": [
+        "446f2b09-5f4d-4a32-8f30-c139d1d62b97"
+      ],
+      "element": "Charge",
+      "bagua_ids": [
+        "4a37e5c9-33d4-4095-95e3-ef247cf081a0"
+      ],
+      "bagua": [
+        "Zhen ☳ Thunder"
+      ],
+      "relations_resolved": 14,
+      "name": "Step 7"
+    },
+    {
+      "id": "41950383-1832-49de-be77-926aa251200e",
+      "number": 3,
+      "created_time": "2023-01-28T21:25:00.000Z",
+      "last_edited_time": "2023-04-18T05:40:00.000Z",
+      "act": "feel",
+      "early_direction": "West",
+      "modes_of_persuasion": [
+        "ethos",
+        "pathos"
+      ],
+      "early_season": [
+        "Autumn"
+      ],
+      "powers_of_ego": null,
+      "note": "re",
+      "numerology": "pair",
+      "loveform_greek": "ἔρως",
+      "quality": "affinity",
+      "intent": "have",
+      "late_direction": "North",
+      "order": 2,
+      "tarot_astrological_entities": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "c6d79387-6946-4d8d-b582-d83470ff01db"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "2b71725f-599a-4600-b16f-3a6e163c69f4"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "18f2d35b-8aee-49dd-a692-cb681354f933"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "diment": "line",
+      "later_season": [
+        "Winter"
+      ],
+      "theme": "affinity",
+      "changes_above": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "12e3d470-8198-4446-81fe-234e979a6d4a"
+              },
+              {
+                "id": "a76f6373-5d81-4071-90ab-2b298f2f5c81"
+              },
+              {
+                "id": "0b57bb3d-9ac3-4819-b5fb-34dac9059191"
+              },
+              {
+                "id": "b778b8de-85b4-43d2-a83b-afccbccec9ac"
+              },
+              {
+                "id": "6a51f38c-4895-4d01-83f8-a363a5537a0c"
+              },
+              {
+                "id": "b49fa441-f88a-4479-9840-14f9b14d589a"
+              },
+              {
+                "id": "04d5bc68-af9e-44a1-83db-6c8a833591fa"
+              },
+              {
+                "id": "8c31e50d-face-4134-bdcd-0bd8c07b2143"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "aspect": "length",
+      "mantra": "VAM",
+      "vedic_direction": {
+        "type": "array",
+        "array": [
+          {
+            "type": "multi_select",
+            "multi_select": [
+              {
+                "id": "1afe3154-8787-4829-a29c-bf1740d12e61",
+                "name": "West",
+                "color": "brown"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "money_stage": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "6cd82ab7-09fb-43b6-ae08-3c389e3de72b"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "rollup": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "a171d284-715c-4e4c-86ec-8857cbad332b"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "changes_below": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "7b3290a2-d157-47eb-9218-2e591f42ec06"
+              },
+              {
+                "id": "bb7c9ef4-4db7-44d0-b1a7-642e41fe098a"
+              },
+              {
+                "id": "f0870cd9-1724-44c2-a8bb-7efe4fd7cd27"
+              },
+              {
+                "id": "b778b8de-85b4-43d2-a83b-afccbccec9ac"
+              },
+              {
+                "id": "8094e6fc-49f2-4518-8115-8b5e619481c6"
+              },
+              {
+                "id": "796bf872-f198-48da-9dc7-85258f91d818"
+              },
+              {
+                "id": "e816f91c-7992-4bd7-a530-bd369b826eaf"
+              },
+              {
+                "id": "e9ab5cee-4c24-4720-bf41-9a60eb8ff0b9"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "realm": "ray",
+      "tarot_themes": {
+        "type": "array",
+        "array": [
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "intuition, subconscious, dreams",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "intuition, subconscious, dreams",
+                "href": null
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "patience, mindfulness, sacrifice",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "patience, mindfulness, sacrifice",
+                "href": null
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "self-care, fertility, sensuality, motherhood",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "self-care, fertility, sensuality, motherhood",
+                "href": null
+              }
+            ]
+          }
+        ],
+        "function": "show_unique"
+      },
+      "sense": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "3db15aec-a25f-43d9-8d62-3a432b59424e"
+              },
+              {
+                "id": "29bdfe12-43fd-4060-b003-771c3183fd08"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "text": null,
+      "aura": "orange",
+      "tarot_elements": {
+        "type": "array",
+        "array": [
+          {
+            "type": "select",
+            "select": {
+              "id": "b184b6ad-a116-42ef-be7f-bfeea3581be1",
+              "name": "Water",
+              "color": "blue"
+            }
+          },
+          {
+            "type": "select",
+            "select": {
+              "id": "b184b6ad-a116-42ef-be7f-bfeea3581be1",
+              "name": "Water",
+              "color": "blue"
+            }
+          },
+          {
+            "type": "select",
+            "select": {
+              "id": "64355748-79d1-4c5d-8b10-58b39d16a4ab",
+              "name": "Earth",
+              "color": "green"
+            }
+          }
+        ],
+        "function": "show_original"
+      },
+      "step": "Step 2",
+      "dimension_ids": [
+        "ea4ef5ed-c02b-41b5-b396-131a1a3b428e"
+      ],
+      "dimension": "1-D",
+      "timespace_ids": [
+        "7163b922-40c5-4a4a-a46c-e87d6330e819"
+      ],
+      "timespace": "Beta β time",
+      "stories_of_deep_well_ids": [
+        "2dcad9d3-8914-4e15-9226-f8b43dc8bcd7",
+        "98377245-0e64-48de-af91-59af4806630a",
+        "d5e65632-ecc0-42f5-9c6f-324f536b7789"
+      ],
+      "stories_of_deep_well": [
+        "Herd My Feelings",
+        "Oli finds a friend",
+        "Every Sun is Someone’s"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-8090-afe7-dbb867bc5ec2"
+      ],
+      "sacred_bodies": [
+        "Astral body"
+      ],
+      "next_step_ids": [
+        "d5f972db-63aa-465d-9984-4dbe04bfc2a8"
+      ],
+      "next_step": [
+        "[object Object]"
+      ],
+      "hermetic_principle_ids": [
+        "b0d3023c-4c0a-4a1e-81c4-eafada338bb9"
+      ],
+      "hermetic_principle": [
+        "Causality"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80ac-8020-c38afbd14f74"
+      ],
+      "dimensional_trinities": [
+        "Shape"
+      ],
+      "major_arcana_ids": [
+        "97e63428-3305-40ed-80c3-c1eff7dd54d1",
+        "cff6659b-f9a0-4096-a22d-7e1588ee337c",
+        "d2de6c24-10fc-40a8-866e-aef902c9afe3"
+      ],
+      "major_arcana": [
+        "The High Priestess",
+        "The Hanged Human",
+        "The Empress"
+      ],
+      "previous_step_ids": [
+        "ed190360-d008-4dcd-8f33-3198a198c41d"
+      ],
+      "previous_step": [
+        "[object Object]"
+      ],
+      "chakra_ids": [
+        "a171d284-715c-4e4c-86ec-8857cbad332b"
+      ],
+      "chakra": "Womb",
+      "loveforms_ids": [
+        "a5939fa0-237c-4946-97e3-6b910703a218"
+      ],
+      "loveforms": [
+        "Éros"
+      ],
+      "vedic_pantheon_ids": [
+        "a269a49b-3d65-42fc-bc78-ec6772bd25c3"
+      ],
+      "vedic_pantheon": [
+        "Varuna"
+      ],
+      "element_ids": [
+        "a3bff97b-68b9-4c88-a71f-a84538de1a64"
+      ],
+      "element": "Water",
+      "bagua_ids": [
+        "ac51801b-b8f7-41b0-939c-1aec517ffed7"
+      ],
+      "bagua": [
+        "K'an ☵ Water"
+      ],
+      "relations_resolved": 14,
+      "name": "Step 2"
+    },
+    {
+      "id": "6484f8fe-68be-4451-9ec0-9add634e6006",
+      "number": 4,
+      "created_time": "2023-02-19T10:56:00.000Z",
+      "last_edited_time": "2023-04-18T05:43:00.000Z",
+      "act": "fall",
+      "early_direction": "Center",
+      "modes_of_persuasion": [
+        "pathos",
+        "kairos"
+      ],
+      "early_season": [],
+      "powers_of_ego": null,
+      "note": "shock (impression)",
+      "numerology": "crisis",
+      "loveform_greek": "ξενία",
+      "quality": "calamity",
+      "intent": "surrender",
+      "late_direction": "Center",
+      "order": 9,
+      "tarot_astrological_entities": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "99282746-bde2-4e4e-a90f-4eba0375be4c"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "c12326e4-9313-46b7-9d0f-620f561a9b2e"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "38140dd2-742d-4346-a20b-b9bb35ab669a"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "diment": "impact",
+      "later_season": [],
+      "theme": "collapse",
+      "changes_above": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": []
+          }
+        ],
+        "function": "show_original"
+      },
+      "aspect": "chaos",
+      "mantra": "———",
+      "vedic_direction": {
+        "type": "array",
+        "array": [
+          {
+            "type": "multi_select",
+            "multi_select": [
+              {
+                "id": "f8f8eda0-ff90-406f-b9ff-d25b35e581c2",
+                "name": "Southwest",
+                "color": "red"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "money_stage": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "8f9f13b9-b02d-4e4c-8ed7-be964c95d637"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "rollup": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "a171d284-715c-4e4c-86ec-8857cbad332b"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "cea7aad3-1bfe-4582-939f-1da728616062"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "changes_below": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": []
+          }
+        ],
+        "function": "show_original"
+      },
+      "realm": "meta",
+      "tarot_themes": {
+        "type": "array",
+        "array": [
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "solitude, meditation, introspection",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "solitude, meditation, introspection",
+                "href": null
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "freedom, acceptance, honesty, purpose",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "freedom, acceptance, honesty, purpose",
+                "href": null
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "potential, luck, naivete, aimlessness",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "potential, luck, naivete, aimlessness",
+                "href": null
+              }
+            ]
+          }
+        ],
+        "function": "show_unique"
+      },
+      "sense": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "c1ef21e9-4c6a-4616-82e1-4c6b1c03af76"
+              },
+              {
+                "id": "5a92b0fb-5614-4a4d-a211-4cbce04f1630"
+              },
+              {
+                "id": "42d058a5-5810-49d5-b0f9-5b359cf21ff1"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "text": null,
+      "aura": "black",
+      "tarot_elements": {
+        "type": "array",
+        "array": [
+          {
+            "type": "select",
+            "select": {
+              "id": "64355748-79d1-4c5d-8b10-58b39d16a4ab",
+              "name": "Earth",
+              "color": "green"
+            }
+          },
+          {
+            "type": "select",
+            "select": {
+              "id": "829f1391-d0f5-4969-80f1-e9421cb8f0b5",
+              "name": "Fire",
+              "color": "red"
+            }
+          },
+          {
+            "type": "select",
+            "select": {
+              "id": "f499d4c1-532b-4afd-8921-a9a03b3c0a94",
+              "name": "Air",
+              "color": "purple"
+            }
+          }
+        ],
+        "function": "show_original"
+      },
+      "step": "Crisis 7/8",
+      "dimension_ids": [
+        "a9f4051d-c2f1-4b6c-8230-c9e85679efb0"
+      ],
+      "dimension": "9-D",
+      "timespace_ids": [
+        "215404e8-eeaa-40c7-9269-165d683b6019"
+      ],
+      "timespace": "Iota ι time",
+      "stories_of_deep_well_ids": [
+        "399aee8a-acee-46d3-b479-b7e8dd885b5c",
+        "d0088503-7877-4982-86d0-d7c46cc54835",
+        "683f6a71-a116-4f66-b68c-6416f9eb9319",
+        "17f2ddb8-8139-80c1-ab06-ef1c79c02e42"
+      ],
+      "stories_of_deep_well": [
+        "Anu, Chapter 9",
+        "Oli, Chapter 9",
+        "Sol, Chapter 9",
+        "Fight for Earth"
+      ],
+      "next_step_ids": [
+        "93e88e93-f73e-47a7-ae8d-bed948c250ee"
+      ],
+      "next_step": [
+        "[object Object]"
+      ],
+      "hermetic_principle_ids": [
+        "b0d3023c-4c0a-4a1e-81c4-eafada338bb9",
+        "8239de11-2d8f-4c82-b2b9-48270a04610e"
+      ],
+      "hermetic_principle": [
+        "Causality",
+        "Correspondence"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-8080-b618-cbe6eb5db282"
+      ],
+      "dimensional_trinities": [
+        "Firmament"
+      ],
+      "major_arcana_ids": [
+        "a7de6967-d6bd-4348-8503-25a887fc15be",
+        "443f6b02-b27f-4b79-88c1-ce405cb98f94",
+        "da7e8f55-1f4a-4ab3-864b-9cf3d7f1a8b9"
+      ],
+      "major_arcana": [
+        "The Hermit",
+        "Judgement",
+        "The Fool"
+      ],
+      "previous_step_ids": [
+        "27d1695c-3849-4699-8681-7447da4a0027"
+      ],
+      "previous_step": [
+        "[object Object]"
+      ],
+      "chakra_ids": [
+        "0d92f172-96c6-4596-9b27-b4ebfc6bdf78"
+      ],
+      "chakra": "Maya",
+      "loveforms_ids": [
+        "10c0651e-afe7-462f-820f-3bb066ecb95e"
+      ],
+      "loveforms": [
+        "Xenia"
+      ],
+      "vedic_pantheon_ids": [
+        "ef9c6439-7dfa-4bec-bcec-eae6eae30520"
+      ],
+      "vedic_pantheon": [
+        "Nirriti"
+      ],
+      "element_ids": [
+        "8d51aa4a-bc03-441b-8ad5-4a9ab9f86469"
+      ],
+      "element": "Dark",
+      "bagua_ids": [
+        "1494455b-ffc3-4ca9-9bd1-629c75df7acf"
+      ],
+      "bagua": [
+        "Yin ⚋ Dark"
+      ],
+      "relations_resolved": 14,
+      "name": "Crisis 7/8"
+    },
+    {
+      "id": "75b79453-2f44-4365-bc14-e6e551a547ce",
+      "number": 5,
+      "created_time": "2023-02-19T10:56:00.000Z",
+      "last_edited_time": "2023-04-18T05:44:00.000Z",
+      "act": "think",
+      "early_direction": "South",
+      "modes_of_persuasion": [
+        "kairos",
+        "logos"
+      ],
+      "early_season": [
+        "Summer"
+      ],
+      "powers_of_ego": null,
+      "note": "la",
+      "numerology": "action",
+      "loveform_greek": "φιλαυτία",
+      "quality": "eternity",
+      "intent": "envision",
+      "late_direction": "Northwest",
+      "order": 7,
+      "tarot_astrological_entities": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "ee3fe209-dfb5-4d83-9cd3-18d6f671850d"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "15bb7847-ef2c-4dde-8f82-5132834304fc"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "diment": "scape",
+      "later_season": [
+        "Autumn",
+        "Winter"
+      ],
+      "theme": "intuition",
+      "changes_above": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "ad34b9b9-edf5-4af4-b44f-dddb1bb6b278"
+              },
+              {
+                "id": "bb7c9ef4-4db7-44d0-b1a7-642e41fe098a"
+              },
+              {
+                "id": "620b40be-921b-4622-8767-ae7fc9fe86fa"
+              },
+              {
+                "id": "098cabd6-7313-442b-a063-0ac52adab0a1"
+              },
+              {
+                "id": "fe50edfb-ceb5-4629-b8da-c419a95ddd81"
+              },
+              {
+                "id": "34b5247f-b31b-4ae8-bad4-ae3a525dac09"
+              },
+              {
+                "id": "460a3415-f5ad-4024-b6b5-646417704bec"
+              },
+              {
+                "id": "df4d529b-f03d-4dca-b1d6-05bced7b19d3"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "aspect": "choice",
+      "mantra": "AUM",
+      "vedic_direction": {
+        "type": "array",
+        "array": [
+          {
+            "type": "multi_select",
+            "multi_select": [
+              {
+                "id": "b2fe7623-5e39-4a91-9625-1011fc3066f1",
+                "name": "Zenith",
+                "color": "yellow"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "money_stage": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "b32f3f5e-556d-41b2-9904-d446775dc760"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "rollup": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "cea7aad3-1bfe-4582-939f-1da728616062"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "changes_below": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "ad34b9b9-edf5-4af4-b44f-dddb1bb6b278"
+              },
+              {
+                "id": "a76f6373-5d81-4071-90ab-2b298f2f5c81"
+              },
+              {
+                "id": "df638efa-907f-4957-ad38-ec629412ed80"
+              },
+              {
+                "id": "fac35d03-3f86-4545-b83a-7bf3b94002a8"
+              },
+              {
+                "id": "8d1ef033-3206-46c4-978f-55d1bbb7ef65"
+              },
+              {
+                "id": "2347bb7d-f3d6-4e3c-8fc1-35ee1b13c942"
+              },
+              {
+                "id": "ecf6888e-bb20-403e-ab93-967d04cfbd1d"
+              },
+              {
+                "id": "09ce559c-44b4-4883-bc1f-63e82f962a5e"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "realm": "soul",
+      "tarot_themes": {
+        "type": "array",
+        "array": [
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "hope, optimism, trust, direction",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "hope, optimism, trust, direction",
+                "href": null
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "shadows, illusion, unseen, subconscious",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "shadows, illusion, unseen, subconscious",
+                "href": null
+              }
+            ]
+          }
+        ],
+        "function": "show_unique"
+      },
+      "sense": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "4d3ae81e-814e-44c9-a68e-6de9ac6a7784"
+              },
+              {
+                "id": "b85b5d97-5385-4080-8a34-cba452fb9d17"
+              },
+              {
+                "id": "7e8ce75d-c9d4-46f3-8919-e24862554889"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "text": null,
+      "aura": "violet",
+      "tarot_elements": {
+        "type": "array",
+        "array": [
+          {
+            "type": "select",
+            "select": {
+              "id": "f499d4c1-532b-4afd-8921-a9a03b3c0a94",
+              "name": "Air",
+              "color": "purple"
+            }
+          },
+          {
+            "type": "select",
+            "select": {
+              "id": "b184b6ad-a116-42ef-be7f-bfeea3581be1",
+              "name": "Water",
+              "color": "blue"
+            }
+          }
+        ],
+        "function": "show_original"
+      },
+      "step": "Step 6",
+      "dimension_ids": [
+        "3e3578b4-2148-426a-958a-61f71a338603"
+      ],
+      "dimension": "5-D",
+      "timespace_ids": [
+        "107c6d0f-fe2d-414b-b4b9-732c84af6f55"
+      ],
+      "timespace": "Eta η time",
+      "stories_of_deep_well_ids": [
+        "d63aea97-f5e5-421a-b691-3512d2ae224a",
+        "617bf3bf-6e31-46aa-afcc-1c55aac71279",
+        "20fe0bb2-90d3-4de1-99be-516e5e37a582"
+      ],
+      "stories_of_deep_well": [
+        "Anu, Chapter 7",
+        "Oli, Chapter 7",
+        "Sol, Chapter 7"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-8039-b765-c5b85eeb0083"
+      ],
+      "sacred_bodies": [
+        "Atman body"
+      ],
+      "next_step_ids": [
+        "27d1695c-3849-4699-8681-7447da4a0027"
+      ],
+      "next_step": [
+        "[object Object]"
+      ],
+      "hermetic_principle_ids": [
+        "8239de11-2d8f-4c82-b2b9-48270a04610e"
+      ],
+      "hermetic_principle": [
+        "Correspondence"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80bc-8d82-f02f3b2ef11a"
+      ],
+      "dimensional_trinities": [
+        "Creation"
+      ],
+      "major_arcana_ids": [
+        "ea0986dd-95c1-45ce-847e-32dcf4955e49",
+        "09ccb24e-0d68-4358-aadb-bcd7a4897c0f"
+      ],
+      "major_arcana": [
+        "The Star",
+        "The Moon"
+      ],
+      "previous_step_ids": [
+        "ad679517-35a3-4009-b12e-2edf3cd65a32"
+      ],
+      "previous_step": [
+        "[object Object]"
+      ],
+      "chakra_ids": [
+        "cea7aad3-1bfe-4582-939f-1da728616062"
+      ],
+      "chakra": "Third eye",
+      "loveforms_ids": [
+        "086bc5cb-6458-4ea7-9c07-a24b641d09e9"
+      ],
+      "loveforms": [
+        "Philautia"
+      ],
+      "vedic_pantheon_ids": [
+        "bd3dc97b-8a7a-46bb-a424-0a7bdde1f60a"
+      ],
+      "vedic_pantheon": [
+        "Brahma"
+      ],
+      "element_ids": [
+        "49fa6258-1f36-4b97-b0b7-bdcf53411bc2"
+      ],
+      "element": "Æther",
+      "bagua_ids": [
+        "c26ec072-82bb-445e-abe1-928c38a8eb1c"
+      ],
+      "bagua": [
+        "Qian ☰ Heaven"
+      ],
+      "relations_resolved": 14,
+      "name": "Step 6"
+    },
+    {
+      "id": "91828741-a5bd-427a-bd83-dd79ab59de30",
+      "number": 6,
+      "created_time": "2023-01-28T21:25:00.000Z",
+      "last_edited_time": "2023-04-18T05:43:00.000Z",
+      "act": "listen",
+      "early_direction": "Southeast",
+      "modes_of_persuasion": [
+        "kairos",
+        "pathos"
+      ],
+      "early_season": [
+        "Spring",
+        "Summer"
+      ],
+      "powers_of_ego": null,
+      "note": "fa",
+      "numerology": "balance",
+      "loveform_greek": "στοργή",
+      "quality": "capacity",
+      "intent": "live",
+      "late_direction": "West",
+      "order": 4,
+      "tarot_astrological_entities": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "651e1092-6a52-4997-a5c5-412e74334841"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "8ccc84ff-8344-41ec-8ec6-950bfbc87bcb"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "diment": "sphere",
+      "later_season": [
+        "Autumn"
+      ],
+      "theme": "love",
+      "changes_above": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "226c0734-d127-4fd7-8ae8-b26770bf6e78"
+              },
+              {
+                "id": "c1bd10ba-d5a4-4981-9476-cb65cdc371e8"
+              },
+              {
+                "id": "13c87ffb-3815-4b46-a397-43e16643623f"
+              },
+              {
+                "id": "09ce559c-44b4-4883-bc1f-63e82f962a5e"
+              },
+              {
+                "id": "43e24421-38f9-4740-8f36-1bf3b0b24bec"
+              },
+              {
+                "id": "796bf872-f198-48da-9dc7-85258f91d818"
+              },
+              {
+                "id": "a2006516-c8e3-45f7-9d90-efe8c96a7571"
+              },
+              {
+                "id": "8a08ba6b-29b3-48a2-9cdc-b850816ffe1e"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "aspect": "depth",
+      "mantra": "YAM",
+      "vedic_direction": {
+        "type": "array",
+        "array": [
+          {
+            "type": "multi_select",
+            "multi_select": [
+              {
+                "id": "c8729d13-902c-45ee-a59f-08db73e6e13c",
+                "name": "Northeast",
+                "color": "blue"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "money_stage": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "f78f552d-6cc4-4ae5-aec6-c20bcd17eaae"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "rollup": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "3d7649af-7224-4607-a719-f7d5c3691b61"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "changes_below": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "620b40be-921b-4622-8767-ae7fc9fe86fa"
+              },
+              {
+                "id": "1012b2d8-693e-4b91-8458-31cdd122b517"
+              },
+              {
+                "id": "4d511ca8-d669-4f3c-8734-384474306205"
+              },
+              {
+                "id": "457e41f1-cdd8-4c17-bd57-f87027dc5c64"
+              },
+              {
+                "id": "087c0dd5-238c-43d9-a00f-5f2dd85add29"
+              },
+              {
+                "id": "8a08ba6b-29b3-48a2-9cdc-b850816ffe1e"
+              },
+              {
+                "id": "04d5bc68-af9e-44a1-83db-6c8a833591fa"
+              },
+              {
+                "id": "403da1dd-b2c6-4db2-95b8-3950b4ed154e"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "realm": "form",
+      "tarot_themes": {
+        "type": "array",
+        "array": [
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "blending, harmony, moderation",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "blending, harmony, moderation",
+                "href": null
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "tradition, wisdom, ethics, morality",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "tradition, wisdom, ethics, morality",
+                "href": null
+              }
+            ]
+          }
+        ],
+        "function": "show_unique"
+      },
+      "sense": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "ef24d01e-926a-478f-b8ce-a6780df17a22"
+              },
+              {
+                "id": "5d44f160-6d5c-4d64-854c-58583c4f0b6c"
+              },
+              {
+                "id": "9d80586c-65a1-4962-97db-bd4dcf3fe101"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "text": null,
+      "aura": "green",
+      "tarot_elements": {
+        "type": "array",
+        "array": [
+          {
+            "type": "select",
+            "select": {
+              "id": "829f1391-d0f5-4969-80f1-e9421cb8f0b5",
+              "name": "Fire",
+              "color": "red"
+            }
+          },
+          {
+            "type": "select",
+            "select": {
+              "id": "64355748-79d1-4c5d-8b10-58b39d16a4ab",
+              "name": "Earth",
+              "color": "green"
+            }
+          }
+        ],
+        "function": "show_original"
+      },
+      "step": "Step 4",
+      "dimension_ids": [
+        "cf0e7920-6118-42f2-b623-c2955f078ac9"
+      ],
+      "dimension": "3-D",
+      "timespace_ids": [
+        "38acb6ba-b71d-46ec-9e5b-ae835ca432fb"
+      ],
+      "timespace": "Delta δ time",
+      "stories_of_deep_well_ids": [
+        "2e273def-7cce-4957-93dd-531f0cf4b6e4",
+        "2bba5ca4-ef51-418c-8449-e847cbe41654",
+        "3c51f965-84c9-46b7-a7d7-290e277bebc9"
+      ],
+      "stories_of_deep_well": [
+        "Anu, Chapter 4",
+        "Oli, Chapter 4",
+        "Sol, Chapter 4"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-80b1-adca-f96818331769"
+      ],
+      "sacred_bodies": [
+        "Causal body"
+      ],
+      "next_step_ids": [
+        "241d833a-f1e2-4ad6-bf88-565ff731c374"
+      ],
+      "next_step": [
+        "[object Object]"
+      ],
+      "hermetic_principle_ids": [
+        "1d762186-b858-4e20-8a56-47e0c00b4cba"
+      ],
+      "hermetic_principle": [
+        "Rhythm"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80eb-8c99-ed4c27722c2c"
+      ],
+      "dimensional_trinities": [
+        "Time"
+      ],
+      "major_arcana_ids": [
+        "76a453e0-5bd6-4413-baba-7d20c2eeb6b0",
+        "ee57da8e-d8a2-4011-8902-c4a2e0f20d40"
+      ],
+      "major_arcana": [
+        "Temperance",
+        "The Hierophant"
+      ],
+      "previous_step_ids": [
+        "d5f972db-63aa-465d-9984-4dbe04bfc2a8"
+      ],
+      "previous_step": [
+        "[object Object]"
+      ],
+      "chakra_ids": [
+        "3d7649af-7224-4607-a719-f7d5c3691b61"
+      ],
+      "chakra": "Heart",
+      "loveforms_ids": [
+        "1d35e77b-b0c4-4687-a5d2-4366df2fe49d"
+      ],
+      "loveforms": [
+        "Storge"
+      ],
+      "vedic_pantheon_ids": [
+        "19445055-1586-412f-b595-6531f95a6ca9"
+      ],
+      "vedic_pantheon": [
+        "Ishana"
+      ],
+      "element_ids": [
+        "dccccd73-d4b2-4fb0-8bcd-eeacc2d0954a"
+      ],
+      "element": "Life",
+      "bagua_ids": [
+        "72ad4fa6-3e59-4523-9623-987ea80d848b"
+      ],
+      "bagua": [
+        "Dui ☱ Lake"
+      ],
+      "relations_resolved": 14,
+      "name": "Step 4"
+    },
+    {
+      "id": "93e88e93-f73e-47a7-ae8d-bed948c250ee",
+      "number": 7,
+      "created_time": "2023-02-19T10:56:00.000Z",
+      "last_edited_time": "2023-10-30T23:58:00.000Z",
+      "act": "return",
+      "early_direction": "Northwest",
+      "modes_of_persuasion": [
+        "kairos",
+        "ethos"
+      ],
+      "early_season": [
+        "Autumn",
+        "Winter"
+      ],
+      "powers_of_ego": null,
+      "note": "do",
+      "numerology": "wander",
+      "loveform_greek": "οὐσία",
+      "quality": "cyclicity",
+      "intent": "complete",
+      "late_direction": "Northeast",
+      "order": 10,
+      "tarot_astrological_entities": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "316e9aaf-7899-426f-aa3a-01cb655313b7"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "24346fa4-7501-4c6e-bb8f-f6b67a5eaaa7"
+              },
+              {
+                "id": "e142ce39-bc6d-4020-bc95-4dd47f2ca307"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "diment": "void",
+      "later_season": [
+        "Winter",
+        "Spring"
+      ],
+      "theme": "reunion",
+      "changes_above": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "7b3290a2-d157-47eb-9218-2e591f42ec06"
+              },
+              {
+                "id": "6f46561a-aa5c-4231-a466-88b898154c6f"
+              },
+              {
+                "id": "3097e1d4-a5b0-4a44-a62d-d34ef84cb1c0"
+              },
+              {
+                "id": "e1518cab-f417-4c88-ab2a-d3f3371d6f33"
+              },
+              {
+                "id": "2347bb7d-f3d6-4e3c-8fc1-35ee1b13c942"
+              },
+              {
+                "id": "fe804c97-b2c8-495a-8aa8-e1713f75e8ba"
+              },
+              {
+                "id": "457e41f1-cdd8-4c17-bd57-f87027dc5c64"
+              },
+              {
+                "id": "d6aa6a6d-6a38-4fd2-9762-6554d61bfda7"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "aspect": "god",
+      "mantra": "HUM",
+      "vedic_direction": {
+        "type": "array",
+        "array": [
+          {
+            "type": "multi_select",
+            "multi_select": [
+              {
+                "id": "04d2d344-b2b2-4eb8-ae63-a8018e18b01c",
+                "name": "South",
+                "color": "orange"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "money_stage": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "95ee5b6a-896b-4274-8683-e6b0bd48d256"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "rollup": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "cea7aad3-1bfe-4582-939f-1da728616062"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "6731227a-199d-4b80-9932-21c3a20e9614"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "5ec2a1da-c9f1-4246-9dfc-fb6ddc4e309b"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "a171d284-715c-4e4c-86ec-8857cbad332b"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "1aba0273-c7cc-497b-8ffc-21c26ae4e684"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "c49bd1b3-7ee4-4fab-b92a-b669de6b043c"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "3d7649af-7224-4607-a719-f7d5c3691b61"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "changes_below": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "ee640546-3479-458a-a0d5-180924fff195"
+              },
+              {
+                "id": "13c87ffb-3815-4b46-a397-43e16643623f"
+              },
+              {
+                "id": "460a3415-f5ad-4024-b6b5-646417704bec"
+              },
+              {
+                "id": "6a51f38c-4895-4d01-83f8-a363a5537a0c"
+              },
+              {
+                "id": "d6aa6a6d-6a38-4fd2-9762-6554d61bfda7"
+              },
+              {
+                "id": "dba1bd75-c2e5-4a99-b683-96c4ab6fda20"
+              },
+              {
+                "id": "67dadfc1-92e7-41c6-a3b3-ff61ea0cc8eb"
+              },
+              {
+                "id": "44016341-4500-4138-97f7-f3665fcbf199"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "realm": "all",
+      "tarot_themes": {
+        "type": "array",
+        "array": [
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "change, destiny, responsibility, interconnectedness",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "change, destiny, responsibility, interconnectedness",
+                "href": null
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "completion, endings, closure, rebirth",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "completion, endings, closure, rebirth",
+                "href": null
+              }
+            ]
+          }
+        ],
+        "function": "show_unique"
+      },
+      "sense": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "8e277a8a-b09b-4c15-9baf-a1ce91bc4007"
+              },
+              {
+                "id": "5ef081dd-fae7-4493-a743-a4126c91e509"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "text": null,
+      "aura": "brown",
+      "tarot_elements": {
+        "type": "array",
+        "array": [
+          {
+            "type": "select",
+            "select": {
+              "id": "829f1391-d0f5-4969-80f1-e9421cb8f0b5",
+              "name": "Fire",
+              "color": "red"
+            }
+          },
+          {
+            "type": "select",
+            "select": {
+              "id": "64355748-79d1-4c5d-8b10-58b39d16a4ab",
+              "name": "Earth",
+              "color": "green"
+            }
+          }
+        ],
+        "function": "show_original"
+      },
+      "step": "Step 8/0",
+      "dimension_ids": [
+        "da038907-bbdd-47b5-b498-3fb4564aac80"
+      ],
+      "dimension": "7-D",
+      "timespace_ids": [
+        "cb7c49fd-900d-4199-9860-2a152868beb0"
+      ],
+      "timespace": "Kappa κ time",
+      "stories_of_deep_well_ids": [
+        "7372eba7-e97c-4502-9424-bf3012b88a05",
+        "5282a59b-781d-490a-aabc-cea489cda03f",
+        "a2cd89d1-9dd6-4672-a7b7-4fa46adebb3a"
+      ],
+      "stories_of_deep_well": [
+        "Anu, Chapter 0/10",
+        "Oli, Chapter 0/10",
+        "Sol, Chapter 0/10"
+      ],
+      "next_step_ids": [
+        "ed190360-d008-4dcd-8f33-3198a198c41d"
+      ],
+      "next_step": [
+        "[object Object]"
+      ],
+      "hermetic_principle_ids": [
+        "8239de11-2d8f-4c82-b2b9-48270a04610e",
+        "c115accc-8a7d-4ca9-933c-a1b5d666bdef",
+        "b4b62eff-d743-4f2e-aef4-03fd1f7f34da",
+        "b0d3023c-4c0a-4a1e-81c4-eafada338bb9",
+        "ee5e8788-c169-43f4-a4e8-f8c7d565183c",
+        "aef6d662-1a1e-4a7f-9faf-9028270aa68e",
+        "1d762186-b858-4e20-8a56-47e0c00b4cba"
+      ],
+      "hermetic_principle": [
+        "Correspondence",
+        "Mentality",
+        "Polarity",
+        "Causality",
+        "Chirality",
+        "Vibration",
+        "Rhythm"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80c9-8b6d-ca4fc10b6596",
+        "1a52ddb8-8139-80d3-a583-c398011cedc5"
+      ],
+      "dimensional_trinities": [
+        "Divine",
+        "Unity"
+      ],
+      "major_arcana_ids": [
+        "54d41dfc-5ef3-4474-b434-24d6388038c7",
+        "5b669628-e22c-4ffb-9c31-96e1d946ee9b"
+      ],
+      "major_arcana": [
+        "The Wheel of Fortune",
+        "The World"
+      ],
+      "previous_step_ids": [
+        "6484f8fe-68be-4451-9ec0-9add634e6006"
+      ],
+      "previous_step": [
+        "[object Object]"
+      ],
+      "chakra_ids": [
+        "41b5a6fd-4a35-4c01-8695-42e771303097"
+      ],
+      "chakra": "Earthstar",
+      "loveforms_ids": [
+        "2c5a214f-3a4e-488e-b84e-8f5ef4d4eee3"
+      ],
+      "loveforms": [
+        "Ousia"
+      ],
+      "vedic_pantheon_ids": [
+        "7f00eff7-2ed3-4277-ba86-5621980f2444"
+      ],
+      "vedic_pantheon": [
+        "Yama"
+      ],
+      "element_ids": [
+        "56f86042-6415-4456-9862-fb3967377a78"
+      ],
+      "element": "Stone",
+      "bagua_ids": [
+        "0ac8229f-0c8d-420b-b6bf-3fcd5033a915"
+      ],
+      "bagua": [
+        "Gen ☶ Mountain"
+      ],
+      "relations_resolved": 14,
+      "name": "Step 8/0"
+    },
+    {
+      "id": "ad679517-35a3-4009-b12e-2edf3cd65a32",
+      "number": 8,
+      "created_time": "2023-02-02T08:40:00.000Z",
+      "last_edited_time": "2023-04-18T05:44:00.000Z",
+      "act": "sing",
+      "early_direction": "Southwest",
+      "modes_of_persuasion": [
+        "ethos",
+        "logos"
+      ],
+      "early_season": [
+        "Summer",
+        "Autumn"
+      ],
+      "powers_of_ego": null,
+      "note": "so",
+      "numerology": "beauty",
+      "loveform_greek": "φιλία",
+      "quality": "causality",
+      "intent": "say",
+      "late_direction": "Southeast",
+      "order": 6,
+      "tarot_astrological_entities": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "c1421cf5-b02a-4ab3-8f0c-bb588a272da8"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "0ae17fec-03f5-4a40-b728-9b1433026f96"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "diment": "phase",
+      "later_season": [
+        "Spring",
+        "Summer"
+      ],
+      "theme": "song",
+      "changes_above": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "df638efa-907f-4957-ad38-ec629412ed80"
+              },
+              {
+                "id": "b39d16ca-bc00-4081-aaeb-330d636e7ee8"
+              },
+              {
+                "id": "64220910-5e31-48a0-9ab5-fde6e9645607"
+              },
+              {
+                "id": "dba1bd75-c2e5-4a99-b683-96c4ab6fda20"
+              },
+              {
+                "id": "6ae787f5-046a-4fec-ac2a-4f6742268e0f"
+              },
+              {
+                "id": "e816f91c-7992-4bd7-a530-bd369b826eaf"
+              },
+              {
+                "id": "403da1dd-b2c6-4db2-95b8-3950b4ed154e"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "aspect": "duration",
+      "mantra": "HAM",
+      "vedic_direction": {
+        "type": "array",
+        "array": [
+          {
+            "type": "multi_select",
+            "multi_select": [
+              {
+                "id": "9c9c0ce5-2862-4527-bf17-ecb7c139c6fb",
+                "name": "Northwest",
+                "color": "pink"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "money_stage": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "6ff418e9-be57-4b65-b0de-e56b3e6f4b95"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "rollup": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "c49bd1b3-7ee4-4fab-b92a-b669de6b043c"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "changes_below": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "6f46561a-aa5c-4231-a466-88b898154c6f"
+              },
+              {
+                "id": "c1bd10ba-d5a4-4981-9476-cb65cdc371e8"
+              },
+              {
+                "id": "a5bda03d-7799-4091-8c3e-a409f8021203"
+              },
+              {
+                "id": "df4d529b-f03d-4dca-b1d6-05bced7b19d3"
+              },
+              {
+                "id": "10013f25-2022-45f1-b6f2-fd1617f53286"
+              },
+              {
+                "id": "b49fa441-f88a-4479-9840-14f9b14d589a"
+              },
+              {
+                "id": "b82d1a14-ecc6-4850-8c5b-d6b58a1897ef"
+              },
+              {
+                "id": "6ae787f5-046a-4fec-ac2a-4f6742268e0f"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "realm": "mind",
+      "tarot_themes": {
+        "type": "array",
+        "array": [
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "relationships, harmony, compassion",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "relationships, harmony, compassion",
+                "href": null
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "focus, determination, drive",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "focus, determination, drive",
+                "href": null
+              }
+            ]
+          }
+        ],
+        "function": "show_unique"
+      },
+      "sense": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "6a3b1c8c-8855-4d02-b40b-fc62aa21a5c7"
+              },
+              {
+                "id": "914ee560-ba61-43e4-8696-342ec9454a29"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "text": null,
+      "aura": "blue",
+      "tarot_elements": {
+        "type": "array",
+        "array": [
+          {
+            "type": "select",
+            "select": {
+              "id": "f499d4c1-532b-4afd-8921-a9a03b3c0a94",
+              "name": "Air",
+              "color": "purple"
+            }
+          },
+          {
+            "type": "select",
+            "select": {
+              "id": "b184b6ad-a116-42ef-be7f-bfeea3581be1",
+              "name": "Water",
+              "color": "blue"
+            }
+          }
+        ],
+        "function": "show_original"
+      },
+      "step": "Step 5",
+      "dimension_ids": [
+        "86503caa-afdd-4605-b102-eaafad1aa237"
+      ],
+      "dimension": "4-D",
+      "timespace_ids": [
+        "c459e5dc-aac9-4c27-be23-d153c64a3d88"
+      ],
+      "timespace": "Zeta ζ time",
+      "stories_of_deep_well_ids": [
+        "190f0c2c-5aa2-40f0-806a-640d9d398bf6",
+        "501f1c8f-e86d-4222-96ce-d49992b6338e",
+        "f9d4b5c1-9401-4023-a92e-a89656284f12"
+      ],
+      "stories_of_deep_well": [
+        "Anu, Chapter 6",
+        "Oli, Chapter 6",
+        "Sol, Chapter 6"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-80e0-9070-dc5b9679698a"
+      ],
+      "sacred_bodies": [
+        "Buddha body"
+      ],
+      "next_step_ids": [
+        "75b79453-2f44-4365-bc14-e6e551a547ce"
+      ],
+      "next_step": [
+        "[object Object]"
+      ],
+      "hermetic_principle_ids": [
+        "aef6d662-1a1e-4a7f-9faf-9028270aa68e"
+      ],
+      "hermetic_principle": [
+        "Vibration"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80eb-96db-e4cc9e4f6a0e"
+      ],
+      "dimensional_trinities": [
+        "Transcendence"
+      ],
+      "major_arcana_ids": [
+        "07b31a3e-4274-4c02-b536-7d3411594ed6",
+        "c12a8383-bfda-47bf-b81a-69b8d326e56d"
+      ],
+      "major_arcana": [
+        "The Lovers",
+        "The Chariot"
+      ],
+      "previous_step_ids": [
+        "241d833a-f1e2-4ad6-bf88-565ff731c374"
+      ],
+      "previous_step": [
+        "[object Object]"
+      ],
+      "chakra_ids": [
+        "c49bd1b3-7ee4-4fab-b92a-b669de6b043c"
+      ],
+      "chakra": "Voice",
+      "loveforms_ids": [
+        "dae1b782-6608-4674-abf6-2ef880fb921e"
+      ],
+      "loveforms": [
+        "Philia"
+      ],
+      "vedic_pantheon_ids": [
+        "a4d43ab8-1eea-4f95-8497-6b5058b3269a"
+      ],
+      "vedic_pantheon": [
+        "Vayu"
+      ],
+      "element_ids": [
+        "4774d1f3-fabc-490b-83c9-640fbf6fdbe2"
+      ],
+      "element": "Air",
+      "bagua_ids": [
+        "c5e64946-6069-4a54-a2b3-a103fe68b7ed"
+      ],
+      "bagua": [
+        "Xun ☴ Wind"
+      ],
+      "relations_resolved": 14,
+      "name": "Step 5"
+    },
+    {
+      "id": "d5f972db-63aa-465d-9984-4dbe04bfc2a8",
+      "number": 9,
+      "created_time": "2023-01-28T21:25:00.000Z",
+      "last_edited_time": "2025-02-25T04:32:00.000Z",
+      "act": "dance",
+      "early_direction": "East",
+      "modes_of_persuasion": [
+        "logos",
+        "ethos"
+      ],
+      "early_season": [
+        "Spring"
+      ],
+      "powers_of_ego": null,
+      "note": "mi",
+      "numerology": "ideal",
+      "loveform_greek": "μανία",
+      "quality": "activity",
+      "intent": "make",
+      "late_direction": "South",
+      "order": 3,
+      "tarot_astrological_entities": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "d15909a7-796a-4ad7-b7e0-c90967af5879"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "80fc83a5-c1b4-4416-88b9-cc458ebc4c84"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "diment": "plane",
+      "later_season": [
+        "Summer"
+      ],
+      "theme": "willpower",
+      "changes_above": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "8d1ef033-3206-46c4-978f-55d1bbb7ef65"
+              },
+              {
+                "id": "45c33ebf-6a78-4447-b5a8-beacaaf4651f"
+              },
+              {
+                "id": "aa274c1d-ea6d-41a6-8344-0309ebb0a2c2"
+              },
+              {
+                "id": "2b722771-1a8e-4816-80c1-36ea4f3614da"
+              },
+              {
+                "id": "4d511ca8-d669-4f3c-8734-384474306205"
+              },
+              {
+                "id": "b82d1a14-ecc6-4850-8c5b-d6b58a1897ef"
+              },
+              {
+                "id": "67dadfc1-92e7-41c6-a3b3-ff61ea0cc8eb"
+              },
+              {
+                "id": "e9ab5cee-4c24-4720-bf41-9a60eb8ff0b9"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "aspect": "width",
+      "mantra": "RAM",
+      "vedic_direction": {
+        "type": "array",
+        "array": [
+          {
+            "type": "multi_select",
+            "multi_select": [
+              {
+                "id": "0bba204f-aae2-4092-be1b-cfca5636b43d",
+                "name": "Southeast",
+                "color": "yellow"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "money_stage": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "8488c301-8356-45ad-b257-16963fdbb1de"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "rollup": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "5ec2a1da-c9f1-4246-9dfc-fb6ddc4e309b"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "changes_below": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "fe50edfb-ceb5-4629-b8da-c419a95ddd81"
+              },
+              {
+                "id": "3097e1d4-a5b0-4a44-a62d-d34ef84cb1c0"
+              },
+              {
+                "id": "aa274c1d-ea6d-41a6-8344-0309ebb0a2c2"
+              },
+              {
+                "id": "4924b80c-7657-485b-a01f-8e35110c70c7"
+              },
+              {
+                "id": "b39d16ca-bc00-4081-aaeb-330d636e7ee8"
+              },
+              {
+                "id": "a2006516-c8e3-45f7-9d90-efe8c96a7571"
+              },
+              {
+                "id": "25630dd5-688f-4300-b358-9de3e1f6fb7a"
+              },
+              {
+                "id": "8c31e50d-face-4134-bdcd-0bd8c07b2143"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "realm": "shape",
+      "tarot_themes": {
+        "type": "array",
+        "array": [
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "inevitability, transition, metamorphosis",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "inevitability, transition, metamorphosis",
+                "href": null
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "authority, structure, rules",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "authority, structure, rules",
+                "href": null
+              }
+            ]
+          }
+        ],
+        "function": "show_unique"
+      },
+      "sense": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "32c78e65-c73b-42fd-b4c3-7ed30058d303"
+              },
+              {
+                "id": "91a2fad3-6e73-4b7a-9e13-833497f4f2c9"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "text": null,
+      "aura": "yellow",
+      "tarot_elements": {
+        "type": "array",
+        "array": [
+          {
+            "type": "select",
+            "select": {
+              "id": "b184b6ad-a116-42ef-be7f-bfeea3581be1",
+              "name": "Water",
+              "color": "blue"
+            }
+          },
+          {
+            "type": "select",
+            "select": {
+              "id": "829f1391-d0f5-4969-80f1-e9421cb8f0b5",
+              "name": "Fire",
+              "color": "red"
+            }
+          }
+        ],
+        "function": "show_original"
+      },
+      "step": "Step 3",
+      "dimension_ids": [
+        "b3dc708b-435f-4a04-84c8-60a2f6d4125c"
+      ],
+      "dimension": "2-D",
+      "timespace_ids": [
+        "a1d70fca-1e0e-4162-846f-c65a956c9139"
+      ],
+      "timespace": "Gamma γ time",
+      "stories_of_deep_well_ids": [
+        "dfc1da44-8cdf-4315-ad9c-bbd88c7fa4dc",
+        "8d3f201b-bab6-4ac6-9edc-54485fd93943",
+        "c9d2b260-a754-4a8e-b5d4-cc903d85bf82"
+      ],
+      "stories_of_deep_well": [
+        "Omo Ablaze",
+        "Oli, Chapter 3",
+        "Sol, Chapter 3"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-80cb-aabd-fb155fdb62de"
+      ],
+      "sacred_bodies": [
+        "Mental body"
+      ],
+      "next_step_ids": [
+        "91828741-a5bd-427a-bd83-dd79ab59de30"
+      ],
+      "next_step": [
+        "[object Object]"
+      ],
+      "hermetic_principle_ids": [
+        "b4b62eff-d743-4f2e-aef4-03fd1f7f34da"
+      ],
+      "hermetic_principle": [
+        "Polarity"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-8084-be48-d021f011cd62"
+      ],
+      "dimensional_trinities": [
+        "Space"
+      ],
+      "major_arcana_ids": [
+        "747a50d4-5881-4978-84ff-03c900d4fe5b",
+        "f4bd466b-1a23-4384-a1f8-93045567cedd"
+      ],
+      "major_arcana": [
+        "Death",
+        "The Emperor"
+      ],
+      "previous_step_ids": [
+        "41950383-1832-49de-be77-926aa251200e"
+      ],
+      "previous_step": [
+        "[object Object]"
+      ],
+      "chakra_ids": [
+        "5ec2a1da-c9f1-4246-9dfc-fb6ddc4e309b"
+      ],
+      "chakra": "Navel",
+      "loveforms_ids": [
+        "c309eb73-846f-427e-af7b-cd508980b2c3"
+      ],
+      "loveforms": [
+        "Mania"
+      ],
+      "vedic_pantheon_ids": [
+        "ad0bb5ca-5d8c-4507-88dd-501048c56ed2"
+      ],
+      "vedic_pantheon": [
+        "Agni"
+      ],
+      "element_ids": [
+        "8c5bf8ab-e936-487d-8d1f-5692feb5c500"
+      ],
+      "element": "Fire",
+      "bagua_ids": [
+        "2872efe3-426a-4f6b-8800-c667f58f0e55"
+      ],
+      "bagua": [
+        "Li ☲ Fire"
+      ],
+      "relations_resolved": 14,
+      "name": "Step 3"
+    },
+    {
+      "id": "ed190360-d008-4dcd-8f33-3198a198c41d",
+      "number": 10,
+      "created_time": "2023-01-28T21:25:00.000Z",
+      "last_edited_time": "2024-11-19T21:04:00.000Z",
+      "act": "sit",
+      "early_direction": "North",
+      "modes_of_persuasion": [
+        "pathos",
+        "kairos"
+      ],
+      "early_season": [
+        "Winter"
+      ],
+      "powers_of_ego": null,
+      "note": "do",
+      "numerology": "begin",
+      "loveform_greek": "πρᾶγμα",
+      "quality": "entity",
+      "intent": "be",
+      "late_direction": "Southwest",
+      "order": 1,
+      "tarot_astrological_entities": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "f587b4db-6dea-4f5d-8f3a-8016366021c3"
+              }
+            ]
+          },
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "4c9a16bb-1856-4c5b-85f2-16111b0f4bc3"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "diment": "point",
+      "later_season": [
+        "Summer",
+        "Autumn"
+      ],
+      "theme": "ground",
+      "changes_above": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "36b11bac-e330-4029-b3e4-4d5271080ac0"
+              },
+              {
+                "id": "f0870cd9-1724-44c2-a8bb-7efe4fd7cd27"
+              },
+              {
+                "id": "fac35d03-3f86-4545-b83a-7bf3b94002a8"
+              },
+              {
+                "id": "ee640546-3479-458a-a0d5-180924fff195"
+              },
+              {
+                "id": "1012b2d8-693e-4b91-8458-31cdd122b517"
+              },
+              {
+                "id": "f87486fb-4b92-45df-b35e-1a150675d097"
+              },
+              {
+                "id": "4924b80c-7657-485b-a01f-8e35110c70c7"
+              },
+              {
+                "id": "10013f25-2022-45f1-b6f2-fd1617f53286"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "aspect": "point",
+      "mantra": "LAM",
+      "vedic_direction": {
+        "type": "array",
+        "array": [
+          {
+            "type": "multi_select",
+            "multi_select": [
+              {
+                "id": "3c934960-404b-4dd1-82f0-ab61694c07d4",
+                "name": "North",
+                "color": "purple"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "money_stage": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "92aa88f3-e322-4ccf-8bd3-16b330e3f213"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "rollup": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "1aba0273-c7cc-497b-8ffc-21c26ae4e684"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "changes_below": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "36b11bac-e330-4029-b3e4-4d5271080ac0"
+              },
+              {
+                "id": "0b57bb3d-9ac3-4819-b5fb-34dac9059191"
+              },
+              {
+                "id": "098cabd6-7313-442b-a063-0ac52adab0a1"
+              },
+              {
+                "id": "3d44e309-24ee-442b-8a3c-0f242ab1cf35"
+              },
+              {
+                "id": "e1518cab-f417-4c88-ab2a-d3f3371d6f33"
+              },
+              {
+                "id": "2b722771-1a8e-4816-80c1-36ea4f3614da"
+              },
+              {
+                "id": "43e24421-38f9-4740-8f36-1bf3b0b24bec"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "realm": "point",
+      "tarot_themes": {
+        "type": "array",
+        "array": [
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "manifestation, willpower, confidence",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "manifestation, willpower, confidence",
+                "href": null
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "rich_text": [
+              {
+                "type": "text",
+                "text": {
+                  "content": "bravery, forgiveness, courage",
+                  "link": null
+                },
+                "annotations": {
+                  "bold": false,
+                  "italic": false,
+                  "strikethrough": false,
+                  "underline": false,
+                  "code": false,
+                  "color": "default"
+                },
+                "plain_text": "bravery, forgiveness, courage",
+                "href": null
+              }
+            ]
+          }
+        ],
+        "function": "show_unique"
+      },
+      "sense": {
+        "type": "array",
+        "array": [
+          {
+            "type": "relation",
+            "relation": [
+              {
+                "id": "4b0c38a1-e0f5-4d0a-b2dc-7214613ed434"
+              },
+              {
+                "id": "0dd74393-68b3-4878-97a1-f24b9f3bda34"
+              }
+            ]
+          }
+        ],
+        "function": "show_original"
+      },
+      "text": null,
+      "aura": "red",
+      "tarot_elements": {
+        "type": "array",
+        "array": [
+          {
+            "type": "select",
+            "select": {
+              "id": "f499d4c1-532b-4afd-8921-a9a03b3c0a94",
+              "name": "Air",
+              "color": "purple"
+            }
+          },
+          {
+            "type": "select",
+            "select": {
+              "id": "829f1391-d0f5-4969-80f1-e9421cb8f0b5",
+              "name": "Fire",
+              "color": "red"
+            }
+          }
+        ],
+        "function": "show_original"
+      },
+      "step": "Step 1",
+      "dimension_ids": [
+        "d9f52857-5961-430a-8b49-8b780e1535df"
+      ],
+      "dimension": "0-D",
+      "timespace_ids": [
+        "9fb4ff83-ccde-489b-9955-78e94ce93905"
+      ],
+      "timespace": "Alpha α time",
+      "stories_of_deep_well_ids": [
+        "c67748ca-2064-4437-83dd-ecaa72bd6c8b",
+        "62a6d272-17f4-4ec7-a9fb-da66f837de99",
+        "5ff56abf-87f2-4689-a5a7-3b4901366af3"
+      ],
+      "stories_of_deep_well": [
+        "Out to Pasture",
+        "Oli sets out",
+        "From Dust to Us"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-806a-baf6-ccaa539bf478"
+      ],
+      "sacred_bodies": [
+        "Physical body"
+      ],
+      "next_step_ids": [
+        "41950383-1832-49de-be77-926aa251200e"
+      ],
+      "next_step": [
+        "[object Object]"
+      ],
+      "hermetic_principle_ids": [
+        "ee5e8788-c169-43f4-a4e8-f8c7d565183c"
+      ],
+      "hermetic_principle": [
+        "Chirality"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80d3-a583-c398011cedc5"
+      ],
+      "dimensional_trinities": [
+        "Unity"
+      ],
+      "major_arcana_ids": [
+        "b5fca0e1-5d3d-4948-a000-41d59e0d3b98",
+        "2e895a9f-d502-4f86-a238-8aaf48a6a448"
+      ],
+      "major_arcana": [
+        "The Magician",
+        "Strength"
+      ],
+      "previous_step_ids": [
+        "93e88e93-f73e-47a7-ae8d-bed948c250ee"
+      ],
+      "previous_step": [
+        "[object Object]"
+      ],
+      "chakra_ids": [
+        "1aba0273-c7cc-497b-8ffc-21c26ae4e684"
+      ],
+      "chakra": "Root",
+      "loveforms_ids": [
+        "44056025-3b9d-4e8a-b18b-2c7ae57dfcbf"
+      ],
+      "loveforms": [
+        "Pragma"
+      ],
+      "vedic_pantheon_ids": [
+        "0eeb1251-6aa3-4b6e-bd9e-ee0594d2e252"
+      ],
+      "vedic_pantheon": [
+        "Kubera"
+      ],
+      "element_ids": [
+        "0e9fcf31-5740-4606-b70a-6ca7c3d18cfe"
+      ],
+      "element": "Earth",
+      "bagua_ids": [
+        "023b357f-f419-48e7-8ad9-0054017df74d"
+      ],
+      "bagua": [
+        "K'un ☷ Earth"
+      ],
+      "relations_resolved": 14,
+      "name": "Step 1"
+    }
+  ]
+}

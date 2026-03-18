@@ -1,0 +1,1622 @@
+{
+  "metadata": {
+    "generated_at": "2026-03-18T14:07:32.949Z",
+    "source": "The Octave of Evolution Notion Database",
+    "database_id": "2c5f600c4dd44cfd87f03cac143d9139",
+    "relations_resolved": 181,
+    "mapping_version": "4.0.0",
+    "notes": "Fully denormalized with all flattening, fixes, and supplemental changes data | Resolved sense, money_stage, tarot_astrological_entities titles via Notion API"
+  },
+  "steps": [
+    {
+      "id": "ed190360-d008-4dcd-8f33-3198a198c41d",
+      "number": 1,
+      "name": "Step 1",
+      "element": "Earth",
+      "chakra": "Root",
+      "aura": "red",
+      "act": "sit",
+      "intent": "be",
+      "quality": "entity",
+      "aspect": "point",
+      "mantra": "LAM",
+      "numerology": "begin",
+      "loveform_greek": "\u03c0\u03c1\u1fb6\u03b3\u03bc\u03b1",
+      "dimension": "0-D",
+      "timespace": "Alpha \u03b1 time",
+      "early_direction": "North",
+      "late_direction": "Southwest",
+      "early_season": [
+        "Winter"
+      ],
+      "later_season": [
+        "Summer",
+        "Autumn"
+      ],
+      "modes_of_persuasion": [
+        "pathos",
+        "kairos"
+      ],
+      "hermetic_principle": [
+        "Chirality"
+      ],
+      "major_arcana": [
+        "The Magician",
+        "Strength"
+      ],
+      "loveforms": [
+        "Pragma"
+      ],
+      "vedic_pantheon": [
+        "Kubera"
+      ],
+      "bagua": [
+        "K'un \u2637 Earth"
+      ],
+      "sacred_bodies": [
+        "Physical body"
+      ],
+      "stories_of_deep_well": [
+        "Out to Pasture",
+        "Oli sets out",
+        "From Dust to Us"
+      ],
+      "dimensional_trinities": [
+        "Unity"
+      ],
+      "visualTheme": {
+        "primary": "#FF0000",
+        "secondary": "#FFFFFF",
+        "particle": "particle",
+        "animation": "still",
+        "gradient": "linear-gradient(135deg, #FF000033, #FFFFFF66)"
+      },
+      "audioProfile": {
+        "voice": "ONDREA",
+        "voiceId": "d8df024d9f604cccb4426f28fd08bbc4",
+        "ambient": "earth_hum",
+        "frequency": "E",
+        "frequencyHertz": 329.63,
+        "intensity": 5
+      },
+      "created_time": "2023-01-28T21:25:00.000Z",
+      "last_edited_time": "2024-11-19T21:04:00.000Z",
+      "next_step_number": 2,
+      "next_step_name": "Step 2",
+      "previous_step_number": 10,
+      "previous_step_name": "Step 8/0",
+      "changes_above": [
+        "Not Knowing",
+        "Corrupting",
+        "Beauty",
+        "Stripping Away",
+        "Great Taming",
+        "Nourishment",
+        "Decreasing",
+        "Stilling"
+      ],
+      "changes_below": [
+        "Integrity",
+        "Influence",
+        "Retreat",
+        "Limping",
+        "Stilling",
+        "Gradual Progress",
+        "Travelling",
+        "Small Exceeding"
+      ],
+      "tarot_themes": [
+        "manifestation, willpower, confidence",
+        "bravery, forgiveness, courage"
+      ],
+      "vedic_direction": [
+        "North"
+      ],
+      "tarot_elements": [
+        "Air",
+        "Fire"
+      ],
+      "sense": [
+        "Smell",
+        "Poop"
+      ],
+      "money_stage": [
+        "Innocence"
+      ],
+      "rollup": [
+        "1aba0273-c7cc-497b-8ffc-21c26ae4e684"
+      ],
+      "tarot_astrological_entities": [
+        "Mercury",
+        "Leo"
+      ],
+      "dimension_ids": [
+        "d9f52857-5961-430a-8b49-8b780e1535df"
+      ],
+      "timespace_ids": [
+        "9fb4ff83-ccde-489b-9955-78e94ce93905"
+      ],
+      "stories_of_deep_well_ids": [
+        "c67748ca-2064-4437-83dd-ecaa72bd6c8b",
+        "62a6d272-17f4-4ec7-a9fb-da66f837de99",
+        "5ff56abf-87f2-4689-a5a7-3b4901366af3"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-806a-baf6-ccaa539bf478"
+      ],
+      "hermetic_principle_ids": [
+        "ee5e8788-c169-43f4-a4e8-f8c7d565183c"
+      ],
+      "major_arcana_ids": [
+        "b5fca0e1-5d3d-4948-a000-41d59e0d3b98",
+        "2e895a9f-d502-4f86-a238-8aaf48a6a448"
+      ],
+      "loveforms_ids": [
+        "44056025-3b9d-4e8a-b18b-2c7ae57dfcbf"
+      ],
+      "vedic_pantheon_ids": [
+        "0eeb1251-6aa3-4b6e-bd9e-ee0594d2e252"
+      ],
+      "bagua_ids": [
+        "023b357f-f419-48e7-8ad9-0054017df74d"
+      ],
+      "element_ids": [
+        "0e9fcf31-5740-4606-b70a-6ca7c3d18cfe"
+      ],
+      "chakra_ids": [
+        "1aba0273-c7cc-497b-8ffc-21c26ae4e684"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80d3-a583-c398011cedc5"
+      ]
+    },
+    {
+      "id": "41950383-1832-49de-be77-926aa251200e",
+      "number": 2,
+      "name": "Step 2",
+      "element": "Water",
+      "chakra": "Womb",
+      "aura": "orange",
+      "act": "feel",
+      "intent": "have",
+      "quality": "affinity",
+      "aspect": "length",
+      "mantra": "VAM",
+      "numerology": "pair",
+      "loveform_greek": "\u1f14\u03c1\u03c9\u03c2",
+      "dimension": "1-D",
+      "timespace": "Beta \u03b2 time",
+      "early_direction": "West",
+      "late_direction": "North",
+      "early_season": [
+        "Autumn"
+      ],
+      "later_season": [
+        "Winter"
+      ],
+      "modes_of_persuasion": [
+        "ethos",
+        "pathos"
+      ],
+      "hermetic_principle": [
+        "Causality"
+      ],
+      "major_arcana": [
+        "The High Priestess",
+        "The Hanged Human",
+        "The Empress"
+      ],
+      "loveforms": [
+        "\u00c9ros"
+      ],
+      "vedic_pantheon": [
+        "Varuna"
+      ],
+      "bagua": [
+        "K'an \u2635 Water"
+      ],
+      "sacred_bodies": [
+        "Astral body"
+      ],
+      "stories_of_deep_well": [
+        "Herd My Feelings",
+        "Oli finds a friend",
+        "Every Sun is Someone\u2019s"
+      ],
+      "dimensional_trinities": [
+        "Shape"
+      ],
+      "visualTheme": {
+        "primary": "#FFA500",
+        "secondary": "#000000",
+        "particle": "wave",
+        "animation": "breathe",
+        "gradient": "linear-gradient(135deg, #FFA50033, #00000066)"
+      },
+      "audioProfile": {
+        "voice": "ONDREA",
+        "voiceId": "d8df024d9f604cccb4426f28fd08bbc4",
+        "ambient": "water_flow",
+        "frequency": "E",
+        "frequencyHertz": 329.63,
+        "intensity": 5
+      },
+      "created_time": "2023-01-28T21:25:00.000Z",
+      "last_edited_time": "2023-04-18T05:40:00.000Z",
+      "next_step_number": 3,
+      "next_step_name": "Step 3",
+      "previous_step_number": 1,
+      "previous_step_name": "Step 1",
+      "changes_above": [
+        "Possessing",
+        "Biting Through",
+        "Clarity",
+        "Advancing",
+        "Opposing",
+        "The Vessel",
+        "Travelling",
+        "Not Yet Across"
+      ],
+      "changes_below": [
+        "Harmonizing",
+        "Beauty",
+        "Clarity",
+        "Brightness Hidden",
+        "People in the Home",
+        "Radical Change",
+        "Abundance",
+        "Already Across"
+      ],
+      "tarot_themes": [
+        "intuition, subconscious, dreams",
+        "patience, mindfulness, sacrifice",
+        "self-care, fertility, sensuality, motherhood"
+      ],
+      "vedic_direction": [
+        "West"
+      ],
+      "tarot_elements": [
+        "Water",
+        "Water",
+        "Earth"
+      ],
+      "sense": [
+        "Pain",
+        "Touch"
+      ],
+      "money_stage": [
+        "Pain"
+      ],
+      "rollup": [
+        "a171d284-715c-4e4c-86ec-8857cbad332b"
+      ],
+      "tarot_astrological_entities": [
+        "Moon",
+        "Neptune",
+        "Venus"
+      ],
+      "dimension_ids": [
+        "ea4ef5ed-c02b-41b5-b396-131a1a3b428e"
+      ],
+      "timespace_ids": [
+        "7163b922-40c5-4a4a-a46c-e87d6330e819"
+      ],
+      "stories_of_deep_well_ids": [
+        "2dcad9d3-8914-4e15-9226-f8b43dc8bcd7",
+        "98377245-0e64-48de-af91-59af4806630a",
+        "d5e65632-ecc0-42f5-9c6f-324f536b7789"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-8090-afe7-dbb867bc5ec2"
+      ],
+      "hermetic_principle_ids": [
+        "b0d3023c-4c0a-4a1e-81c4-eafada338bb9"
+      ],
+      "major_arcana_ids": [
+        "97e63428-3305-40ed-80c3-c1eff7dd54d1",
+        "cff6659b-f9a0-4096-a22d-7e1588ee337c",
+        "d2de6c24-10fc-40a8-866e-aef902c9afe3"
+      ],
+      "loveforms_ids": [
+        "a5939fa0-237c-4946-97e3-6b910703a218"
+      ],
+      "vedic_pantheon_ids": [
+        "a269a49b-3d65-42fc-bc78-ec6772bd25c3"
+      ],
+      "bagua_ids": [
+        "ac51801b-b8f7-41b0-939c-1aec517ffed7"
+      ],
+      "element_ids": [
+        "a3bff97b-68b9-4c88-a71f-a84538de1a64"
+      ],
+      "chakra_ids": [
+        "a171d284-715c-4e4c-86ec-8857cbad332b"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80ac-8020-c38afbd14f74"
+      ]
+    },
+    {
+      "id": "d5f972db-63aa-465d-9984-4dbe04bfc2a8",
+      "number": 3,
+      "name": "Step 3",
+      "element": "Fire",
+      "chakra": "Navel",
+      "aura": "yellow",
+      "act": "dance",
+      "intent": "make",
+      "quality": "activity",
+      "aspect": "width",
+      "mantra": "RAM",
+      "numerology": "ideal",
+      "loveform_greek": "\u03bc\u03b1\u03bd\u03af\u03b1",
+      "dimension": "2-D",
+      "timespace": "Gamma \u03b3 time",
+      "early_direction": "East",
+      "late_direction": "South",
+      "early_season": [
+        "Spring"
+      ],
+      "later_season": [
+        "Summer"
+      ],
+      "modes_of_persuasion": [
+        "logos",
+        "ethos"
+      ],
+      "hermetic_principle": [
+        "Polarity"
+      ],
+      "major_arcana": [
+        "Death",
+        "The Emperor"
+      ],
+      "loveforms": [
+        "Mania"
+      ],
+      "vedic_pantheon": [
+        "Agni"
+      ],
+      "bagua": [
+        "Li \u2632 Fire"
+      ],
+      "sacred_bodies": [
+        "Mental body"
+      ],
+      "stories_of_deep_well": [
+        "Omo Ablaze",
+        "Oli, Chapter 3",
+        "Sol, Chapter 3"
+      ],
+      "dimensional_trinities": [
+        "Space"
+      ],
+      "visualTheme": {
+        "primary": "#FFFF00",
+        "secondary": "#000000",
+        "particle": "spark",
+        "animation": "spin",
+        "gradient": "linear-gradient(135deg, #FFFF0033, #00000066)"
+      },
+      "audioProfile": {
+        "voice": "ONDREA",
+        "voiceId": "d8df024d9f604cccb4426f28fd08bbc4",
+        "ambient": "fire_crackle",
+        "frequency": "D",
+        "frequencyHertz": 293.66,
+        "intensity": 5
+      },
+      "created_time": "2023-01-28T21:25:00.000Z",
+      "last_edited_time": "2025-02-25T04:32:00.000Z",
+      "next_step_number": 4,
+      "next_step_name": "Step 4",
+      "previous_step_number": 2,
+      "previous_step_name": "Step 2",
+      "changes_above": [],
+      "changes_below": [],
+      "tarot_themes": [
+        "inevitability, transition, metamorphosis",
+        "authority, structure, rules"
+      ],
+      "vedic_direction": [
+        "Southeast"
+      ],
+      "tarot_elements": [
+        "Water",
+        "Fire"
+      ],
+      "sense": [
+        "Hunger",
+        "Heat"
+      ],
+      "money_stage": [
+        "Knowledge"
+      ],
+      "rollup": [
+        "5ec2a1da-c9f1-4246-9dfc-fb6ddc4e309b"
+      ],
+      "tarot_astrological_entities": [
+        "Scorpio",
+        "Aries"
+      ],
+      "dimension_ids": [
+        "b3dc708b-435f-4a04-84c8-60a2f6d4125c"
+      ],
+      "timespace_ids": [
+        "a1d70fca-1e0e-4162-846f-c65a956c9139"
+      ],
+      "stories_of_deep_well_ids": [
+        "dfc1da44-8cdf-4315-ad9c-bbd88c7fa4dc",
+        "8d3f201b-bab6-4ac6-9edc-54485fd93943",
+        "c9d2b260-a754-4a8e-b5d4-cc903d85bf82"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-80cb-aabd-fb155fdb62de"
+      ],
+      "hermetic_principle_ids": [
+        "b4b62eff-d743-4f2e-aef4-03fd1f7f34da"
+      ],
+      "major_arcana_ids": [
+        "747a50d4-5881-4978-84ff-03c900d4fe5b",
+        "f4bd466b-1a23-4384-a1f8-93045567cedd"
+      ],
+      "loveforms_ids": [
+        "c309eb73-846f-427e-af7b-cd508980b2c3"
+      ],
+      "vedic_pantheon_ids": [
+        "ad0bb5ca-5d8c-4507-88dd-501048c56ed2"
+      ],
+      "bagua_ids": [
+        "2872efe3-426a-4f6b-8800-c667f58f0e55"
+      ],
+      "element_ids": [
+        "8c5bf8ab-e936-487d-8d1f-5692feb5c500"
+      ],
+      "chakra_ids": [
+        "5ec2a1da-c9f1-4246-9dfc-fb6ddc4e309b"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-8084-be48-d021f011cd62"
+      ]
+    },
+    {
+      "id": "91828741-a5bd-427a-bd83-dd79ab59de30",
+      "number": 4,
+      "name": "Step 4",
+      "element": "Life",
+      "chakra": "Heart",
+      "aura": "green",
+      "act": "listen",
+      "intent": "live",
+      "quality": "capacity",
+      "aspect": "depth",
+      "mantra": "YAM",
+      "numerology": "balance",
+      "loveform_greek": "\u03c3\u03c4\u03bf\u03c1\u03b3\u03ae",
+      "dimension": "3-D",
+      "timespace": "Delta \u03b4 time",
+      "early_direction": "Southeast",
+      "late_direction": "West",
+      "early_season": [
+        "Spring",
+        "Summer"
+      ],
+      "later_season": [
+        "Autumn"
+      ],
+      "modes_of_persuasion": [
+        "kairos",
+        "pathos"
+      ],
+      "hermetic_principle": [
+        "Rhythm"
+      ],
+      "major_arcana": [
+        "Temperance",
+        "The Hierophant"
+      ],
+      "loveforms": [
+        "Storge"
+      ],
+      "vedic_pantheon": [
+        "Ishana"
+      ],
+      "bagua": [
+        "Dui \u2631 Lake"
+      ],
+      "sacred_bodies": [
+        "Causal body"
+      ],
+      "stories_of_deep_well": [
+        "Anu, Chapter 4",
+        "Oli, Chapter 4",
+        "Sol, Chapter 4"
+      ],
+      "dimensional_trinities": [
+        "Time"
+      ],
+      "visualTheme": {
+        "primary": "#008000",
+        "secondary": "#FFFFFF",
+        "particle": "pulse",
+        "animation": "reverberate",
+        "gradient": "linear-gradient(135deg, #00800033, #FFFFFF66)"
+      },
+      "audioProfile": {
+        "voice": "ONDREA",
+        "voiceId": "d8df024d9f604cccb4426f28fd08bbc4",
+        "ambient": "biological_swarm",
+        "frequency": "A",
+        "frequencyHertz": 440,
+        "intensity": 5
+      },
+      "created_time": "2023-01-28T21:25:00.000Z",
+      "last_edited_time": "2023-04-18T05:43:00.000Z",
+      "next_step_number": 5,
+      "next_step_name": "Break 4/5",
+      "previous_step_number": 3,
+      "previous_step_name": "Step 3",
+      "changes_above": [
+        "Small Taming",
+        "People in the Home",
+        "Increasing",
+        "Gradual Progress",
+        "Subtly Penetrating",
+        "Dispersing",
+        "Inner Truth"
+      ],
+      "changes_below": [
+        "Corrupting",
+        "Great Exceeding",
+        "Lasting",
+        "Coupling",
+        "Pushing Upward",
+        "The Well",
+        "The Vessel",
+        "Subtly Penetrating"
+      ],
+      "tarot_themes": [
+        "blending, harmony, moderation",
+        "tradition, wisdom, ethics, morality"
+      ],
+      "vedic_direction": [
+        "Northeast"
+      ],
+      "tarot_elements": [
+        "Fire",
+        "Earth"
+      ],
+      "sense": [
+        "Taste",
+        "Sound",
+        "Karma"
+      ],
+      "money_stage": [
+        "Understanding"
+      ],
+      "rollup": [
+        "3d7649af-7224-4607-a719-f7d5c3691b61"
+      ],
+      "tarot_astrological_entities": [
+        "Sagittarius",
+        "Taurus"
+      ],
+      "dimension_ids": [
+        "cf0e7920-6118-42f2-b623-c2955f078ac9"
+      ],
+      "timespace_ids": [
+        "38acb6ba-b71d-46ec-9e5b-ae835ca432fb"
+      ],
+      "stories_of_deep_well_ids": [
+        "2e273def-7cce-4957-93dd-531f0cf4b6e4",
+        "2bba5ca4-ef51-418c-8449-e847cbe41654",
+        "3c51f965-84c9-46b7-a7d7-290e277bebc9"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-80b1-adca-f96818331769"
+      ],
+      "hermetic_principle_ids": [
+        "1d762186-b858-4e20-8a56-47e0c00b4cba"
+      ],
+      "major_arcana_ids": [
+        "76a453e0-5bd6-4413-baba-7d20c2eeb6b0",
+        "ee57da8e-d8a2-4011-8902-c4a2e0f20d40"
+      ],
+      "loveforms_ids": [
+        "1d35e77b-b0c4-4687-a5d2-4366df2fe49d"
+      ],
+      "vedic_pantheon_ids": [
+        "19445055-1586-412f-b595-6531f95a6ca9"
+      ],
+      "bagua_ids": [
+        "72ad4fa6-3e59-4523-9623-987ea80d848b"
+      ],
+      "element_ids": [
+        "dccccd73-d4b2-4fb0-8bcd-eeacc2d0954a"
+      ],
+      "chakra_ids": [
+        "3d7649af-7224-4607-a719-f7d5c3691b61"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80eb-8c99-ed4c27722c2c"
+      ]
+    },
+    {
+      "id": "241d833a-f1e2-4ad6-bf88-565ff731c374",
+      "number": 5,
+      "name": "Break 4/5",
+      "element": "Light",
+      "chakra": "Samsara",
+      "aura": "white",
+      "act": "shock",
+      "intent": "improve",
+      "quality": "pity",
+      "aspect": "separation",
+      "mantra": "CACAO",
+      "numerology": "aspire",
+      "loveform_greek": "\u03b5\u1f50\u03b4\u03b1\u03b9\u03bc\u03bf\u03bd\u03af\u03b1",
+      "dimension": "8-D",
+      "timespace": "Epsilon \u03b5 time",
+      "early_direction": "Center",
+      "late_direction": "Center",
+      "early_season": [
+        "Winter",
+        "Spring"
+      ],
+      "later_season": [
+        "Spring",
+        "Summer"
+      ],
+      "modes_of_persuasion": [
+        "pathos",
+        "logos"
+      ],
+      "hermetic_principle": [
+        "Chirality",
+        "Polarity"
+      ],
+      "major_arcana": [
+        "The Devil",
+        "The Tower"
+      ],
+      "loveforms": [
+        "Eudaimonia"
+      ],
+      "vedic_pantheon": [
+        "Vishnu"
+      ],
+      "bagua": [
+        "Yang \u268a Light"
+      ],
+      "sacred_bodies": [
+        "Causal body"
+      ],
+      "stories_of_deep_well": [
+        "Anu, Chapter 5",
+        "Oli, Chapter 5",
+        "Sol, Chapter 5",
+        "Fight for Earth"
+      ],
+      "dimensional_trinities": [
+        "Transcendence"
+      ],
+      "visualTheme": {
+        "primary": "#FFFFFF",
+        "secondary": "#000000",
+        "particle": "star",
+        "animation": "pulse",
+        "gradient": "linear-gradient(135deg, #FFFFFF33, #00000066)"
+      },
+      "audioProfile": {
+        "voice": "ONDREA",
+        "voiceId": "d8df024d9f604cccb4426f28fd08bbc4",
+        "ambient": "ethereal_space",
+        "frequency": "C",
+        "frequencyHertz": 261.63,
+        "intensity": 5
+      },
+      "created_time": "2023-01-28T21:25:00.000Z",
+      "last_edited_time": "2023-04-18T06:09:00.000Z",
+      "next_step_number": 6,
+      "next_step_name": "Step 5",
+      "previous_step_number": 4,
+      "previous_step_name": "Step 4",
+      "changes_above": [
+        "Earth",
+        "Leading",
+        "Flow",
+        "Integrity",
+        "Nearing",
+        "Returning",
+        "Brightness Hidden",
+        "Pushing Upward"
+      ],
+      "changes_below": [
+        "Earth",
+        "Seeking Union",
+        "Blocked",
+        "Enthusing",
+        "Stripping Away",
+        "Advancing",
+        "Gathering"
+      ],
+      "tarot_themes": [
+        "bondage, materialism, oppression, excess",
+        "chaos, disruption, upheaval, disaster, catastrophe, shock"
+      ],
+      "vedic_direction": [
+        "Nadir"
+      ],
+      "tarot_elements": [
+        "Earth",
+        "Fire"
+      ],
+      "sense": [
+        "Shock",
+        "Prey"
+      ],
+      "money_stage": [
+        "Loss"
+      ],
+      "rollup": [
+        "1aba0273-c7cc-497b-8ffc-21c26ae4e684",
+        "5ec2a1da-c9f1-4246-9dfc-fb6ddc4e309b"
+      ],
+      "tarot_astrological_entities": [
+        "Capricorn",
+        "Mars"
+      ],
+      "dimension_ids": [
+        "57f4d9b9-d9bb-4023-a3aa-c177977b0317"
+      ],
+      "timespace_ids": [
+        "b4eb7d23-cc84-44d7-9b61-9ee6c48e767f"
+      ],
+      "stories_of_deep_well_ids": [
+        "889fcb14-9139-4052-abc5-e808b1f9c023",
+        "48d69a95-9661-442c-819c-e1b29cb6f547",
+        "79877ff9-193a-477d-ad7d-0d0f28363a9f",
+        "17f2ddb8-8139-80c1-ab06-ef1c79c02e42"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-80b1-adca-f96818331769"
+      ],
+      "hermetic_principle_ids": [
+        "ee5e8788-c169-43f4-a4e8-f8c7d565183c",
+        "b4b62eff-d743-4f2e-aef4-03fd1f7f34da"
+      ],
+      "major_arcana_ids": [
+        "46d61882-f1f9-4c41-a83e-e9776712a6af",
+        "3d7c2262-2765-452c-8bb2-c1a5df09155c"
+      ],
+      "loveforms_ids": [
+        "b1e50399-f05f-405a-bea7-339b3ba1f6cf"
+      ],
+      "vedic_pantheon_ids": [
+        "dff80407-0d53-4807-920c-c519a4e9a322"
+      ],
+      "bagua_ids": [
+        "d29d2f64-4b8c-4952-acfe-f3766a3d1f44"
+      ],
+      "element_ids": [
+        "268af1d8-0e4f-4936-894a-eca343bdd1ef"
+      ],
+      "chakra_ids": [
+        "268a56f9-3c9e-4021-975d-0f56edf38b0c"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80eb-96db-e4cc9e4f6a0e"
+      ]
+    },
+    {
+      "id": "ad679517-35a3-4009-b12e-2edf3cd65a32",
+      "number": 6,
+      "name": "Step 5",
+      "element": "Air",
+      "chakra": "Voice",
+      "aura": "blue",
+      "act": "sing",
+      "intent": "say",
+      "quality": "causality",
+      "aspect": "duration",
+      "mantra": "HAM",
+      "numerology": "beauty",
+      "loveform_greek": "\u03c6\u03b9\u03bb\u03af\u03b1",
+      "dimension": "4-D",
+      "timespace": "Zeta \u03b6 time",
+      "early_direction": "Southwest",
+      "late_direction": "Southeast",
+      "early_season": [
+        "Summer",
+        "Autumn"
+      ],
+      "later_season": [
+        "Spring",
+        "Summer"
+      ],
+      "modes_of_persuasion": [
+        "ethos",
+        "logos"
+      ],
+      "hermetic_principle": [
+        "Vibration"
+      ],
+      "major_arcana": [
+        "The Lovers",
+        "The Chariot"
+      ],
+      "loveforms": [
+        "Philia"
+      ],
+      "vedic_pantheon": [
+        "Vayu"
+      ],
+      "bagua": [
+        "Xun \u2634 Wind"
+      ],
+      "sacred_bodies": [
+        "Buddha body"
+      ],
+      "stories_of_deep_well": [
+        "Anu, Chapter 6",
+        "Oli, Chapter 6",
+        "Sol, Chapter 6"
+      ],
+      "dimensional_trinities": [
+        "Transcendence"
+      ],
+      "visualTheme": {
+        "primary": "#0000FF",
+        "secondary": "#FFFFFF",
+        "particle": "swirl",
+        "animation": "resonate",
+        "gradient": "linear-gradient(135deg, #0000FF33, #FFFFFF66)"
+      },
+      "audioProfile": {
+        "voice": "ONDREA",
+        "voiceId": "d8df024d9f604cccb4426f28fd08bbc4",
+        "ambient": "gentle_breeze",
+        "frequency": "C",
+        "frequencyHertz": 261.63,
+        "intensity": 5
+      },
+      "created_time": "2023-02-02T08:40:00.000Z",
+      "last_edited_time": "2023-04-18T05:44:00.000Z",
+      "next_step_number": 7,
+      "next_step_name": "Step 6",
+      "previous_step_number": 5,
+      "previous_step_name": "Break 4/5",
+      "changes_above": [
+        "Enthusing",
+        "Lasting",
+        "Great Vigour",
+        "Release",
+        "Shock",
+        "The Marrying Maiden",
+        "Abundance",
+        "Small Exceeding"
+      ],
+      "changes_below": [
+        "Sprouting",
+        "Following",
+        "Biting Through",
+        "Returning",
+        "Without Entanglement",
+        "Nourishment",
+        "Increasing",
+        "Shock"
+      ],
+      "tarot_themes": [
+        "relationships, harmony, compassion",
+        "focus, determination, drive"
+      ],
+      "vedic_direction": [
+        "Northwest"
+      ],
+      "tarot_elements": [
+        "Air",
+        "Water"
+      ],
+      "sense": [
+        "Breath",
+        "Voice"
+      ],
+      "money_stage": [
+        "Vigor"
+      ],
+      "rollup": [
+        "c49bd1b3-7ee4-4fab-b92a-b669de6b043c"
+      ],
+      "tarot_astrological_entities": [
+        "Gemini",
+        "Cancer"
+      ],
+      "dimension_ids": [
+        "86503caa-afdd-4605-b102-eaafad1aa237"
+      ],
+      "timespace_ids": [
+        "c459e5dc-aac9-4c27-be23-d153c64a3d88"
+      ],
+      "stories_of_deep_well_ids": [
+        "190f0c2c-5aa2-40f0-806a-640d9d398bf6",
+        "501f1c8f-e86d-4222-96ce-d49992b6338e",
+        "f9d4b5c1-9401-4023-a92e-a89656284f12"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-80e0-9070-dc5b9679698a"
+      ],
+      "hermetic_principle_ids": [
+        "aef6d662-1a1e-4a7f-9faf-9028270aa68e"
+      ],
+      "major_arcana_ids": [
+        "07b31a3e-4274-4c02-b536-7d3411594ed6",
+        "c12a8383-bfda-47bf-b81a-69b8d326e56d"
+      ],
+      "loveforms_ids": [
+        "dae1b782-6608-4674-abf6-2ef880fb921e"
+      ],
+      "vedic_pantheon_ids": [
+        "a4d43ab8-1eea-4f95-8497-6b5058b3269a"
+      ],
+      "bagua_ids": [
+        "c5e64946-6069-4a54-a2b3-a103fe68b7ed"
+      ],
+      "element_ids": [
+        "4774d1f3-fabc-490b-83c9-640fbf6fdbe2"
+      ],
+      "chakra_ids": [
+        "c49bd1b3-7ee4-4fab-b92a-b669de6b043c"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80eb-96db-e4cc9e4f6a0e"
+      ]
+    },
+    {
+      "id": "75b79453-2f44-4365-bc14-e6e551a547ce",
+      "number": 7,
+      "name": "Step 6",
+      "element": "\u00c6ther",
+      "chakra": "Third eye",
+      "aura": "violet",
+      "act": "think",
+      "intent": "envision",
+      "quality": "eternity",
+      "aspect": "choice",
+      "mantra": "AUM",
+      "numerology": "action",
+      "loveform_greek": "\u03c6\u03b9\u03bb\u03b1\u03c5\u03c4\u03af\u03b1",
+      "dimension": "5-D",
+      "timespace": "Eta \u03b7 time",
+      "early_direction": "South",
+      "late_direction": "Northwest",
+      "early_season": [
+        "Summer"
+      ],
+      "later_season": [
+        "Autumn",
+        "Winter"
+      ],
+      "modes_of_persuasion": [
+        "kairos",
+        "logos"
+      ],
+      "hermetic_principle": [
+        "Correspondence"
+      ],
+      "major_arcana": [
+        "The Star",
+        "The Moon"
+      ],
+      "loveforms": [
+        "Philautia"
+      ],
+      "vedic_pantheon": [
+        "Brahma"
+      ],
+      "bagua": [
+        "Qian \u2630 Heaven"
+      ],
+      "sacred_bodies": [
+        "Atman body"
+      ],
+      "stories_of_deep_well": [
+        "Anu, Chapter 7",
+        "Oli, Chapter 7",
+        "Sol, Chapter 7"
+      ],
+      "dimensional_trinities": [
+        "Creation"
+      ],
+      "visualTheme": {
+        "primary": "#EE82EE",
+        "secondary": "#000000",
+        "particle": "swirl",
+        "animation": "thought",
+        "gradient": "linear-gradient(135deg, #EE82EE33, #00000066)"
+      },
+      "audioProfile": {
+        "voice": "ONDREA",
+        "voiceId": "d8df024d9f604cccb4426f28fd08bbc4",
+        "ambient": "cosmic_drone",
+        "frequency": "G",
+        "frequencyHertz": 392,
+        "intensity": 5
+      },
+      "created_time": "2023-02-19T10:56:00.000Z",
+      "last_edited_time": "2023-04-18T05:44:00.000Z",
+      "next_step_number": 8,
+      "next_step_name": "Step 7",
+      "previous_step_number": 6,
+      "previous_step_name": "Step 5",
+      "changes_above": [],
+      "changes_below": [],
+      "tarot_themes": [
+        "hope, optimism, trust, direction",
+        "shadows, illusion, unseen, subconscious"
+      ],
+      "vedic_direction": [
+        "Zenith"
+      ],
+      "tarot_elements": [
+        "Air",
+        "Water"
+      ],
+      "sense": [
+        "Depth",
+        "Sight",
+        "Likelihood"
+      ],
+      "money_stage": [
+        "Vision"
+      ],
+      "rollup": [
+        "cea7aad3-1bfe-4582-939f-1da728616062"
+      ],
+      "tarot_astrological_entities": [
+        "Aquarius",
+        "Pisces"
+      ],
+      "dimension_ids": [
+        "3e3578b4-2148-426a-958a-61f71a338603"
+      ],
+      "timespace_ids": [
+        "107c6d0f-fe2d-414b-b4b9-732c84af6f55"
+      ],
+      "stories_of_deep_well_ids": [
+        "d63aea97-f5e5-421a-b691-3512d2ae224a",
+        "617bf3bf-6e31-46aa-afcc-1c55aac71279",
+        "20fe0bb2-90d3-4de1-99be-516e5e37a582"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-8039-b765-c5b85eeb0083"
+      ],
+      "hermetic_principle_ids": [
+        "8239de11-2d8f-4c82-b2b9-48270a04610e"
+      ],
+      "major_arcana_ids": [
+        "ea0986dd-95c1-45ce-847e-32dcf4955e49",
+        "09ccb24e-0d68-4358-aadb-bcd7a4897c0f"
+      ],
+      "loveforms_ids": [
+        "086bc5cb-6458-4ea7-9c07-a24b641d09e9"
+      ],
+      "vedic_pantheon_ids": [
+        "bd3dc97b-8a7a-46bb-a424-0a7bdde1f60a"
+      ],
+      "bagua_ids": [
+        "c26ec072-82bb-445e-abe1-928c38a8eb1c"
+      ],
+      "element_ids": [
+        "49fa6258-1f36-4b97-b0b7-bdcf53411bc2"
+      ],
+      "chakra_ids": [
+        "cea7aad3-1bfe-4582-939f-1da728616062"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80bc-8d82-f02f3b2ef11a"
+      ]
+    },
+    {
+      "id": "27d1695c-3849-4699-8681-7447da4a0027",
+      "number": 8,
+      "name": "Step 7",
+      "element": "Charge",
+      "chakra": "Crown",
+      "aura": "rainbow",
+      "act": "intend",
+      "intent": "know",
+      "quality": "unity",
+      "aspect": "perspective",
+      "mantra": "AH",
+      "numerology": "perfect",
+      "loveform_greek": "\u1f00\u03b3\u03ac\u03c0\u03b7",
+      "dimension": "6-D",
+      "timespace": "Theta \u03b8 time",
+      "early_direction": "Northeast",
+      "late_direction": "East",
+      "early_season": [
+        "Winter",
+        "Spring"
+      ],
+      "later_season": [
+        "Spring"
+      ],
+      "modes_of_persuasion": [
+        "kairos",
+        "ethos"
+      ],
+      "hermetic_principle": [
+        "Mentality"
+      ],
+      "major_arcana": [
+        "Justice",
+        "The Sun"
+      ],
+      "loveforms": [
+        "Ag\u00e1pe"
+      ],
+      "vedic_pantheon": [
+        "Indra"
+      ],
+      "bagua": [
+        "Zhen \u2633 Thunder"
+      ],
+      "sacred_bodies": [
+        "Monad body"
+      ],
+      "stories_of_deep_well": [
+        "Anu, Chapter 8",
+        "Oli, Chapter 8",
+        "Sol, Chapter 8"
+      ],
+      "dimensional_trinities": [
+        "Light"
+      ],
+      "visualTheme": {
+        "primary": "#FF00FF",
+        "secondary": "#FFFFFF",
+        "particle": "spark",
+        "animation": "flow",
+        "gradient": "linear-gradient(135deg, #FF00FF33, #FFFFFF66)"
+      },
+      "audioProfile": {
+        "voice": "ONDREA",
+        "voiceId": "d8df024d9f604cccb4426f28fd08bbc4",
+        "ambient": "electrical_hum",
+        "frequency": "D",
+        "frequencyHertz": 293.66,
+        "intensity": 5
+      },
+      "created_time": "2023-02-19T10:56:00.000Z",
+      "last_edited_time": "2023-04-18T06:09:00.000Z",
+      "next_step_number": 9,
+      "next_step_name": "Crisis 7/8",
+      "previous_step_number": 7,
+      "previous_step_name": "Step 6",
+      "changes_above": [
+        "Sprouting",
+        "Waiting",
+        "Seeking Union",
+        "Repeating Chasms",
+        "Limping",
+        "The Well",
+        "Measuring",
+        "Already Across"
+      ],
+      "changes_below": [
+        "Not Knowing",
+        "Arguing",
+        "Leading",
+        "Repeating Chasms",
+        "Release",
+        "Confined",
+        "Dispersing",
+        "Not Yet Across"
+      ],
+      "tarot_themes": [
+        "balance, fairness, accountability",
+        "joy, enthusiasm, success, awakening"
+      ],
+      "vedic_direction": [
+        "East"
+      ],
+      "tarot_elements": [
+        "Air",
+        "Fire"
+      ],
+      "sense": [
+        "Love",
+        "Proximity"
+      ],
+      "money_stage": [
+        "Aloha"
+      ],
+      "rollup": [
+        "6731227a-199d-4b80-9932-21c3a20e9614"
+      ],
+      "tarot_astrological_entities": [
+        "Libra",
+        "Sun"
+      ],
+      "dimension_ids": [
+        "df4de8a7-4457-4685-924f-45c1517e4953"
+      ],
+      "timespace_ids": [
+        "2205800d-b44e-4bac-aece-14b0d8a8da37"
+      ],
+      "stories_of_deep_well_ids": [
+        "d79354de-ae46-47fd-80d5-bff789017e22",
+        "6428b282-eaf0-4cb6-9637-f424533e45b7",
+        "25f4ce48-d3da-43b8-8137-fc6a0d7bb314"
+      ],
+      "sacred_bodies_ids": [
+        "1a52ddb8-8139-8019-9008-c276119c9909"
+      ],
+      "hermetic_principle_ids": [
+        "c115accc-8a7d-4ca9-933c-a1b5d666bdef"
+      ],
+      "major_arcana_ids": [
+        "1739d16c-c2bf-46fa-a15e-a261a64950f2",
+        "e1815774-0617-4c12-8cae-2d00c59d21a1"
+      ],
+      "loveforms_ids": [
+        "a8c2de35-8e0a-4abf-8025-d74113bbf6b7"
+      ],
+      "vedic_pantheon_ids": [
+        "7c5d51b8-53a5-46ee-acd4-a440622462a9"
+      ],
+      "bagua_ids": [
+        "4a37e5c9-33d4-4095-95e3-ef247cf081a0"
+      ],
+      "element_ids": [
+        "446f2b09-5f4d-4a32-8f30-c139d1d62b97"
+      ],
+      "chakra_ids": [
+        "6731227a-199d-4b80-9932-21c3a20e9614"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80e4-939a-e500e0a0e491"
+      ]
+    },
+    {
+      "id": "6484f8fe-68be-4451-9ec0-9add634e6006",
+      "number": 9,
+      "name": "Crisis 7/8",
+      "element": "Dark",
+      "chakra": "Maya",
+      "aura": "black",
+      "act": "fall",
+      "intent": "surrender",
+      "quality": "calamity",
+      "aspect": "chaos",
+      "mantra": "\u2014\u2014\u2014",
+      "numerology": "crisis",
+      "loveform_greek": "\u03be\u03b5\u03bd\u03af\u03b1",
+      "dimension": "9-D",
+      "timespace": "Iota \u03b9 time",
+      "early_direction": "Center",
+      "late_direction": "Center",
+      "early_season": [],
+      "later_season": [],
+      "modes_of_persuasion": [
+        "pathos",
+        "kairos"
+      ],
+      "hermetic_principle": [
+        "Causality",
+        "Correspondence"
+      ],
+      "major_arcana": [
+        "The Hermit",
+        "Judgement",
+        "The Fool"
+      ],
+      "loveforms": [
+        "Xenia"
+      ],
+      "vedic_pantheon": [
+        "Nirriti"
+      ],
+      "bagua": [
+        "Yin \u268b Dark"
+      ],
+      "stories_of_deep_well": [
+        "Anu, Chapter 9",
+        "Oli, Chapter 9",
+        "Sol, Chapter 9",
+        "Fight for Earth"
+      ],
+      "dimensional_trinities": [
+        "Firmament"
+      ],
+      "visualTheme": {
+        "primary": "#000000",
+        "secondary": "#FFFFFF",
+        "particle": "void",
+        "animation": "fall",
+        "gradient": "linear-gradient(135deg, #00000033, #FFFFFF66)"
+      },
+      "audioProfile": {
+        "voice": "ONDREA",
+        "voiceId": "d8df024d9f604cccb4426f28fd08bbc4",
+        "ambient": "atmospheric_drone",
+        "frequency": "F",
+        "frequencyHertz": 349.23,
+        "intensity": 5
+      },
+      "created_time": "2023-02-19T10:56:00.000Z",
+      "last_edited_time": "2023-04-18T05:43:00.000Z",
+      "next_step_number": 10,
+      "next_step_name": "Step 8/0",
+      "previous_step_number": 8,
+      "previous_step_name": "Step 7",
+      "changes_above": [
+        "Following",
+        "Great Exceeding",
+        "Influence",
+        "Deciding",
+        "Gathering",
+        "Confined",
+        "Radical Change",
+        "Opening"
+      ],
+      "changes_below": [
+        "Treading",
+        "Nearing",
+        "Opposing",
+        "Decreasing",
+        "The Marrying Maiden",
+        "Opening",
+        "Measuring",
+        "Inner Truth"
+      ],
+      "tarot_themes": [
+        "solitude, meditation, introspection",
+        "freedom, acceptance, honesty, purpose",
+        "potential, luck, naivete, aimlessness"
+      ],
+      "vedic_direction": [
+        "Southwest"
+      ],
+      "tarot_elements": [
+        "Earth",
+        "Fire",
+        "Air"
+      ],
+      "sense": [
+        "Death",
+        "Motion",
+        "Danger"
+      ],
+      "money_stage": [
+        "Bankruptcy"
+      ],
+      "rollup": [
+        "a171d284-715c-4e4c-86ec-8857cbad332b",
+        "cea7aad3-1bfe-4582-939f-1da728616062"
+      ],
+      "tarot_astrological_entities": [
+        "Virgo",
+        "Pluto",
+        "Uranus"
+      ],
+      "dimension_ids": [
+        "a9f4051d-c2f1-4b6c-8230-c9e85679efb0"
+      ],
+      "timespace_ids": [
+        "215404e8-eeaa-40c7-9269-165d683b6019"
+      ],
+      "stories_of_deep_well_ids": [
+        "399aee8a-acee-46d3-b479-b7e8dd885b5c",
+        "d0088503-7877-4982-86d0-d7c46cc54835",
+        "683f6a71-a116-4f66-b68c-6416f9eb9319",
+        "17f2ddb8-8139-80c1-ab06-ef1c79c02e42"
+      ],
+      "hermetic_principle_ids": [
+        "b0d3023c-4c0a-4a1e-81c4-eafada338bb9",
+        "8239de11-2d8f-4c82-b2b9-48270a04610e"
+      ],
+      "major_arcana_ids": [
+        "a7de6967-d6bd-4348-8503-25a887fc15be",
+        "443f6b02-b27f-4b79-88c1-ce405cb98f94",
+        "da7e8f55-1f4a-4ab3-864b-9cf3d7f1a8b9"
+      ],
+      "loveforms_ids": [
+        "10c0651e-afe7-462f-820f-3bb066ecb95e"
+      ],
+      "vedic_pantheon_ids": [
+        "ef9c6439-7dfa-4bec-bcec-eae6eae30520"
+      ],
+      "bagua_ids": [
+        "1494455b-ffc3-4ca9-9bd1-629c75df7acf"
+      ],
+      "element_ids": [
+        "8d51aa4a-bc03-441b-8ad5-4a9ab9f86469"
+      ],
+      "chakra_ids": [
+        "0d92f172-96c6-4596-9b27-b4ebfc6bdf78"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-8080-b618-cbe6eb5db282"
+      ]
+    },
+    {
+      "id": "93e88e93-f73e-47a7-ae8d-bed948c250ee",
+      "number": 10,
+      "name": "Step 8/0",
+      "element": "Stone",
+      "chakra": "Earthstar",
+      "aura": "brown",
+      "act": "return",
+      "intent": "complete",
+      "quality": "cyclicity",
+      "aspect": "god",
+      "mantra": "HUM",
+      "numerology": "wander",
+      "loveform_greek": "\u03bf\u1f50\u03c3\u03af\u03b1",
+      "dimension": "7-D",
+      "timespace": "Kappa \u03ba time",
+      "early_direction": "Northwest",
+      "late_direction": "Northeast",
+      "early_season": [
+        "Autumn",
+        "Winter"
+      ],
+      "later_season": [
+        "Winter",
+        "Spring"
+      ],
+      "modes_of_persuasion": [
+        "kairos",
+        "ethos"
+      ],
+      "hermetic_principle": [
+        "Correspondence",
+        "Mentality",
+        "Polarity",
+        "Causality",
+        "Chirality",
+        "Vibration",
+        "Rhythm"
+      ],
+      "major_arcana": [
+        "The Wheel of Fortune",
+        "The World"
+      ],
+      "loveforms": [
+        "Ousia"
+      ],
+      "vedic_pantheon": [
+        "Yama"
+      ],
+      "bagua": [
+        "Gen \u2636 Mountain"
+      ],
+      "stories_of_deep_well": [
+        "Anu, Chapter 0/10",
+        "Oli, Chapter 0/10",
+        "Sol, Chapter 0/10"
+      ],
+      "dimensional_trinities": [
+        "Divine",
+        "Unity"
+      ],
+      "visualTheme": {
+        "primary": "#964B00",
+        "secondary": "#FFFFFF",
+        "particle": "rock",
+        "animation": "merge",
+        "gradient": "linear-gradient(135deg, #964B0033, #FFFFFF66)"
+      },
+      "audioProfile": {
+        "voice": "ONDREA",
+        "voiceId": "d8df024d9f604cccb4426f28fd08bbc4",
+        "ambient": "stone_rubbing",
+        "frequency": "B",
+        "frequencyHertz": 493.88,
+        "intensity": 5
+      },
+      "created_time": "2023-02-19T10:56:00.000Z",
+      "last_edited_time": "2023-10-30T23:58:00.000Z",
+      "next_step_number": 1,
+      "next_step_name": "Step 1",
+      "previous_step_number": 9,
+      "previous_step_name": "Crisis 7/8",
+      "changes_above": [
+        "Creative Force",
+        "Arguing",
+        "Treading",
+        "Blocked",
+        "Harmonizing",
+        "Without Entanglement",
+        "Retreat",
+        "Coupling"
+      ],
+      "changes_below": [
+        "Creative Force",
+        "Waiting",
+        "Small Taming",
+        "Flow",
+        "Possessing",
+        "Great Taming",
+        "Great Vigour",
+        "Deciding"
+      ],
+      "tarot_themes": [
+        "change, destiny, responsibility, interconnectedness",
+        "completion, endings, closure, rebirth"
+      ],
+      "vedic_direction": [
+        "South"
+      ],
+      "tarot_elements": [
+        "Fire",
+        "Earth"
+      ],
+      "sense": [
+        "Pressure",
+        "Urine"
+      ],
+      "money_stage": [
+        "Bootstrapping"
+      ],
+      "rollup": [
+        "cea7aad3-1bfe-4582-939f-1da728616062",
+        "6731227a-199d-4b80-9932-21c3a20e9614",
+        "5ec2a1da-c9f1-4246-9dfc-fb6ddc4e309b",
+        "a171d284-715c-4e4c-86ec-8857cbad332b",
+        "1aba0273-c7cc-497b-8ffc-21c26ae4e684",
+        "c49bd1b3-7ee4-4fab-b92a-b669de6b043c",
+        "3d7649af-7224-4607-a719-f7d5c3691b61"
+      ],
+      "tarot_astrological_entities": [
+        "Jupiter",
+        "Saturn",
+        "Earth"
+      ],
+      "dimension_ids": [
+        "da038907-bbdd-47b5-b498-3fb4564aac80"
+      ],
+      "timespace_ids": [
+        "cb7c49fd-900d-4199-9860-2a152868beb0"
+      ],
+      "stories_of_deep_well_ids": [
+        "7372eba7-e97c-4502-9424-bf3012b88a05",
+        "5282a59b-781d-490a-aabc-cea489cda03f",
+        "a2cd89d1-9dd6-4672-a7b7-4fa46adebb3a"
+      ],
+      "hermetic_principle_ids": [
+        "8239de11-2d8f-4c82-b2b9-48270a04610e",
+        "c115accc-8a7d-4ca9-933c-a1b5d666bdef",
+        "b4b62eff-d743-4f2e-aef4-03fd1f7f34da",
+        "b0d3023c-4c0a-4a1e-81c4-eafada338bb9",
+        "ee5e8788-c169-43f4-a4e8-f8c7d565183c",
+        "aef6d662-1a1e-4a7f-9faf-9028270aa68e",
+        "1d762186-b858-4e20-8a56-47e0c00b4cba"
+      ],
+      "major_arcana_ids": [
+        "54d41dfc-5ef3-4474-b434-24d6388038c7",
+        "5b669628-e22c-4ffb-9c31-96e1d946ee9b"
+      ],
+      "loveforms_ids": [
+        "2c5a214f-3a4e-488e-b84e-8f5ef4d4eee3"
+      ],
+      "vedic_pantheon_ids": [
+        "7f00eff7-2ed3-4277-ba86-5621980f2444"
+      ],
+      "bagua_ids": [
+        "0ac8229f-0c8d-420b-b6bf-3fcd5033a915"
+      ],
+      "element_ids": [
+        "56f86042-6415-4456-9862-fb3967377a78"
+      ],
+      "chakra_ids": [
+        "41b5a6fd-4a35-4c01-8695-42e771303097"
+      ],
+      "dimensional_trinities_ids": [
+        "1a52ddb8-8139-80c9-8b6d-ca4fc10b6596",
+        "1a52ddb8-8139-80d3-a583-c398011cedc5"
+      ]
+    }
+  ]
+}
