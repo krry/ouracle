@@ -137,3 +137,66 @@ function ttsVoiceStore() {
 	};
 }
 export const ttsVoice = ttsVoiceStore();
+
+// ── SeekerState ────────────────────────────────────────────────────────────────
+// Aggregated state visible in the status panel: identity + inferences
+export interface VagalInfo {
+	probable: 'ventral' | 'sympathetic' | 'dorsal' | 'mixed' | null;
+	confidence: 'low' | 'medium' | 'high' | null;
+	reasoning?: string;
+}
+
+export interface BeliefInfo {
+	pattern: 'scarcity' | 'unworthiness' | 'control' | 'isolation' | 'silence' | 'blindness' | 'separation' | null;
+	confidence: 'low' | 'medium' | 'high' | null;
+	reasoning?: string;
+}
+
+export interface QualityInfo {
+	quality: 'entity' | 'affinity' | 'activity' | 'pity' | 'capacity' | 'causality' | 'eternity' | 'unity' | 'calamity' | 'cyclicity' | null;
+	confidence: 'low' | 'medium' | 'high' | null;
+	is_shock: boolean;
+	reasoning?: string;
+}
+
+export interface AffectInfo {
+	valence: number | null; // -1.0 to +1.0
+	arousal: number | null; // -1.0 to +1.0
+	gloss: string | null;
+	confidence: 'low' | 'medium' | 'high' | null;
+	reasoning?: string;
+}
+
+export interface SeekerState {
+	handle?: string | null;
+	vagal: VagalInfo;
+	belief: BeliefInfo;
+	quality: QualityInfo;
+	affect: AffectInfo;
+}
+
+function seekerStateStore() {
+	const initial: SeekerState = {
+		handle: null,
+		vagal: { probable: null, confidence: null },
+		belief: { pattern: null, confidence: null },
+		quality: { quality: null, confidence: null, is_shock: false },
+		affect: { valence: null, arousal: null, gloss: null, confidence: null },
+	};
+	const { subscribe, set, update } = writable<SeekerState>(initial);
+	return {
+		subscribe,
+		set: (v: SeekerState) => set(v),
+		update: (fn: (prev: SeekerState) => SeekerState) => update(fn),
+		setPartial: (fn: Partial<SeekerState> | ((prev: SeekerState) => Partial<SeekerState>)) => {
+			if (typeof fn === 'function') {
+				update(prev => ({ ...prev, ...(fn as (prev: SeekerState) => Partial<SeekerState>)(prev) }));
+			} else {
+				update(prev => ({ ...prev, ...fn }));
+			}
+		},
+		reset: () => set(initial),
+	};
+}
+
+export const seekerState = seekerStateStore();

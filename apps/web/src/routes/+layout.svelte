@@ -5,7 +5,8 @@
   import type { Snippet } from 'svelte';
   import TopBar from '$lib/TopBar.svelte';
   import AmbientControls from '$lib/AmbientControls.svelte';
-  import { ttsEnabled, ttsVoice, creds, authed } from '$lib/stores';
+  import SeekerStatusPanel from '$lib/SeekerStatusPanel.svelte';
+  import { ttsEnabled, ttsVoice, creds, authed, seekerState } from '$lib/stores';
   import type { Credentials, TtsVoice } from '$lib/stores';
   import { signOut } from '$lib/auth';
 
@@ -21,6 +22,7 @@
   async function leave() {
     await signOut({ fetchOptions: { onSuccess: () => creds.logout() } });
     creds.logout();
+    seekerState.reset();
     closeDrawer();
   }
 </script>
@@ -93,6 +95,10 @@
             <span class="dm-handle">{($creds as Credentials | null)?.handle}</span>
           {/if}
           <button class="dm-leave" onclick={leave} title="leave">⌁ sign out</button>
+        </div>
+        <!-- Seeker status panel in drawer (shows brief) -->
+        <div class="drawer-mobile-row dm-seeker-status">
+          <svelte:component this={SeekerStatusPanel} />
         </div>
       {/if}
     </div>

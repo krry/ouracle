@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
-	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered } from './stores';
-	import type { CardData, RiteData, TtsVoice } from './stores';
+	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState } from './stores';
+	import type { CardData, RiteData, TtsVoice, VagalInfo, BeliefInfo, QualityInfo } from './stores';
 	import { enquire, tts, stt } from './api';
 	import Breath from './Breath.svelte';
 	import OraclePanel from './OraclePanel.svelte';
+	import SeekerStatusPanel from './SeekerStatusPanel.svelte';
 	import type { Credentials } from './stores';
 	import { incrementGuestTurns, getGuestTurns, GUEST_LIMIT } from './guestSession';
 	import { TotemSession } from './totemSession';
@@ -197,10 +198,44 @@
 					if (stage === 'complete' || stage === 'reintegration_complete') {
 						pendingRite.set(null);
 					}
-				} else if (event.type === 'continue_offered') {
-					continueOffered.set(true);
+} else if (event.type === 'continue_offered') {
+			continueOffered.set(true);
+		} else if (event.type === 'affect') {
+			seekerState.setPartial({
+				affect: {
+					valence: event.valence as number | null,
+					arousal: event.arousal as number | null,
+					gloss: event.gloss as string | null,
+					confidence: event.confidence as 'low' | 'medium' | 'high' | null,
 				}
-			}, mode)) { /* yield */ }
+			});
+		} else if (event.type === 'vagal') {
+			seekerState.setPartial({
+				vagal: {
+					probable: event.probable as VagalInfo['probable'],
+					confidence: event.confidence as VagalInfo['confidence'],
+					reasoning: event.reasoning as string | undefined,
+				}
+			});
+		} else if (event.type === 'belief') {
+			seekerState.setPartial({
+				belief: {
+					pattern: event.pattern as BeliefInfo['pattern'],
+					confidence: event.confidence as BeliefInfo['confidence'],
+					reasoning: event.reasoning as string | undefined,
+				}
+			});
+		} else if (event.type === 'quality') {
+			seekerState.setPartial({
+				quality: {
+					quality: event.quality as QualityInfo['quality'],
+					confidence: event.confidence as QualityInfo['confidence'],
+					is_shock: event.is_shock as boolean,
+					reasoning: event.reasoning as string | undefined,
+				}
+			});
+		}
+	}, mode)) { /* yield */ }
 		} catch (e: unknown) {
 			const msg = e instanceof Error ? e.message : String(e);
 			if (msg.includes('guest_limit')) {
@@ -233,6 +268,8 @@
 			audioQueue = createAudioQueue((t) => tts(t, c.access_token, get(ttsVoice)));
 			totemSession = new TotemSession(c.access_token, c.seeker_id);
 			totemSession.load().catch(() => {}); // non-blocking, non-fatal
+			// Initialize seeker handle
+			seekerState.setPartial({ handle: c.handle ?? null });
 		}
 		fetchDecks();
 		send('');
@@ -369,8 +406,16 @@
 			<div class="thinking">▋</div>
 		{/if}
 
-	</div>
+		</div>
 
+	<!-- Left: seeker status panel (desktop) -->
+	{#if $authed}
+	<div class="seeker-panel-wrap">
+		<SeekerStatusPanel />
+	</div>
+	{/if}
+
+	<!-- Right: oracle panel -->
 	<div class="panel-wrap">
 		<OraclePanel
 			{availableDecks}
@@ -475,6 +520,28 @@
 		right: 0;
 		left: 0;
 		width: 100%;
+	}
+}
+
+/* ── Seeker Status Panel wrapper (desktop left) ───────────────────────────── */
+.seeker-panel-wrap {
+	position: fixed;
+	top: var(--topbar-h, 57px);
+	left: 1.25rem;
+	z-index: 20;
+	width: 260px; /* slightly narrower, fits the status panel */
+}
+@media (max-width: 1024px) {
+	.seeker-panel-wrap {
+		display: none;
+	}
+}
+
+/* ── Main content padding when side panels are visible ─────────────────────── */
+@media (min-width: 1025px) {
+	.msgs {
+		padding-left: 280px;  /* space for left panel + gap */
+		padding-right: 320px; /* space for right panel + gap */
 	}
 }
 

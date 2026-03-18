@@ -1,22 +1,11 @@
 **TODO**
 
-# Next to do for v0.3
-
-- [x] covenant-rite — copy + staging redesign
-- [ ] tui-torus — visual, self-contained
+# Next to do for v0.4-v0.5
 - [ ] octave-ambiance — requires mapping work first
+- [ ] emo-detector — display the cartesian plot?
+- [ ] companions — post v1.0      
 - [ ] tui-stt — testing + wiring
 - [ ] web-aura — bigger, WebGL work
-- [ ] emo-detector — v0.4
-- [ ] companions — post v1.0      
-- [x] rite-card-ui — quickest win, all frontend
-- [x] reintegration-greeting — one clea-prompt.js edit
-- [x] reintegration-panel
-   - [x] cards are non-blocking of the conversation
-   - [x] structural but contained - cards show here too
-- [x] mobile layout for bottom bar
-- [x] rite-deck-pairing — depends on rite-card-ui
-- [x] map-pathways — doc work
 
 ## TUI tuneup
 - [ ] test speech to text and text to speech
@@ -38,6 +27,16 @@
 
 # DONE
 
+- [x] covenant-rite — copy + staging redesign
+- [x] tui-torus — visual, self-contained
+- [x] rite-card-ui — quickest win, all frontend
+- [x] reintegration-greeting — one clea-prompt.js edit
+- [x] reintegration-panel
+   - [x] cards are non-blocking of the conversation
+   - [x] structural but contained - cards show here too
+- [x] mobile layout for bottom bar
+- [x] rite-deck-pairing — depends on rite-card-ui
+- [x] map-pathways — doc work
 - [x] figure out the covenant dance in the TUI
 - [x] find the priestess a better voice on fish.audio — FISH_AUDIO_VOICE_ONDREA (fallback: GALADRIEL)
 - [x] pace the typewriter with the speech so it doesn't talk over itself — priestess_target_duration_ms synced to TTS
@@ -60,3 +59,4 @@
       - "[C]lean - overwrite and start fresh"
       - "[D]irty - append and mix it up"
       - "[E]gotistically - I know what I'm doing already"
+- [x] emo-detector — Russell's Circumplex affect detection (valence/arousal tracking, SSE integration, demo validation)

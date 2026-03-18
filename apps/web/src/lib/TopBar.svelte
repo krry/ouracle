@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { creds, authed } from './stores';
+  import { creds, authed, seekerState } from './stores';
   import type { Credentials } from './stores';
   import { signOut } from './auth';
   import AmbientControls from './AmbientControls.svelte';
@@ -12,6 +12,7 @@
   async function leave() {
     await signOut({ fetchOptions: { onSuccess: () => creds.logout() } });
     creds.logout();
+    seekerState.reset();
   }
 </script>
 

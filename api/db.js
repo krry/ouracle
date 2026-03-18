@@ -410,3 +410,23 @@ export async function getGuestSession(id) {
 export async function incrementGuestTurn(id) {
   await sql`UPDATE guest_sessions SET turns_used = turns_used + 1 WHERE id = ${id}::uuid`;
 }
+
+// ─────────────────────────────────────────────
+// OCTAVE STEPS
+// Read-only access to the octave_steps table
+// ─────────────────────────────────────────────
+
+export async function listOctaveSteps() {
+  return sql`
+    SELECT * FROM octave_steps
+    ORDER BY number ASC
+  `;
+}
+
+export async function getOctaveStep(number) {
+  const rows = await sql`
+    SELECT * FROM octave_steps
+    WHERE number = ${number}
+  `;
+  return rows[0] ?? null;
+}

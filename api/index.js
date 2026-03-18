@@ -1135,13 +1135,16 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
       conversation.push({ role: 'seeker', text: message, at: new Date().toISOString() });
 
       const { vagal, belief, quality, affect } = await infer(newText);
-      // Attach affect to the seeker entry
-      const lastSeekerIdx = conversation.findLastIndex(e => e.role === 'seeker');
-      if (lastSeekerIdx !== -1) {
-        conversation[lastSeekerIdx] = { ...conversation[lastSeekerIdx], affect };
-      }
-      // Emit affect SSE event for real-time UI updates
-      emit({ type: 'affect', valence: affect.valence, arousal: affect.arousal, gloss: affect.gloss, confidence: affect.confidence });
+       // Attach affect to the seeker entry
+       const lastSeekerIdx = conversation.findLastIndex(e => e.role === 'seeker');
+       if (lastSeekerIdx !== -1) {
+         conversation[lastSeekerIdx] = { ...conversation[lastSeekerIdx], affect };
+       }
+       // Emit inference events for real-time UI updates
+       emit({ type: 'vagal', probable: vagal.probable, confidence: vagal.confidence, reasoning: vagal.reasoning });
+       emit({ type: 'belief', pattern: belief.pattern, confidence: belief.confidence, reasoning: belief.reasoning });
+       emit({ type: 'quality', quality: quality.quality, confidence: quality.confidence, is_shock: quality.is_shock, reasoning: quality.reasoning });
+       emit({ type: 'affect', valence: affect.valence, arousal: affect.arousal, gloss: affect.gloss, confidence: affect.confidence });
 
       const threshold = vagal.confidence === 'high' || (vagal.confidence === 'medium' && belief.confidence !== 'low');
 
