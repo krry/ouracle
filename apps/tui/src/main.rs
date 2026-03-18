@@ -1,5 +1,6 @@
 mod provider;
 mod reception;
+mod toroid;
 
 use std::fs;
 use std::path::PathBuf;
@@ -272,6 +273,10 @@ fn cmd_ambiance(cfg: &mut Config, on: bool) -> Result<()> {
     Ok(())
 }
 
+fn cmd_toroid() -> Result<()> {
+    toroid::run()
+}
+
 fn cmd_help() {
     println!(
         r#"Clea — chief priestess of Ouracle. CLI/TUI
@@ -284,6 +289,7 @@ USAGE
   clea voices add <id>        save a voice to your list
   clea voices rm <id>         remove a voice from your list
   clea ambiance on|off        toggle ambient sound
+  clea toroid                 run the toroid visualizer (braille art)
   clea help                   show this message
 
 IN-SESSION COMMANDS
@@ -384,6 +390,7 @@ fn main() -> Result<()> {
         [_, "voices", "rm", id]                 => return cmd_voices_rm(&mut cfg, id),
         [_, "ambiance", "on"]                   => return cmd_ambiance(&mut cfg, true),
         [_, "ambiance", "off"]                  => return cmd_ambiance(&mut cfg, false),
+        [_, "toroid"]                          => return cmd_toroid(),
         [_, "help"] | [_, "--help"] | [_, "-h"] => { cmd_help(); return Ok(()); }
         [_] => {}
         _   => { cmd_help(); return Ok(()); }
