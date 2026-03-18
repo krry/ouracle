@@ -30,6 +30,8 @@ export async function signin(handle: string, password: string) {
 // Events: { type: 'session', session_id, stage }
 //         { type: 'token', text }
 //         { type: 'break' }
+//         { type: 'draw', card: CardData }
+//         { type: 'rite', rite: RiteData }   — structured rite, rendered in OraclePanel
 //         { type: 'complete', stage, session_id? }
 //         { type: 'error', message }
 export async function* chat(

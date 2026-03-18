@@ -199,7 +199,7 @@
     <p class="body">
       Our priestesses will be with you shortly.<br/>Please come in.
     </p>
-    <a href="/chat" class="enter">enter</a>
+    <a href="/chat" class="enter">enter the temple</a>
   </div>
 </div>
 

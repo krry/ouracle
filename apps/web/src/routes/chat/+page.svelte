@@ -12,6 +12,14 @@
   let exchanging = $state(false);
   $effect(() => { if ($authed) wantsSignin = false; });
 
+  // Dev mock: ?mock=1 → instant authed session, no API needed
+  if (import.meta.env.DEV && typeof window !== 'undefined') {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('mock') === '1' && !localStorage.getItem('clea_creds')) {
+      creds.login({ seeker_id: 'dev-seeker', access_token: 'dev-token', refresh_token: '', handle: 'dev', stage: 'covenanted' });
+    }
+  }
+
   // Sync BetterAuth session cookie → our JWT after OAuth redirect
   onMount(async () => {
     if ($authed) return;
@@ -39,13 +47,28 @@
 </svelte:head>
 
 {#if $authed || !wantsSignin}
-  <Chat guestMode={!$authed} />
-  {#if !$authed && !exchanging && $guestTurns >= GUEST_LIMIT}
-    <AltarOverlay onsignin={() => (wantsSignin = true)} />
-  {/if}
-  {#if $authed && $creds?.stage !== 'covenanted'}
-    <Covenant onaccept={() => {}} />
-  {/if}
+  <!--
+    .chat-stage is the full-bleed container.
+    OraclePanel is rendered inside Chat.svelte as a positioned overlay,
+    so no layout split needed here — Chat owns the panel placement.
+  -->
+  <div class="chat-stage">
+    <Chat guestMode={!$authed} />
+    {#if !$authed && !exchanging && $guestTurns >= GUEST_LIMIT}
+      <AltarOverlay onsignin={() => (wantsSignin = true)} />
+    {/if}
+    {#if $authed && $creds?.stage !== 'covenanted'}
+      <Covenant onaccept={() => {}} />
+    {/if}
+  </div>
 {:else}
   <Reception />
 {/if}
+
+<style>
+.chat-stage {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+</style>

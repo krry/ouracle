@@ -356,9 +356,9 @@ app.post('/session/new', authenticate, async (req, res) => {
   });
   const lastAct = lastSession?.rite_json?.act;
   const returningGreeting = lastAct
-    ? `You were going to ${lastAct.replace(/\.$/, '')}.`
+    ? `Welcome back. You were going to ${lastAct.replace(/\.$/, '')}.`
     : lastSession?.rite_name
-      ? `You were working with ${lastSession.rite_name}.`
+      ? `Welcome back. You were working with ${lastSession.rite_name}.`
       : null;
   const greeting = daysSinceLast !== null && daysSinceLast >= 90
     ? "Three months. What's been happening?"
@@ -980,9 +980,9 @@ app.post('/chat', authenticateOrGuest, async (req, res) => {
       const nowIso = new Date().toISOString();
       const lastAct = lastSession?.rite_json?.act;
       const returningGreeting = lastAct
-        ? `You were going to ${lastAct.replace(/\.$/, '')}.`
+        ? `Welcome back. You were going to ${lastAct.replace(/\.$/, '')}.`
         : lastSession?.rite_name
-          ? `You were working with ${lastSession.rite_name}.`
+          ? `Welcome back. You were working with ${lastSession.rite_name}.`
           : null;
       const greeting = daysSinceLast !== null && daysSinceLast >= 90
         ? "Three months. What's been happening?"
@@ -1198,6 +1198,7 @@ Most responses will NOT include [READY].`;
           const altVagal = ['dorsal', 'sympathetic', 'ventral', 'uncertain'].find(v => v !== prescription.vagal_state && RITES[v]?.[quality.quality]);
           if (altVagal) prescription.rite = RITES[altVagal][quality.quality];
         }
+        // TODO: rite-deck-pairing — see docs/rite-deck-pairing.md
         const ritePayload = divination ? { ...prescription.rite, divination } : prescription.rite;
         await updateSession(session_id, {
           stage: 'prescribed',
@@ -1209,11 +1210,8 @@ Most responses will NOT include [READY].`;
         });
         emit({ type: 'break' });
         if (quality.seeker_language) { await streamText(emit, quality.seeker_language); emit({ type: 'break' }); }
-        const riteBlocks = [ritePayload.rite_name, ritePayload.act, ritePayload.invocation, ritePayload.textures?.length ? ritePayload.textures.join('\n') : null].filter(Boolean);
-        for (let i = 0; i < riteBlocks.length; i++) {
-          await streamText(emit, riteBlocks[i]);
-          if (i < riteBlocks.length - 1) emit({ type: 'break' });
-        }
+        // Emit structured rite event — frontend renders in OraclePanel, not chat stream
+        emit({ type: 'rite', rite: ritePayload });
         return finish('prescribed', { session_id, rite_name: prescription.rite?.rite_name });
       }
 
@@ -1283,7 +1281,6 @@ Most responses will NOT include [REPORT].`;
           : null;
         const closing = openingQuestion ? getClosingDedication(openingQuestion) : null;
         if (closing) { await streamText(emit, closing); emit({ type: 'break' }); }
-        await streamText(emit, '[low warmth, certain and at peace, a quiet smile] Always as it will have been.');
         return finish('complete', { session_id });
       }
 

@@ -52,6 +52,43 @@ export interface Message {
 export const messages = writable<Message[]>([]);
 export const streaming = writable(false);
 
+// ── Oracle Panel ─────────────────────────────────────────────────────────────
+export interface RiteData {
+	rite_name: string;
+	act: string;
+	invocation?: string;
+	textures?: string[];
+	context?: string;
+	duration?: string;
+	divination?: unknown;
+}
+
+export const activeRite = writable<RiteData | null>(null);
+// activeCard reuses CardData — set when a card is drawn, cleared on interpret/dismiss
+export const activeCard = writable<CardData | null>(null);
+
+// pendingRite persists across sessions — set when a rite is prescribed, cleared on complete
+export interface PendingRite {
+	rite: RiteData;
+	stage: 'offered' | 'prescribed' | 'completed';
+}
+
+function pendingRiteStore() {
+	const stored = browser ? localStorage.getItem('clea_pending_rite') : null;
+	const { subscribe, set } = writable<PendingRite | null>(stored ? JSON.parse(stored) : null);
+	return {
+		subscribe,
+		set(v: PendingRite | null) {
+			if (browser) {
+				if (v) localStorage.setItem('clea_pending_rite', JSON.stringify(v));
+				else localStorage.removeItem('clea_pending_rite');
+			}
+			set(v);
+		}
+	};
+}
+export const pendingRite = pendingRiteStore();
+
 // ── Voice ───────────────────────────────────────────────────────────────────
 export type VoiceState = 'idle' | 'listening' | 'transcribing' | 'speaking';
 export const voiceState = writable<VoiceState>('idle');

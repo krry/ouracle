@@ -4,6 +4,10 @@
   import { page } from '$app/stores';
   import type { Snippet } from 'svelte';
   import TopBar from '$lib/TopBar.svelte';
+  import AmbientControls from '$lib/AmbientControls.svelte';
+  import { ttsEnabled, ttsVoice, creds, authed } from '$lib/stores';
+  import type { Credentials, TtsVoice } from '$lib/stores';
+  import { signOut } from '$lib/auth';
 
   inject();
 
@@ -13,6 +17,12 @@
   let drawerOpen = $state(false);
   function toggleDrawer() { drawerOpen = !drawerOpen; }
   function closeDrawer() { drawerOpen = false; }
+
+  async function leave() {
+    await signOut({ fetchOptions: { onSuccess: () => creds.logout() } });
+    creds.logout();
+    closeDrawer();
+  }
 </script>
 
 <div class="app">
@@ -50,8 +60,45 @@
       </a>
     </nav>
 
+    <!-- Mobile-only controls: TTS, voice, ambient, identity -->
+    <div class="drawer-mobile">
+      <hr class="drawer-divider" />
+
+      <div class="drawer-mobile-row">
+        <label class="dm-tts-toggle" title={$ttsEnabled ? "mute Clea's voice" : "enable Clea's voice"}>
+          <input type="checkbox" bind:checked={$ttsEnabled} />
+          <span class="dm-tts-icon">〲</span>
+          <span class="dm-label">voice</span>
+        </label>
+        <select
+          class="dm-voice-select"
+          value={$ttsVoice}
+          onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value as TtsVoice)}
+          aria-label="Clea's voice"
+        >
+          <option value="elf">Elf</option>
+          <option value="poet">Poet</option>
+          <option value="alien">Alien</option>
+          <option value="president">President</option>
+        </select>
+      </div>
+
+      <div class="drawer-mobile-row">
+        <AmbientControls />
+      </div>
+
+      {#if $authed && $creds}
+        <div class="drawer-mobile-row dm-identity">
+          {#if ($creds as Credentials | null)?.handle}
+            <span class="dm-handle">{($creds as Credentials | null)?.handle}</span>
+          {/if}
+          <button class="dm-leave" onclick={leave} title="leave">⌁ sign out</button>
+        </div>
+      {/if}
+    </div>
+
     <div class="drawer-footer">
-      <a href="/chat" class="drawer-enter" onclick={closeDrawer}>enter</a>
+      <a href="/chat" class="drawer-enter" onclick={closeDrawer}>enter the temple</a>
     </div>
   </div>
 
@@ -203,6 +250,94 @@
   place-items: center;
 }
 .drawer-enter:hover { background: var(--accent); color: var(--bg); }
+
+/* ── Drawer mobile controls ───────────────────────────────────────────── */
+.drawer-mobile {
+  display: none; /* hidden on desktop */
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1.25rem 0.75rem;
+}
+
+@media (max-width: 767px) {
+  .drawer-mobile { display: flex; }
+}
+
+.drawer-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0.25rem 0;
+}
+
+.drawer-mobile-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 40px;
+}
+
+.dm-tts-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color 0.15s;
+}
+.dm-tts-toggle input { display: none; }
+.dm-tts-toggle:has(input:checked) { color: var(--accent); }
+
+.dm-tts-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.dm-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+}
+
+.dm-voice-select {
+  appearance: none;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  padding: 0;
+  transition: color 0.15s;
+}
+.dm-voice-select:hover, .dm-voice-select:focus { color: var(--accent); outline: none; }
+.dm-voice-select option { background: var(--bg); color: var(--text); }
+
+.dm-identity {
+  justify-content: space-between;
+}
+
+.dm-handle {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.dm-leave {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.6rem;
+  transition: border-color 0.15s, color 0.15s;
+  min-height: 32px;
+}
+.dm-leave:hover { border-color: var(--border); color: var(--text); }
 
 /* ── Footer ───────────────────────────────────────────────────────────── */
 footer {

@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
-	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice } from './stores';
-	import type { CardData, TtsVoice } from './stores';
+	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite } from './stores';
+	import type { CardData, RiteData, TtsVoice } from './stores';
 	import { chat, tts, stt } from './api';
 	import Breath from './Breath.svelte';
+	import OraclePanel from './OraclePanel.svelte';
 	import type { Credentials } from './stores';
 	import { incrementGuestTurns, getGuestTurns, GUEST_LIMIT } from './guestSession';
 	import { TotemSession } from './totemSession';
@@ -25,12 +26,32 @@
 	let handle: string | null = null;
 	let totemSession: TotemSession | null = null;
 
-	// ── Deck picker ───────────────────────────────────────────────────────────
+	// ── Deck / Oracle Panel ───────────────────────────────────────────────────
 	type DeckMeta = { id: string; meta: { name?: string; description?: string }; count: number };
 	let availableDecks = $state<DeckMeta[]>([]);
 	let selectedDecks = $state<Set<string>>(new Set());
-	let deckPickerOpen = $state(false);
 	let drawing = $state(false);
+
+	function handleDeckToggle(id: string, checked: boolean) {
+		const next = new Set(selectedDecks);
+		if (checked) next.add(id); else next.delete(id);
+		selectedDecks = next;
+	}
+
+	function handleInterpretCard(card: CardData) {
+		messages.update(m => m.map(msg =>
+			msg.role === 'card' && msg.card?.id === card.id && !msg.interpreted
+				? { ...msg, interpreted: true }
+				: msg
+		));
+		const text = `I drew a card — **${card.title}** from the ${card.deckLabel}.\n\nKeywords: ${card.keywords.join(' · ')}\n\n${card.body}\n\nPlease interpret this for me.`;
+		send(text, 'interpret');
+	}
+
+	function handleAcceptRite(_rite: RiteData) {
+		// Seeker accepted — send an acknowledgement into the conversation
+		send('I accept this rite.');
+	}
 
 	// ── PTT hint ──────────────────────────────────────────────────────────────
 	// Hide the "hold to speak" hint after first successful transcription
@@ -49,7 +70,7 @@
 	}
 
 	async function drawCard() {
-		if (drawing || $streaming || pendingCard) return;
+		if (drawing || $streaming) return;
 		drawing = true;
 		try {
 			const params = new URLSearchParams();
@@ -70,23 +91,13 @@
 				keywords: raw.keywords ?? [],
 				body: raw.body ?? '',
 			};
+			activeCard.set(card);
 			messages.update(m => [...m, { role: 'card', content: '', card, interpreted: false }]);
 		} catch (e) {
 			console.error('draw failed:', e);
 		} finally {
 			drawing = false;
 		}
-	}
-
-	function interpret(card: CardData) {
-		// Mark the card as interpreted
-		messages.update(m => m.map(msg =>
-			msg.role === 'card' && msg.card?.id === card.id && !msg.interpreted
-				? { ...msg, interpreted: true }
-				: msg
-		));
-		const text = `I drew a card — **${card.title}** from the ${card.deckLabel}.\n\nKeywords: ${card.keywords.join(' · ')}\n\n${card.body}\n\nPlease interpret this for me.`;
-		send(text, 'interpret');
 	}
 
 	// The last uninterpreted card — gates input
@@ -161,6 +172,14 @@
 						body: raw.body ?? '',
 					};
 					messages.update(m => [...m, { role: 'card', content: '', card: cardData, interpreted: false }]);
+				} else if (event.type === 'rite' && event.rite) {
+					activeRite.set(event.rite as RiteData);
+					pendingRite.set({ rite: event.rite as RiteData, stage: 'prescribed' });
+				} else if (event.type === 'complete') {
+					const stage = (event as { type: string; stage?: string }).stage;
+					if (stage === 'complete' || stage === 'reintegration_complete') {
+						pendingRite.set(null);
+					}
 				}
 			}, mode)) { /* yield */ }
 		} catch (e: unknown) {
@@ -316,11 +335,6 @@
 							<div class="card-keywords">{msg.card.keywords.join(' · ')}</div>
 						{/if}
 						<pre class="card-text">{msg.card.body}</pre>
-						{#if !msg.interpreted}
-							<button class="card-interpret" onclick={() => interpret(msg.card!)}>
-								interpret
-							</button>
-						{/if}
 					</div>
 				</div>
 			{:else if msg.role !== 'system' && msg.role !== 'card'}
@@ -336,49 +350,17 @@
 
 	</div>
 
-	<!-- floating divination widget — absolute bottom-right, above the bar -->
-	<div class="divination-float">
-		{#if deckPickerOpen}
-			<div class="deck-picker">
-				<div class="deck-picker-header">
-					<button onclick={() => { selectedDecks = new Set(availableDecks.map(d => d.id)); }}>all</button>
-					<span class="deck-picker-sep">·</span>
-					<button onclick={() => { selectedDecks = new Set(); }}>none</button>
-				</div>
-				<div class="deck-list">
-					{#each availableDecks as deck}
-						<label class="deck-item">
-							<input
-								type="checkbox"
-								checked={selectedDecks.has(deck.id)}
-								onchange={(e) => {
-									const next = new Set(selectedDecks);
-									if ((e.target as HTMLInputElement).checked) next.add(deck.id);
-									else next.delete(deck.id);
-									selectedDecks = next;
-								}}
-							/>
-							<span>{deck.meta?.name ?? deck.id}</span>
-							<span class="deck-count">{deck.count}</span>
-						</label>
-					{/each}
-				</div>
-			</div>
-		{/if}
-		<div class="divination-actions">
-			<button
-				class="deck-toggle"
-				class:open={deckPickerOpen}
-				onclick={() => { deckPickerOpen = !deckPickerOpen; }}
-				title="choose decks"
-			>Divination Decks ▾</button>
-			<button
-				class="draw-btn"
-				class:drawing
-				onclick={drawCard}
-				disabled={drawing || $streaming || !!pendingCard || selectedDecks.size === 0}
-			>draw card</button>
-		</div>
+	<div class="panel-wrap">
+		<OraclePanel
+			{availableDecks}
+			{selectedDecks}
+			onDeckToggle={handleDeckToggle}
+			onDrawCard={drawCard}
+			onInterpretCard={handleInterpretCard}
+			onAcceptRite={handleAcceptRite}
+			{drawing}
+			streaming={$streaming}
+		/>
 	</div>
 
 	<!-- input bar -->
@@ -408,9 +390,9 @@
 		<textarea
 			bind:value={input}
 			onkeydown={handleKey}
-			placeholder={pendingCard ? '— card drawn —' : 'Type to speak…'}
+			placeholder="Type to speak…"
 			rows="1"
-			disabled={$streaming || !!pendingCard}
+			disabled={$streaming}
 		></textarea>
 
 		<div class="bar-trailing">
@@ -459,30 +441,20 @@
 	scroll-behavior: smooth;
 }
 
-/* ── Floating divination widget ─────────────────────────────────────────── */
-.divination-float {
-	position: absolute;
-	bottom: 5.5rem;  /* clears the bar */
+/* ── Oracle Panel wrapper ───────────────────────────────────────────────── */
+.panel-wrap {
+	position: fixed;
+	top: var(--topbar-h, 57px);
 	right: 1.25rem;
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	gap: 0;
-	z-index: 5;
+	z-index: 20;
+	width: 300px;
 }
-
-.divination-actions {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 0.25rem;
-	background: color-mix(in srgb, var(--bg) 85%, transparent);
-	backdrop-filter: blur(10px);
-	-webkit-backdrop-filter: blur(10px);
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-	padding: 0.5rem 0.75rem;
+@media (max-width: 640px) {
+	.panel-wrap {
+		right: 0;
+		left: 0;
+		width: 100%;
+	}
 }
 
 .msg { display: flex; flex-direction: column; gap: 0.25rem; }
@@ -683,98 +655,6 @@ textarea:focus { border-color: var(--accent); }
 	opacity: 1;
 }
 
-/* ── Draw controls ─────────────────────────────────────────────────────── */
-
-.draw-btn {
-	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	color: var(--muted);
-	cursor: pointer;
-	font-family: var(--font-mono);
-	font-size: 0.75rem;
-	letter-spacing: 0.08em;
-	padding: 0.4rem 0.75rem;
-	transition: border-color 0.15s, color 0.15s;
-	white-space: nowrap;
-}
-.draw-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-.draw-btn:disabled { opacity: 0.35; cursor: default; }
-.draw-btn.drawing { animation: pulse 0.8s ease-in-out infinite; }
-
-.deck-toggle {
-	background: none;
-	border: none;
-	color: var(--muted);
-	cursor: pointer;
-	font-family: var(--font-mono);
-	font-size: 0.6rem;
-	letter-spacing: 0.06em;
-	line-height: 1;
-	padding: 0;
-	opacity: 0.45;
-	transition: opacity 0.15s, color 0.15s;
-	white-space: nowrap;
-}
-.deck-toggle:hover, .deck-toggle.open { opacity: 1; color: var(--accent); }
-
-.deck-picker {
-	position: absolute;
-	bottom: calc(100% + 0.4rem);
-	right: 0;
-	background: color-mix(in srgb, var(--surface) 95%, transparent);
-	backdrop-filter: blur(8px);
-	-webkit-backdrop-filter: blur(8px);
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	min-width: 200px;
-	max-height: 260px;
-	overflow-y: auto;
-	z-index: 20;
-	box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-}
-
-.deck-picker-header {
-	display: flex;
-	align-items: center;
-	gap: 0.4rem;
-	padding: 0.5rem 0.75rem;
-	border-bottom: 1px solid var(--border);
-}
-.deck-picker-header button {
-	background: none;
-	border: none;
-	color: var(--muted);
-	cursor: pointer;
-	font-family: var(--font-mono);
-	font-size: 0.7rem;
-	letter-spacing: 0.08em;
-	padding: 0;
-	transition: color 0.15s;
-}
-.deck-picker-header button:hover { color: var(--accent); }
-.deck-picker-sep { color: var(--border); }
-
-.deck-list { padding: 0.25rem 0; }
-
-.deck-item {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	padding: 0.35rem 0.75rem;
-	cursor: pointer;
-	font-size: 0.75rem;
-	color: var(--muted);
-	transition: background 0.1s, color 0.1s;
-}
-.deck-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
-.deck-item input { accent-color: var(--accent); cursor: pointer; }
-.deck-item span:nth-child(2) { flex: 1; }
-.deck-count {
-	font-size: 0.65rem;
-	opacity: 0.4;
-}
-
 /* ── Card message ──────────────────────────────────────────────────────── */
 .card-msg { max-width: 480px; }
 
@@ -816,24 +696,9 @@ textarea:focus { border-color: var(--accent); }
 	margin: 0;
 }
 
-.card-interpret {
-	align-self: flex-start;
-	background: none;
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	color: var(--accent);
-	cursor: pointer;
-	font-family: var(--font-mono);
-	font-size: 0.75rem;
-	letter-spacing: 0.1em;
-	margin-top: 0.25rem;
-	padding: 0.35rem 0.75rem;
-	transition: border-color 0.15s, background 0.15s;
-}
-.card-interpret:hover {
-	background: rgba(255,255,255,0.04);
-	border-color: var(--accent);
-}
-
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+@media (max-width: 767px) {
+	.bar-trailing { display: none; }
+}
 </style>

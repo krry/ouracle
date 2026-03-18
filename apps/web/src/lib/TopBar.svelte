@@ -30,7 +30,7 @@
   <a href="/" class="wordmark">Ouracle</a>
 
   <div class="trail">
-    <AmbientControls />
+    <div class="ambient-wrap"><AmbientControls /></div>
     {#if isChat && $authed && $creds}
       <div class="identity">
         {#if ($creds as Credentials | null)?.handle}
@@ -39,7 +39,7 @@
         <button class="leave" onclick={leave} title="leave">⌁</button>
       </div>
     {:else if !isChat}
-      <a href="/chat" class="enter">enter</a>
+      <a href="/chat" class="enter">enter the temple</a>
     {/if}
   </div>
 </header>
@@ -137,6 +137,11 @@
   place-items: center;
 }
 .leave:hover { border-color: var(--border); color: var(--text); }
+
+@media (max-width: 767px) {
+  .ambient-wrap { display: none; }
+  .identity { display: none; }
+}
 
 .enter {
   border: 1px solid var(--border);

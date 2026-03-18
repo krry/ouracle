@@ -141,7 +141,7 @@
     {#if error}<p class="error">{error}</p>{/if}
 
     <button type="submit" class="primary" disabled={busy}>
-      {busy ? '…' : mode === 'sign-in' ? 'enter' : 'begin'}
+      {busy ? '…' : mode === 'sign-in' ? 'enter the temple' : 'begin'}
     </button>
   </form>
 
