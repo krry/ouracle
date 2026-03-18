@@ -22,41 +22,39 @@ fn braille_char(brightness: u8) -> char {
 
 #[derive(Clone, Copy)]
 struct Torus {
-    R: f32,
-    r: f32,
+    r_major: f32,
+    r_minor: f32,
     k: f32,
-    phase_speed: f32,
     rot_speed: f32,
 }
 
 impl Torus {
-    fn new(R: f32, r: f32, k: f32) -> Self {
+    fn new(r_major: f32, r_minor: f32, k: f32) -> Self {
         Self {
-            R,
-            r,
+            r_major,
+            r_minor,
             k,
-            phase_speed: 0.3,
             rot_speed: 0.5,
         }
     }
 
     fn sample(&self, u: f32, v: f32) -> (f32, f32, f32) {
         let v_fold = v + self.k * u;
-        let x = (self.R + self.r * v_fold.cos()) * u.cos();
-        let y = (self.R + self.r * v_fold.cos()) * u.sin();
-        let z = self.r * v_fold.sin();
+        let x = (self.r_major + self.r_minor * v_fold.cos()) * u.cos();
+        let y = (self.r_major + self.r_minor * v_fold.cos()) * u.sin();
+        let z = self.r_minor * v_fold.sin();
         (x, y, z)
     }
 
     fn normal(&self, u: f32, v: f32) -> (f32, f32, f32) {
         let v_fold = v + self.k * u;
-        let dxdu = -(self.R + self.r * v_fold.cos()) * u.sin();
-        let dydu =  (self.R + self.r * v_fold.cos()) * u.cos();
-        let dzdu = -self.r * v_fold.sin() * self.k;
+        let dxdu = -(self.r_major + self.r_minor * v_fold.cos()) * u.sin();
+        let dydu =  (self.r_major + self.r_minor * v_fold.cos()) * u.cos();
+        let dzdu = -self.r_minor * v_fold.sin() * self.k;
 
-        let dxdv = -self.r * v_fold.sin() * u.cos();
-        let dydv = -self.r * v_fold.sin() * u.sin();
-        let dzdv =  self.r * v_fold.cos();
+        let dxdv = -self.r_minor * v_fold.sin() * u.cos();
+        let dydv = -self.r_minor * v_fold.sin() * u.sin();
+        let dzdv =  self.r_minor * v_fold.cos();
 
         let nx = dydu * dzdv - dzdu * dydv;
         let ny = dzdu * dxdv - dxdu * dzdv;
@@ -98,7 +96,7 @@ fn render_frame(torus: &Torus, time: f32, scale: f32) -> [[u8; COLS]; ROWS] {
             let x2 = x1;
 
             // Project
-            let d = 3.0 * torus.R;
+            let d = 3.0 * torus.r_major;
             let denom = d + z2;
             if denom <= 0.1 { continue; }
 
