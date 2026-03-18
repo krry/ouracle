@@ -2,6 +2,13 @@
 
 # Next to do for v0.3
 
+- [ ] covenant-rite — copy + staging redesign
+- [ ] tui-torus — visual, self-contained
+- [ ] octave-ambiance — requires mapping work first
+- [ ] tui-stt — testing + wiring
+- [ ] web-aura — bigger, WebGL work
+- [ ] emo-detector — v0.4
+- [ ] companions — post v1.0      
 - [x] rite-card-ui — quickest win, all frontend
 - [x] reintegration-greeting — one clea-prompt.js edit
 - [x] reintegration-panel
@@ -10,14 +17,6 @@
 - [x] mobile layout for bottom bar
 - [x] rite-deck-pairing — depends on rite-card-ui
 - [x] map-pathways — doc work
-- [ ] attribution for divination decks to Alan Botts (github.com/AlanBotts/divine); this might mean we need an About page
-- [ ] tui-torus — visual, self-contained
-- [ ] covenant-rite — copy + staging redesign
-- [ ] octave-ambiance — requires mapping work first
-- [ ] tui-stt — testing + wiring
-- [ ] web-aura — bigger, WebGL work
-- [ ] emo-detector — v0.4
-- [ ] companions — post v1.0      
 
 ## TUI tuneup
 - [ ] test speech to text and text to speech

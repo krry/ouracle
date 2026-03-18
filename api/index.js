@@ -214,6 +214,8 @@ const COVENANT = {
   ],
 };
 
+const COVENANT_REMINDER = 'But, before we enter the temple, I must ask that you enter a covenant. Are you ready?';
+
 function deriveStage(seeker) {
   return seeker?.covenant_at ? 'covenanted' : 'known';
 }
@@ -950,9 +952,8 @@ app.post('/chat', authenticateOrGuest, async (req, res) => {
 
     // ── New session ──────────────────────────────
     if (!session_id) {
-      if (!seeker.covenant_at) {
-        await recordCovenant(seeker_id, COVENANT.version);
-      }
+      // Covenant is NOT auto-recorded — seeker enters it via the modal
+      // after Clea introduces it conversationally.
 
       const sessionCount = await getSeekerSessionCount(seeker_id);
       const lastSession = await getSeekerLatestSession(seeker_id);
@@ -994,12 +995,17 @@ app.post('/chat', authenticateOrGuest, async (req, res) => {
       ];
       await updateSession(session.id, { stage: 'inquiry', turn: 0, conversation });
 
-      emit({ type: 'session', session_id: session.id, stage: 'inquiry' });
+      emit({ type: 'session', session_id: session.id, stage: 'inquiry', needs_covenant: !seeker.covenant_at });
       if (greeting) {
         await streamText(emit, greeting);
         emit({ type: 'break' });
       }
       await streamText(emit, question);
+      // Covenant reminder for seekers who haven't entered the covenant
+      if (!seeker.covenant_at) {
+        emit({ type: 'break' });
+        await streamText(emit, COVENANT_REMINDER);
+      }
       return finish('inquiry', { session_id: session.id });
     }
 
