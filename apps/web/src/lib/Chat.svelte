@@ -503,6 +503,7 @@
 	padding: 2rem 1.5rem 5rem; /* bottom padding leaves room for float widget */
 	display: flex;
 	flex-direction: column;
+	justify-content: flex-end;
 	gap: 1.5rem;
 	scroll-behavior: smooth;
 }

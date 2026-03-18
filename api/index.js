@@ -259,7 +259,7 @@ app.get('/covenant/current', (_req, res) => res.json(COVENANT));
 
 // ── Divination ───────────────────────────────────────────────────────────────
 
-app.get('/decks', authenticate, async (_req, res) => {
+app.get('/decks', async (_req, res) => {
   try {
     res.json(await listDecks());
   } catch (e) {

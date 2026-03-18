@@ -127,7 +127,7 @@
 
   {#if !isEnquire}
     <footer>
-      <span>© 2026 <a href="https://kerry.ink">Kerry Alan Snyder</a></span>
+      <span><span class="flip-x">©</span> 2026 <a href="https://kerry.ink">kerry.ink</a></span>
     </footer>
     <webring-widget
       data-source="https://kerry.ink/widgets/webring/webring.json"
@@ -368,11 +368,16 @@
 footer {
   display: flex;
   justify-content: space-between;
-  padding: var(--space-md);
+  padding: var(--space-xs) var(--space-sm);
   font-size: 0.75rem;
   color: var(--muted);
   border-top: 1px solid var(--border);
   flex-shrink: 0;
+  justify-content: flex-end;
 }
 footer a { color: var(--muted); }
+.flip-x {
+  display: inline-block;
+  transform: rotateY(180deg);
+}
 </style>

@@ -40,7 +40,7 @@
         <button class="leave" onclick={leave} title="leave">⌁</button>
       </div>
     {:else if !isEnquire}
-      <a href="/enquire" class="enter">enter the temple</a>
+      <a href="/enquire" class="enter">enter <span class="the-temple">the temple</span></a>
     {/if}
   </div>
 </header>
@@ -142,6 +142,7 @@
 @media (max-width: 767px) {
   .ambient-wrap { display: none; }
   .identity { display: none; }
+  .the-temple { display: none; }
 }
 
 .enter {
