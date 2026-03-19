@@ -2,7 +2,6 @@
   import { signIn, signUp, passkey } from './auth';
   import { creds } from './stores';
   import { generateDeviceKeyPair, storePrivateKey } from './totem';
-  import { fade } from 'svelte/transition';
 
   type Mode = 'sign-in' | 'sign-up';
   let mode = $state<Mode>('sign-in');
@@ -30,26 +29,23 @@
     }
   }
 
-  // BetterAuth 1.x returns { data, error } — data.token is the session token,
-  // data.user has { id, name, email, ... }.
-  // We must exchange the BetterAuth session token for our custom JWT via /auth/social-exchange.
-  type AuthResult = {
-    data?: { token?: string; user?: { id: string; name?: string } } | null;
-    error?: { message?: string } | null;
-  };
+  type AuthResult =
+    | { data?: { token?: string; user?: { id: string; name?: string } } | null; error?: { message?: string } | null }
+    | { token?: string; user?: { id: string; name?: string } };
 
   async function handleCredResult(result: AuthResult) {
-    if (result.error) {
+    if ('error' in result && result.error) {
       error = result.error.message ?? 'something went wrong';
       return;
     }
-    // Accept both direct token (email/password) and BetterAuth session token (social)
-    const betterAuthToken = result.data?.token ?? result.data?.session?.token ?? '';
+    const betterAuthToken =
+      ('token' in result && result.token) ||
+      ('data' in result && result.data?.session?.token) ||
+      '';
     if (!betterAuthToken) {
       error = 'authentication failed — no token received';
       return;
     }
-    // Exchange BetterAuth session token for our custom JWT
     const r = await fetch(`${BASE}/auth/social-exchange`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -88,9 +84,7 @@
     error = '';
     busy = true;
     try {
-      // Use popup flow to avoid losing guest session on redirect
       const result = await signIn.social({ provider, callbackURL: window.location.href, flow: 'popup' });
-      // Popup flow returns directly; handle the auth result
       await handleCredResult(result as AuthResult);
     } catch (e: unknown) {
       error = e instanceof Error ? e.message : 'something went wrong';
@@ -103,7 +97,6 @@
     error = '';
     busy = true;
     try {
-      // passkey.signIn() is the authenticate flow in better-auth 1.x
       const result = await passkey.signIn();
       await handleCredResult(result as AuthResult);
     } catch (e: unknown) {
@@ -118,70 +111,51 @@
   }
 </script>
 
-<div class="veil" out:fade={{ duration: 2000 }} role="dialog" aria-modal="true" aria-label="sign in">
-  <div class="inner">
-    <button class="close-btn" onclick={handleClose} aria-label="Close">✕</button>
+<div class="inner">
+  <button class="close-btn" onclick={handleClose} aria-label="Close">✕</button>
 
-    <header>
-      <h1>Ouracle</h1>
-      <p class="sub">hear and be heard.</p>
-    </header>
+  <header>
+    <h1 class="wordmark">Ouracle</h1>
+    <p class="sub">hear and be heard</p>
+  </header>
 
-    <div class="social-row">
-      <button class="social" onclick={() => socialSignIn('apple')} disabled={busy}>Apple</button>
-      <button class="social" onclick={() => socialSignIn('google')} disabled={busy}>Google</button>
-      <button class="social" onclick={() => socialSignIn('github')} disabled={busy}>GitHub</button>
-    </div>
-
-    <div class="divider"><span>or</span></div>
-
-    <form onsubmit={(e) => { e.preventDefault(); submit(); }}>
-      {#if mode === 'sign-up'}
-        <label>
-          <span>name</span>
-          <input bind:value={name} type="text" autocomplete="name" required />
-        </label>
-      {/if}
-      <label>
-        <span>email</span>
-        <input bind:value={email} type="email" autocomplete="email" required />
-      </label>
-      <label>
-        <span>password</span>
-        <input bind:value={password} type="password"
-          autocomplete={mode === 'sign-up' ? 'new-password' : 'current-password'} required />
-      </label>
-
-      {#if error}<p class="error">{error}</p>{/if}
-
-      <button type="submit" class="primary" disabled={busy}>
-        {busy ? '…' : mode === 'sign-in' ? 'enter the temple' : 'begin'}
-      </button>
-    </form>
-
-    <button class="toggle" onclick={() => { mode = mode === 'sign-in' ? 'sign-up' : 'sign-in'; error = ''; }}>
-      {mode === 'sign-in' ? 'new seeker' : 'returning seeker'}
-    </button>
+  <div class="social-row">
+    <button class="social" onclick={() => socialSignIn('apple')} disabled={busy}>Apple</button>
+    <button class="social" onclick={() => socialSignIn('google')} disabled={busy}>Google</button>
+    <button class="social" onclick={() => socialSignIn('github')} disabled={busy}>GitHub</button>
   </div>
+
+  <div class="divider"><span>or</span></div>
+
+  <form onsubmit={(e) => { e.preventDefault(); submit(); }}>
+    {#if mode === 'sign-up'}
+      <label>
+        <span>name</span>
+        <input bind:value={name} type="text" autocomplete="name" required />
+      </label>
+    {/if}
+    <label>
+      <span>email</span>
+      <input bind:value={email} type="email" autocomplete="email" required />
+    </label>
+    <label>
+      <span>password</span>
+      <input bind:value={password} type="password" autocomplete={mode === 'sign-up' ? 'new-password' : 'current-password'} required />
+    </label>
+
+    {#if error}<p class="error">{error}</p>{/if}
+
+    <button type="submit" class="primary" disabled={busy}>
+      {busy ? '…' : mode === 'sign-in' ? 'enter the temple' : 'begin'}
+    </button>
+  </form>
+
+  <button class="toggle" onclick={() => { mode = mode === 'sign-in' ? 'sign-up' : 'sign-in'; error = ''; }}>
+    {mode === 'sign-in' ? 'new seeker' : 'returning seeker'}
+  </button>
 </div>
 
 <style>
-.veil {
-  position: fixed;
-  inset: 0;
-  background: color-mix(in srgb, var(--bg) 15%, transparent);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  animation: fadein 1.2s ease-out both;
-}
-
-@keyframes fadein { from { opacity: 0 } to { opacity: 1 } }
-
 .inner {
   max-width: 380px;
   padding: 2.5rem 2rem;
@@ -190,39 +164,6 @@
   flex-direction: column;
   gap: 1.5rem;
   position: relative;
-  opacity: 0;
-  animation: unblur-in 0.8s ease-out 1.2s both;
-}
-
-@keyframes unblur-in {
-  from {
-    filter: blur(20px);
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    filter: blur(0);
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.inner {
-  max-width: 380px;
-  padding: 2.5rem 2rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  position: relative;
-  animation: scalein 1.2s ease-out both;
-  animation-delay: 0.2s;
-  transform-origin: center;
-}
-
-@keyframes scalein {
-  from { opacity: 0; transform: scale(0.96); }
-  to  { opacity: 1; transform: scale(1); }
 }
 
 .close-btn {
@@ -240,14 +181,27 @@
 }
 .close-btn:hover { color: var(--text); }
 
-.quip {
-  color: var(--text);
-  font-size: 1rem;
-  line-height: 1.7;
-  font-style: italic;
+header {
+  margin-bottom: 0.5rem;
+}
+.wordmark {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  margin: 0;
+}
+header .sub {
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
 }
 
-button {
+.social-row {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+.social {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -260,6 +214,7 @@ button {
   transition: border-color 0.15s, color 0.15s;
 }
 .social:hover { border-color: var(--accent); color: var(--accent); }
+.social:disabled { opacity: 0.4; cursor: default; }
 
 .divider {
   display: flex;

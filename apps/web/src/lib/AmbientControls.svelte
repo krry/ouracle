@@ -44,13 +44,11 @@
 
 <div class="ambient">
   <button
-    class="toggle"
+    class="toggle beat-label"
     class:on={$ambientRunning}
     onclick={toggle}
     title={$ambientRunning ? 'stop' : 'ambient'}
-  >♪</button>
-
-
+  ><span class="tones-icon">♪</span> tones</button>
 
   {#if $ambientScene === 'binaural'}
     <div class="beat-ctrl">
@@ -125,11 +123,22 @@
   width: 10px;
 }
 
+.tones-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
 .beat-label {
   font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  font-size: 0.65em;
+  color: var(--muted);
+  margin-right: 1ch;
+}
+
+.beat-ctrl .beat-label {
   font-size: 0.6rem;
   letter-spacing: 0.06em;
-  color: var(--muted);
   white-space: nowrap;
 }
 </style>

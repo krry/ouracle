@@ -14,7 +14,15 @@
 	import { renderMarkdown } from './markdown';
 	import { createAudioQueue, type AudioQueue } from './audio';
 
-	let { guestMode = false } = $props<{ guestMode?: boolean }>();
+	let {
+		guestMode = false,
+		guestLocked = false,
+		onsignin,
+	}: {
+		guestMode?: boolean;
+		guestLocked?: boolean;
+		onsignin?: () => void;
+	} = $props();
 
 	let audioQueue: AudioQueue | null = null;
 	let sessionId: string | null = null;
@@ -143,7 +151,7 @@
 	});
 
 	async function send(text: string, mode?: string) {
-		if ($streaming) return;
+		if ($streaming || guestLocked) return;
 		let skipTag = false;
 
 		// Fuzzy covenant readiness detection
@@ -330,6 +338,7 @@
 	});
 
 	function handleKey(e: KeyboardEvent) {
+		if (guestLocked) return;
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
 			const text = input.trim();
@@ -340,6 +349,7 @@
 
 	// ── PTT voice ─────────────────────────────────────────────────────────────
 	async function startListening() {
+		if (guestLocked) return;
 		if (!navigator.mediaDevices?.getUserMedia) {
 			console.warn('getUserMedia not available — requires a secure context (HTTPS or localhost)');
 			return;
@@ -377,6 +387,7 @@
 	}
 
 	async function stopListening() {
+		if (guestLocked) return;
 		if (!mediaRecorder) return;
 		voiceState.set('transcribing');
 		mediaRecorder.stop();
@@ -406,6 +417,7 @@
 
 	// ── PTT keyboard shortcut (Space, held) ───────────────────────────────────
 	function handleGlobalKey(e: KeyboardEvent) {
+		if (guestLocked) return;
 		// Only when textarea is not focused
 		if (document.activeElement?.tagName === 'TEXTAREA') return;
 		if (e.code === 'Space' && !e.repeat) {
@@ -473,6 +485,13 @@
 		/>
 	</div>
 
+	{#if guestLocked && onsignin}
+		<div class="guest-lock-banner">
+			Priestess Clea awaits you in the temple.
+			<button class="guest-lock-cta" onclick={onsignin}>sign in to continue</button>
+		</div>
+	{/if}
+
 	<!-- input bar -->
 	<div class="bar">
 		<div class="bar-leading">
@@ -484,6 +503,7 @@
 					onpointerdown={startListening}
 					onpointerup={stopListening}
 					aria-label="hold to speak"
+					disabled={guestLocked}
 				>
 					{$voiceState === 'listening' ? '◉' : $voiceState === 'transcribing' ? '…' : '◎'}
 				</button>
@@ -500,9 +520,9 @@
 		<textarea
 			bind:value={input}
 			onkeydown={handleKey}
-			placeholder="Type to speak…"
+			placeholder={guestLocked ? 'sign in to continue…' : 'Type to speak…'}
 			rows="1"
-			disabled={$streaming}
+			disabled={$streaming || guestLocked}
 		></textarea>
 
 		<div class="bar-trailing">
@@ -556,7 +576,7 @@
 /* ── Oracle Panel wrapper ───────────────────────────────────────────────── */
 .panel-wrap {
 	position: fixed;
-	top: var(--topbar-h, 57px);
+	top: var(--topbar-h, 2.5rem);
 	right: 1.25rem;
 	z-index: 20;
 	width: 300px;
@@ -649,6 +669,36 @@
 
 @keyframes blink { 50% { opacity: 0; } }
 
+.guest-lock-banner {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
+	padding: 0.75rem 1rem;
+	color: var(--muted);
+	font-size: 0.72rem;
+	font-family: var(--font-mono);
+	letter-spacing: 0.06em;
+	text-transform: lowercase;
+}
+
+.guest-lock-cta {
+	background: transparent;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	color: var(--accent);
+	cursor: pointer;
+	font-family: var(--font-mono);
+	font-size: 0.78rem;
+	letter-spacing: 0.08em;
+	padding: 0.45rem 0.7rem;
+	text-transform: lowercase;
+}
+
+.guest-lock-cta:hover {
+	border-color: var(--accent);
+}
+
 .bar {
 	display: flex;
 	align-items: flex-end;
@@ -676,6 +726,11 @@ textarea {
 }
 
 textarea:focus { border-color: var(--accent); }
+
+textarea:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
 
 .ptt-wrap {
 	position: relative;
@@ -717,6 +772,11 @@ textarea:focus { border-color: var(--accent); }
 }
 .ptt-hint-pop.listening::after { border-top-color: var(--accent); }
 .ptt-hint-pop.transcribing { opacity: 0.5; }
+
+.ptt:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
 
 .ptt {
 	background: var(--surface);

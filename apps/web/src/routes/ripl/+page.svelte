@@ -6,10 +6,12 @@
 
   <section class="prose-section">
     <p>
-      ripl is the nervous system Clea runs on —
-      a ratatui event loop wired to any LLM, with voice, ambient sound,
+      ripl is the chassis for Clea in the shell —
+      a <code>ratatui</code> event loop bathing in an ASCII aura
+      wired to any LLM, with voice, ambient sound,
       and themes that shift with the conversation.
-      Open source. Point it at your model. Build something that listens.
+      Open source. Point it at your model.
+      Build a prompt that listens.
     </p>
   </section>
 

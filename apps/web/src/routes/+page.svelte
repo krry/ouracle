@@ -194,7 +194,7 @@
 <div class="hero">
   <canvas bind:this={canvas} aria-hidden="true"></canvas>
   <div class="content">
-    <h1>Ouracle</h1>
+    <h1 class="wordmark">Ouracle</h1>
     <p class="tagline">Plot the next step</p>
     <p class="body">
       Our priestesses will be with you shortly.<br/>Please come in.
@@ -248,10 +248,10 @@ canvas {
   align-items: center;
   gap: var(--space-sm);
 }
-h1 {
+.wordmark {
   font-family: var(--font-display);
   font-size: clamp(3rem, 10vw, 5rem);
-  font-weight: 300;
+  font-weight: 600;
   letter-spacing: 0.3em;
   color: var(--accent);
   line-height: 1;

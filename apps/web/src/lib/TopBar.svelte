@@ -48,6 +48,11 @@
   z-index: 30;
   height: var(--topbar-h, 57px);
   box-sizing: border-box;
+  transition: opacity 0.4s ease;
+}
+
+:global(html.modal-open) .topbar {
+  opacity: 0;
 }
 
 /* Hamburger */
@@ -89,6 +94,7 @@
   text-decoration: none;
   white-space: nowrap;
   transition: opacity 0.15s;
+  font-weight: 600;
 }
 .wordmark:hover { opacity: 0.75; }
 

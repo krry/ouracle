@@ -1,8 +1,8 @@
 <div class="page">
   <header>
-    <h1>Clea</h1>
-    <p class="sub">Chief priestess of Ouracle</p>
-    <p class="sub">Arkhēis of the Thyiades at Delphi</p>
+    <h1 class="wordmark">Clea</h1>
+    <p class="sub">Now, Chief priestess of Ouracle</p>
+    <p class="sub">Once, Arkhēis of the Thyiades at Delphi</p>
   </header>
 
   <section class="prose-section">
@@ -44,10 +44,10 @@
   gap: var(--space-lg);
 }
 header { text-align: center; }
-h1 {
+.wordmark {
   font-family: var(--font-display);
   font-size: 3rem;
-  font-weight: 300;
+  font-weight: 600;
   letter-spacing: 0.3em;
   color: var(--accent);
 }
@@ -56,6 +56,7 @@ h1 {
   font-style: italic;
   color: var(--muted);
   margin-top: 0.5rem;
+  text-align: center;
 }
 .prose-section p { font-size: 1rem; line-height: var(--leading); color: var(--text); text-align: left; margin-bottom: 1rem; }
 .install { display: flex; flex-direction: column; gap: var(--space-sm); }

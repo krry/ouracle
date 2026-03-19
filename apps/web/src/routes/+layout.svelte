@@ -194,6 +194,7 @@
   letter-spacing: 0.22em;
   color: var(--accent);
   text-decoration: none;
+  font-weight: 600;
 }
 
 .drawer-close {

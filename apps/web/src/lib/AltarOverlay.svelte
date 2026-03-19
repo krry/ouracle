@@ -1,65 +1,18 @@
 <script lang="ts">
   import { randomQuip } from './guestSession';
 
-  let { onsignin }: { onsignin: () => void } = $props();
+  let { onsignin, ondismiss }: { onsignin: () => void; ondismiss: () => void } = $props();
   const quip = randomQuip();
-
-  function handleClose() {
-    onsignin();
-  }
 </script>
 
-<div class="veil" role="dialog" aria-modal="true" aria-label="guest limit reached">
-  <div class="inner">
-    <button class="close-btn" onclick={handleClose} aria-label="Sign in">✕</button>
-    <p class="quip">{quip}</p>
-    <button onclick={onsignin}>enter the temple</button>
-    <p class="sub">or close this tab and carry the questions with you</p>
-  </div>
+<div class="inner">
+  <button class="close-btn" onclick={ondismiss} aria-label="Close">✕</button>
+  <p class="quip">{quip}</p>
+  <button onclick={onsignin}>enter the temple</button>
+  <p class="sub">or close this tab and carry the questions with you</p>
 </div>
 
 <style>
-.veil {
-  position: fixed;
-  inset: 0;
-  background: color-mix(in srgb, var(--bg) 15%, transparent);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  animation: fadein 0.6s ease both;
-}
-
-@keyframes fadein { from { opacity: 0 } to { opacity: 1 } }
-
-.inner {
-  max-width: 380px;
-  padding: 2.5rem 2rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  position: relative;
-  opacity: 0;
-  animation: unblur-in 0.5s ease-out 0.6s both;
-}
-
-@keyframes unblur-in {
-  from {
-    filter: blur(20px);
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    filter: blur(0);
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 .inner {
   max-width: 380px;
   padding: 2.5rem 2rem;
