@@ -30,10 +30,21 @@
   align-items: center;
   justify-content: center;
   z-index: 100;
-  animation: fadein 0.6s ease both;
+  animation: fadein-unblur 0.6s ease both;
 }
 
-@keyframes fadein { from { opacity: 0 } to { opacity: 1 } }
+@keyframes fadein-unblur {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+}
 
 .inner {
   max-width: 380px;
