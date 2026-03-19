@@ -42,8 +42,12 @@
       error = result.error.message ?? 'something went wrong';
       return;
     }
-    const betterAuthToken = result.data?.token ?? '';
-    if (!betterAuthToken) return;
+    // Accept both direct token (email/password) and BetterAuth session token (social)
+    const betterAuthToken = result.data?.token ?? result.data?.session?.token ?? '';
+    if (!betterAuthToken) {
+      error = 'authentication failed — no token received';
+      return;
+    }
     // Exchange BetterAuth session token for our custom JWT
     const r = await fetch(`${BASE}/auth/social-exchange`, {
       method: 'POST',
@@ -83,10 +87,10 @@
     error = '';
     busy = true;
     try {
-      const result = await signIn.social({ provider, callbackURL: window.location.href });
-      // If the SDK returned a URL instead of auto-redirecting, navigate manually
-      const url = (result as { data?: { url?: string } })?.data?.url;
-      if (url) window.location.href = url;
+      // Use popup flow to avoid losing guest session on redirect
+      const result = await signIn.social({ provider, callbackURL: window.location.href, flow: 'popup' });
+      // Popup flow returns directly; handle the auth result
+      await handleCredResult(result as AuthResult);
     } catch (e: unknown) {
       error = e instanceof Error ? e.message : 'something went wrong';
     } finally {
@@ -170,7 +174,7 @@
   align-items: center;
   justify-content: center;
   z-index: 100;
-  animation: fadein 0.6s ease both;
+  animation: fadein 1.2s ease-out both;
 }
 
 @keyframes fadein { from { opacity: 0 } to { opacity: 1 } }
@@ -183,6 +187,14 @@
   flex-direction: column;
   gap: 1.5rem;
   position: relative;
+  animation: scalein 1.2s ease-out both;
+  animation-delay: 0.2s;
+  transform-origin: center;
+}
+
+@keyframes scalein {
+  from { opacity: 0; transform: scale(0.96); }
+  to  { opacity: 1; transform: scale(1); }
 }
 
 .close-btn {
