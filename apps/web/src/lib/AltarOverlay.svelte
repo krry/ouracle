@@ -43,8 +43,8 @@
   flex-direction: column;
   gap: 1.5rem;
   position: relative;
-  animation: unblur-in 0.5s ease-out both;
-  animation-delay: 0.4s;
+  opacity: 0;
+  animation: unblur-in 0.5s ease-out 0.6s both;
 }
 
 @keyframes unblur-in {

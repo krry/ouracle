@@ -190,8 +190,8 @@
   flex-direction: column;
   gap: 1.5rem;
   position: relative;
-  animation: unblur-in 0.8s ease-out both;
-  animation-delay: 0.8s;
+  opacity: 0;
+  animation: unblur-in 0.8s ease-out 1.2s both;
 }
 
 @keyframes unblur-in {
