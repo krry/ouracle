@@ -177,19 +177,33 @@
   align-items: center;
   justify-content: center;
   z-index: 100;
-  animation: fadein-unblur 1.2s ease-out both;
+  animation: fadein 1.2s ease-out both;
 }
 
-@keyframes fadein-unblur {
+@keyframes fadein { from { opacity: 0 } to { opacity: 1 } }
+
+.inner {
+  max-width: 380px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+  animation: unblur-in 1.2s ease-out both;
+  animation-delay: 0.2s;
+}
+
+@keyframes unblur-in {
   from {
+    filter: blur(20px);
     opacity: 0;
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    transform: scale(0.96);
   }
   to {
+    filter: blur(0);
     opacity: 1;
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    transform: scale(1);
   }
 }
 
