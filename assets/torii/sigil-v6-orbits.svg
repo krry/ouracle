@@ -1,0 +1,279 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+
+    <!--
+      Ouracle Torus Sigil v6 — "The Orrery"
+
+      Palette: Jing / Qi / Shen
+        Jing  #1a0952  dense indigo ring body
+        Qi    #9a7c18  muted gold orbital paths / particles
+        Shen  #18a8a0  cool teal inner void light
+        Haze  #2e0a16  dim crimson outer breath (barely present)
+
+      Each orbit has TWO layers:
+        1. Wide soft glow (bloom, blurry)
+        2. Thin sharp wire on top
+      → bright core + luminous halo → feels like light in space
+      Nodes: small bright circles positioned on orbital paths
+    -->
+
+    <!-- ── GRADIENTS ── -->
+
+    <radialGradient id="jqs6" cx="50%" cy="47%" r="47%">
+      <stop offset="0%"   stop-color="#030609"/>
+      <stop offset="11%"  stop-color="#050f1a"/>
+      <stop offset="21%"  stop-color="#08201c" stop-opacity="0.88"/>
+      <stop offset="30%"  stop-color="#0c5248"/>
+      <stop offset="37%"  stop-color="#18a8a0"/>  <!-- Shen peak -->
+      <stop offset="43%"  stop-color="#4a600e"/>
+      <stop offset="50%"  stop-color="#9a7c18"/>  <!-- Qi peak -->
+      <stop offset="56%"  stop-color="#7a6212"/>
+      <stop offset="62%"  stop-color="#2a1272"/>  <!-- Jing rising -->
+      <stop offset="69%"  stop-color="#1a0952"/>  <!-- Jing peak -->
+      <stop offset="75%"  stop-color="#100638"/>
+      <stop offset="81%"  stop-color="#280812" stop-opacity="0.62"/>
+      <stop offset="90%"  stop-color="#0c0410" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="depth6" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#000" stop-opacity="0.52"/>
+      <stop offset="28%"  stop-color="#000" stop-opacity="0.10"/>
+      <stop offset="50%"  stop-color="#000" stop-opacity="0"/>
+      <stop offset="80%"  stop-color="#9a7c18" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#c8a020" stop-opacity="0.20"/>
+    </linearGradient>
+
+    <radialGradient id="void6" cx="50%" cy="50%" r="24%">
+      <stop offset="0%"   stop-color="#020408" stop-opacity="1"/>
+      <stop offset="62%"  stop-color="#020408" stop-opacity="0.70"/>
+      <stop offset="100%" stop-color="#020408" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="shenGlow6" cx="50%" cy="54%" r="44%">
+      <stop offset="0%"   stop-color="#18a8a0" stop-opacity="0.42"/>
+      <stop offset="38%"  stop-color="#0d6860" stop-opacity="0.18"/>
+      <stop offset="80%"  stop-color="#042420" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+
+    <radialGradient id="farWall6" cx="50%" cy="35%" r="36%">
+      <stop offset="0%"   stop-color="#1a0952" stop-opacity="0.52"/>
+      <stop offset="50%"  stop-color="#0e0638" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+
+    <radialGradient id="nearRim6" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#18a8a0" stop-opacity="0.62"/>
+      <stop offset="42%"  stop-color="#9a7c18" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+
+    <radialGradient id="halo6" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="transparent"/>
+      <stop offset="54%"  stop-color="transparent"/>
+      <stop offset="73%"  stop-color="#1a0952" stop-opacity="0.17"/>
+      <stop offset="85%"  stop-color="#2e0a16" stop-opacity="0.09"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+
+    <!-- Node glows -->
+    <radialGradient id="nodeQi" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#d4aa28" stop-opacity="0.9"/>
+      <stop offset="50%"  stop-color="#9a7c18" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    <radialGradient id="nodeShen" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#40d8cc" stop-opacity="0.95"/>
+      <stop offset="45%"  stop-color="#18a8a0" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+
+    <!-- ── FILTERS ── -->
+
+    <filter id="bodyGlow6" x="-12%" y="-12%" width="124%" height="124%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <!-- Orbit bloom layer (wide, soft) -->
+    <filter id="bloom" x="-18%" y="-18%" width="136%" height="136%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6"/>
+    </filter>
+
+    <!-- Tight orbit glow (narrower halo around the wire) -->
+    <filter id="wireGlow" x="-8%" y="-8%" width="116%" height="116%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+    </filter>
+
+    <!-- Node bloom -->
+    <filter id="nodeBloom" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>
+    </filter>
+
+    <filter id="shenBlur6" x="-22%" y="-22%" width="144%" height="144%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="7"/>
+    </filter>
+
+    <filter id="rimBlur6" x="-35%" y="-45%" width="170%" height="190%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10"/>
+    </filter>
+
+    <filter id="grain6" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.70" numOctaves="4"
+        stitchTiles="stitch" result="n"/>
+      <feColorMatrix type="saturate" values="0" in="n" result="g"/>
+      <feBlend in="SourceGraphic" in2="g" mode="overlay" result="gr"/>
+      <feComposite in="gr" in2="SourceGraphic" operator="in"/>
+    </filter>
+
+    <clipPath id="bound6">
+      <ellipse cx="256" cy="256" rx="248" ry="248"/>
+    </clipPath>
+
+  </defs>
+
+  <!-- ══ RENDER ══ -->
+
+  <!-- 0. Void -->
+  <rect width="512" height="512" fill="#020409"/>
+
+  <!-- 1. Outer halo -->
+  <ellipse cx="256" cy="256" rx="256" ry="256" fill="url(#halo6)"/>
+
+  <!-- 2. Torus body — Jing/Qi/Shen gradient base -->
+  <ellipse cx="256" cy="256" rx="232" ry="167"
+    fill="url(#jqs6)" filter="url(#bodyGlow6)"/>
+
+  <!-- 3. Depth shift (near/far perspective) -->
+  <ellipse cx="256" cy="256" rx="232" ry="167" fill="url(#depth6)"/>
+
+  <!-- 4. ── ORBITAL BANDS (screen blend) ──
+       Each orbit: BLOOM layer first, then WIRE on top.
+       Tilts pushed to ±22-35° for clear intersection geometry.
+  -->
+  <g clip-path="url(#bound6)" style="mix-blend-mode: screen">
+
+    <!-- ── Orbit A: Jing ring (primary, +0°, indigo) ── -->
+    <!-- Bloom -->
+    <ellipse cx="256" cy="256" rx="232" ry="167"
+      fill="none" stroke="#2a1472" stroke-width="32" opacity="0.40"
+      filter="url(#bloom)"/>
+    <!-- Wire -->
+    <ellipse cx="256" cy="256" rx="232" ry="167"
+      fill="none" stroke="#3a1e8a" stroke-width="2" opacity="0.60"
+      filter="url(#wireGlow)"/>
+
+    <!-- ── Orbit B: Qi ring 1 (+22°, gold, offset) ── -->
+    <!-- Bloom -->
+    <ellipse cx="262" cy="250" rx="216" ry="148"
+      fill="none" stroke="#9a7c18" stroke-width="14" opacity="0.38"
+      transform="rotate(22, 256, 256)"
+      filter="url(#bloom)"/>
+    <!-- Wire -->
+    <ellipse cx="262" cy="250" rx="216" ry="148"
+      fill="none" stroke="#c8a030" stroke-width="1.5" opacity="0.65"
+      transform="rotate(22, 256, 256)"
+      filter="url(#wireGlow)"/>
+
+    <!-- ── Orbit C: Qi ring 2 (−22°, gold-green, counter-orbital) ── -->
+    <!-- Bloom -->
+    <ellipse cx="250" cy="262" rx="204" ry="154"
+      fill="none" stroke="#6a8010" stroke-width="10" opacity="0.30"
+      transform="rotate(-22, 256, 256)"
+      filter="url(#bloom)"/>
+    <!-- Wire -->
+    <ellipse cx="250" cy="262" rx="204" ry="154"
+      fill="none" stroke="#8aaa18" stroke-width="1.5" opacity="0.55"
+      transform="rotate(-22, 256, 256)"
+      filter="url(#wireGlow)"/>
+
+    <!-- ── Orbit D: Shen inner ring (+8°, teal, spirit path) ── -->
+    <!-- Bloom -->
+    <ellipse cx="254" cy="257" rx="112" ry="80"
+      fill="none" stroke="#18a8a0" stroke-width="16" opacity="0.45"
+      transform="rotate(8, 256, 256)"
+      filter="url(#bloom)"/>
+    <!-- Wire -->
+    <ellipse cx="254" cy="257" rx="112" ry="80"
+      fill="none" stroke="#40d8cc" stroke-width="1.5" opacity="0.70"
+      transform="rotate(8, 256, 256)"
+      filter="url(#wireGlow)"/>
+
+    <!-- ── Orbit E: crimson haze (+35°, barely present) ── -->
+    <!-- Bloom only — no wire, this is pure atmosphere -->
+    <ellipse cx="258" cy="254" rx="238" ry="150"
+      fill="none" stroke="#5a1424" stroke-width="10" opacity="0.13"
+      transform="rotate(35, 256, 256)"
+      filter="url(#bloom)"/>
+
+    <!-- ── Orbit F: Qi echo ring (−6°, hairline gold) ── -->
+    <!-- Wire only — the delicate echo -->
+    <ellipse cx="257" cy="255" rx="118" ry="84"
+      fill="none" stroke="#9a7c18" stroke-width="1" opacity="0.42"
+      transform="rotate(-6, 256, 256)"/>
+
+  </g>
+
+  <!-- 5. ── NODES (orbital bodies) ──
+       Placed on orbital paths at visually distributed angles.
+       Each node: bloom + bright core.
+       Using transform="translate(cx,cy) rotate(θ)" to sit ON the orbit.
+  -->
+  <g style="mix-blend-mode: screen">
+
+    <!-- Node 1: Qi body on Orbit B upper-right (~φ55°) -->
+    <!-- In orbit B local coords (rotated 22°): point at 55° -->
+    <!-- rx*cos55=124, ry*sin55=121 → local (124, 121), global rotate 22° around 256,256 -->
+    <g transform="translate(256,256) rotate(22) translate(124, 121)">
+      <circle r="9"  fill="url(#nodeQi)" filter="url(#nodeBloom)" opacity="0.90"/>
+      <circle r="2.5" fill="#e8c840" opacity="0.95"/>
+    </g>
+
+    <!-- Node 2: Qi body on Orbit B lower-left (antipodal ~φ235°) -->
+    <g transform="translate(256,256) rotate(22) translate(-120, -125)">
+      <circle r="7"  fill="url(#nodeQi)" filter="url(#nodeBloom)" opacity="0.75"/>
+      <circle r="2"  fill="#c8a030" opacity="0.88"/>
+    </g>
+
+    <!-- Node 3: Qi body on Orbit C right side (~φ330°) -->
+    <!-- rx*cos330=177, ry*sin330=-77 → local (177,-77), orbit rotated -22° -->
+    <g transform="translate(256,256) rotate(-22) translate(177, -77)">
+      <circle r="7"  fill="url(#nodeQi)" filter="url(#nodeBloom)" opacity="0.78"/>
+      <circle r="2"  fill="#aaba20" opacity="0.90"/>
+    </g>
+
+    <!-- Node 4: Shen body on Orbit D bottom (near-rim, ~φ90°, closest to viewer) -->
+    <!-- rx*cos90=0, ry*sin90=80 → local (0, 80), orbit rotated 8° -->
+    <g transform="translate(256,256) rotate(8) translate(0, 80)">
+      <circle r="10" fill="url(#nodeShen)" filter="url(#nodeBloom)" opacity="0.92"/>
+      <circle r="3"  fill="#60e8e0" opacity="0.98"/>
+    </g>
+
+    <!-- Node 5: Qi body on Orbit B left (~φ155°) — smaller/dimmer -->
+    <g transform="translate(256,256) rotate(22) translate(-196, 63)">
+      <circle r="5"  fill="url(#nodeQi)" filter="url(#nodeBloom)" opacity="0.60"/>
+      <circle r="1.5" fill="#c8a030" opacity="0.80"/>
+    </g>
+
+  </g>
+
+  <!-- 6. Far wall (inside back of tube, compressed toward top) -->
+  <ellipse cx="256" cy="230" rx="78" ry="43" fill="url(#farWall6)"/>
+
+  <!-- 7. Deep void -->
+  <ellipse cx="256" cy="256" rx="108" ry="77" fill="url(#void6)"/>
+
+  <!-- 8. Shen glow — teal light through the aperture -->
+  <ellipse cx="256" cy="258" rx="102" ry="72"
+    fill="url(#shenGlow6)" filter="url(#shenBlur6)"/>
+
+  <!-- 9. Near-rim highlight (bottom) -->
+  <ellipse cx="256" cy="304" rx="86" ry="24"
+    fill="url(#nearRim6)" filter="url(#rimBlur6)"/>
+
+  <!-- 10. Grain -->
+  <ellipse cx="256" cy="256" rx="232" ry="167"
+    fill="#18183a" opacity="0.07" filter="url(#grain6)"/>
+
+</svg>

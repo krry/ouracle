@@ -1,7 +1,7 @@
 <div class="page">
   <header>
     <h1>ripl</h1>
-    <p class="sub">when the shell that listens back</p>
+    <p class="sub">when the shell listens back</p>
   </header>
 
   <section class="prose-section">

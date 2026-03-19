@@ -438,18 +438,7 @@
 	<!-- message list -->
 	<div class="msgs" bind:this={msgList}>
 		{#each $messages as msg}
-			{#if msg.role === 'card' && msg.card}
-				<div class="msg card-msg">
-					<span class="label card-label">◈ {msg.card.deckLabel}</span>
-					<div class="card-body">
-						<div class="card-title">{msg.card.title}</div>
-						{#if msg.card.keywords.length}
-							<div class="card-keywords">{msg.card.keywords.join(' · ')}</div>
-						{/if}
-						<pre class="card-text">{msg.card.body}</pre>
-					</div>
-				</div>
-			{:else if msg.role !== 'system' && msg.role !== 'card'}
+			{#if msg.role !== 'system' && msg.role !== 'card'}
 				<div class="msg {msg.role}" class:covenant-reminder={msg.isCovenantReminder}>
 					{#if !msg.isCovenantReminder}
 						<span class="label">{msg.role === 'user' ? 'you' : 'clea'}</span>
@@ -580,6 +569,8 @@
 	right: 1.25rem;
 	z-index: 20;
 	width: 300px;
+	backdrop-filter: blur(1rem);
+	-webkit-backdrop-filter: blur(1rem);
 }
 @media (max-width: 640px) {
 	.panel-wrap {

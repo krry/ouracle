@@ -199,9 +199,7 @@
 	/* Overlay — positioned by the parent (chat/+page.svelte) */
 	display: flex;
 	flex-direction: column;
-	background: color-mix(in srgb, var(--bg) 85%, transparent);
-	backdrop-filter: blur(20px) saturate(180%);
-	-webkit-backdrop-filter: blur(20px) saturate(180%);
+	background: color-mix(in srgb, var(--bg) 82%, transparent);
 	border: 1px solid rgba(255, 255, 255, 0.15);
 	border-radius: var(--radius);
 	box-shadow:

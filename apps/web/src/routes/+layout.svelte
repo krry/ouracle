@@ -368,11 +368,13 @@
 /* ── Footer ───────────────────────────────────────────────────────────── */
 footer {
   display: flex;
+  position: absolute;
+  bottom: 0;
+  right: 0;
   justify-content: space-between;
   padding: var(--space-xs) var(--space-sm);
   font-size: 0.75rem;
   color: var(--muted);
-  border-top: 1px solid var(--border);
   flex-shrink: 0;
   justify-content: flex-end;
 }
