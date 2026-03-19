@@ -11,6 +11,9 @@ readme = "README.md"
 keywords = ["tui", "ai", "chat", "terminal", "ratatui"]
 categories = ["command-line-interface", "command-line-utilities"]
 
+[package.metadata]
+icons = ["assets/icon-256.png"]
+
 [[bin]]
 name = "clea"
 path = "src/main.rs"
