@@ -199,12 +199,15 @@
 	/* Overlay — positioned by the parent (chat/+page.svelte) */
 	display: flex;
 	flex-direction: column;
-	background: color-mix(in srgb, var(--bg) 88%, transparent);
-	backdrop-filter: blur(14px);
-	-webkit-backdrop-filter: blur(14px);
-	border: 1px solid var(--border);
+	background: color-mix(in srgb, var(--bg) 85%, transparent);
+	backdrop-filter: blur(20px) saturate(180%);
+	-webkit-backdrop-filter: blur(20px) saturate(180%);
+	border: 1px solid rgba(255, 255, 255, 0.15);
 	border-radius: var(--radius);
-	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+	box-shadow:
+		0 1px 3px rgba(0, 0, 0, 0.08),
+		0 8px 24px rgba(0, 0, 0, 0.1),
+		inset 0 1px 0 rgba(255, 255, 255, 0.1);
 	overflow: hidden;
 	width: 100%;
 }

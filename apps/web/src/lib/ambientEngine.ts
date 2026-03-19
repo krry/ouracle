@@ -13,29 +13,10 @@
 import { writable, get } from 'svelte/store';
 import { browser } from '$app/environment';
 
-export type SceneId =
-  | 'drizzle' | 'storm'     | 'river'  | 'wind'
-  | 'leaves'  | 'fire'      | 'asmr'   | 'bowls'
-  | 'earth'   | 'drone'     | 'ocean'  | 'desert'
-  | 'waterfall'| 'night'    | 'jungle' | 'binaural';
+export type SceneId = 'binaural';
 
 export const SCENES: { id: SceneId; label: string }[] = [
-  { id: 'drizzle',   label: 'drizzle'   },
-  { id: 'storm',     label: 'storm'     },
-  { id: 'river',     label: 'river'     },
-  { id: 'ocean',     label: 'ocean'     },
-  { id: 'waterfall', label: 'waterfall' },
-  { id: 'wind',      label: 'wind'      },
-  { id: 'desert',    label: 'desert'    },
-  { id: 'leaves',    label: 'leaves'    },
-  { id: 'night',     label: 'night'     },
-  { id: 'jungle',    label: 'jungle'    },
-  { id: 'fire',      label: 'fire'      },
-  { id: 'asmr',      label: 'asmr'      },
-  { id: 'bowls',     label: 'bowls'     },
-  { id: 'earth',     label: 'earth'     },
-  { id: 'drone',     label: 'drone'     },
-  { id: 'binaural',  label: 'binaural'  },
+  { id: 'binaural', label: 'binaural' },
 ];
 
 /** Binaural beat frequency Hz — seeker-controlled, default theta (6 Hz). */
@@ -734,22 +715,11 @@ export function startAmbient(scene: SceneId, volume: number) {
   masterGain.connect(audioCtx.destination);
 
   switch (scene) {
-    case 'drizzle':   buildDrizzle(audioCtx, masterGain);   break;
-    case 'storm':     buildStorm(audioCtx, masterGain);     break;
-    case 'river':     buildRiver(audioCtx, masterGain);     break;
-    case 'wind':      buildWind(audioCtx, masterGain);      break;
-    case 'leaves':    buildLeaves(audioCtx, masterGain);    break;
-    case 'ocean':     buildOcean(audioCtx, masterGain);     break;
-    case 'waterfall': buildWaterfall(audioCtx, masterGain); break;
-    case 'desert':    buildDesert(audioCtx, masterGain);    break;
-    case 'night':     buildNight(audioCtx, masterGain);     break;
-    case 'jungle':    buildJungle(audioCtx, masterGain);    break;
-    case 'fire':      buildFire(audioCtx, masterGain);      break;
-    case 'asmr':      buildAsmr(audioCtx, masterGain);      break;
-    case 'bowls':     buildBowls(audioCtx, masterGain);     break;
-    case 'earth':     buildEarth(audioCtx, masterGain);     break;
-    case 'drone':     buildDrone(audioCtx, masterGain);     break;
-    case 'binaural':  buildBinaural(audioCtx, masterGain, get(binauralBeat)); break;
+    case 'binaural':
+      buildBinaural(audioCtx, masterGain, get(binauralBeat));
+      break;
+    default:
+      throw new Error(`Unknown scene: ${scene}`);
   }
 
   ambientRunning.set(true);

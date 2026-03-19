@@ -132,6 +132,7 @@
 
 	async function send(text: string, mode?: string) {
 		if ($streaming) return;
+		let skipTag = false;
 
 		// Fuzzy covenant readiness detection
 		if ($needsCovenant && !$covenantReady && text.trim()) {
@@ -161,13 +162,28 @@
 					sessionId = event.session_id as string;
 					needsCovenant.set(!!event.needs_covenant);
 					continueOffered.set(false);
-				} else if (event.type === 'token') {
-					messages.update(m => {
-						const last = m[m.length - 1];
-						last.content += event.text as string;
-						return [...m];
-					});
-			} else if (event.type === 'break') {
+            } else if (event.type === 'token') {
+                const tokenText = event.text as string;
+                if (skipTag) {
+                    if (tokenText.includes(']')) {
+                        skipTag = false;
+                    }
+                } else {
+                    const currentMsgs = get(messages);
+                    const lastMsg = currentMsgs[currentMsgs.length - 1];
+                    if (lastMsg.role === 'assistant' && lastMsg.content === '' && tokenText.startsWith('[')) {
+                        if (!tokenText.includes(']')) {
+                            skipTag = true;
+                        }
+                    } else {
+                        messages.update(m => {
+                            const last = m[m.length - 1];
+                            last.content += tokenText;
+                            return [...m];
+                        });
+                    }
+                }
+            }else if (event.type === 'break') {
 				// Priestess finished one block — enqueue for TTS, then start fresh message
 				if ($ttsEnabled && audioQueue) {
 					const msgs = get(messages);
@@ -176,9 +192,10 @@
 						audioQueue.enqueue(last.content);
 					}
 				}
-				// Always add a fresh empty assistant message for the next turn
-				messages.update(m => [...m, { role: 'assistant', content: '' }]);
-			}else if (event.type === 'draw' && event.card) {
+        // Always add a fresh empty assistant message for the next turn
+        messages.update(m => [...m, { role: 'assistant', content: '' }]);
+        skipTag = false;
+			} else if (event.type === 'draw' && event.card) {
 					// Clea triggered a contextual card draw server-side
 					const raw = event.card as any;
 					const deckMeta = availableDecks.find(d => d.id === raw.deck);
@@ -499,6 +516,7 @@
 }
 
 .msgs {
+	position: relative;
 	flex: 1;
 	overflow-y: auto;
 	padding: 2rem 1.5rem 5rem; /* bottom padding leaves room for float widget */
@@ -527,9 +545,9 @@
 
 /* ── Seeker Status Panel wrapper (desktop left) ───────────────────────────── */
 .seeker-panel-wrap {
-	position: fixed;
-	top: var(--topbar-h, 57px);
-	left: 1.25rem;
+	position: absolute;
+  bottom: 5rem;
+	right: 1.25rem;
 	z-index: 20;
 	width: 260px; /* slightly narrower, fits the status panel */
 }
@@ -691,10 +709,13 @@ textarea:focus { border-color: var(--accent); }
 }
 
 .ptt.active {
-	background: hsl(var(--hue), 55%, 18%);
+	/* Light tint of accent color for active state */
+	background: color-mix(in srgb, var(--accent) 20%, white);
 	border-color: var(--accent);
-	color: var(--accent);
-	box-shadow: 0 0 0 4px hsl(var(--hue), 60%, 65%, 0.25), 0 0 16px hsl(var(--hue), 60%, 65%, 0.3);
+	color: hsl(var(--hue), 70%, 20%);
+	box-shadow:
+		0 0 0 4px hsl(var(--hue), 60%, 65%, 0.2),
+		0 4px 12px rgba(0, 0, 0, 0.1);
 	transform: scale(1.15);
 }
 

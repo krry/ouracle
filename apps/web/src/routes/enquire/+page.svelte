@@ -47,18 +47,18 @@
   <style>html, body { height: 100%; overflow: hidden; }</style>
 </svelte:head>
 
-{#if $authed || !wantsSignin}
-  <div class="chat-stage">
-    <Chat guestMode={!$authed} />
-    {#if !$authed && !exchanging && $guestTurns >= GUEST_LIMIT}
-      <AltarOverlay onsignin={() => (wantsSignin = true)} />
-    {/if}
-    {#if $covenantReady}
-      <Covenant onaccept={handleCovenantAccepted} />
-    {/if}
-  </div>
-{:else}
-  <Reception />
+<div class="chat-stage">
+  <Chat guestMode={!$authed} />
+  {#if !$authed && !exchanging && $guestTurns >= GUEST_LIMIT && !wantsSignin}
+    <AltarOverlay onsignin={() => (wantsSignin = true)} />
+  {/if}
+  {#if $covenantReady}
+    <Covenant onaccept={handleCovenantAccepted} />
+  {/if}
+</div>
+
+{#if wantsSignin}
+  <Reception onclose={() => (wantsSignin = false)} />
 {/if}
 
 <style>

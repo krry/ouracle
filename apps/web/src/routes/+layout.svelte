@@ -100,11 +100,11 @@
       </div>
 
       {#if $authed && $creds}
-        <div class="drawer-mobile-row dm-identity">
+        <!--<div class="drawer-mobile-row dm-identity">
           {#if ($creds as Credentials | null)?.handle}
             <span class="dm-handle">{($creds as Credentials | null)?.handle}</span>
           {/if}
-        </div>
+        </div>-->
         <!-- Seeker status panel in drawer (shows brief) -->
         <div class="drawer-mobile-row dm-seeker-status">
           <svelte:component this={SeekerStatusPanel} />

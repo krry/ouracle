@@ -40,8 +40,8 @@
 <div class="seeker-status" class:has-data={$seekerState.affect.valence !== null}>
 	<div class="ss-header">
 		<div class="ss-identity">
-			<span class="ss-handle">{$seekerState.handle ?? 'guest'}</span>
 			<span class="ss-label">Seeker</span>
+			<span class="ss-handle">{$seekerState.handle ?? 'guest'}</span>
 		</div>
 	</div>
 
@@ -51,25 +51,32 @@
 			<!-- Axes -->
 			<line x1="0" y1="50" x2="100" y2="50" class="axis" />
 			<line x1="50" y1="0" x2="50" y2="100" class="axis" />
-			<!-- Quadrant labels -->
-			<text x="15" y="18" class="quadrant-label">High‑Arousal\nPositive</text>
-			<text x="55" y="18" class="quadrant-label">High‑Arousal\nNegative</text>
-			<text x="15" y="85" class="quadrant-label">Low‑Arousal\nPositive</text>
-			<text x="55" y="85" class="quadrant-label">Low‑Arousal\nNegative</text>
+		<!-- Axis labels and +/- markers -->
+		<!-- X-axis: Valence -->
+		<text x="5" y="54" class="axis-label valence-label">-</text>
+		<text x="98" y="54" class="axis-label valence-label">+</text>
+		<text x="50" y="96" class="axis-label valence-label">Valence</text>
+
+		<!-- Y-axis: Arousal (rotated vertical) -->
+		<text x="54" y="8" class="axis-label arousal-label">+</text>
+		<text x="54" y="98" class="axis-label arousal-label">-</text>
+		<text x="92" y="50" class="axis-label arousal-label">Arousal</text>
 			<!-- Data point -->
 			<circle cx={dotX} cy={dotY} r="4" class="affect-dot" />
 		</svg>
+		<!-- Gloss temporarily commented out until we understand its purpose
 		{#if $seekerState.affect.gloss}
 			<div class="ss-affect-gloss">{$seekerState.affect.gloss}</div>
 		{/if}
+		-->
 	</div>
 
 	<!-- Inference badges -->
 	<div class="ss-badges">
 		<div class="badge-row">
-			<span class="badge-label">vagal</span>
+			<span class="badge-label">vagus</span>
 			<span class="badge-value" style="color: {vagalColor($seekerState.vagal.probable)}">
-				{$seekerState.vagal.probable ?? '—'}
+				{$seekerState.vagal.probable ?? '_'}
 			</span>
 			<span class="badge-confidence" style="color: {confidenceColor($seekerState.vagal.confidence)}">
 				({$seekerState.vagal.confidence ?? '?'})
@@ -77,14 +84,14 @@
 		</div>
 		<div class="badge-row">
 			<span class="badge-label">belief</span>
-			<span class="badge-value">{$seekerState.belief.pattern ?? '—'}</span>
+			<span class="badge-value">{$seekerState.belief.pattern ?? '_'}</span>
 			<span class="badge-confidence" style="color: {confidenceColor($seekerState.belief.confidence)}">
 				({$seekerState.belief.confidence ?? '?'})
 			</span>
 		</div>
 		<div class="badge-row">
 			<span class="badge-label">quality</span>
-			<span class="badge-value">{$seekerState.quality.quality ?? '—'}</span>
+			<span class="badge-value">{$seekerState.quality.quality ?? '_'}</span>
 			<span class="badge-confidence" style="color: {confidenceColor($seekerState.quality.confidence)}">
 				({$seekerState.quality.confidence ?? '?'})
 			</span>
@@ -117,8 +124,9 @@
 	}
 	.ss-identity {
 		display: flex;
-		flex-direction: column;
-		gap: 0.1rem;
+		flex-direction: row;
+		align-items: baseline;
+		gap: 1ch;
 	}
 	.ss-handle {
 		font-size: 0.75rem;
@@ -131,6 +139,8 @@
 		text-transform: uppercase;
 		letter-spacing: 0.12em;
 		color: var(--muted);
+		min-width: 3rem;
+		text-align: right;
 	}
 
 	/* Circumplex plot */
@@ -149,11 +159,20 @@
 		stroke: var(--border);
 		stroke-width: 0.5;
 	}
-	.quadrant-label {
+	.axis-label {
 		font-size: 4px;
 		text-anchor: middle;
 		fill: var(--muted);
-		opacity: 0.5;
+		opacity: 0.6;
+		font-weight: 500;
+	}
+	.valence-label {
+		font-size: 5px;
+	}
+	.arousal-label {
+		font-size: 5px;
+		transform: rotate(-90deg);
+		transform-origin: center;
 	}
 	.affect-dot {
 		fill: var(--accent);
@@ -185,6 +204,8 @@
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
 		min-width: 3rem;
+		text-align: right;
+		margin-right: 1ch;
 	}
 	.badge-value {
 		font-weight: 600;
@@ -198,12 +219,13 @@
 	/* Compact variant for drawer (stacked, no plot? Actually drawer is narrow, we may keep plot small) */
 	@media (max-width: 767px) {
 		.seeker-status {
+			width: 100%;
 			padding: 0.5rem 0.6rem;
 		}
 		.ss-affect-plot {
 			max-width: 80px;
 		}
-		.quadrant-label {
+		.axis-label {
 			font-size: 3px;
 		}
 		.badge-row {

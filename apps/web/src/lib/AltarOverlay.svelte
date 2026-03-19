@@ -9,7 +9,7 @@
   <div class="inner">
     <p class="quip">{quip}</p>
     <button onclick={onsignin}>enter the temple</button>
-    <p class="sub">or close this tab and carry the questions with you</p>
+    <p class="sub">or go back and carry the questions with you</p>
   </div>
 </div>
 

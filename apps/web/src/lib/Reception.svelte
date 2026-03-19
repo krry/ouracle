@@ -11,6 +11,8 @@
   let error = $state('');
   let busy = $state(false);
 
+  let { onclose }: { onclose?: () => void } = $props();
+
   const BASE = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
 
   async function registerDeviceKey(token: string) {
@@ -105,66 +107,107 @@
       busy = false;
     }
   }
+
+  function handleClose() {
+    onclose?.();
+  }
 </script>
 
-<main>
-  <header>
-    <h1>Ouracle</h1>
-    <p class="sub">hear and be heard.</p>
-  </header>
+<div class="veil" role="dialog" aria-modal="true" aria-label="sign in">
+  <div class="inner">
+    <button class="close-btn" onclick={handleClose} aria-label="Close">✕</button>
 
-  <div class="social-row">
-    <button class="social" onclick={() => socialSignIn('apple')} disabled={busy}>Apple</button>
-    <button class="social" onclick={() => socialSignIn('google')} disabled={busy}>Google</button>
-    <button class="social" onclick={() => socialSignIn('github')} disabled={busy}>GitHub</button>
-  </div>
+    <header>
+      <h1>Ouracle</h1>
+      <p class="sub">hear and be heard.</p>
+    </header>
 
-  <div class="divider"><span>or</span></div>
+    <div class="social-row">
+      <button class="social" onclick={() => socialSignIn('apple')} disabled={busy}>Apple</button>
+      <button class="social" onclick={() => socialSignIn('google')} disabled={busy}>Google</button>
+      <button class="social" onclick={() => socialSignIn('github')} disabled={busy}>GitHub</button>
+    </div>
 
-  <form onsubmit={(e) => { e.preventDefault(); submit(); }}>
-    {#if mode === 'sign-up'}
+    <div class="divider"><span>or</span></div>
+
+    <form onsubmit={(e) => { e.preventDefault(); submit(); }}>
+      {#if mode === 'sign-up'}
+        <label>
+          <span>name</span>
+          <input bind:value={name} type="text" autocomplete="name" required />
+        </label>
+      {/if}
       <label>
-        <span>name</span>
-        <input bind:value={name} type="text" autocomplete="name" required />
+        <span>email</span>
+        <input bind:value={email} type="email" autocomplete="email" required />
       </label>
-    {/if}
-    <label>
-      <span>email</span>
-      <input bind:value={email} type="email" autocomplete="email" required />
-    </label>
-    <label>
-      <span>password</span>
-      <input bind:value={password} type="password"
-        autocomplete={mode === 'sign-up' ? 'new-password' : 'current-password'} required />
-    </label>
+      <label>
+        <span>password</span>
+        <input bind:value={password} type="password"
+          autocomplete={mode === 'sign-up' ? 'new-password' : 'current-password'} required />
+      </label>
 
-    {#if error}<p class="error">{error}</p>{/if}
+      {#if error}<p class="error">{error}</p>{/if}
 
-    <button type="submit" class="primary" disabled={busy}>
-      {busy ? '…' : mode === 'sign-in' ? 'enter the temple' : 'begin'}
+      <button type="submit" class="primary" disabled={busy}>
+        {busy ? '…' : mode === 'sign-in' ? 'enter the temple' : 'begin'}
+      </button>
+    </form>
+
+    <button class="toggle" onclick={() => { mode = mode === 'sign-in' ? 'sign-up' : 'sign-in'; error = ''; }}>
+      {mode === 'sign-in' ? 'new seeker' : 'returning seeker'}
     </button>
-  </form>
-
-  <button class="toggle" onclick={() => { mode = mode === 'sign-in' ? 'sign-up' : 'sign-in'; error = ''; }}>
-    {mode === 'sign-in' ? 'new seeker' : 'returning seeker'}
-  </button>
-</main>
+  </div>
+</div>
 
 <style>
-main {
-  height: 100dvh;
+.veil {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem;
-  padding: 2rem;
+  z-index: 100;
+  animation: fadein 0.6s ease both;
 }
-header { text-align: center; }
-h1 { font-size: 2rem; letter-spacing: 0.2em; color: var(--accent); }
-.sub { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.15em; margin-top: 0.4rem; }
-.social-row { display: flex; gap: 0.75rem; }
-.social {
+
+@keyframes fadein { from { opacity: 0 } to { opacity: 1 } }
+
+.inner {
+  max-width: 380px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0.3rem;
+  transition: color 0.15s;
+}
+.close-btn:hover { color: var(--text); }
+
+.quip {
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.7;
+  font-style: italic;
+}
+
+button {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -177,6 +220,7 @@ h1 { font-size: 2rem; letter-spacing: 0.2em; color: var(--accent); }
   transition: border-color 0.15s, color 0.15s;
 }
 .social:hover { border-color: var(--accent); color: var(--accent); }
+
 .divider {
   display: flex;
   align-items: center;
@@ -185,9 +229,11 @@ h1 { font-size: 2rem; letter-spacing: 0.2em; color: var(--accent); }
   max-width: 300px;
   color: var(--muted);
   font-size: 0.75rem;
+  margin: 0 auto;
 }
 .divider::before, .divider::after { content: ''; flex: 1; border-top: 1px solid var(--border); }
-form { display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 300px; }
+
+form { display: flex; flex-direction: column; gap: 1rem; width: 100%; }
 label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em; }
 input {
   background: var(--surface);
@@ -201,6 +247,7 @@ input {
   transition: border-color 0.15s;
 }
 input:focus { border-color: var(--accent); }
+
 .primary {
   background: var(--accent);
   border: none;
@@ -214,7 +261,9 @@ input:focus { border-color: var(--accent); }
   transition: opacity 0.15s;
 }
 .primary:disabled { opacity: 0.4; cursor: default; }
+
 .error { color: hsl(0, 60%, 65%); font-size: 0.8rem; }
+
 .toggle {
   background: none;
   border: none;

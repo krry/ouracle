@@ -32,16 +32,6 @@
 
   <div class="trail">
     <div class="ambient-wrap"><AmbientControls /></div>
-    {#if isEnquire && $authed && $creds}
-      <div class="identity">
-        {#if ($creds as Credentials | null)?.handle}
-          <span class="handle">{($creds as Credentials | null)?.handle}</span>
-        {/if}
-        <button class="leave" onclick={leave} title="leave">⌁</button>
-      </div>
-    {:else if !isEnquire}
-      <a href="/enquire" class="enter">enter <span class="the-temple">the temple</span></a>
-    {/if}
   </div>
 </header>
 

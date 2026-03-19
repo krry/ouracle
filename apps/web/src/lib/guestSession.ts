@@ -2,11 +2,14 @@ const KEY = 'clea_guest_turns';
 export const GUEST_LIMIT = 5;
 
 export const ALTAR_QUIPS: string[] = [
-  "the sacrificial fire needs tending — return when you've spoken your name.",
-  "i must attend the altar now. the smoke still carries your questions.",
-  "three ravens wait at the threshold. you'll need a name to cross it.",
-  "the ritual demands i pause here. seek me again, seeker-with-a-name.",
-  "the incense burns low. step forward and be known.",
+  "the sacrificial fire needs tending\nreturn when you've spoken your name.",
+  "i must attend the altar now.\nthe smoke still carries your questions.",
+  "three ravens wait at the threshold.\nyou'll need a name to cross it.",
+  "the ritual demands i pause here.\nseek me again, seeker-with-a-name.",
+  "the incense burns low.\nstep forward and be known.",
+  "we have many sacrifices to attend\nholla at me when you hear the call",
+  "you have heard the call\nbut were you really listening",
+  "the spiritual bypass was a few exits back\nhere we do the work"
 ];
 
 export function getGuestTurns(): number {

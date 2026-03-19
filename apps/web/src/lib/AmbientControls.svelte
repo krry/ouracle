@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { startAmbient, stopAmbient, ambientRunning, ambientScene, SCENES, binauralBeat, updateBinauralBeat } from './ambientEngine';
-  import type { SceneId } from './ambientEngine';
+  import { startAmbient, stopAmbient, ambientRunning, ambientScene, binauralBeat, updateBinauralBeat } from './ambientEngine';
+
 
   const MIN_HZ = 0.5;
   const MAX_HZ = 100;
@@ -39,10 +39,7 @@
     else startAmbient($ambientScene, 0.75);
   }
 
-  function switchScene(scene: SceneId) {
-    ambientScene.set(scene);
-    if ($ambientRunning) startAmbient(scene, 0.75);
-  }
+
 </script>
 
 <div class="ambient">
@@ -53,16 +50,7 @@
     title={$ambientRunning ? 'stop' : 'ambient'}
   >♪</button>
 
-  <select
-    class="scene"
-    value={$ambientScene}
-    onchange={(e) => switchScene((e.target as HTMLSelectElement).value as SceneId)}
-    aria-label="ambient scene"
-  >
-    {#each SCENES as s}
-      <option value={s.id}>{s.label}</option>
-    {/each}
-  </select>
+
 
   {#if $ambientScene === 'binaural'}
     <div class="beat-ctrl">
