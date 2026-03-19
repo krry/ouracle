@@ -3,13 +3,18 @@
 
   let { onsignin }: { onsignin: () => void } = $props();
   const quip = randomQuip();
+
+  function handleClose() {
+    onsignin();
+  }
 </script>
 
-<div class="veil" role="dialog" aria-modal="true" aria-label="session ended">
+<div class="veil" role="dialog" aria-modal="true" aria-label="guest limit reached">
   <div class="inner">
+    <button class="close-btn" onclick={handleClose} aria-label="Sign in">✕</button>
     <p class="quip">{quip}</p>
     <button onclick={onsignin}>enter the temple</button>
-    <p class="sub">or go back and carry the questions with you</p>
+    <p class="sub">or close this tab and carry the questions with you</p>
   </div>
 </div>
 
@@ -35,7 +40,23 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  position: relative;
 }
+
+.close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0.3rem;
+  transition: color 0.15s;
+}
+.close-btn:hover { color: var(--text); }
 
 .quip {
   color: var(--text);
