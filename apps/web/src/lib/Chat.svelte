@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
+	import { browser } from '$app/environment';
 	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState } from './stores';
 	import type { CardData, RiteData, TtsVoice, VagalInfo, BeliefInfo, QualityInfo } from './stores';
 	import { enquire, tts, stt } from './api';
@@ -60,6 +61,17 @@
 	let pttSeen = $state(typeof localStorage !== 'undefined' && !!localStorage.getItem(PTT_SEEN_KEY));
 
 	const BASE_URL = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
+
+	// Persist conversation to localStorage
+	$effect(() => {
+	  if (browser) {
+	    try {
+	      localStorage.setItem('clea_messages', JSON.stringify($messages));
+	    } catch (e) {
+	      console.error('Failed to save messages:', e);
+	    }
+	  }
+	});
 
 	async function fetchDecks() {
 		try {
@@ -276,6 +288,17 @@
 
 	// Open session on mount — /enquire with no session_id bootstraps it
 	onMount(async () => {
+		// Restore saved messages if available
+		if (browser) {
+		  try {
+		    const saved = localStorage.getItem('clea_messages');
+		    if (saved) {
+		      messages.set(JSON.parse(saved));
+		    }
+		  } catch (e) {
+		    console.error('Failed to load saved messages:', e);
+		  }
+		}
 		window.addEventListener('keydown', handleGlobalKey);
 		window.addEventListener('keyup', handleGlobalKey);
 		if (guestMode) {
@@ -290,7 +313,10 @@
 			seekerState.setPartial({ handle: c.handle ?? null });
 		}
 		fetchDecks();
-		send('');
+		// Only send initial greeting if no conversation history restored
+		if (get(messages).length === 0) {
+		  send('');
+		}
 	});
 
 	onDestroy(() => {

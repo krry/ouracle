@@ -2,6 +2,7 @@
   import { signIn, signUp, passkey } from './auth';
   import { creds } from './stores';
   import { generateDeviceKeyPair, storePrivateKey } from './totem';
+  import { fade } from 'svelte/transition';
 
   type Mode = 'sign-in' | 'sign-up';
   let mode = $state<Mode>('sign-in');
@@ -117,7 +118,7 @@
   }
 </script>
 
-<div class="veil" role="dialog" aria-modal="true" aria-label="sign in">
+<div class="veil" out:fade={{ duration: 2000 }} role="dialog" aria-modal="true" aria-label="sign in">
   <div class="inner">
     <button class="close-btn" onclick={handleClose} aria-label="Close">✕</button>
 
