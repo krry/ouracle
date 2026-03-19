@@ -44,7 +44,7 @@
   border-bottom: 1px solid var(--border);
   background: var(--bg);
   position: sticky;
-  top: 0;
+  top: var(--safe-top, 0px);
   z-index: 30;
   height: var(--topbar-h, 57px);
   box-sizing: border-box;

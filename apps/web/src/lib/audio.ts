@@ -2,8 +2,11 @@ import { voiceState, waveform } from './stores';
 
 type FetchFn = (text: string) => Promise<ArrayBuffer>;
 
+type QueueItem = { type: 'text'; text: string } | { type: 'buffer'; buffer: ArrayBuffer };
+
+// AudioQueue supports both text (to fetch) and pre-decoded buffers (for streaming TTS)
 export class AudioQueue {
-  private queue: string[] = [];
+  private queue: QueueItem[] = [];
   private _playing = false;
   private ctx: AudioContext | null = null;
   private analyser: AnalyserNode | null = null;
@@ -11,7 +14,6 @@ export class AudioQueue {
 
   constructor(private fetchAudio: FetchFn) {}
 
-  /** Call from a user-gesture handler (e.g. send button, PTT) to unlock the AudioContext. */
   prime() {
     this.ctx ??= new AudioContext();
     this.ctx.resume().catch(() => {});
@@ -21,7 +23,13 @@ export class AudioQueue {
   get playing() { return this._playing; }
 
   enqueue(text: string) {
-    this.queue.push(text);
+    this.queue.push({ type: 'text', text });
+    if (!this._playing) queueMicrotask(() => this._drain());
+  }
+
+  // Enqueue a pre-decoded audio buffer (base64 from server)
+  enqueueBuffer(buffer: ArrayBuffer) {
+    this.queue.push({ type: 'buffer', buffer });
     if (!this._playing) queueMicrotask(() => this._drain());
   }
 
@@ -35,13 +43,19 @@ export class AudioQueue {
     voiceState.set('speaking');
 
     while (this.queue.length > 0) {
-      const text = this.queue.shift()!;
-      try {
-        const buf = await this.fetchAudio(text);
-        await this._play(buf);
-      } catch {
-        // skip failed chunk
+      const item = this.queue.shift()!;
+      let buf: ArrayBuffer;
+      if (item.type === 'text') {
+        try {
+          buf = await this.fetchAudio(item.text);
+        } catch {
+          // skip failed fetch
+          continue;
+        }
+      } else {
+        buf = item.buffer;
       }
+      await this._play(buf);
     }
 
     this._playing = false;
@@ -82,8 +96,6 @@ export class AudioQueue {
   }
 }
 
-// Instantiate per component mount — do NOT use a module-level singleton.
-// Stale state across navigation is avoided by having Chat.svelte own the lifetime.
 export function createAudioQueue(fetchFn: FetchFn): AudioQueue {
   return new AudioQueue(fetchFn);
 }

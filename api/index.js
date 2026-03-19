@@ -1,5 +1,39 @@
 import express from 'express';
 import { fetchAudio, hasFishKey } from './fish-tts.js';
+
+// ── Sentence detection utilities ─────────────────────────────────────
+function splitIntoSentences(text) {
+  // Split on sentence boundaries: period, exclamation, question mark followed by whitespace or end
+  // Also handle common abbreviations and edge cases
+  const sentenceRegex = /[^.!?]+[.!?]+(?:\s|$)|[^.!?]+$/g;
+  const sentences = text.match(sentenceRegex) || [];
+  return sentences.map(s => s.trim()).filter(s => s.length > 0);
+}
+
+function isSentenceBoundary(token, nextToken) {
+  if (!token) return false;
+  const lastChar = token[token.length - 1];
+  if (lastChar === '.' || lastChar === '!' || lastChar === '?') {
+    // Avoid splitting on common abbreviations
+    const abbrevs = ['Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Prof.', 'St.', 'etc.', 'e.g.', 'i.e.'];
+    const isAbbrev = abbrevs.some(abbr => token.endsWith(abbr));
+    if (isAbbrev) return false;
+    // If followed by capitalization or end, it's likely a sentence boundary
+    if (!nextToken) return true;
+    const firstChar = nextToken[0];
+    if (firstChar === firstChar.toUpperCase()) return true;
+  }
+  return false;
+}
+
+// ── SSE Event helpers ───────────────────────────────────────────────
+function sendSSE(res, obj) {
+  res.write(`data: ${JSON.stringify(obj)}\n\n`);
+}
+
+// ── Audio encoder cache ─────────────────────────────────────────────
+const audioCache = new Map(); // text -> { base64, timestamp }
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 import { makeLlmClient } from './llm-client.js';
 import { CLEA_SYSTEM_PROMPT } from './clea-prompt.js';
 import { randomUUID } from 'crypto';
@@ -966,9 +1000,163 @@ app.post('/:domain/:verb', authenticate, async (req, res) => {
 // POST /enquire
 // ─────────────────────────────────────────────
 
-// Stream text word-by-word with ~25ms spacing.
+// ── Sentence-aware TTS streaming with pre-fetch ─────────────────────────────
+class SentenceAudioStreamer {
+  constructor(res, options = {}) {
+    this.res = res;
+    this.muted = options.muted || false;
+    this.voice = options.voice;
+    this.sentenceIdx = 0;
+    this.audioPromises = new Map(); // idx -> Promise
+    this.readyAudio = new Map(); // idx -> base64 | null (null = failed)
+    this.nextAudioEmitIdx = 0;
+    this.preFetchLimit = 2; // pre-fetch up to 2 sentences ahead
+    this.currentSentence = '';
+    this.sentenceStarted = false;
+  }
+
+  emit(obj) {
+    sendSSE(this.res, obj);
+  }
+
+  emitToken(token) {
+    this.emit({ type: 'token', text: token });
+  }
+
+  async emitTokensWithDelay(sentence) {
+    const words = sentence.split(/(\s+)/);
+    for (const word of words) {
+      if (word) {
+        this.emitToken(word);
+        await new Promise(r => setTimeout(r, 22));
+      }
+    }
+  }
+
+  isSentenceBoundary(token) {
+    if (!token) return false;
+    const lastChar = token[token.length - 1];
+    if (lastChar === '.' || lastChar === '!' || lastChar === '?') {
+      const abbrevs = ['Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Prof.', 'St.', 'etc.', 'e.g.', 'i.e.'];
+      if (abbrevs.some(abbr => token.endsWith(abbr))) return false;
+      return true;
+    }
+    return false;
+  }
+
+  startAudioFetch(idx, sentence) {
+    if (this.audioPromises.has(idx)) return;
+    // Cache check
+    const cached = audioCache.get(sentence);
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+      this.readyAudio.set(idx, cached.base64);
+      this.tryEmitAudio();
+      return;
+    }
+    // Limit concurrency: we only want up to preFetchLimit fetches in flight for upcoming sentences.
+    // We'll allow any number to be started as long as they are within [this.sentenceIdx, this.sentenceIdx + this.preFetchLimit].
+    // Since we call this method right when a sentence is finalized (and possibly pre-fetch for upcoming known sentences), we can just start.
+    const p = fetchAudio(sentence, this.voice).then(buf => {
+      const base64 = buf.toString('base64');
+      audioCache.set(sentence, { base64, timestamp: Date.now() });
+      this.readyAudio.set(idx, base64);
+      this.tryEmitAudio();
+    }).catch(err => {
+      console.error('[TTS] sentence fetch error:', err.message);
+      this.readyAudio.set(idx, null); // mark as failed, still allow proceeding
+      this.tryEmitAudio();
+    });
+    this.audioPromises.set(idx, p);
+  }
+
+  tryEmitAudio() {
+    while (this.readyAudio.has(this.nextAudioEmitIdx)) {
+      const data = this.readyAudio.get(this.nextAudioEmitIdx);
+      if (data !== null) {
+        this.emit({ type: 'audio', base64: data, sentence_index: this.nextAudioEmitIdx });
+      }
+      this.nextAudioEmitIdx++;
+    }
+  }
+
+  async waitForRemainingAudio(timeout = 5000) {
+    const deadline = Date.now() + timeout;
+    while (this.nextAudioEmitIdx < this.sentenceIdx) {
+      if (Date.now() > deadline) break;
+      // Check if the next pending index is now ready
+      if (this.readyAudio.has(this.nextAudioEmitIdx)) {
+        const data = this.readyAudio.get(this.nextAudioEmitIdx);
+        if (data !== null) {
+          this.emit({ type: 'audio', base64: data, sentence_index: this.nextAudioEmitIdx });
+        }
+        this.nextAudioEmitIdx++;
+      } else {
+        // Wait a bit for it to become ready
+        await new Promise(r => setTimeout(r, 50));
+      }
+    }
+  }
+
+  // For static text (fully known upfront)
+  async processFullText(fullText) {
+    const sentences = splitIntoSentences(fullText);
+    for (let i = 0; i < sentences.length; i++) {
+      const sentence = sentences[i];
+      await this.emitTokensWithDelay(sentence);
+      this.finalizeSentence(sentence);
+      // Pre-fetch next up to 2 ahead if available
+      if (!this.muted) {
+        for (let j = i + 1; j <= Math.min(i + this.preFetchLimit, sentences.length - 1); j++) {
+          const futureSentence = sentences[j];
+          // Check if we already started fetch for that index? We need to map future index: current sentenceIdx will be incremented after finalizeSentence.
+          // Actually after finalizeSentence, this.sentenceIdx was incremented to i+1.
+          // The future sentences are at indices i+1, i+2, etc.
+          const futureIdx = i + 1 + (j - (i + 1));
+          if (!this.audioPromises.has(futureIdx)) {
+            this.startAudioFetch(futureIdx, futureSentence);
+          }
+        }
+      }
+    }
+  }
+
+  // For incremental LLM token stream
+  feedToken(token) {
+    this.emitToken(token);
+    this.currentSentence += token;
+    if (this.isSentenceBoundary(token)) {
+      const sentence = this.currentSentence.trim();
+      this.currentSentence = '';
+      this.finalizeSentence(sentence);
+    }
+  }
+
+  finalizeSentence(sentence) {
+    if (!sentence) return;
+    // Sentence index is current value before increment
+    const idx = this.sentenceIdx++;
+    if (!this.muted) {
+      this.startAudioFetch(idx, sentence);
+      // Also try to pre-fetch next sentences if we know them? In incremental mode we don't know future sentences until they arrive.
+      // But we can try to prefetch up to depth: we'll check upcoming sentence indices that might be finalized later. We can't start fetch without text.
+      // However, after finishing current sentence, the next sentence start accumulating, but we cannot prefetch until we have its text. That's okay; we'll fetch when it's finalized.
+    }
+    this.tryEmitAudio();
+  }
+
+  finish() {
+    // Called when no more tokens will be fed
+    if (this.currentSentence.trim()) {
+      const sentence = this.currentSentence.trim();
+      this.currentSentence = '';
+      this.finalizeSentence(sentence);
+    }
+  }
+}
+
+// ── Stream text word-by-word with ~25ms spacing (legacy, kept for reference) ─
 async function streamText(emit, text) {
-  const chunks = text.split(/(\s+)/);
+  const chunks = text.split(/(\\s+)/);
   for (const chunk of chunks) {
     if (chunk) {
       emit({ type: 'token', text: chunk });
@@ -988,7 +1176,18 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
   });
 
   const emit = (obj) => res.write(`data: ${JSON.stringify(obj)}\n\n`);
-  const finish = (stage, extra = {}) => {
+  let streamer = null;
+  const finish = async (stage, extra = {}) => {
+    if (streamer) {
+      try {
+        await Promise.race([
+          streamer.waitForRemainingAudio(),
+          new Promise(resolve => setTimeout(resolve, 3000))
+        ]);
+      } catch (e) {
+        // ignore
+      }
+    }
     emit({ type: 'complete', stage, ...extra });
     res.end();
   };
@@ -996,6 +1195,12 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
     emit({ type: 'error', message });
     res.end();
   };
+
+  // Initialize sentence streamer with mute/voice preferences
+  streamer = new SentenceAudioStreamer(res, {
+    muted: req.body.muted || false,
+    voice: req.body.voice
+  });
 
   // ── Guest path ──────────────────────────────────────────
   if (req.is_guest) {
@@ -1006,7 +1211,7 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
 
     if (!message) {
       // First load: Clea's opening line for new visitors
-      await streamText(emit, 'Speak. What brings you to the threshold?');
+      await streamer.processFullText('Speak. What brings you to the threshold?');
       return finish('guest');
     }
 
@@ -1022,11 +1227,12 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
     try {
       for await (const chunk of stream) {
         const text = chunk.choices?.[0]?.delta?.content;
-        if (text) emit({ type: 'token', text });
+        if (text) streamer.feedToken(text);
       }
     } catch (streamErr) {
       console.error('/enquire guest stream error:', streamErr);
     } finally {
+      streamer.finish();
       await incrementGuestTurn(req.guest_session_id).catch((e) =>
         console.error('[guest] incrementGuestTurn failed:', e.message)
       );
@@ -1086,14 +1292,14 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
 
       emit({ type: 'session', session_id: session.id, stage: 'inquiry', needs_covenant: !seeker.covenant_at });
       if (greeting) {
-        await streamText(emit, greeting);
+        await streamer.processFullText(greeting);
         emit({ type: 'break' });
       }
-      await streamText(emit, question);
+      await streamer.processFullText(question);
       // Covenant reminder for seekers who haven't entered the covenant
       if (!seeker.covenant_at) {
         emit({ type: 'break' });
-        await streamText(emit, COVENANT_REMINDER);
+        await streamer.processFullText(COVENANT_REMINDER);
       }
       return finish('inquiry', { session_id: session.id });
     }
@@ -1117,9 +1323,13 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
         maxTokens: 512,
         stream: true,
       });
-      for await (const chunk of stream) {
-        const token = chunk.choices?.[0]?.delta?.content;
-        if (token) emit({ type: 'token', text: token });
+      try {
+        for await (const chunk of stream) {
+          const token = chunk.choices?.[0]?.delta?.content;
+          if (token) streamer.feedToken(token);
+        }
+      } finally {
+        streamer.finish();
       }
       return finish(session.stage, { session_id });
     }
@@ -1186,7 +1396,7 @@ Brief — one or two sentences. Let it breathe. Do not describe the rite yet.`;
 
         conversation.push({ role: 'priestess', text: offeringQ, at: new Date().toISOString() });
         await updateSession(session_id, { conversation });
-        await streamText(emit, offeringQ);
+        await streamer.processFullText(offeringQ);
         return finish('offering', { session_id });
       }
 
@@ -1231,7 +1441,7 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
       conversation.push({ role: 'priestess', text: nextQ, at: new Date().toISOString() });
       await updateSession(session_id, { turn: newTurn, full_text: newText, conversation });
 
-      await streamText(emit, nextQ);
+      await streamer.processFullText(nextQ);
 
       // Clea requested a draw — pick a contextually relevant card server-side
       if (drawSignal) {
@@ -1282,11 +1492,15 @@ Most responses will NOT include [READY].`;
         const stream = await llm.chat({ system: offeringSystem, messages: llmMessages, temperature: 0.9, maxTokens: 400, stream: true });
         for await (const chunk of stream) {
           const text = chunk.choices?.[0]?.delta?.content;
-          if (text) { chunks.push(text); emit({ type: 'token', text }); }
+          if (text) {
+            chunks.push(text);
+            streamer.feedToken(text);
+          }
         }
       } catch (e) {
         console.error('[clea] offering LLM error:', e.message);
       }
+      streamer.finish();
 
       let response = chunks.join('').trim();
       const readySignal = /\s*\[READY\]\s*$/i.test(response);
@@ -1316,7 +1530,10 @@ Most responses will NOT include [READY].`;
           prescribed_at: new Date().toISOString(),
         });
         emit({ type: 'break' });
-        if (quality.seeker_language) { await streamText(emit, quality.seeker_language); emit({ type: 'break' }); }
+        if (quality.seeker_language) {
+          await streamer.processFullText(quality.seeker_language);
+          emit({ type: 'break' });
+        }
         // Emit structured rite event — frontend renders in OraclePanel, not chat stream
         emit({ type: 'rite', rite: ritePayload });
         return finish('prescribed', { session_id, rite_name: prescription.rite?.rite_name });
@@ -1353,11 +1570,15 @@ Most responses will NOT include [REPORT].`;
         const stream = await llm.chat({ system: prescribedSystem, messages: llmMessages, temperature: 0.9, maxTokens: 400, stream: true });
         for await (const chunk of stream) {
           const text = chunk.choices?.[0]?.delta?.content;
-          if (text) { chunks.push(text); emit({ type: 'token', text }); }
+          if (text) {
+            chunks.push(text);
+            streamer.feedToken(text);
+          }
         }
       } catch (e) {
         console.error('[clea] prescribed LLM error:', e.message);
       }
+      streamer.finish();
 
       let response = chunks.join('').trim();
       const reportSignal = /\s*\[REPORT\]\s*$/i.test(response);
@@ -1387,7 +1608,10 @@ Most responses will NOT include [REPORT].`;
           ? session.conversation.find((e) => e?.role === 'priestess')?.text
           : null;
         const closing = openingQuestion ? getClosingDedication(openingQuestion) : null;
-        if (closing) { await streamText(emit, closing); emit({ type: 'break' }); }
+        if (closing) {
+          await streamer.processFullText(closing);
+          emit({ type: 'break' });
+        }
         return finish('complete', { session_id });
       }
 

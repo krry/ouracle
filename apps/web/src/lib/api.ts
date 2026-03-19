@@ -29,6 +29,7 @@ export async function signin(handle: string, password: string) {
 // /enquire handles both new sessions (no session_id) and continuing ones.
 // Events: { type: 'session', session_id, stage }
 //         { type: 'token', text }
+//         { type: 'audio', base64, sentence_index }
 //         { type: 'break' }
 //         { type: 'draw', card: CardData }
 //         { type: 'rite', rite: RiteData }   — structured rite, rendered in OraclePanel
@@ -39,12 +40,20 @@ export async function* enquire(
 	message: string,
 	sessionId: string | null,
 	onEvent: (event: Record<string, unknown>) => void,
-	mode?: string
+	mode?: string,
+	ttsEnabled?: boolean,
+	voice?: TtsVoice
 ): AsyncGenerator<void> {
 	const r = await fetch(`${BASE}/enquire`, {
 		method: 'POST',
 		headers: authHeaders(token),
-		body: JSON.stringify({ message, session_id: sessionId ?? undefined, ...(mode ? { mode } : {}) })
+		body: JSON.stringify({
+			message,
+			session_id: sessionId ?? undefined,
+			...(mode ? { mode } : {}),
+			...(ttsEnabled !== undefined ? { muted: !ttsEnabled } : {}),
+			...(voice ? { voice } : {})
+		})
 	});
 	if (!r.ok) throw new Error(await r.text());
 	const reader = r.body!.getReader();

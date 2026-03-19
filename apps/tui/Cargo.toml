@@ -21,7 +21,7 @@ path = "src/main.rs"
 [dependencies]
 # For development, use local ripl with help_lines() support.
 # For production, switch to: ripl = { package = "ripl-tui", version = "0.3" }
-ripl = { package = "ripl-tui", version = "0.3.2" }
+ripl = { package = "ripl-tui", version = "0.3.3" }
 color-eyre = "0.6"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 reqwest = { version = "0.12", features = ["blocking", "json"] }

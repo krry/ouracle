@@ -2,10 +2,6 @@
 
 Multimodal oracle drawing on Tarot de Marseilles, I Ching, Gene Keys, Delphic maxims, and other divination traditions.
 
-## IMPORTANT
-
-**EXTREME EMPHASIS: DO NOT NUDGE THE USER. DO NOT SUGGEST NEXT STEPS UNLESS EXPLICITLY ASKED.**
-
 ## Structure
 
 - `docs/` — specifications and design documents

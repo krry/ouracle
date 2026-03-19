@@ -142,7 +142,7 @@ dependencies = [
 
 [[package]]
 name = "clea-tui"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "chrono",
  "color-eyre",
@@ -1269,9 +1269,9 @@ dependencies = [
 
 [[package]]
 name = "ripl-tui"
-version = "0.3.1"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e79c20ca1c686bb0aecafd0aa96da09739a3d829cd3310dbc3f0864478dafa78"
+checksum = "f38cce4263b5dd6b20ff543d7b5a86e8d462b49741c7be06f86947f5b058a929"
 dependencies = [
  "color-eyre",
  "crossterm 0.28.1",
