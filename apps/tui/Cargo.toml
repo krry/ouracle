@@ -1,6 +1,6 @@
 [package]
 name = "clea-tui"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2024"
 rust-version = "1.94"
 description = "Clea — Chief Priestess of Ouracle available via CLI/TUI in your UNIX shell"
@@ -21,7 +21,7 @@ path = "src/main.rs"
 [dependencies]
 # For development, use local ripl with help_lines() support.
 # For production, switch to: ripl = { package = "ripl-tui", version = "0.3" }
-ripl = { package = "ripl-tui", version = "0.3.1" }
+ripl = { package = "ripl-tui", version = "0.3.2" }
 color-eyre = "0.6"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 reqwest = { version = "0.12", features = ["blocking", "json"] }
