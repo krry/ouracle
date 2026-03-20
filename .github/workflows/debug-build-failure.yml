@@ -100,7 +100,7 @@ jobs:
             LOG_SECTION="(Build logs unavailable — check Vercel dashboard)"
           fi
 
-          MESSAGE="🔴 <b>Build failure: ouracle/apps/web</b>
+          MESSAGE="@Yakul_bot 🔴 <b>Build failure: ouracle/apps/web</b>
 
 Commit: $SHA_SHORT — $COMMIT_MSG
 Branch: $DEPLOY_REF
@@ -116,7 +116,7 @@ Please fix the build failure, commit, and push to main."
             OVERFLOW=$(( MSG_LEN - 4090 ))
             TRIMMED_LOGS=$(printf '%s' "$LOGS" | head -c $(( ${#LOGS} - OVERFLOW )) )
             LOG_SECTION="<pre>$TRIMMED_LOGS</pre>"
-            MESSAGE="🔴 <b>Build failure: ouracle/apps/web</b>
+            MESSAGE="@Yakul_bot 🔴 <b>Build failure: ouracle/apps/web</b>
 
 Commit: $SHA_SHORT — $COMMIT_MSG
 Branch: $DEPLOY_REF
