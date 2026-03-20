@@ -1,11 +1,11 @@
 use color_eyre::eyre::Result;
 use crossterm::{
-    event::{self, Event, KeyCode},
-    terminal::{disable_raw_mode, enable_raw_mode, Clear, ClearType},
     ExecutableCommand,
+    event::{self, Event, KeyCode},
+    terminal::{Clear, ClearType, disable_raw_mode, enable_raw_mode},
 };
 use std::f32::consts::PI;
-use std::io::{stdout, Write};
+use std::io::{Write, stdout};
 use std::time::Duration;
 
 const FIXED_COLS: usize = 40;
@@ -55,15 +55,20 @@ fn grid_to_string(grid: &[bool], actual_cols: usize, actual_rows: usize) -> Stri
     let mut s = String::with_capacity(actual_rows * (actual_cols + 2));
     for r in 0..actual_rows {
         for c in 0..actual_cols {
-            if r >= row_offset && r < row_offset + FIXED_ROWS &&
-               c >= col_offset && c < col_offset + FIXED_COLS {
+            if r >= row_offset
+                && r < row_offset + FIXED_ROWS
+                && c >= col_offset
+                && c < col_offset + FIXED_COLS
+            {
                 let index = (r - row_offset) * FIXED_COLS + (c - col_offset);
                 s.push(braille_char(grid[index]));
             } else {
                 s.push(' ');
             }
         }
-        if r < actual_rows - 1 { s.push('\n'); }
+        if r < actual_rows - 1 {
+            s.push('\n');
+        }
     }
     s
 }
@@ -86,7 +91,7 @@ fn render_static_logo(actual_cols: usize, actual_rows: usize) -> String {
     for r in 0..actual_rows {
         for c in 0..actual_cols {
             if r >= row_offset && r < row_offset + logo_height {
-                let logo_row = (r - row_offset) as usize;
+                let logo_row = r - row_offset;
                 if c >= col_offset && c < col_offset + logo_width {
                     let ch = logo[logo_row].chars().nth(c - col_offset).unwrap_or(' ');
                     s.push(ch);
@@ -97,7 +102,9 @@ fn render_static_logo(actual_cols: usize, actual_rows: usize) -> String {
                 s.push(' ');
             }
         }
-        if r < actual_rows - 1 { s.push('\n'); }
+        if r < actual_rows - 1 {
+            s.push('\n');
+        }
     }
     s
 }
@@ -138,12 +145,13 @@ pub fn run() -> Result<()> {
         write!(out, "{}", frame)?;
         out.flush()?;
 
-        if event::poll(Duration::from_millis(50))? {
-            if let Event::Key(key) = event::read()? {
-                if key.code == KeyCode::Char('q') || key.code == KeyCode::Esc || key.code == KeyCode::Enter {
-                    break;
-                }
-            }
+        if event::poll(Duration::from_millis(50))?
+            && let Event::Key(key) = event::read()?
+            && (key.code == KeyCode::Char('q')
+                || key.code == KeyCode::Esc
+                || key.code == KeyCode::Enter)
+        {
+            break;
         }
     }
 

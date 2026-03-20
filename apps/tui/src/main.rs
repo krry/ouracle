@@ -10,7 +10,7 @@ use std::time::Duration;
 
 use ripl::RunOptions;
 
-use color_eyre::eyre::{bail, eyre, Result};
+use color_eyre::eyre::{Result, bail, eyre};
 use serde::{Deserialize, Serialize};
 
 use provider::OuracleProvider;
@@ -49,7 +49,9 @@ pub struct Config {
 
 // Keep a flat accessor for reception module compat
 impl Config {
-    pub fn refresh_token(&self) -> Option<&String> { self.auth.refresh_token.as_ref() }
+    pub fn refresh_token(&self) -> Option<&String> {
+        self.auth.refresh_token.as_ref()
+    }
 }
 
 const SETTINGS_TEMPLATE: &str = r#"# Clea — ~/.ripl/clea.toml
@@ -72,9 +74,15 @@ fn ripl_dir() -> PathBuf {
     PathBuf::from(home).join(".ripl")
 }
 
-fn settings_path() -> PathBuf { ripl_dir().join("clea.toml") }
-fn auth_path() -> PathBuf      { ripl_dir().join("clea.auth") }
-fn ambient_dir() -> PathBuf    { ripl_dir().join("ambient") }
+fn settings_path() -> PathBuf {
+    ripl_dir().join("clea.toml")
+}
+fn auth_path() -> PathBuf {
+    ripl_dir().join("clea.auth")
+}
+fn ambient_dir() -> PathBuf {
+    ripl_dir().join("ambient")
+}
 
 fn load_settings() -> Settings {
     fs::read_to_string(settings_path())
@@ -91,7 +99,10 @@ fn load_auth() -> Auth {
 }
 
 fn load_config() -> Config {
-    Config { settings: load_settings(), auth: load_auth() }
+    Config {
+        settings: load_settings(),
+        auth: load_auth(),
+    }
 }
 
 fn save_settings(s: &Settings) -> Result<()> {
@@ -130,14 +141,16 @@ fn resolve_base_url(cfg: &Config) -> String {
         return local.to_string();
     }
     // Fall back to saved config or production.
-    cfg.settings.base_url
+    cfg.settings
+        .base_url
         .clone()
         .filter(|u| u != local) // don't re-use local if it was saved and is down
         .unwrap_or_else(|| "https://api.ouracle.kerry.ink".to_string())
 }
 
 fn resolve_voice_id(cfg: &Config) -> Option<String> {
-    cfg.settings.voice_id
+    cfg.settings
+        .voice_id
         .clone()
         .filter(|v| !v.is_empty())
         .or_else(|| std::env::var("FISH_AUDIO_VOICE_GALADRIEL").ok())
@@ -163,7 +176,11 @@ fn cmd_config() -> Result<()> {
         println!("Created {}", path.display());
     }
     let editor = std::env::var("EDITOR").unwrap_or_else(|_| {
-        if cfg!(target_os = "macos") { "open".to_string() } else { "vi".to_string() }
+        if cfg!(target_os = "macos") {
+            "open".to_string()
+        } else {
+            "vi".to_string()
+        }
     });
     Command::new(&editor).arg(&path).status()?;
     Ok(())
@@ -196,13 +213,17 @@ fn cmd_voices_list(cfg: &Config) -> Result<()> {
     match items {
         None => println!("No voices found."),
         Some(voices) => {
-            println!("{:<38} {}", "ID", "Name");
+            println!("{:<38} Name", "ID");
             println!("{}", "─".repeat(60));
             for v in voices {
-                let id   = v.get("_id").and_then(|v| v.as_str()).unwrap_or("?");
+                let id = v.get("_id").and_then(|v| v.as_str()).unwrap_or("?");
                 let name = v.get("title").and_then(|v| v.as_str()).unwrap_or("?");
-                let star = if saved.contains(&id.to_string()) { " ★" } else { "" };
-                let dot  = if active == id { " ◆" } else { "" };
+                let star = if saved.contains(&id.to_string()) {
+                    " ★"
+                } else {
+                    ""
+                };
+                let dot = if active == id { " ◆" } else { "" };
                 println!("{:<38} {}{}{}", id, name, star, dot);
             }
             println!("\n★ saved  ◆ active");
@@ -240,14 +261,9 @@ fn cmd_voices_rm(cfg: &mut Config, id: &str) -> Result<()> {
 }
 
 fn write_ambient_scripts(dir: &std::path::Path, ambient_url: &str) -> Result<()> {
-    let runner = AMBIENT_RUNNER.replace(
-        "from '../ambient-player.js'",
-        "from './ambient-player.js'",
-    );
-    let player = AMBIENT_PLAYER.replace(
-        "'AMBIENT_BASE_URL'",
-        &format!("'{ambient_url}'"),
-    );
+    let runner =
+        AMBIENT_RUNNER.replace("from '../ambient-player.js'", "from './ambient-player.js'");
+    let player = AMBIENT_PLAYER.replace("'AMBIENT_BASE_URL'", &format!("'{ambient_url}'"));
     fs::write(dir.join("ambient-runner.js"), runner)?;
     fs::write(dir.join("ambient-player.js"), player)?;
     Ok(())
@@ -340,31 +356,51 @@ fn bootstrap_session(base_url: &str, access_token: &str) -> Result<BootstrappedS
     let status = resp.status().as_u16();
     let json: serde_json::Value = resp.json()?;
     if status >= 400 {
-        let msg = json.get("error").and_then(|v| v.as_str())
+        let msg = json
+            .get("error")
+            .and_then(|v| v.as_str())
             .unwrap_or("session bootstrap failed");
         bail!("bootstrap failed ({status}): {msg}");
     }
 
-    let session_id = json.get("session_id").and_then(|v| v.as_str())
-        .unwrap_or("").to_string();
-    let question = json.get("question").and_then(|v| v.as_str())
-        .unwrap_or("...").to_string();
-    let greeting = json.get("greeting").and_then(|v| v.as_str())
+    let session_id = json
+        .get("session_id")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+    let question = json
+        .get("question")
+        .and_then(|v| v.as_str())
+        .unwrap_or("...")
+        .to_string();
+    let greeting = json
+        .get("greeting")
+        .and_then(|v| v.as_str())
         .map(|s| s.to_string());
 
     if session_id.is_empty() {
         bail!("bootstrap failed: missing session_id");
     }
 
-    Ok(BootstrappedSession { session_id, greeting, question })
+    Ok(BootstrappedSession {
+        session_id,
+        greeting,
+        question,
+    })
 }
 
 fn seed_ripl_session(bootstrap: &BootstrappedSession) {
     let mut conversation = Vec::new();
     if let Some(g) = &bootstrap.greeting {
-        conversation.push(Message { role: Role::Assistant, content: g.clone() });
+        conversation.push(Message {
+            role: Role::Assistant,
+            content: g.clone(),
+        });
     }
-    conversation.push(Message { role: Role::Assistant, content: bootstrap.question.clone() });
+    conversation.push(Message {
+        role: Role::Assistant,
+        content: bootstrap.question.clone(),
+    });
     ripl::session::save(&SessionCache {
         conversation,
         provider: Some("ouracle".to_string()),
@@ -383,17 +419,23 @@ fn main() -> Result<()> {
     let mut cfg = load_config();
 
     match argv.as_slice() {
-        [_, "config"]                           => return cmd_config(),
-        [_, "voices", "list"]                   => return cmd_voices_list(&cfg),
-        [_, "voices", "set", id]                => return cmd_voices_set(&mut cfg, id),
-        [_, "voices", "add", id]                => return cmd_voices_add(&mut cfg, id),
-        [_, "voices", "rm", id]                 => return cmd_voices_rm(&mut cfg, id),
-        [_, "ambiance", "on"]                   => return cmd_ambiance(&mut cfg, true),
-        [_, "ambiance", "off"]                  => return cmd_ambiance(&mut cfg, false),
-        [_, "toroid"]                          => return cmd_toroid(),
-        [_, "help"] | [_, "--help"] | [_, "-h"] => { cmd_help(); return Ok(()); }
+        [_, "config"] => return cmd_config(),
+        [_, "voices", "list"] => return cmd_voices_list(&cfg),
+        [_, "voices", "set", id] => return cmd_voices_set(&mut cfg, id),
+        [_, "voices", "add", id] => return cmd_voices_add(&mut cfg, id),
+        [_, "voices", "rm", id] => return cmd_voices_rm(&mut cfg, id),
+        [_, "ambiance", "on"] => return cmd_ambiance(&mut cfg, true),
+        [_, "ambiance", "off"] => return cmd_ambiance(&mut cfg, false),
+        [_, "toroid"] => return cmd_toroid(),
+        [_, "help"] | [_, "--help"] | [_, "-h"] => {
+            cmd_help();
+            return Ok(());
+        }
         [_] => {}
-        _   => { cmd_help(); return Ok(()); }
+        _ => {
+            cmd_help();
+            return Ok(());
+        }
     }
 
     let base_url = resolve_base_url(&cfg);
@@ -408,12 +450,14 @@ fn main() -> Result<()> {
 
     ripl::with_terminal(|terminal| {
         let creds = reception::tui::ensure_credentials(terminal, &cfg, &base_url)?;
-        let Some(creds) = creds else { return Ok(()); };
+        let Some(creds) = creds else {
+            return Ok(());
+        };
 
-        cfg.auth.access_token  = Some(creds.access_token.clone());
+        cfg.auth.access_token = Some(creds.access_token.clone());
         cfg.auth.refresh_token = Some(creds.refresh_token.clone());
-        cfg.auth.seeker_id     = Some(creds.seeker_id.clone());
-        cfg.settings.base_url  = Some(base_url.clone());
+        cfg.auth.seeker_id = Some(creds.seeker_id.clone());
+        cfg.settings.base_url = Some(base_url.clone());
         save_auth(&cfg.auth)?;
         save_settings(&cfg.settings)?;
 
@@ -426,12 +470,15 @@ fn main() -> Result<()> {
             Some(bootstrap.session_id),
         ));
 
-        ripl::run_in_terminal(terminal, RunOptions {
-            provider: Some(provider),
-            label: Some("Ouracle".to_string()),
-            ambient_cmd: resolve_ambient_cmd(&cfg),
-            voice_id: resolve_voice_id(&cfg),
-            scaffold: false,
-        })
+        ripl::run_in_terminal(
+            terminal,
+            RunOptions {
+                provider: Some(provider),
+                label: Some("Ouracle".to_string()),
+                ambient_cmd: resolve_ambient_cmd(&cfg),
+                voice_id: resolve_voice_id(&cfg),
+                scaffold: false,
+            },
+        )
     })
 }

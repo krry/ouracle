@@ -1,5 +1,5 @@
 use std::io::{BufRead, BufReader};
-use std::sync::{mpsc, Mutex};
+use std::sync::{Mutex, mpsc};
 use std::time::Duration;
 
 use reqwest::blocking::Client;
@@ -56,7 +56,9 @@ impl Provider for OuracleProvider {
         {
             Ok(c) => c,
             Err(e) => {
-                let _ = tx.send(ApiResponse::Error { message: e.to_string() });
+                let _ = tx.send(ApiResponse::Error {
+                    message: e.to_string(),
+                });
                 return;
             }
         };
@@ -86,7 +88,9 @@ impl Provider for OuracleProvider {
         {
             Ok(r) => r,
             Err(e) => {
-                let _ = tx.send(ApiResponse::Error { message: e.to_string() });
+                let _ = tx.send(ApiResponse::Error {
+                    message: e.to_string(),
+                });
                 return;
             }
         };
@@ -102,7 +106,7 @@ impl Provider for OuracleProvider {
         }
 
         let reader = BufReader::new(resp);
-        for line in reader.lines().flatten() {
+        for line in reader.lines().map_while(Result::ok) {
             let Some(json_str) = line.strip_prefix("data: ") else {
                 continue;
             };
@@ -117,11 +121,15 @@ impl Provider for OuracleProvider {
                 }
                 Some("token") => {
                     if let Some(token) = event.get("text").and_then(|t| t.as_str()) {
-                        let _ = tx.send(ApiResponse::TokenChunk { token: token.to_string() });
+                        let _ = tx.send(ApiResponse::TokenChunk {
+                            token: token.to_string(),
+                        });
                     }
                 }
                 Some("break") => {
-                    let _ = tx.send(ApiResponse::TokenChunk { token: "\n\n".to_string() });
+                    let _ = tx.send(ApiResponse::TokenChunk {
+                        token: "\n\n".to_string(),
+                    });
                 }
                 Some("complete") => {
                     let stage = event.get("stage").and_then(|s| s.as_str()).unwrap_or("");
@@ -136,14 +144,18 @@ impl Provider for OuracleProvider {
                 }
                 Some("draw") => {
                     if let Some(card) = event.get("card") {
-                        let deck  = card.get("deckLabel").and_then(|v| v.as_str()).unwrap_or("Oracle");
+                        let deck = card
+                            .get("deckLabel")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("Oracle");
                         let title = card.get("title").and_then(|v| v.as_str()).unwrap_or("");
-                        let kws: Vec<&str> = card.get("keywords")
+                        let kws: Vec<&str> = card
+                            .get("keywords")
                             .and_then(|v| v.as_array())
                             .map(|a| a.iter().filter_map(|k| k.as_str()).collect())
                             .unwrap_or_default();
-                        let body  = card.get("body").and_then(|v| v.as_str()).unwrap_or("");
-                        let bar   = "─".repeat(40);
+                        let body = card.get("body").and_then(|v| v.as_str()).unwrap_or("");
+                        let bar = "─".repeat(40);
                         let block = format!(
                             "\n\n◈ {deck}\n{bar}\n{title}\n{}\n\n{body}\n{bar}",
                             kws.join(" · "),
@@ -168,7 +180,10 @@ impl Provider for OuracleProvider {
     fn handle_command(&self, cmd: &str, tx: mpsc::Sender<ApiResponse>) {
         // /draw [deck_id] — manually draw a card
         if cmd == "/draw" || cmd.starts_with("/draw ") {
-            let deck_id = cmd.strip_prefix("/draw ").map(|s| s.trim()).filter(|s| !s.is_empty());
+            let deck_id = cmd
+                .strip_prefix("/draw ")
+                .map(|s| s.trim())
+                .filter(|s| !s.is_empty());
             self.cmd_draw(deck_id, &tx);
             return;
         }
@@ -199,18 +214,19 @@ impl Provider for OuracleProvider {
         }
 
         if self.stub {
-            let _ = tx.send(ApiResponse::TokenChunk { token: "[stub] session reset.".to_string() });
+            let _ = tx.send(ApiResponse::TokenChunk {
+                token: "[stub] session reset.".to_string(),
+            });
             let _ = tx.send(ApiResponse::TurnComplete);
             return;
         }
 
-        let client = match Client::builder()
-            .timeout(Duration::from_secs(12))
-            .build()
-        {
+        let client = match Client::builder().timeout(Duration::from_secs(12)).build() {
             Ok(c) => c,
             Err(e) => {
-                let _ = tx.send(ApiResponse::Error { message: e.to_string() });
+                let _ = tx.send(ApiResponse::Error {
+                    message: e.to_string(),
+                });
                 return;
             }
         };
@@ -223,7 +239,9 @@ impl Provider for OuracleProvider {
         {
             Ok(v) => v,
             Err(e) => {
-                let _ = tx.send(ApiResponse::Error { message: e.to_string() });
+                let _ = tx.send(ApiResponse::Error {
+                    message: e.to_string(),
+                });
                 return;
             }
         };
@@ -248,7 +266,9 @@ impl Provider for OuracleProvider {
         {
             Ok(r) => r,
             Err(e) => {
-                let _ = tx.send(ApiResponse::Error { message: e.to_string() });
+                let _ = tx.send(ApiResponse::Error {
+                    message: e.to_string(),
+                });
                 return;
             }
         };
@@ -256,7 +276,9 @@ impl Provider for OuracleProvider {
         let json: Value = match resp.json() {
             Ok(v) => v,
             Err(e) => {
-                let _ = tx.send(ApiResponse::Error { message: e.to_string() });
+                let _ = tx.send(ApiResponse::Error {
+                    message: e.to_string(),
+                });
                 return;
             }
         };
@@ -267,11 +289,17 @@ impl Provider for OuracleProvider {
 
         // Send greeting + opening question as the new turn.
         if let Some(greeting) = json.get("greeting").and_then(|v| v.as_str()) {
-            let _ = tx.send(ApiResponse::TokenChunk { token: greeting.to_string() });
-            let _ = tx.send(ApiResponse::TokenChunk { token: "\n\n".to_string() });
+            let _ = tx.send(ApiResponse::TokenChunk {
+                token: greeting.to_string(),
+            });
+            let _ = tx.send(ApiResponse::TokenChunk {
+                token: "\n\n".to_string(),
+            });
         }
         if let Some(question) = json.get("question").and_then(|v| v.as_str()) {
-            let _ = tx.send(ApiResponse::TokenChunk { token: question.to_string() });
+            let _ = tx.send(ApiResponse::TokenChunk {
+                token: question.to_string(),
+            });
         }
         let _ = tx.send(ApiResponse::TurnComplete);
     }
@@ -282,14 +310,21 @@ impl OuracleProvider {
 
     fn cmd_draw(&self, deck_id: Option<&str>, tx: &mpsc::Sender<ApiResponse>) {
         if self.stub {
-            let _ = tx.send(ApiResponse::TokenChunk { token: "[stub] drawing card…".to_string() });
+            let _ = tx.send(ApiResponse::TokenChunk {
+                token: "[stub] drawing card…".to_string(),
+            });
             let _ = tx.send(ApiResponse::TurnComplete);
             return;
         }
 
         let client = match Client::builder().timeout(Duration::from_secs(12)).build() {
             Ok(c) => c,
-            Err(e) => { let _ = tx.send(ApiResponse::Error { message: e.to_string() }); return; }
+            Err(e) => {
+                let _ = tx.send(ApiResponse::Error {
+                    message: e.to_string(),
+                });
+                return;
+            }
         };
 
         let mut url = format!("{}/draw?n=1", self.base_url);
@@ -297,32 +332,52 @@ impl OuracleProvider {
             url.push_str(&format!("&decks={id}"));
         }
 
-        let resp: Value = match client.get(&url).bearer_auth(&self.access_token).send()
+        let resp: Value = match client
+            .get(&url)
+            .bearer_auth(&self.access_token)
+            .send()
             .and_then(|r| r.json())
         {
             Ok(v) => v,
-            Err(e) => { let _ = tx.send(ApiResponse::Error { message: e.to_string() }); return; }
+            Err(e) => {
+                let _ = tx.send(ApiResponse::Error {
+                    message: e.to_string(),
+                });
+                return;
+            }
         };
 
         let Some(cards) = resp.get("cards").and_then(|v| v.as_array()) else {
-            let _ = tx.send(ApiResponse::Error { message: "no cards returned".to_string() });
+            let _ = tx.send(ApiResponse::Error {
+                message: "no cards returned".to_string(),
+            });
             return;
         };
 
         let Some(card) = cards.first() else {
-            let _ = tx.send(ApiResponse::Error { message: "empty deck".to_string() });
+            let _ = tx.send(ApiResponse::Error {
+                message: "empty deck".to_string(),
+            });
             return;
         };
 
-        let deck  = card.get("deckLabel").or_else(|| card.get("deck")).and_then(|v| v.as_str()).unwrap_or("Oracle");
+        let deck = card
+            .get("deckLabel")
+            .or_else(|| card.get("deck"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("Oracle");
         let title = card.get("title").and_then(|v| v.as_str()).unwrap_or("");
-        let kws: Vec<&str> = card.get("keywords")
+        let kws: Vec<&str> = card
+            .get("keywords")
             .and_then(|v| v.as_array())
             .map(|a| a.iter().filter_map(|k| k.as_str()).collect())
             .unwrap_or_default();
-        let body  = card.get("body").and_then(|v| v.as_str()).unwrap_or("");
-        let bar   = "─".repeat(40);
-        let block = format!("◈ {deck}\n{bar}\n{title}\n{}\n\n{body}\n{bar}", kws.join(" · "));
+        let body = card.get("body").and_then(|v| v.as_str()).unwrap_or("");
+        let bar = "─".repeat(40);
+        let block = format!(
+            "◈ {deck}\n{bar}\n{title}\n{}\n\n{body}\n{bar}",
+            kws.join(" · ")
+        );
 
         let _ = tx.send(ApiResponse::TokenChunk { token: block });
         let _ = tx.send(ApiResponse::TurnComplete);
@@ -332,39 +387,61 @@ impl OuracleProvider {
 
     fn cmd_decks(&self, tx: &mpsc::Sender<ApiResponse>) {
         if self.stub {
-            let _ = tx.send(ApiResponse::TokenChunk { token: "[stub] no decks in stub mode".to_string() });
+            let _ = tx.send(ApiResponse::TokenChunk {
+                token: "[stub] no decks in stub mode".to_string(),
+            });
             let _ = tx.send(ApiResponse::TurnComplete);
             return;
         }
 
         let client = match Client::builder().timeout(Duration::from_secs(12)).build() {
             Ok(c) => c,
-            Err(e) => { let _ = tx.send(ApiResponse::Error { message: e.to_string() }); return; }
+            Err(e) => {
+                let _ = tx.send(ApiResponse::Error {
+                    message: e.to_string(),
+                });
+                return;
+            }
         };
 
-        let resp: Value = match client.get(format!("{}/decks", self.base_url))
-            .bearer_auth(&self.access_token).send()
+        let resp: Value = match client
+            .get(format!("{}/decks", self.base_url))
+            .bearer_auth(&self.access_token)
+            .send()
             .and_then(|r| r.json())
         {
             Ok(v) => v,
-            Err(e) => { let _ = tx.send(ApiResponse::Error { message: e.to_string() }); return; }
+            Err(e) => {
+                let _ = tx.send(ApiResponse::Error {
+                    message: e.to_string(),
+                });
+                return;
+            }
         };
 
         let Some(decks) = resp.as_array() else {
-            let _ = tx.send(ApiResponse::Error { message: "unexpected /decks response".to_string() });
+            let _ = tx.send(ApiResponse::Error {
+                message: "unexpected /decks response".to_string(),
+            });
             return;
         };
 
         let mut lines = vec!["Available decks:\n".to_string()];
         for deck in decks {
-            let id   = deck.get("id").and_then(|v| v.as_str()).unwrap_or("?");
-            let name = deck.get("meta").and_then(|m| m.get("name")).and_then(|v| v.as_str()).unwrap_or(id);
+            let id = deck.get("id").and_then(|v| v.as_str()).unwrap_or("?");
+            let name = deck
+                .get("meta")
+                .and_then(|m| m.get("name"))
+                .and_then(|v| v.as_str())
+                .unwrap_or(id);
             let count = deck.get("count").and_then(|v| v.as_u64()).unwrap_or(0);
             lines.push(format!("  {id:<16} {name} ({count} cards)"));
         }
         lines.push("\nUsage: /draw <deck_id>".to_string());
 
-        let _ = tx.send(ApiResponse::TokenChunk { token: lines.join("\n") });
+        let _ = tx.send(ApiResponse::TokenChunk {
+            token: lines.join("\n"),
+        });
         let _ = tx.send(ApiResponse::TurnComplete);
     }
 }

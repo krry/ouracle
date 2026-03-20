@@ -9,7 +9,7 @@ use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Style};
 use ratatui::widgets::{Block, Borders, Clear, Paragraph, Wrap};
-use ratatui::{backend::CrosstermBackend, Frame, Terminal};
+use ratatui::{Frame, Terminal, backend::CrosstermBackend};
 
 use ripl::aura::Aura;
 use ripl::theme::text_accent;
@@ -23,7 +23,9 @@ use crate::Config;
 enum Step {
     Entry,
     Name,
-    Password { name: String },
+    Password {
+        name: String,
+    },
     Covenant {
         lines: Vec<String>,
         offset: usize,
@@ -31,7 +33,9 @@ enum Step {
         existing_creds: Option<Box<Credentials>>,
     },
     ReturningHandle,
-    ReturningPassword { handle: String },
+    ReturningPassword {
+        handle: String,
+    },
 }
 
 struct State {
@@ -127,8 +131,12 @@ fn handle_event(
     terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
     base_url: &str,
 ) -> Result<Outcome> {
-    let Event::Key(key) = event else { return Ok(Outcome::Continue) };
-    if key.kind != KeyEventKind::Press { return Ok(Outcome::Continue) }
+    let Event::Key(key) = event else {
+        return Ok(Outcome::Continue);
+    };
+    if key.kind != KeyEventKind::Press {
+        return Ok(Outcome::Continue);
+    }
 
     // Global: Esc always aborts.
     if key.code == KeyCode::Esc {
@@ -155,8 +163,12 @@ fn handle_event(
                     state.goto(Step::Password { name }, true);
                 }
             }
-            KeyCode::Backspace => { state.input.pop(); }
-            KeyCode::Char(c) => { state.input.push(c); }
+            KeyCode::Backspace => {
+                state.input.pop();
+            }
+            KeyCode::Char(c) => {
+                state.input.push(c);
+            }
             _ => {}
         },
 
@@ -188,7 +200,8 @@ fn handle_event(
                                 state.connecting = false;
                                 let msg = e.to_string();
                                 if msg.contains("handle_exhausted") {
-                                    state.error = Some("that name has no handles left — try another".into());
+                                    state.error =
+                                        Some("that name has no handles left — try another".into());
                                     state.goto(Step::Name, false);
                                 } else {
                                     state.error = Some(msg);
@@ -197,8 +210,12 @@ fn handle_event(
                         }
                     }
                 }
-                KeyCode::Backspace => { state.input.pop(); }
-                KeyCode::Char(c) => { state.input.push(c); }
+                KeyCode::Backspace => {
+                    state.input.pop();
+                }
+                KeyCode::Char(c) => {
+                    state.input.push(c);
+                }
                 _ => {}
             }
         }
@@ -250,8 +267,12 @@ fn handle_event(
                     state.goto(Step::ReturningPassword { handle }, true);
                 }
             }
-            KeyCode::Backspace => { state.input.pop(); }
-            KeyCode::Char(c) => { state.input.push(c); }
+            KeyCode::Backspace => {
+                state.input.pop();
+            }
+            KeyCode::Char(c) => {
+                state.input.push(c);
+            }
             _ => {}
         },
 
@@ -289,8 +310,12 @@ fn handle_event(
                         }
                     }
                 }
-                KeyCode::Backspace => { state.input.pop(); }
-                KeyCode::Char(c) => { state.input.push(c); }
+                KeyCode::Backspace => {
+                    state.input.pop();
+                }
+                KeyCode::Char(c) => {
+                    state.input.push(c);
+                }
                 _ => {}
             }
         }
@@ -342,7 +367,12 @@ fn draw_input_screen(frame: &mut Frame, state: &State) {
     let height = 7u16;
     let x = size.x + (size.width.saturating_sub(width)) / 2;
     let y = size.y + (size.height.saturating_sub(height)) / 2;
-    let area = Rect { x, y, width, height };
+    let area = Rect {
+        x,
+        y,
+        width,
+        height,
+    };
 
     frame.render_widget(Clear, area);
 
@@ -390,7 +420,12 @@ fn draw_covenant(frame: &mut Frame, lines: &[String], offset: usize) {
     let height = 20u16.min(size.height.saturating_sub(4));
     let x = size.x + (size.width.saturating_sub(width)) / 2;
     let y = size.y + (size.height.saturating_sub(height)) / 2;
-    let area = Rect { x, y, width, height };
+    let area = Rect {
+        x,
+        y,
+        width,
+        height,
+    };
 
     frame.render_widget(Clear, area);
 

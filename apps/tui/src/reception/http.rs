@@ -2,7 +2,7 @@
 
 use std::time::Duration;
 
-use color_eyre::eyre::{bail, Result};
+use color_eyre::eyre::{Result, bail};
 use reqwest::blocking::Client;
 use serde_json::Value;
 
@@ -77,7 +77,11 @@ pub fn rotate_token(base_url: &str, refresh_token: &str) -> Result<RotateResult>
 
 /// Register a new seeker. Returns (credentials, assigned_handle).
 /// Errors include "handle_exhausted" if the name is saturated.
-pub fn register_seeker(base_url: &str, name: &str, password: &str) -> Result<(Credentials, String)> {
+pub fn register_seeker(
+    base_url: &str,
+    name: &str,
+    password: &str,
+) -> Result<(Credentials, String)> {
     let c = make_client();
     let body = serde_json::json!({
         "name": name,
@@ -115,7 +119,11 @@ pub fn fetch_covenant(base_url: &str) -> Result<(String, Vec<String>)> {
     let lines = resp
         .get("text")
         .and_then(|v| v.as_array())
-        .map(|arr| arr.iter().filter_map(|v| v.as_str().map(str::to_string)).collect())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|v| v.as_str().map(str::to_string))
+                .collect()
+        })
         .unwrap_or_default();
     Ok((version, lines))
 }
@@ -123,24 +131,49 @@ pub fn fetch_covenant(base_url: &str) -> Result<(String, Vec<String>)> {
 /// Accept the current covenant.
 pub fn accept_covenant(base_url: &str, access_token: &str) -> Result<()> {
     let c = make_client();
-    post_json(&c, &format!("{base_url}/covenant"), &serde_json::json!({}), Some(access_token))?;
+    post_json(
+        &c,
+        &format!("{base_url}/covenant"),
+        &serde_json::json!({}),
+        Some(access_token),
+    )?;
     Ok(())
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 fn extract_credentials(json: Value) -> Result<Credentials> {
-    let seeker_id = json.get("seeker_id").and_then(|v| v.as_str()).unwrap_or("").to_string();
-    let access_token = json.get("access_token").and_then(|v| v.as_str()).unwrap_or("").to_string();
-    let refresh_token = json.get("refresh_token").and_then(|v| v.as_str()).unwrap_or("").to_string();
+    let seeker_id = json
+        .get("seeker_id")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+    let access_token = json
+        .get("access_token")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+    let refresh_token = json
+        .get("refresh_token")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
     if seeker_id.is_empty() || access_token.is_empty() {
         bail!("missing credentials in response");
     }
-    Ok(Credentials { seeker_id, access_token, refresh_token })
+    Ok(Credentials {
+        seeker_id,
+        access_token,
+        refresh_token,
+    })
 }
 
 fn extract_credentials_and_stage(json: Value) -> Result<RotateResult> {
-    let stage = json.get("stage").and_then(|v| v.as_str()).unwrap_or("covenanted").to_string();
+    let stage = json
+        .get("stage")
+        .and_then(|v| v.as_str())
+        .unwrap_or("covenanted")
+        .to_string();
     let credentials = extract_credentials(json)?;
     Ok(RotateResult { credentials, stage })
 }
