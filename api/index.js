@@ -29,7 +29,7 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 import { makeLlmClient } from './llm-client.js';
 import { CLEA_SYSTEM_PROMPT } from './clea-prompt.js';
 import { randomUUID } from 'crypto';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 const pkgPath = new URL('package.json', import.meta.url);
 const { version } = JSON.parse(readFileSync(pkgPath));
 import {
@@ -146,6 +146,15 @@ app.use(rateLimitMiddleware);
 // Serve ambient audio files — no auth required, public CDN-style
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+
+// Resolve RITES corpus location (Railway & local)
+const isRailway = process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_NAME;
+const RITES_ROOT = isRailway
+  ? '/app/rites'
+  : join(__dirname, '..', 'rites');
+const RITES_DIR = join(RITES_ROOT, 'dist');
+
+console.log('[RITES] RITES_ROOT:', RITES_ROOT, 'RITES_DIR:', RITES_DIR);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 app.use('/ambient', express.static(join(__dirname, 'data/ambient'), {
   maxAge: '7d',
@@ -1649,8 +1658,6 @@ import { pipeline as pipe } from 'stream';
 import { createGunzip } from 'zlib';
 
 function ensureRitesCorpus() {
-  const RITES_ROOT = join(__dirname, '../rites');
-  const RITES_DIR = join(RITES_ROOT, 'dist');
   console.log("[DEBUG] ensureRitesCorpus() called. RITES_ROOT:", RITES_ROOT, "RITES_DIR:", RITES_DIR || join(RITES_ROOT, \'dist\'));
   const INDEX = join(RITES_ROOT, 'index.json');
   try {
@@ -1694,8 +1701,6 @@ ensureRitesCorpus();
 // ── RITES Corpus ───────────────────────────────────────────────────────
 // Serve indexed practices from the rites submodule.
 // Build artifacts: ./rites/dist/stepstates.json, stepstate_engagement.json, index.json
-
-const RITES_DIR = join(__dirname, '../rites/dist');
 
 // GET /api/v1/rites/stepstates — polyvagal step definitions
 app.get('/api/v1/rites/stepstates', async (req, res) => {
