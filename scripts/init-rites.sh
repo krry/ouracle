@@ -13,9 +13,20 @@ else
   fi
 fi
 
+# Build the RITES index (generate dist/*.json)
+echo "Building RITES corpus index..."
+cd rites
+if command -v node &> /dev/null; then
+  node scripts/build-index.js
+else
+  echo "ERROR: node not available to build RITES index"
+  exit 1
+fi
+cd -
+
 # Verify the data files exist
 if [ ! -f "rites/dist/stepstates.json" ]; then
-  echo "ERROR: rites/dist/stepstates.json not found after initialization"
+  echo "ERROR: rites/dist/stepstates.json not found after build"
   ls -la rites/dist 2>&1 || true
   exit 1
 fi
