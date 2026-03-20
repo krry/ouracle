@@ -1637,6 +1637,48 @@ app.post('/stt', authenticateOrGuest, async (req, res) => {
   }
 });
 
+// ── RITES Corpus ───────────────────────────────────────────────────────
+// Serve indexed practices from the rites submodule.
+// Build artifacts: ./rites/dist/stepstates.json, stepstate_engagement.json, index.json
+
+const RITES_DIR = join(__dirname, '../rites/dist');
+
+// GET /api/v1/rites/stepstates — polyvagal step definitions
+app.get('/api/v1/rites/stepstates', async (req, res) => {
+  try {
+    const data = JSON.parse(readFileSync(join(RITES_DIR, 'stepstates.json'), 'utf8'));
+    res.json(data);
+  } catch (e) {
+    console.error('[rites/stepstates]', e);
+    res.status(500).json({ error: 'Failed to load step states' });
+  }
+});
+
+// GET /api/v1/rites/recommended/:stepstateId — practice slugs for a given stepstate
+app.get('/api/v1/rites/recommended/:stepstateId', async (req, res) => {
+  try {
+    const mapping = JSON.parse(readFileSync(join(RITES_DIR, 'stepstate_engagement.json'), 'utf8'));
+    const slugs = mapping[req.params.stepstateId] || [];
+    res.json({ stepstateId: req.params.stepstateId, practices: slugs });
+  } catch (e) {
+    console.error('[rites/recommended]', e);
+    res.status(500).json({ error: 'Failed to load recommended practices' });
+  }
+});
+
+// GET /api/v1/rites/:slug — full practice data by slug
+app.get('/api/v1/rites/:slug', async (req, res) => {
+  try {
+    const index = JSON.parse(readFileSync(join(RITES_DIR, 'index.json'), 'utf8'));
+    const practice = index.find(p => p.slug === req.params.slug);
+    if (!practice) return res.status(404).json({ error: 'Practice not found' });
+    res.json(practice);
+  } catch (e) {
+    console.error('[rites/:slug]', e);
+    res.status(500).json({ error: 'Failed to load practice' });
+  }
+});
+
 app.get('/health', (req, res) => {
   const base = { status: 'alive', version };
   if (req.query.full === 'true') {
@@ -1648,6 +1690,9 @@ app.get('/health', (req, res) => {
       { method: 'GET',  path: '/draw' },
       { method: 'GET',  path: '/octave/steps' },
       { method: 'GET',  path: '/octave/step/:number' },
+      { method: 'GET',  path: '/api/v1/rites/stepstates' },
+      { method: 'GET',  path: '/api/v1/rites/recommended/:stepstateId' },
+      { method: 'GET',  path: '/api/v1/rites/:slug' },
       { method: 'POST', path: '/auth/token' },
       { method: 'POST', path: '/auth/refresh' },
       { method: 'POST', path: '/auth/social-exchange' },
