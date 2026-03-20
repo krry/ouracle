@@ -1,33 +1,36 @@
-     1|[package]
-     2|name = "clea-tui"
-     3|version = "0.2.3"
-     4|edition = "2024"
-     5|rust-version = "1.94"
-     6|description = "Clea — Chief Priestess of Ouracle available via CLI/TUI in your UNIX shell"
-     7|license = "MIT"
-     8|repository = "https://github.com/krry/ouracle"
-     9|homepage = "https://ouracle.kerry.ink/clea"
-    10|readme = "README.md"
-    11|keywords = ["tui", "ai", "chat", "terminal", "ratatui"]
-    12|categories = ["command-line-interface", "command-line-utilities"]
-    13|
-    14|[package.metadata]
-    15|icons = ["assets/icon-256.png"]
-    16|
-    17|[[bin]]
-    18|name = "clea"
-    19|path = "src/main.rs"
-    20|
-    21|[dependencies]
-    22|# For development, use local ripl with help_lines() support.
-    23|# For production, switch to: ripl = { package = "ripl-tui", version = "0.3" }
-    24|ripl = { package = "ripl-tui", version = "0.3.3" }
-    25|color-eyre = "0.6"
-    26|chrono = { version = "0.4", default-features = false, features = ["clock"] }
-    27|reqwest = { version = "0.12", features = ["blocking", "json"] }
-    28|serde = { version = "1", features = ["derive"] }
-    29|serde_json = "1"
-    30|toml = "0.8"
-    31|ratatui = "0.26"
-    32|crossterm = "0.28"
-    33|
+[package]
+name = "clea-tui"
+version = "0.2.3"
+edition = "2024"
+rust-version = "1.94"
+description = "Clea — Chief Priestess of Ouracle available via CLI/TUI in your UNIX shell"
+license = "MIT"
+repository = "https://github.com/krry/ouracle"
+homepage = "https://ouracle.kerry.ink/clea"
+readme = "README.md"
+keywords = ["tui", "ai", "chat", "terminal", "ratatui"]
+categories = ["command-line-interface", "command-line-utilities"]
+
+[package.metadata]
+icons = ["assets/icon-256.png"]
+
+[[bin]]
+name = "clea"
+path = "src/main.rs"
+
+[dependencies]
+crossterm = "0.29"
+ratatui = "0.26"
+color-eyre = "0.6"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.44", features = ["full"] }
+reqwest = { version = "0.12", features = ["json", "blocking"] }
+once_cell = "1.19"
+uuid = { version = "1.10", features = ["v4"] }
+chrono = "0.4"
+toml = "0.8"
+ripl = { package = "ripl-tui", path = "../../../ripl" }
+
+[dev-dependencies]
+tempfile = "3.18"
