@@ -1669,8 +1669,11 @@ app.get('/api/v1/rites/recommended/:stepstateId', async (req, res) => {
 // GET /api/v1/rites/:slug — full practice data by slug
 app.get('/api/v1/rites/:slug', async (req, res) => {
   try {
-    const index = JSON.parse(readFileSync(join(RITES_DIR, 'index.json'), 'utf8'));
-    const practice = index.find(p => p.slug === req.params.slug);
+    const indexPath = join(__dirname, '../rites/index.json');
+    const index = JSON.parse(readFileSync(indexPath, 'utf8'));
+    // index is { generated, totalPractices, practices: [...] }
+    const practices = index.practices || index;
+    const practice = practices.find(p => p.slug === req.params.slug);
     if (!practice) return res.status(404).json({ error: 'Practice not found' });
     res.json(practice);
   } catch (e) {
