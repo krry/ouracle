@@ -1,0 +1,144 @@
+name: notify hermes on build failure
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    # Filter to Vercel Production failures only.
+    # Vercel sets deployment.environment to "Production" for main-branch deploys.
+    if: |
+      github.event.deployment_status.state == 'failure' &&
+      github.event.deployment.environment == 'Production'
+    steps:
+      - name: fetch commit message
+        id: commit
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DEPLOY_SHA: ${{ github.event.deployment.sha }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          RESPONSE=$(curl -s \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$GH_REPO/commits/$DEPLOY_SHA")
+
+          # Extract subject line only (first line of commit message)
+          MSG=$(echo "$RESPONSE" | jq -r '.commit.message' | head -1)
+          echo "message=$MSG" >> $GITHUB_OUTPUT
+
+          # Loop guard: skip if this is already a Hermes auto-fix commit
+          if [[ "$MSG" == "fix(auto):"* ]]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: fetch vercel logs
+        if: steps.commit.outputs.skip != 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          TARGET_URL: ${{ github.event.deployment_status.target_url }}
+        run: |
+          # Build optional team query param
+          TEAM_PARAM=""
+          if [ -n "$VERCEL_TEAM_ID" ]; then
+            TEAM_PARAM="&teamId=$VERCEL_TEAM_ID"
+          fi
+
+          # Resolve Vercel deployment ID from full URL.
+          # /v9/deployments?url= expects the full URL including https://.
+          ENCODED_URL=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$TARGET_URL")
+          VERCEL_RESPONSE=$(curl -s \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/deployments?url=$ENCODED_URL$TEAM_PARAM")
+
+          DEPLOYMENT_ID=$(echo "$VERCEL_RESPONSE" | jq -r '.deployments[0].uid // empty')
+
+          if [ -n "$DEPLOYMENT_ID" ]; then
+            # Use /v9/ events endpoint (NDJSON: one JSON object per line)
+            EVENTS=$(curl -s \
+              -H "Authorization: Bearer $VERCEL_TOKEN" \
+              "https://api.vercel.com/v9/deployments/$DEPLOYMENT_ID/events?builds=1$TEAM_PARAM")
+
+            # Parse NDJSON line-by-line; fromjson? silently skips non-JSON lines
+            LOGS=$(echo "$EVENTS" | jq -R 'fromjson? | .text? // empty' 2>/dev/null | \
+              jq -r '.' | \
+              tail -c 3000)
+
+            # HTML-escape for Telegram parse_mode: HTML
+            LOGS_ESCAPED=$(printf '%s' "$LOGS" | \
+              sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
+          else
+            LOGS_ESCAPED=""
+          fi
+
+          # Write to file to avoid env var size limits
+          printf '%s' "$LOGS_ESCAPED" > /tmp/build_logs.txt
+
+      - name: notify hermes
+        if: steps.commit.outputs.skip != 'true'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          COMMIT_MSG: ${{ steps.commit.outputs.message }}
+          DEPLOY_SHA: ${{ github.event.deployment.sha }}
+          DEPLOY_REF: ${{ github.event.deployment.ref }}
+          DEPLOY_URL: ${{ github.event.deployment_status.target_url }}
+        run: |
+          SHA_SHORT="${DEPLOY_SHA:0:7}"
+          LOGS=$(cat /tmp/build_logs.txt 2>/dev/null || echo "")
+
+          if [ -n "$LOGS" ]; then
+            LOG_SECTION="<pre>$LOGS</pre>"
+          else
+            LOG_SECTION="(Build logs unavailable — check Vercel dashboard)"
+          fi
+
+          MESSAGE="🔴 <b>Build failure: ouracle/apps/web</b>
+
+Commit: $SHA_SHORT — $COMMIT_MSG
+Branch: $DEPLOY_REF
+Deployment: $DEPLOY_URL
+
+$LOG_SECTION
+
+Please fix the build failure, commit, and push to main."
+
+          # Enforce Telegram's 4096-char hard limit by trimming logs if needed
+          MSG_LEN=${#MESSAGE}
+          if [ "$MSG_LEN" -gt 4096 ]; then
+            OVERFLOW=$(( MSG_LEN - 4090 ))
+            TRIMMED_LOGS=$(printf '%s' "$LOGS" | head -c $(( ${#LOGS} - OVERFLOW )) )
+            LOG_SECTION="<pre>$TRIMMED_LOGS</pre>"
+            MESSAGE="🔴 <b>Build failure: ouracle/apps/web</b>
+
+Commit: $SHA_SHORT — $COMMIT_MSG
+Branch: $DEPLOY_REF
+Deployment: $DEPLOY_URL
+
+$LOG_SECTION
+
+Please fix the build failure, commit, and push to main."
+          fi
+
+          # Build JSON with jq --arg to handle all escaping correctly
+          PAYLOAD=$(jq -n \
+            --arg chat_id "$TELEGRAM_CHAT_ID" \
+            --arg text "$MESSAGE" \
+            '{
+              chat_id: $chat_id,
+              text: $text,
+              parse_mode: "HTML",
+              disable_web_page_preview: true
+            }')
+
+          curl -s -X POST \
+            "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD"
