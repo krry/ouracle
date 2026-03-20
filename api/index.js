@@ -1,14 +1,6 @@
 import express from 'express';
 import { fetchAudio, hasFishKey } from './fish-tts.js';
-
-// ── Sentence detection utilities ─────────────────────────────────────
-function splitIntoSentences(text) {
-  // Split on sentence boundaries: period, exclamation, question mark followed by whitespace or end
-  // Also handle common abbreviations and edge cases
-  const sentenceRegex = /[^.!?]+[.!?]+(?:\s|$)|[^.!?]+$/g;
-  const sentences = text.match(sentenceRegex) || [];
-  return sentences.map(s => s.trim()).filter(s => s.length > 0);
-}
+import { split as splitSentences } from 'sentence-splitter';
 
 function isSentenceBoundary(token, nextToken) {
   if (!token) return false;
@@ -1006,74 +998,54 @@ class SentenceAudioStreamer {
     this.res = res;
     this.muted = options.muted || false;
     this.voice = options.voice;
-    this.sentenceIdx = 0;
-    this.audioPromises = new Map(); // idx -> Promise
-    this.readyAudio = new Map(); // idx -> base64 | null (null = failed)
-    this.nextAudioEmitIdx = 0;
+    this.sentenceIdx = 0; // sequence number for sentences
+    this.audioPromises = new Map(); // seq -> Promise
+    this.readyAudio = new Map(); // seq -> base64 | null (null = failed)
+    this.nextAudioEmitIdx = 0; // next audio sequence to emit
     this.preFetchLimit = 2; // pre-fetch up to 2 sentences ahead
-    this.currentSentence = '';
-    this.sentenceStarted = false;
+    this.buffer = ''; // accumulated tokens for current incomplete sentence
   }
 
   emit(obj) {
     sendSSE(this.res, obj);
   }
 
-  emitToken(token) {
-    this.emit({ type: 'token', text: token });
-  }
-
-  async emitTokensWithDelay(sentence) {
-    const words = sentence.split(/(\s+)/);
-    for (const word of words) {
-      if (word) {
-        this.emitToken(word);
-        await new Promise(r => setTimeout(r, 22));
-      }
+  // Emit a complete sentence text event (immediate)
+  emitSentenceText(text, isFinal = false) {
+    const seq = this.sentenceIdx++;
+    this.emit({ type: 'sentence_text', text, sequence: seq, isFinal });
+    if (!this.muted) {
+      this.startAudioFetch(seq, text);
     }
   }
 
-  isSentenceBoundary(token) {
-    if (!token) return false;
-    const lastChar = token[token.length - 1];
-    if (lastChar === '.' || lastChar === '!' || lastChar === '?') {
-      const abbrevs = ['Mr.', 'Mrs.', 'Ms.', 'Dr.', 'Prof.', 'St.', 'etc.', 'e.g.', 'i.e.'];
-      if (abbrevs.some(abbr => token.endsWith(abbr))) return false;
-      return true;
-    }
-    return false;
-  }
-
-  startAudioFetch(idx, sentence) {
-    if (this.audioPromises.has(idx)) return;
+  startAudioFetch(seq, sentence) {
+    if (this.audioPromises.has(seq)) return;
     // Cache check
     const cached = audioCache.get(sentence);
     if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
-      this.readyAudio.set(idx, cached.base64);
+      this.readyAudio.set(seq, cached.base64);
       this.tryEmitAudio();
       return;
     }
-    // Limit concurrency: we only want up to preFetchLimit fetches in flight for upcoming sentences.
-    // We'll allow any number to be started as long as they are within [this.sentenceIdx, this.sentenceIdx + this.preFetchLimit].
-    // Since we call this method right when a sentence is finalized (and possibly pre-fetch for upcoming known sentences), we can just start.
     const p = fetchAudio(sentence, this.voice).then(buf => {
       const base64 = buf.toString('base64');
       audioCache.set(sentence, { base64, timestamp: Date.now() });
-      this.readyAudio.set(idx, base64);
+      this.readyAudio.set(seq, base64);
       this.tryEmitAudio();
     }).catch(err => {
       console.error('[TTS] sentence fetch error:', err.message);
-      this.readyAudio.set(idx, null); // mark as failed, still allow proceeding
+      this.readyAudio.set(seq, null); // mark as failed, still allow proceeding
       this.tryEmitAudio();
     });
-    this.audioPromises.set(idx, p);
+    this.audioPromises.set(seq, p);
   }
 
   tryEmitAudio() {
     while (this.readyAudio.has(this.nextAudioEmitIdx)) {
       const data = this.readyAudio.get(this.nextAudioEmitIdx);
       if (data !== null) {
-        this.emit({ type: 'audio', base64: data, sentence_index: this.nextAudioEmitIdx });
+        this.emit({ type: 'sentence_audio', sequence: this.nextAudioEmitIdx, audio: data });
       }
       this.nextAudioEmitIdx++;
     }
@@ -1083,15 +1055,13 @@ class SentenceAudioStreamer {
     const deadline = Date.now() + timeout;
     while (this.nextAudioEmitIdx < this.sentenceIdx) {
       if (Date.now() > deadline) break;
-      // Check if the next pending index is now ready
       if (this.readyAudio.has(this.nextAudioEmitIdx)) {
         const data = this.readyAudio.get(this.nextAudioEmitIdx);
         if (data !== null) {
-          this.emit({ type: 'audio', base64: data, sentence_index: this.nextAudioEmitIdx });
+          this.emit({ type: 'sentence_audio', sequence: this.nextAudioEmitIdx, audio: data });
         }
         this.nextAudioEmitIdx++;
       } else {
-        // Wait a bit for it to become ready
         await new Promise(r => setTimeout(r, 50));
       }
     }
@@ -1099,18 +1069,14 @@ class SentenceAudioStreamer {
 
   // For static text (fully known upfront)
   async processFullText(fullText) {
-    const sentences = splitIntoSentences(fullText);
+    const sentences = splitSentences(fullText).map(s => s.raw.trim()).filter(s => s.length > 0);
     for (let i = 0; i < sentences.length; i++) {
       const sentence = sentences[i];
-      await this.emitTokensWithDelay(sentence);
-      this.finalizeSentence(sentence);
+      this.emitSentenceText(sentence, i === sentences.length - 1);
       // Pre-fetch next up to 2 ahead if available
       if (!this.muted) {
         for (let j = i + 1; j <= Math.min(i + this.preFetchLimit, sentences.length - 1); j++) {
           const futureSentence = sentences[j];
-          // Check if we already started fetch for that index? We need to map future index: current sentenceIdx will be incremented after finalizeSentence.
-          // Actually after finalizeSentence, this.sentenceIdx was incremented to i+1.
-          // The future sentences are at indices i+1, i+2, etc.
           const futureIdx = i + 1 + (j - (i + 1));
           if (!this.audioPromises.has(futureIdx)) {
             this.startAudioFetch(futureIdx, futureSentence);
@@ -1122,34 +1088,22 @@ class SentenceAudioStreamer {
 
   // For incremental LLM token stream
   feedToken(token) {
-    this.emitToken(token);
-    this.currentSentence += token;
-    if (this.isSentenceBoundary(token)) {
-      const sentence = this.currentSentence.trim();
-      this.currentSentence = '';
-      this.finalizeSentence(sentence);
+    this.buffer += token;
+    const sentences = splitSentences(this.buffer);
+    if (sentences.length > 1) {
+      const completed = sentences.slice(0, -1).map(s => s.raw.trim()).filter(s => s.length > 0);
+      this.buffer = sentences[sentences.length - 1].raw;
+      for (const sentence of completed) {
+        this.emitSentenceText(sentence, false);
+      }
     }
-  }
-
-  finalizeSentence(sentence) {
-    if (!sentence) return;
-    // Sentence index is current value before increment
-    const idx = this.sentenceIdx++;
-    if (!this.muted) {
-      this.startAudioFetch(idx, sentence);
-      // Also try to pre-fetch next sentences if we know them? In incremental mode we don't know future sentences until they arrive.
-      // But we can try to prefetch up to depth: we'll check upcoming sentence indices that might be finalized later. We can't start fetch without text.
-      // However, after finishing current sentence, the next sentence start accumulating, but we cannot prefetch until we have its text. That's okay; we'll fetch when it's finalized.
-    }
-    this.tryEmitAudio();
   }
 
   finish() {
-    // Called when no more tokens will be fed
-    if (this.currentSentence.trim()) {
-      const sentence = this.currentSentence.trim();
-      this.currentSentence = '';
-      this.finalizeSentence(sentence);
+    if (this.buffer.trim()) {
+      const sentence = this.buffer.trim();
+      this.buffer = '';
+      this.emitSentenceText(sentence, true);
     }
   }
 }
