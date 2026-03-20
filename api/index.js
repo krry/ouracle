@@ -1703,7 +1703,7 @@ app.get('/api/v1/rites/stepstates', async (req, res) => {
     res.json(data);
   } catch (e) {
     console.error('[rites/stepstates]', e);
-    res.status(500).json({ error: 'Failed to load step states', details: e.message });
+    res.status(500).json({ error: 'Failed to load step states', details: String(e) });
   }
 });
 
@@ -1715,7 +1715,7 @@ app.get('/api/v1/rites/recommended/:stepstateId', async (req, res) => {
     res.json({ stepstateId: req.params.stepstateId, practices: slugs });
   } catch (e) {
     console.error('[rites/recommended]', e);
-    res.status(500).json({ error: 'Failed to load recommended practices', details: e.message });
+    res.status(500).json({ error: 'Failed to load recommended practices', details: String(e) });
   }
 });
 
@@ -1731,7 +1731,7 @@ app.get('/api/v1/rites/:slug', async (req, res) => {
     res.json(practice);
   } catch (e) {
     console.error('[rites/:slug]', e);
-    res.status(500).json({ error: 'Failed to load practice', details: e.message });
+    res.status(500).json({ error: 'Failed to load practice', details: String(e) });
   }
 });
 
