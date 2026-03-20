@@ -40,7 +40,7 @@
     }
     const betterAuthToken =
       ('token' in result && result.token) ||
-      ('data' in result && result.data?.session?.token) ||
+      ('data' in result && result.data?.token) ||
       '';
     if (!betterAuthToken) {
       error = 'authentication failed — no token received';
@@ -84,7 +84,7 @@
     error = '';
     busy = true;
     try {
-      const result = await signIn.social({ provider, callbackURL: window.location.href, flow: 'popup' });
+      const result = await signIn.social({ provider, callbackURL: window.location.href });
       await handleCredResult(result as AuthResult);
     } catch (e: unknown) {
       error = e instanceof Error ? e.message : 'something went wrong';

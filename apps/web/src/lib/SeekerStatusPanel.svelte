@@ -20,21 +20,21 @@
 	};
 
 	// Compute position for circumplex dot: valence (x), arousal (y)
-	const dotX = $derived(() => {
+	function getDotX(): number {
 		const v = $seekerState.affect.valence;
 		return v !== null ? 50 + v * 45 : 50; // map [-1,1] to [5%,95%]
-	});
-	const dotY = $derived(() => {
+	}
+	function getDotY(): number {
 		const a = $seekerState.affect.arousal;
 		return a !== null ? 50 + a * 45 : 50; // map [-1,1] to [5%,95%]
-	});
+	}
 
 	// Tooltip for dot
-	const dotTitle = $derived(() => {
+	function getDotTitle(): string {
 		const { valence, arousal, gloss, confidence } = $seekerState.affect;
 		if (valence === null || arousal === null) return 'No affect data';
 		return `Valence: ${valence.toFixed(2)}, Arousal: ${arousal.toFixed(2)}\nGloss: ${gloss ?? 'n/a'}\nConfidence: ${confidence ?? 'n/a'}`;
-	});
+	}
 </script>
 
 <div class="seeker-status" class:has-data={$seekerState.affect.valence !== null}>
@@ -46,7 +46,7 @@
 	</div>
 
 	<!-- Circumplex affect plot -->
-	<div class="ss-affect-plot" title={dotTitle}>
+	<div class="ss-affect-plot" title={getDotTitle()}>
 		<svg viewBox="0 0 100 100" class="circumplex">
 			<!-- Axes -->
 			<line x1="0" y1="50" x2="100" y2="50" class="axis" />
@@ -62,7 +62,7 @@
 		<text x="54" y="98" class="axis-label arousal-label">-</text>
 		<text x="92" y="50" class="axis-label arousal-label">Arousal</text>
 			<!-- Data point -->
-			<circle cx={dotX} cy={dotY} r="4" class="affect-dot" />
+			<circle cx={getDotX()} cy={getDotY()} r="4" class="affect-dot" />
 		</svg>
 		<!-- Gloss temporarily commented out until we understand its purpose
 		{#if $seekerState.affect.gloss}

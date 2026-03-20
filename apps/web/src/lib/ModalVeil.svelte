@@ -97,7 +97,7 @@
     class="backdrop {backdropClass}"
     onclick={close ?? undefined}
   ></div>
-  <div class="content" class:visible={contentVisible} onclick={(e) => e.stopPropagation()}>
+  <div class="content" class:visible={contentVisible} onclick={(e) => e.stopPropagation()} onkeydown={(e) => { if (e.key === "Escape" && close) close(); }} role="dialog" aria-modal="true" tabindex="-1">
     {#if phase !== 'hidden' && currentComponent}
       <svelte:component this={currentComponent} {...$$restProps} />
     {/if}

@@ -9,6 +9,7 @@ export interface AudioSegment {
   duration: number;
   skipped: boolean;
   timestamp: number;
+  sequence?: number;
 }
 
 export type AudioManagerEvent =
@@ -55,7 +56,6 @@ async function getSkippedSegments(db: IDBDatabase): Promise<AudioSegment[]> {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readonly');
     const store = tx.objectStore(STORE_NAME);
-    // Get all records and filter client-side for simplicity
     const request = store.getAll();
     request.onsuccess = () => resolve(request.result.filter(s => s.skipped));
     request.onerror = () => reject(request.error);
@@ -72,12 +72,14 @@ async function clearHistory(db: IDBDatabase): Promise<void> {
   });
 }
 
+interface QueueItem {
+  text: string;
+  resolve: (blob: Blob) => void;
+  buffer?: ArrayBuffer;
+  sequence?: number;
+}
+
 export class AudioManager {
-  type QueueItem = {
-    text: string;
-    resolve: (blob: Blob) => void;
-    buffer?: ArrayBuffer;
-  };
   private queue: QueueItem[] = [];
   private currentSource: AudioBufferSourceNode | null = null;
   private currentSegment: AudioSegment | null = null;
@@ -90,6 +92,8 @@ export class AudioManager {
   private _paused = false;
   private eventHandlers: Set<(event: AudioManagerEvent) => void> = new Set();
   private idCounter = 0;
+  private gainNode: GainNode | null = null;
+  private currentPlayResolve: (() => void) | null = null;
 
   constructor(private fetchAudio: FetchFn) {
     if (typeof window !== 'undefined' && 'indexedDB' in window) {
@@ -123,12 +127,19 @@ export class AudioManager {
     });
   }
 
-  // Enqueue a pre-decoded audio buffer (from server-side TTS streaming)
-  enqueueBuffer(buffer: ArrayBuffer, text: string = ''): Promise<Blob> {
+  enqueueBuffer(buffer: ArrayBuffer, text: string = '', sequence?: number): Promise<Blob> {
     return new Promise((resolve) => {
-      this.queue.push({ text, resolve, buffer });
+      this.queue.push({ text, resolve, buffer, sequence });
       if (!this._playing && !this._paused) queueMicrotask(() => this._drain());
     });
+  }
+
+  enqueueBase64(seq: number, base64: string, text: string): Promise<Blob> {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const buffer = bytes.buffer;
+    return this.enqueueBuffer(buffer, text, seq);
   }
 
   flush() {
@@ -147,13 +158,7 @@ export class AudioManager {
   skip(): boolean {
     if (this.currentSource && this._playing) {
       this.currentSource.stop();
-      if (this.currentSegment && this.db) {
-        this.currentSegment.skipped = true;
-        saveSegment(this.db, this.currentSegment).catch(() => {});
-      }
-      if (this.currentSegment) {
-        this.emit({ type: 'skipped', segment: this.currentSegment });
-      }
+      this._finishCurrentSegment(true);
       return true;
     }
     return false;
@@ -177,10 +182,8 @@ export class AudioManager {
   mute() {
     if (!this._muted) {
       this._muted = true;
-      if (this.currentSource && this._playing) {
-        this.currentSource.stop();
-        this._paused = true;
-        this._playing = false;
+      if (this.gainNode) {
+        this.gainNode.gain.value = 0;
       }
       this.emit({ type: 'mute' });
     }
@@ -189,8 +192,8 @@ export class AudioManager {
   unmute() {
     if (this._muted) {
       this._muted = false;
-      if (this._paused && this.currentSegment) {
-        this._playSegment(this.currentSegment);
+      if (this.gainNode) {
+        this.gainNode.gain.value = 1;
       }
       this.emit({ type: 'unmute' });
     }
@@ -240,7 +243,7 @@ export class AudioManager {
         }
       }
       const blob = new Blob([buf], { type: 'audio/wav' });
-      const audio = await this._play(buf, item.text, false);
+      const audio = await this._play(buf, item.text, false, item.sequence);
       item.resolve(blob);
       if (!this._playing) break;
     }
@@ -254,15 +257,11 @@ export class AudioManager {
     }
   }
 
-  private _play(arrayBuffer: ArrayBuffer, text: string, isReplay: boolean): Promise<void> {
+  private _play(arrayBuffer: ArrayBuffer, text: string, isReplay: boolean, sequence?: number): Promise<void> {
     return new Promise<void>((resolve) => {
-      if (this._muted) {
-        resolve();
-        return;
-      }
-
       this.ctx ??= new AudioContext();
       const ctx = this.ctx;
+      this.currentPlayResolve = resolve;
 
       ctx.decodeAudioData(arrayBuffer.slice(0), async (decoded) => {
         const segment: AudioSegment = {
@@ -273,6 +272,7 @@ export class AudioManager {
           skipped: false,
           timestamp: Date.now(),
         };
+        if (sequence !== undefined) segment.sequence = sequence;
 
         this.currentSegment = segment;
         const source = ctx.createBufferSource();
@@ -282,21 +282,19 @@ export class AudioManager {
         if (!this.analyser) {
           this.analyser = ctx.createAnalyser();
           this.analyser.fftSize = 128;
-          this.analyser.connect(ctx.destination);
+        }
+        if (!this.gainNode) {
+          this.gainNode = ctx.createGain();
+          this.gainNode.connect(ctx.destination);
         }
 
         source.connect(this.analyser);
+        this.analyser.connect(this.gainNode);
+        this.gainNode.gain.value = this._muted ? 0 : 1;
+
         source.onended = async () => {
           if (!this._paused) {
-            source.disconnect();
-            this.currentSource = null;
-            this.currentSegment = null;
-            if (this.db) {
-              segment.skipped = false;
-              await saveSegment(this.db, segment);
-            }
-            this.emit({ type: 'queue-update', length: this.queue.length });
-            resolve();
+            this._finishCurrentSegment(false);
           }
         };
 
@@ -314,9 +312,34 @@ export class AudioManager {
         };
         tick();
       }, () => {
-        resolve();
+        this.currentPlayResolve?.();
       });
     });
+  }
+
+  private _finishCurrentSegment(skipped: boolean): void {
+    if (this.currentSource) {
+      this.currentSource.disconnect();
+      this.currentSource = null;
+    }
+    if (this.currentSegment) {
+      if (skipped) {
+        this.currentSegment.skipped = true;
+        if (this.db) {
+          saveSegment(this.db, this.currentSegment).catch(() => {});
+        }
+        this.emit({ type: 'skipped', segment: this.currentSegment });
+      } else {
+        if (this.db) {
+          saveSegment(this.db, this.currentSegment).catch(() => {});
+        }
+        this.emit({ type: 'queue-update', length: this.queue.length });
+      }
+      this.currentSegment = null;
+    }
+    const resolve = this.currentPlayResolve;
+    this.currentPlayResolve = null;
+    resolve?.();
   }
 
   private async _playSegment(segment: AudioSegment): Promise<void> {

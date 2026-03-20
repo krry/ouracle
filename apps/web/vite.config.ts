@@ -30,10 +30,9 @@ export default defineConfig({
         ]
       },
       workbox: {
-        enabled: process.env.NODE_ENV === 'production',
         cleanupOutdatedCaches: true,
         navigateFallback: '/index.html',
-        navigatePreload: true,
+        navigationPreload: true,
         // Ensure new SW activates immediately without waiting for clients to close
         skipWaiting: true,
         clientsClaim: true,
@@ -53,7 +52,7 @@ export default defineConfig({
                   maxEntries: 100,
                   maxAgeSeconds: 5 * 60 // 5 minutes
                 },
-                cacheKeyWillBeUsed: async ({ request }) => {
+                cacheKeyWillBeUsed: async ({ request }: { request: Request }) => {
                   // Add timestamp-based busting for dev-like query params
                   const url = new URL(request.url);
                   if (url.searchParams.get('_nocache') || url.searchParams.get('_t')) {

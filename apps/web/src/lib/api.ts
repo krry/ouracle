@@ -1,4 +1,5 @@
 const BASE = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
+import type { TtsVoice } from './stores';
 
 function authHeaders(token: string): HeadersInit {
 	return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };

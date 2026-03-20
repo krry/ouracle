@@ -10,6 +10,7 @@ const mockDB = {
     clear: vi.fn(() => ({ onsuccess: null, onerror: null })),
     getAll: vi.fn(() => ({ result: [] })),
   })),
+  onupgradeneeded: null,
   transaction: vi.fn(() => ({
     objectStore: vi.fn(() => ({
       index: vi.fn(() => ({ getAll: vi.fn() })),
@@ -23,14 +24,14 @@ global.indexedDB = {
     onupgradeneeded: null,
     onsuccess: () => {
       const event = { target: { result: mockDB } };
-      if (mockDB.onupgradeneeded) mockDB.onupgradeneeded(event);
+      if (mockDB.onupgradeneeded) (mockDB.onupgradeneeded as any)(event);
     },
     onerror: null,
   })),
 } as unknown as typeof indexedDB;
 
 describe('AudioManager', () => {
-  let mockFetchAudio: ReturnType<typeof vi.fn>;
+  let mockFetchAudio: any;
 
   beforeEach(() => {
     mockFetchAudio = vi.fn().mockResolvedValue(new ArrayBuffer(0));

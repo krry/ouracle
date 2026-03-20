@@ -23,7 +23,7 @@ export async function blobToWav(blob: Blob, ctx: AudioContext, sampleRate = 1600
 function encodeWav(samples: Float32Array, sampleRate: number): Blob {
 	const pcm = floatTo16BitPcm(samples);
 	const header = wavHeader(pcm.byteLength, sampleRate);
-	return new Blob([header, pcm], { type: 'audio/wav' });
+	return new Blob([header, pcm.buffer.slice(pcm.byteOffset, pcm.byteOffset + pcm.byteLength) as ArrayBuffer], { type: 'audio/wav' });
 }
 
 function floatTo16BitPcm(input: Float32Array): Int16Array {
