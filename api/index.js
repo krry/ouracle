@@ -1637,6 +1637,59 @@ app.post('/stt', authenticateOrGuest, async (req, res) => {
   }
 });
 
+
+// ── Self-healing: ensure RITES corpus exists on Railway/Nixpacks ─────────
+import { existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
+import { execSync } from 'child_process';
+import { pipeline } from 'stream/promises';
+import { createWriteStream, unlink } from 'fs';
+import https from 'https';
+import { pipeline as pipe } from 'stream';
+import { createGunzip } from 'zlib';
+
+function ensureRitesCorpus() {
+  const RITES_ROOT = join(__dirname, '../rites');
+  const RITES_DIR = join(RITES_ROOT, 'dist');
+  const INDEX = join(RITES_ROOT, 'index.json');
+  try {
+    if (!existsSync(join(RITES_DIR, 'stepstates.json'))) {
+      console.log('[RITES] Corpus missing — attempting auto-download...');
+      // Try git clone first (if git available)
+      try {
+        execSync('git --version', { stdio: 'ignore' });
+        if (!existsSync(RITES_ROOT)) {
+          execSync('git clone --depth=1 https://github.com/krry/rites.git ../rites', { cwd: __dirname, stdio: 'pipe' });
+        } else {
+          execSync('git -C ../rites pull', { stdio: 'pipe' });
+        }
+        console.log('[RITES] Git fetch successful');
+        return;
+      } catch (e) {
+        console.log('[RITES] git not available, falling back to tarball');
+        // Fallback: curl + tar
+        try {
+          execSync('curl --version', { stdio: 'ignore' });
+          const tarPath = '/tmp/rites.tar.gz';
+          execSync(`curl -sL https://github.com/krry/rites/archive/refs/heads/main.tar.gz -o ${tarPath}`, { stdio: 'pipe' });
+          // Ensure target dir exists
+          if (!existsSync(RITES_ROOT)) mkdirSync(RITES_ROOT, { recursive: true });
+          // Extract
+          execSync(`tar -xzf ${tarPath} -C ../rites --strip-components=1`, { cwd: __dirname, stdio: 'pipe' });
+          unlink(tarPath, () => {});
+          console.log('[RITES] Tarball extraction successful');
+        } catch (e2) {
+          console.error('[RITES] Auto-download failed:', e2.message);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[RITES] ensureRitesCorpus error:', err);
+  }
+}
+
+ensureRitesCorpus();
+// ─────────────────────────────────────────────────────────────────────────────
 // ── RITES Corpus ───────────────────────────────────────────────────────
 // Serve indexed practices from the rites submodule.
 // Build artifacts: ./rites/dist/stepstates.json, stepstate_engagement.json, index.json
