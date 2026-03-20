@@ -1651,6 +1651,7 @@ import { createGunzip } from 'zlib';
 function ensureRitesCorpus() {
   const RITES_ROOT = join(__dirname, '../rites');
   const RITES_DIR = join(RITES_ROOT, 'dist');
+  console.log("[DEBUG] ensureRitesCorpus() called. RITES_ROOT:", RITES_ROOT, "RITES_DIR:", RITES_DIR || join(RITES_ROOT, \'dist\'));
   const INDEX = join(RITES_ROOT, 'index.json');
   try {
     if (!existsSync(join(RITES_DIR, 'stepstates.json'))) {
