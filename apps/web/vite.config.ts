@@ -30,6 +30,7 @@ export default defineConfig({
         ]
       },
       workbox: {
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB — kokoro-js bundle exceeds 2MB default
         cleanupOutdatedCaches: true,
         navigateFallback: '/index.html',
         navigationPreload: true,
