@@ -374,12 +374,11 @@ canvas {
   gap: var(--space-sm);
   /* Liquid glass — blurs nebula behind text, provides contrast in both modes */
   background: color-mix(in srgb, var(--bg) 52%, transparent);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(4px);
   border-radius: 1.75rem;
   border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
   box-shadow:
-    0 8px 40px color-mix(in srgb, black 28%, transparent),
+    0 8px 20px color-mix(in srgb, black 14%, transparent),
     inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
 }
 .wordmark {
