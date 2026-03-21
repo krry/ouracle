@@ -1,0 +1,3 @@
+[submodule "rites"]
+	path = rites
+	url = https://github.com/krry/rites.git

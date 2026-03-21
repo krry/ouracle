@@ -2,12 +2,9 @@
   "name": "ouracle",
   "version": "1.0.0",
   "description": "Multimodal oracle drawing on Tarot de Marseilles, I Ching, Gene Keys, Delphic maxims, and other divination traditions.",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postinstall": "bash scripts/init-rites.sh",
+    "start": "cd api && bun start"
   },
   "repository": {
     "type": "git",
@@ -16,12 +13,5 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/krry/ouracle/issues"
-  },
-  "homepage": "https://github.com/krry/ouracle#readme",
-  "dependencies": {
-    "pg": "^8.20.0"
-  }
+  "type": "commonjs"
 }

@@ -29,7 +29,8 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 import { makeLlmClient } from './llm-client.js';
 import { CLEA_SYSTEM_PROMPT } from './clea-prompt.js';
 import { randomUUID } from 'crypto';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync, mkdirSync, unlink } from 'fs';
+import { execSync } from 'child_process';
 const pkgPath = new URL('package.json', import.meta.url);
 const { version } = JSON.parse(readFileSync(pkgPath));
 import {
@@ -100,9 +101,12 @@ const ALLOWED_ORIGINS = [
   'https://souvenir.local:2532',
 ];
 
+// Vercel preview deployments: ouracle-<hash>-kerry.vercel.app
+const ALLOWED_ORIGIN_RE = /^https:\/\/ouracle(-[a-z0-9]+)*-kerry\.vercel\.app$/;
+
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+  if (origin && (ALLOWED_ORIGINS.includes(origin) || ALLOWED_ORIGIN_RE.test(origin))) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
@@ -146,7 +150,10 @@ app.use(rateLimitMiddleware);
 // Serve ambient audio files — no auth required, public CDN-style
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const RITES_DIR = join(__dirname, 'data', 'rites');
+
 app.use('/ambient', express.static(join(__dirname, 'data/ambient'), {
   maxAge: '7d',
   setHeaders: (res) => res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin'),
@@ -1088,6 +1095,7 @@ class SentenceAudioStreamer {
 
   // For incremental LLM token stream
   feedToken(token) {
+    this.emit({ type: 'token', text: token }); // client renders tokens in real-time
     this.buffer += token;
     const sentences = splitSentences(this.buffer);
     if (sentences.length > 1) {
@@ -1637,6 +1645,62 @@ app.post('/stt', authenticateOrGuest, async (req, res) => {
   }
 });
 
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ── RITES Corpus ───────────────────────────────────────────────────────
+// Serve indexed practices from data/rites/ (synced at build time by scripts/sync-rites.js).
+
+// GET /api/v1/rites/stepstates — polyvagal step definitions
+app.get('/api/v1/rites/stepstates', async (req, res) => {
+  try {
+    const data = JSON.parse(readFileSync(join(RITES_DIR, 'stepstates.json'), 'utf8'));
+    res.json(data);
+  } catch (e) {
+    console.error('[rites/stepstates]', e);
+    res.status(500).json({ error: 'Failed to load step states', details: String(e) });
+  }
+});
+
+// GET /api/v1/rites/recommended/:stepstateId — practice slugs for a given stepstate
+app.get('/api/v1/rites/recommended/:stepstateId', async (req, res) => {
+  try {
+    const mapping = JSON.parse(readFileSync(join(RITES_DIR, 'stepstate_engagement.json'), 'utf8'));
+    const slugs = mapping[req.params.stepstateId] || [];
+    res.json({ stepstateId: req.params.stepstateId, practices: slugs });
+  } catch (e) {
+    console.error('[rites/recommended]', e);
+    res.status(500).json({ error: 'Failed to load recommended practices', details: String(e) });
+  }
+});
+
+// GET /api/v1/rites — catalog of all practices
+app.get('/api/v1/rites', async (req, res) => {
+  try {
+    const catalog = JSON.parse(readFileSync(join(RITES_DIR, 'catalog.json'), 'utf8'));
+    res.json(catalog);
+  } catch (e) {
+    console.error('[rites]', e);
+    res.status(500).json({ error: 'Failed to load rites catalog', details: String(e) });
+  }
+});
+
+// GET /api/v1/rites/:slug — full practice data + markdown body
+app.get('/api/v1/rites/:slug', async (req, res) => {
+  try {
+    const catalog = JSON.parse(readFileSync(join(RITES_DIR, 'catalog.json'), 'utf8'));
+    const practices = catalog.practices || catalog;
+    const practice = practices.find(p => p.slug === req.params.slug);
+    if (!practice) return res.status(404).json({ error: 'Practice not found' });
+    const mdPath = join(RITES_DIR, 'practices', practice.file);
+    const markdown = existsSync(mdPath) ? readFileSync(mdPath, 'utf8') : null;
+    res.json({ ...practice, markdown });
+  } catch (e) {
+    console.error('[rites/:slug]', e);
+    res.status(500).json({ error: 'Failed to load practice', details: String(e) });
+  }
+});
+
 app.get('/health', (req, res) => {
   const base = { status: 'alive', version };
   if (req.query.full === 'true') {
@@ -1648,6 +1712,9 @@ app.get('/health', (req, res) => {
       { method: 'GET',  path: '/draw' },
       { method: 'GET',  path: '/octave/steps' },
       { method: 'GET',  path: '/octave/step/:number' },
+      { method: 'GET',  path: '/api/v1/rites/stepstates' },
+      { method: 'GET',  path: '/api/v1/rites/recommended/:stepstateId' },
+      { method: 'GET',  path: '/api/v1/rites/:slug' },
       { method: 'POST', path: '/auth/token' },
       { method: 'POST', path: '/auth/refresh' },
       { method: 'POST', path: '/auth/social-exchange' },

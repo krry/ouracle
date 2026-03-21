@@ -1,6 +1,6 @@
 import { voiceState, waveform } from './stores';
 
-type FetchFn = (text: string) => Promise<ArrayBuffer>;
+type FetchFn = (text: string) => Promise<ArrayBuffer | null>;
 
 type QueueItem = { type: 'text'; text: string } | { type: 'buffer'; buffer: ArrayBuffer };
 
@@ -47,9 +47,10 @@ export class AudioQueue {
       let buf: ArrayBuffer;
       if (item.type === 'text') {
         try {
-          buf = await this.fetchAudio(item.text);
+          const result = await this.fetchAudio(item.text);
+          if (result === null) continue; // Web Speech already spoke it
+          buf = result;
         } catch {
-          // skip failed fetch
           continue;
         }
       } else {

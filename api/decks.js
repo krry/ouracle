@@ -116,8 +116,80 @@ export async function loadDecks({ force = false } = {}) {
     }
   }
 
+  // Append rites deck if synced
+  const ritesDeck = await loadRitesDeck();
+  if (ritesDeck) decks.push(ritesDeck);
+
   _cache = decks;
   return decks;
+}
+
+// ── Rites deck loader ─────────────────────────────────────────────────────────
+
+const RITES_CATALOG = join(__dirname, 'data', 'rites', 'catalog.json');
+const RITES_PRACTICES = join(__dirname, 'data', 'rites', 'practices');
+
+async function loadRitesDeck() {
+  let catalog;
+  try {
+    catalog = JSON.parse(await readFile(RITES_CATALOG, 'utf8'));
+  } catch {
+    return null; // not synced yet — skip silently
+  }
+
+  const practices = catalog.practices || catalog;
+  const cards = [];
+
+  for (const p of practices) {
+    let markdown = '';
+    let act = '';
+    let themes = [];
+    let octave_qualities = [];
+    let textures = [];
+
+    try {
+      markdown = await readFile(join(RITES_PRACTICES, p.file), 'utf8');
+      const fmMatch = markdown.match(/^---\n([\s\S]*?)\n---/);
+      if (fmMatch) {
+        const fm = parseFrontmatter(fmMatch[1]);
+        act = typeof fm.act === 'string' ? fm.act : '';
+        themes = Array.isArray(fm.themes) ? fm.themes : [];
+        octave_qualities = Array.isArray(fm.octave_qualities) ? fm.octave_qualities : [];
+        textures = Array.isArray(fm.textures) ? fm.textures : [];
+      }
+    } catch { /* file missing — catalog-only */ }
+
+    const keywords = [...new Set([...(p.categories || []), ...themes])];
+
+    cards.push({
+      id: p.slug,
+      deck: 'rites',
+      title: p.name,
+      keywords,
+      body: act || p.duration || '',
+      markdown,
+      fields: {
+        act,
+        source: p.source,
+        duration: p.duration,
+        movement: p.movement,
+        voice: p.voice,
+        vagalStates: p.vagalStates || [],
+        categories: p.categories || [],
+        themes,
+        octave_qualities,
+        textures,
+        primaryStep: p.primaryStep,
+      },
+    });
+  }
+
+  if (!cards.length) return null;
+  return {
+    id: 'rites',
+    meta: { name: 'Rites', description: 'Contemplative practices for body and mind' },
+    cards,
+  };
 }
 
 // ── Draw ─────────────────────────────────────────────────────────────────────

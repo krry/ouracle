@@ -41,6 +41,9 @@
 	--space-xl: 8rem;
 	--max-prose: 640px;
 	--max-wide: 1024px;
+
+	/* Topbar height includes status bar safe area so fixed/absolute children can use it */
+	--topbar-h: calc(57px + env(safe-area-inset-top, 0px));
 }
 
 @keyframes accent-breathe {
@@ -87,13 +90,9 @@ html, body {
 	--safe-left: env(safe-area-inset-left, 0px);
 }
 
-/* Apply safe area to body */
-body {
-	padding-top: var(--safe-top);
-	padding-right: var(--safe-right);
-	padding-bottom: var(--safe-bottom);
-	padding-left: var(--safe-left);
-}
+/* Safe areas handled per-component (fixed elements are viewport-relative;
+   body padding would clip them incorrectly). Topbar extends behind the notch;
+   input bar has padding-bottom for home indicator. */
 
 /* Full-screen overlays (modals, dialogs) should also respect safe area */
 [data-fullscreen],

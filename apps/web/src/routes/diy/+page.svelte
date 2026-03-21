@@ -1,3 +1,7 @@
+<svelte:head>
+  <title>D.I.Y. | Ouracle</title>
+</svelte:head>
+
 <script lang="ts">
   import { renderMarkdown } from '$lib/markdown';
 

@@ -3,8 +3,9 @@
 	import { get } from 'svelte/store';
 	import { browser } from '$app/environment';
 	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState } from './stores';
-	import type { CardData, RiteData, TtsVoice, VagalInfo, BeliefInfo, QualityInfo } from './stores';
-	import { enquire, tts, stt } from './api';
+	import type { CardData, RiteData, VagalInfo, BeliefInfo, QualityInfo } from './stores';
+	import { enquire, stt } from './api';
+	import { synthesize, preloadKokoro, KOKORO_VOICES, DEFAULT_VOICE } from './tts-client';
 	import Breath from './Breath.svelte';
 	import OraclePanel from './OraclePanel.svelte';
 	import SeekerStatusPanel from './SeekerStatusPanel.svelte';
@@ -41,6 +42,8 @@
 	let availableDecks = $state<DeckMeta[]>([]);
 	let selectedDecks = $state<Set<string>>(new Set());
 	let drawing = $state(false);
+	let inputEl: HTMLTextAreaElement | undefined;
+	let pendingPracticeContext: string | null = null;
 
 	function handleDeckToggle(id: string, checked: boolean) {
 		const next = new Set(selectedDecks);
@@ -61,6 +64,21 @@
 	function handleAcceptRite(_rite: RiteData) {
 		// Seeker accepted — send an acknowledgement into the conversation
 		send('I accept this rite.');
+	}
+
+	function handleDiscussPractice(card: CardData) {
+		// Mark the card as interpreted so input is unblocked
+		messages.update(m => m.map(msg =>
+			msg.role === 'card' && msg.card?.id === card.id && !msg.interpreted
+				? { ...msg, interpreted: true }
+				: msg
+		));
+		// Stash practice markdown to inject as context on the seeker's first message
+		if (card.markdown) {
+			pendingPracticeContext = `[Practice: ${card.title}]\n${card.markdown}`;
+		}
+		// Focus the input — seeker decides what to ask
+		setTimeout(() => inputEl?.focus(), 50);
 	}
 
 	// ── PTT hint ──────────────────────────────────────────────────────────────
@@ -116,6 +134,8 @@
 				title: raw.title,
 				keywords: raw.keywords ?? [],
 				body: raw.body ?? '',
+				markdown: raw.markdown,
+				fields: raw.fields,
 			};
 			activeCard.set(card);
 			messages.update(m => [...m, { role: 'card', content: '', card, interpreted: false }]);
@@ -154,6 +174,10 @@
 		if ($streaming || guestLocked) return;
 		let skipTag = false;
 
+		// Snapshot and clear practice context — injected into API call only, not the thread
+		const practiceCtx = pendingPracticeContext;
+		pendingPracticeContext = null;
+
 		// Fuzzy covenant readiness detection
 		if ($needsCovenant && !$covenantReady && text.trim()) {
 			const readyPattern = /^(yes|ready|sure|let'?s go|absolutely|of course|okay|ok|yeah|yep|i'?m ready|i accept|let'?s do it|let'?s begin|please|go ahead)/i;
@@ -177,7 +201,8 @@
 		streaming.set(true);
 
 		try {
-			for await (const _ of enquire(token, text, sessionId, (event) => {
+			const apiText = practiceCtx && text.trim() ? `${practiceCtx}\n\n${text}` : text;
+		for await (const _ of enquire(token, apiText, sessionId, (event) => {
 				if (event.type === 'session') {
 					sessionId = event.session_id as string;
 					needsCovenant.set(!!event.needs_covenant);
@@ -203,15 +228,19 @@
                         });
                     }
                 }
-            }else if (event.type === 'break') {
-				// Priestess finished one block — enqueue for TTS, then start fresh message
-				if ($ttsEnabled && audioQueue) {
-					const msgs = get(messages);
-					const last = msgs.at(-1);
-					if (last?.role === 'assistant' && last.content) {
-						audioQueue.enqueue(last.content);
-					}
-				}
+            } else if (event.type === 'sentence_text') {
+                // Complete sentence — append to display and speak
+                const sentence = event.text as string;
+                messages.update(m => {
+                    const last = m[m.length - 1];
+                    if (last?.role === 'assistant') {
+                        last.content += (last.content ? ' ' : '') + sentence;
+                    }
+                    return [...m];
+                });
+                if ($ttsEnabled && audioQueue) audioQueue.enqueue(sentence);
+            } else if (event.type === 'break') {
+                // Start a fresh assistant message block
         // Always add a fresh empty assistant message for the next turn
         messages.update(m => [...m, { role: 'assistant', content: '' }]);
         skipTag = false;
@@ -226,6 +255,8 @@
 						title: raw.title,
 						keywords: raw.keywords ?? [],
 						body: raw.body ?? '',
+						markdown: raw.markdown,
+						fields: raw.fields,
 					};
 					messages.update(m => [...m, { role: 'card', content: '', card: cardData, interpreted: false }]);
 				} else if (event.type === 'rite' && event.rite) {
@@ -273,7 +304,7 @@
 				}
 			});
 		}
-	}, mode)) { /* yield */ }
+	}, mode, $ttsEnabled, get(ttsVoice))) { /* yield */ }
 		} catch (e: unknown) {
 			const msg = e instanceof Error ? e.message : String(e);
 			if (msg.includes('guest_limit')) {
@@ -282,14 +313,6 @@
 		} finally {
 			// Remove any trailing empty assistant message
 			messages.update(m => m.filter((msg, i) => !(msg.role === 'assistant' && msg.content === '' && i === m.length - 1)));
-			// Enqueue last assistant message for TTS (catches streams with no 'break' event)
-			if ($ttsEnabled && audioQueue) {
-				const msgs = get(messages);
-				const last = msgs.at(-1);
-				if (last?.role === 'assistant' && last.content) {
-					audioQueue.enqueue(last.content);
-				}
-			}
 			streaming.set(false);
 		}
 	}
@@ -309,12 +332,12 @@
 		}
 		window.addEventListener('keydown', handleGlobalKey);
 		window.addEventListener('keyup', handleGlobalKey);
+		audioQueue = createAudioQueue((t) => synthesize(t, get(ttsVoice)));
+		preloadKokoro();
 		if (guestMode) {
 			await ensureGuestToken();
-			audioQueue = createAudioQueue((t) => tts(t, guestToken ?? '', get(ttsVoice)));
 		} else if ($authed && $creds) {
 			const c = $creds as Credentials;
-			audioQueue = createAudioQueue((t) => tts(t, c.access_token, get(ttsVoice)));
 			totemSession = new TotemSession(c.access_token, c.seeker_id);
 			totemSession.load().catch(() => {}); // non-blocking, non-fatal
 			// Initialize seeker handle
@@ -469,6 +492,7 @@
 			onDrawCard={drawCard}
 			onInterpretCard={handleInterpretCard}
 			onAcceptRite={handleAcceptRite}
+			onDiscussPractice={handleDiscussPractice}
 			{drawing}
 			streaming={$streaming}
 		/>
@@ -507,6 +531,7 @@
 		</div>
 
 		<textarea
+			bind:this={inputEl}
 			bind:value={input}
 			onkeydown={handleKey}
 			placeholder={guestLocked ? 'sign in to continue…' : 'Type to speak…'}
@@ -522,14 +547,13 @@
 			<select
 				class="voice-select"
 				value={$ttsVoice}
-				onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value as TtsVoice)}
+				onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value)}
 				aria-label="Clea's voice"
 				title="Clea's voice"
 			>
-				<option value="elf">Elf</option>
-				<option value="poet">Poet</option>
-				<option value="alien">Alien</option>
-				<option value="president">President</option>
+				{#each KOKORO_VOICES as v}
+					<option value={v.id}>{v.label}</option>
+				{/each}
 			</select>
 		</div>
 	</div>
@@ -694,7 +718,7 @@
 	display: flex;
 	align-items: flex-end;
 	gap: 1rem;
-	padding: 0.75rem 1rem;
+	padding: 0.75rem 1rem calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
 	border-top: 1px solid var(--border);
 	background: var(--bg);
 }

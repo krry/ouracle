@@ -78,6 +78,7 @@
 </script>
 
 <svelte:head>
+  <title>Aspire | Ouracle</title>
   <style>html, body { height: 100%; overflow: hidden; }</style>
 </svelte:head>
 

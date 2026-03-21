@@ -1,13 +1,14 @@
 {
   "name": "meat-api",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "start": "bun index.js",
     "dev": "bun --watch index.js",
     "test": "bun test.js",
     "sync-decks": "bun scripts/sync-decks.js",
-    "download-ambient": "bun scripts/download-ambient.js"
+    "download-ambient": "bun scripts/download-ambient.js",
+    "sync-rites": "bun scripts/sync-rites.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",

@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     sveltekit(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'],
       manifest: {
         name: 'Ouracle',
@@ -33,9 +33,6 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         navigateFallback: '/index.html',
         navigationPreload: true,
-        // Ensure new SW activates immediately without waiting for clients to close
-        skipWaiting: true,
-        clientsClaim: true,
         // Cache-busting: use revisioned static assets from Vite manifest
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
@@ -45,20 +42,10 @@ export default defineConfig({
             method: 'GET',
             options: {
               cacheName: 'ouracle-api',
-              networkTimeoutSeconds: 10,
-              // No caching for API in rapid dev, but we could add short TTL in prod
               ...(process.env.NODE_ENV === 'production' && {
                 expiration: {
                   maxEntries: 100,
                   maxAgeSeconds: 5 * 60 // 5 minutes
-                },
-                cacheKeyWillBeUsed: async ({ request }: { request: Request }) => {
-                  // Add timestamp-based busting for dev-like query params
-                  const url = new URL(request.url);
-                  if (url.searchParams.get('_nocache') || url.searchParams.get('_t')) {
-                    return `${request.url}&_buster=${Date.now()}`;
-                  }
-                  return request.url;
                 }
               })
             }
