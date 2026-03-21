@@ -299,7 +299,7 @@
 				}
 			});
 		}
-	}, mode)) { /* yield */ }
+	}, mode, $ttsEnabled, get(ttsVoice))) { /* yield */ }
 		} catch (e: unknown) {
 			const msg = e instanceof Error ? e.message : String(e);
 			if (msg.includes('guest_limit')) {
