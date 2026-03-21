@@ -1,3 +1,7 @@
+<svelte:head>
+  <title>ripl | Ouracle</title>
+</svelte:head>
+
 <div class="page">
   <header>
     <h1>ripl</h1>

@@ -37,6 +37,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>Ouracle</title>
+</svelte:head>
+
 <div class="app">
   <TopBar {drawerOpen} ontoggle={toggleDrawer} />
 

@@ -227,7 +227,17 @@
                         });
                     }
                 }
-            }else if (event.type === 'break') {
+            } else if (event.type === 'sentence_text') {
+                // Static text path (greetings, questions) — append full sentence
+                const sentence = event.text as string;
+                messages.update(m => {
+                    const last = m[m.length - 1];
+                    if (last?.role === 'assistant') {
+                        last.content += (last.content ? ' ' : '') + sentence;
+                    }
+                    return [...m];
+                });
+            } else if (event.type === 'break') {
 				// Priestess finished one block — enqueue for TTS, then start fresh message
 				if ($ttsEnabled && audioQueue) {
 					const msgs = get(messages);

@@ -1,3 +1,7 @@
+<svelte:head>
+  <title>Aspire | Ouracle</title>
+</svelte:head>
+
 <script lang="ts">
   import { onMount } from 'svelte';
   import { authed, creds, guestTurns, covenantReady, needsCovenant } from '$lib/stores';

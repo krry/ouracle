@@ -1,3 +1,7 @@
+<svelte:head>
+  <title>Clea | Ouracle</title>
+</svelte:head>
+
 <div class="page">
   <header>
     <h1 class="wordmark">Clea</h1>
