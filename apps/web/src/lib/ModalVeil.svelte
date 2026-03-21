@@ -1,14 +1,20 @@
 <script lang="ts">
-  import { createEventDispatcher, onDestroy } from 'svelte';
+  import { untrack } from 'svelte';
 
-  export let active: boolean;
-  export let component: any;
-  export let close: (() => void) | undefined = undefined;
-
-  const dispatch = createEventDispatcher();
+  let {
+    active,
+    component,
+    close = undefined,
+    ...restProps
+  }: {
+    active: boolean;
+    component: any;
+    close?: (() => void) | undefined;
+    [key: string]: unknown;
+  } = $props();
 
   const BACKDROP_MS = 800;
-  const CONTENT_MS = 300;
+  const CONTENT_MS  = 300;
 
   type Phase =
     | 'hidden'
@@ -18,15 +24,12 @@
     | 'content-exiting'
     | 'backdrop-exiting';
 
-  let phase: Phase = 'hidden';
-  let currentComponent = component;
+  let phase: Phase          = $state<Phase>('hidden');
+  let currentComponent: any = $state<any>(untrack(() => component));
   let timer: ReturnType<typeof setTimeout> | null = null;
 
   function clearTimer() {
-    if (timer !== null) {
-      clearTimeout(timer);
-      timer = null;
-    }
+    if (timer !== null) { clearTimeout(timer); timer = null; }
   }
 
   function startEnter() {
@@ -34,9 +37,7 @@
     phase = 'backdrop-entering';
     timer = setTimeout(() => {
       phase = 'content-entering';
-      timer = setTimeout(() => {
-        phase = 'visible';
-      }, CONTENT_MS);
+      timer = setTimeout(() => { phase = 'visible'; }, CONTENT_MS);
     }, BACKDROP_MS);
   }
 
@@ -45,51 +46,58 @@
     phase = 'content-exiting';
     timer = setTimeout(() => {
       phase = 'backdrop-exiting';
-      timer = setTimeout(() => {
-        phase = 'hidden';
-        dispatch('exited');
-      }, BACKDROP_MS);
+      timer = setTimeout(() => { phase = 'hidden'; }, BACKDROP_MS);
     }, CONTENT_MS);
   }
 
-  $: if (active) {
-    if (phase === 'hidden') {
-      startEnter();
-    } else if (phase === 'content-exiting' || phase === 'backdrop-exiting') {
-      clearTimer();
-      startEnter();
+  // React to `active` only — untrack `phase` so phase changes don't re-run this effect.
+  $effect(() => {
+    if (active) {
+      const p = untrack(() => phase);
+      if (p === 'hidden') {
+        startEnter();
+      } else if (p === 'content-exiting' || p === 'backdrop-exiting') {
+        clearTimer();
+        startEnter();
+      }
+    } else {
+      const p = untrack(() => phase);
+      if (p !== 'hidden') startExit();
     }
-  } else if (phase !== 'hidden') {
-    startExit();
-  }
+  });
 
-  $: if (active && component !== currentComponent) {
-    if (phase === 'visible' || phase === 'content-entering') {
+  // React to `component` only — untrack everything else so phase changes don't re-run
+  // this effect and cancel in-flight swaps (the Svelte 4 $: interference bug).
+  $effect(() => {
+    const next = component;
+    if (!active) return;
+    if (next === untrack(() => currentComponent)) return;
+
+    const p = untrack(() => phase);
+    if (p === 'visible' || p === 'content-entering') {
       clearTimer();
       phase = 'content-exiting';
       timer = setTimeout(() => {
-        currentComponent = component;
+        currentComponent = next;
         phase = 'content-entering';
-        timer = setTimeout(() => {
-          phase = 'visible';
-        }, CONTENT_MS);
+        timer = setTimeout(() => { phase = 'visible'; }, CONTENT_MS);
       }, CONTENT_MS);
-    } else if (phase === 'backdrop-entering') {
-      currentComponent = component;
+    } else if (p === 'backdrop-entering') {
+      currentComponent = next;
     }
-  }
+  });
 
-  onDestroy(clearTimer);
+  // Cleanup timers when component is destroyed
+  $effect(() => () => clearTimer());
 
-  $: backdropClass = phase === 'backdrop-entering'
-    ? 'backdrop-enter'
-    : phase === 'backdrop-exiting'
-    ? 'backdrop-exit'
-    : phase === 'hidden'
-    ? 'hidden'
-    : 'visible';
+  const backdropClass = $derived(
+    phase === 'backdrop-entering' ? 'backdrop-enter'
+    : phase === 'backdrop-exiting'  ? 'backdrop-exit'
+    : phase === 'hidden'            ? 'hidden'
+    : 'visible'
+  );
 
-  $: contentVisible = phase === 'content-entering' || phase === 'visible';
+  const contentVisible = $derived(phase === 'content-entering' || phase === 'visible');
 </script>
 
 <div class="veil-wrapper">
@@ -97,9 +105,18 @@
     class="backdrop {backdropClass}"
     onclick={close ?? undefined}
   ></div>
-  <div class="content" class:visible={contentVisible} onclick={(e) => e.stopPropagation()} onkeydown={(e) => { if (e.key === "Escape" && close) close(); }} role="dialog" aria-modal="true" tabindex="-1">
+  <div
+    class="content"
+    class:visible={contentVisible}
+    onclick={(e) => e.stopPropagation()}
+    onkeydown={(e) => { if (e.key === 'Escape' && close) close(); }}
+    role="dialog"
+    aria-modal="true"
+    tabindex="-1"
+  >
     {#if phase !== 'hidden' && currentComponent}
-      <svelte:component this={currentComponent} {...$$restProps} />
+      {@const Modal = currentComponent}
+      <Modal {...restProps} />
     {/if}
   </div>
 </div>
