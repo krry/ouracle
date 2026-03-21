@@ -367,11 +367,20 @@ canvas {
   position: relative;
   text-align: center;
   max-width: var(--max-prose);
-  padding: var(--space-md);
+  padding: 2.5rem 2.75rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-sm);
+  /* Liquid glass — blurs nebula behind text, provides contrast in both modes */
+  background: color-mix(in srgb, var(--bg) 52%, transparent);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border-radius: 1.75rem;
+  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+  box-shadow:
+    0 8px 40px color-mix(in srgb, black 28%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
 }
 .wordmark {
   font-family: var(--font-display);
@@ -380,12 +389,14 @@ canvas {
   letter-spacing: 0.3em;
   color: var(--accent);
   line-height: 1;
+  /* Soft glow ties the wordmark into the nebula */
+  text-shadow: 0 0 48px color-mix(in srgb, var(--accent) 55%, transparent);
 }
 .tagline {
   font-family: var(--font-display);
   font-size: 1.2rem;
   font-style: italic;
-  color: var(--muted);
+  color: var(--text);
   letter-spacing: 0.1em;
 }
 .body {
@@ -396,17 +407,24 @@ canvas {
 }
 .enter {
   margin-top: var(--space-sm);
-  border: 1px solid var(--accent);
-  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 2rem;
   color: var(--accent);
   font-family: var(--font-sans);
   font-size: 0.85rem;
   letter-spacing: 0.2em;
-  padding: 0.6rem 2rem;
+  padding: 0.65rem 2.25rem;
   text-decoration: none;
   transition: all 0.2s;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
-.enter:hover { background: var(--accent); color: var(--bg); }
+.enter:hover {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
 .about {
   display: grid;
   grid-template-columns: 1fr 1fr;
