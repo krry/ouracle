@@ -178,6 +178,7 @@
 	async function send(text: string, mode?: string) {
 		if ($streaming || guestLocked) return;
 		let skipTag = false;
+		let messageHasTokens = false; // true once token events arrive for current message
 
 		// Snapshot and clear practice context — injected into API call only, not the thread
 		const practiceCtx = pendingPracticeContext;
@@ -214,6 +215,7 @@
 					continueOffered.set(false);
             } else if (event.type === 'token') {
                 const tokenText = event.text as string;
+                messageHasTokens = true;
                 if (skipTag) {
                     if (tokenText.includes(']')) {
                         skipTag = false;
@@ -234,21 +236,25 @@
                     }
                 }
             } else if (event.type === 'sentence_text') {
-                // Complete sentence — append to display and speak
+                // Complete sentence — speak it, and only render if no token events
+                // have arrived (i.e. static content like greetings, not streamed LLM output)
                 const sentence = event.text as string;
-                messages.update(m => {
-                    const last = m[m.length - 1];
-                    if (last?.role === 'assistant') {
-                        last.content += (last.content ? ' ' : '') + sentence;
-                    }
-                    return [...m];
-                });
+                if (!messageHasTokens) {
+                    messages.update(m => {
+                        const last = m[m.length - 1];
+                        if (last?.role === 'assistant') {
+                            last.content += (last.content ? ' ' : '') + sentence;
+                        }
+                        return [...m];
+                    });
+                }
                 if ($ttsEnabled && audioQueue) audioQueue.enqueue(sentence);
             } else if (event.type === 'break') {
                 // Start a fresh assistant message block
         // Always add a fresh empty assistant message for the next turn
         messages.update(m => [...m, { role: 'assistant', content: '' }]);
         skipTag = false;
+        messageHasTokens = false;
 			} else if (event.type === 'draw' && event.card) {
 					// Clea triggered a contextual card draw server-side
 					const raw = event.card as any;
@@ -725,7 +731,8 @@
 	display: flex;
 	align-items: flex-end;
 	gap: 1rem;
-	padding: 0.75rem 1rem calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+	padding: 0.75rem 1rem;
+	padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
 	border-top: 1px solid var(--border);
 	background: var(--bg);
 }
