@@ -7,7 +7,8 @@
   import AmbientControls from '$lib/AmbientControls.svelte';
   import SeekerStatusPanel from '$lib/SeekerStatusPanel.svelte';
   import { ttsEnabled, ttsVoice, creds, authed, seekerState } from '$lib/stores';
-  import type { Credentials, TtsVoice } from '$lib/stores';
+  import type { Credentials } from '$lib/stores';
+  import { KOKORO_VOICES } from '$lib/tts-client';
   import { signOut } from '$lib/auth';
 
   inject();
@@ -89,13 +90,12 @@
         <select
           class="dm-voice-select"
           value={$ttsVoice}
-          onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value as TtsVoice)}
+          onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value)}
           aria-label="Clea's voice"
         >
-          <option value="elf">Elf</option>
-          <option value="poet">Poet</option>
-          <option value="alien">Alien</option>
-          <option value="president">President</option>
+          {#each KOKORO_VOICES as v}
+            <option value={v.id}>{v.label}</option>
+          {/each}
         </select>
       </div>
 

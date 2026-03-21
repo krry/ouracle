@@ -3,8 +3,9 @@
 	import { get } from 'svelte/store';
 	import { browser } from '$app/environment';
 	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState } from './stores';
-	import type { CardData, RiteData, TtsVoice, VagalInfo, BeliefInfo, QualityInfo } from './stores';
-	import { enquire, tts, stt } from './api';
+	import type { CardData, RiteData, VagalInfo, BeliefInfo, QualityInfo } from './stores';
+	import { enquire, stt } from './api';
+	import { synthesize, preloadKokoro, KOKORO_VOICES, DEFAULT_VOICE } from './tts-client';
 	import Breath from './Breath.svelte';
 	import OraclePanel from './OraclePanel.svelte';
 	import SeekerStatusPanel from './SeekerStatusPanel.svelte';
@@ -228,7 +229,7 @@
                     }
                 }
             } else if (event.type === 'sentence_text') {
-                // Static text path (greetings, questions) — append full sentence
+                // Complete sentence — append to display and speak
                 const sentence = event.text as string;
                 messages.update(m => {
                     const last = m[m.length - 1];
@@ -237,15 +238,9 @@
                     }
                     return [...m];
                 });
+                if ($ttsEnabled && audioQueue) audioQueue.enqueue(sentence);
             } else if (event.type === 'break') {
-				// Priestess finished one block — enqueue for TTS, then start fresh message
-				if ($ttsEnabled && audioQueue) {
-					const msgs = get(messages);
-					const last = msgs.at(-1);
-					if (last?.role === 'assistant' && last.content) {
-						audioQueue.enqueue(last.content);
-					}
-				}
+                // Start a fresh assistant message block
         // Always add a fresh empty assistant message for the next turn
         messages.update(m => [...m, { role: 'assistant', content: '' }]);
         skipTag = false;
@@ -318,14 +313,6 @@
 		} finally {
 			// Remove any trailing empty assistant message
 			messages.update(m => m.filter((msg, i) => !(msg.role === 'assistant' && msg.content === '' && i === m.length - 1)));
-			// Enqueue last assistant message for TTS (catches streams with no 'break' event)
-			if ($ttsEnabled && audioQueue) {
-				const msgs = get(messages);
-				const last = msgs.at(-1);
-				if (last?.role === 'assistant' && last.content) {
-					audioQueue.enqueue(last.content);
-				}
-			}
 			streaming.set(false);
 		}
 	}
@@ -345,12 +332,12 @@
 		}
 		window.addEventListener('keydown', handleGlobalKey);
 		window.addEventListener('keyup', handleGlobalKey);
+		audioQueue = createAudioQueue((t) => synthesize(t, get(ttsVoice)));
+		preloadKokoro();
 		if (guestMode) {
 			await ensureGuestToken();
-			audioQueue = createAudioQueue((t) => tts(t, guestToken ?? '', get(ttsVoice)));
 		} else if ($authed && $creds) {
 			const c = $creds as Credentials;
-			audioQueue = createAudioQueue((t) => tts(t, c.access_token, get(ttsVoice)));
 			totemSession = new TotemSession(c.access_token, c.seeker_id);
 			totemSession.load().catch(() => {}); // non-blocking, non-fatal
 			// Initialize seeker handle
@@ -560,14 +547,13 @@
 			<select
 				class="voice-select"
 				value={$ttsVoice}
-				onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value as TtsVoice)}
+				onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value)}
 				aria-label="Clea's voice"
 				title="Clea's voice"
 			>
-				<option value="elf">Elf</option>
-				<option value="poet">Poet</option>
-				<option value="alien">Alien</option>
-				<option value="president">President</option>
+				{#each KOKORO_VOICES as v}
+					<option value={v.id}>{v.label}</option>
+				{/each}
 			</select>
 		</div>
 	</div>

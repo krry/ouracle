@@ -125,11 +125,11 @@ function ttsStore() {
 }
 export const ttsEnabled = ttsStore();
 
-export type TtsVoice = 'elf' | 'poet' | 'alien' | 'president';
+export type TtsVoice = string; // Kokoro voice id, e.g. 'af_bella'
 
 function ttsVoiceStore() {
-	const stored = browser ? (localStorage.getItem('clea_tts_voice') as TtsVoice | null) : null;
-	const { subscribe, set } = writable<TtsVoice>(stored ?? 'elf');
+	const stored = browser ? localStorage.getItem('clea_tts_voice') : null;
+	const { subscribe, set } = writable<TtsVoice>(stored ?? 'af_bella');
 	return {
 		subscribe,
 		set(v: TtsVoice) {
