@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     sveltekit(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'],
       manifest: {
         name: 'Ouracle',
@@ -33,9 +33,6 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         navigateFallback: '/index.html',
         navigationPreload: true,
-        // Ensure new SW activates immediately without waiting for clients to close
-        skipWaiting: true,
-        clientsClaim: true,
         // Cache-busting: use revisioned static assets from Vite manifest
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [

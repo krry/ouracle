@@ -40,11 +40,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.6rem 1rem;
+  /* top padding absorbs the status bar; side padding stays constant */
+  padding: calc(env(safe-area-inset-top, 0px) + 0.6rem) 1rem 0.6rem;
   border-bottom: 1px solid var(--border);
   background: var(--bg);
   position: sticky;
-  top: var(--safe-top, 0px);
+  top: 0;
   z-index: 30;
   height: var(--topbar-h, 57px);
   box-sizing: border-box;

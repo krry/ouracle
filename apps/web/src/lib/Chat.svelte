@@ -732,7 +732,7 @@
 	display: flex;
 	align-items: flex-end;
 	gap: 1rem;
-	padding: 0.75rem 1rem;
+	padding: 0.75rem 1rem calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
 	border-top: 1px solid var(--border);
 	background: var(--bg);
 }
