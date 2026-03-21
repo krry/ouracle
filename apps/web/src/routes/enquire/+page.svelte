@@ -1,7 +1,3 @@
-<svelte:head>
-  <title>Aspire | Ouracle</title>
-</svelte:head>
-
 <script lang="ts">
   import { onMount } from 'svelte';
   import { authed, creds, guestTurns, covenantReady, needsCovenant } from '$lib/stores';
@@ -82,6 +78,7 @@
 </script>
 
 <svelte:head>
+  <title>Aspire | Ouracle</title>
   <style>html, body { height: 100%; overflow: hidden; }</style>
 </svelte:head>
 
