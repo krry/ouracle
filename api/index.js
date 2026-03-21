@@ -1095,6 +1095,7 @@ class SentenceAudioStreamer {
 
   // For incremental LLM token stream
   feedToken(token) {
+    this.emit({ type: 'token', text: token }); // client renders tokens in real-time
     this.buffer += token;
     const sentences = splitSentences(this.buffer);
     if (sentences.length > 1) {
