@@ -9,6 +9,7 @@
 		onDrawCard,
 		onInterpretCard,
 		onAcceptRite,
+		onDiscussPractice,
 		drawing = false,
 		streaming = false,
 	}: {
@@ -18,29 +19,46 @@
 		onDrawCard: () => void;
 		onInterpretCard: (card: CardData) => void;
 		onAcceptRite: (rite: RiteData) => void;
+		onDiscussPractice: (card: CardData) => void;
 		drawing?: boolean;
 		streaming?: boolean;
 	} = $props();
 
 	let deckPickerOpen = $state(false);
+	let showPractice = $state(false);
 
 	const mode = $derived(
-		$activeRite   ? 'rite'    :
-		$activeCard   ? 'card'    :
-		$pendingRite  ? 'pending' :
+		$activeRite                 ? 'rite'     :
+		showPractice && $activeCard ? 'practice' :
+		$activeCard                 ? 'card'     :
+		$pendingRite                ? 'pending'  :
 		'idle'
 	);
 
 	const STAGES: Array<'offered' | 'prescribed' | 'completed'> = ['offered', 'prescribed', 'completed'];
 
-	function dismissCard() { activeCard.set(null); }
+	function dismissCard() { showPractice = false; activeCard.set(null); }
 	function dismissRite() { activeRite.set(null); }
 
 	function handleInterpret() {
-		if ($activeCard) {
+		if (!$activeCard) return;
+		if ($activeCard.deck === 'rites') {
+			showPractice = true;
+		} else {
 			onInterpretCard($activeCard);
 			activeCard.set(null);
 		}
+	}
+
+	function backFromPractice() {
+		showPractice = false;
+	}
+
+	function handleDiscuss() {
+		if (!$activeCard) return;
+		onDiscussPractice($activeCard);
+		showPractice = false;
+		activeCard.set(null);
 	}
 
 	function handleAccept() {
@@ -51,9 +69,15 @@
 	}
 
 	function handleDrawAgain() {
+		showPractice = false;
 		activeCard.set(null);
 		activeRite.set(null);
 		onDrawCard();
+	}
+
+	// Helper to read practice fields safely
+	function field<T>(key: string, fallback: T): T {
+		return ($activeCard?.fields?.[key] as T) ?? fallback;
 	}
 </script>
 
@@ -122,6 +146,64 @@
 				</button>
 				<button class="action-secondary" onclick={handleDrawAgain} disabled={drawing || streaming}>
 					Draw Again
+				</button>
+			</div>
+		</div>
+
+	{:else if mode === 'practice' && $activeCard}
+		<!-- ── Full practice view (rites) ── -->
+		<div class="panel-section practice-section">
+			<div class="panel-header">
+				<span class="panel-label">◈ rites</span>
+				<button class="dismiss-btn" onclick={backFromPractice} aria-label="Back to card">←</button>
+			</div>
+
+			<div class="practice-content">
+				<div class="rite-name">{$activeCard.title}</div>
+
+				{#if field('act', '')}
+					<div class="rite-act">{field('act', '')}</div>
+				{/if}
+
+				{#if field('source', '')}
+					<div class="rite-invocation">{field('source', '')}</div>
+				{/if}
+
+				{#if (field('vagalStates', []) as string[]).length}
+					<div class="practice-meta">
+						{#each field('vagalStates', []) as string[] as state}
+							<span class="practice-chip">{state}</span>
+						{/each}
+					</div>
+				{/if}
+
+				{#if (field('textures', []) as string[]).length}
+					<ul class="rite-textures">
+						{#each field('textures', []) as string[] as t}
+							<li>{t}</li>
+						{/each}
+					</ul>
+				{/if}
+
+				<div class="practice-meta">
+					{#if field('duration', '')}
+						<span class="practice-chip">{field('duration', '')}</span>
+					{/if}
+					{#if field('movement', '') && (field('movement', '') as string) !== 'none'}
+						<span class="practice-chip">movement: {field('movement', '')}</span>
+					{/if}
+					{#if field('voice', '') && (field('voice', '') as string) !== 'none'}
+						<span class="practice-chip">voice: {field('voice', '')}</span>
+					{/if}
+				</div>
+			</div>
+
+			<div class="panel-actions">
+				<button class="action-primary" onclick={handleDiscuss} disabled={streaming}>
+					Discuss
+				</button>
+				<button class="action-secondary" onclick={backFromPractice}>
+					← Back
 				</button>
 			</div>
 		</div>
@@ -337,6 +419,32 @@
 	margin: 0;
 	max-height: 220px;
 	overflow-y: auto;
+}
+
+/* ── Practice section ───────────────────────────────────────────────────── */
+.practice-content {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	overflow-y: auto;
+	max-height: 60vh;
+}
+
+.practice-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.3rem;
+}
+
+.practice-chip {
+	font-family: var(--font-mono);
+	font-size: 0.6rem;
+	letter-spacing: 0.08em;
+	color: var(--muted);
+	border: 1px solid var(--border);
+	border-radius: 2px;
+	padding: 0.15rem 0.4rem;
+	opacity: 0.75;
 }
 
 /* ── Rite section ───────────────────────────────────────────────────────── */

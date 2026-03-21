@@ -41,6 +41,8 @@
 	let availableDecks = $state<DeckMeta[]>([]);
 	let selectedDecks = $state<Set<string>>(new Set());
 	let drawing = $state(false);
+	let inputEl: HTMLTextAreaElement | undefined;
+	let pendingPracticeContext: string | null = null;
 
 	function handleDeckToggle(id: string, checked: boolean) {
 		const next = new Set(selectedDecks);
@@ -61,6 +63,21 @@
 	function handleAcceptRite(_rite: RiteData) {
 		// Seeker accepted — send an acknowledgement into the conversation
 		send('I accept this rite.');
+	}
+
+	function handleDiscussPractice(card: CardData) {
+		// Mark the card as interpreted so input is unblocked
+		messages.update(m => m.map(msg =>
+			msg.role === 'card' && msg.card?.id === card.id && !msg.interpreted
+				? { ...msg, interpreted: true }
+				: msg
+		));
+		// Stash practice markdown to inject as context on the seeker's first message
+		if (card.markdown) {
+			pendingPracticeContext = `[Practice: ${card.title}]\n${card.markdown}`;
+		}
+		// Focus the input — seeker decides what to ask
+		setTimeout(() => inputEl?.focus(), 50);
 	}
 
 	// ── PTT hint ──────────────────────────────────────────────────────────────
@@ -116,6 +133,8 @@
 				title: raw.title,
 				keywords: raw.keywords ?? [],
 				body: raw.body ?? '',
+				markdown: raw.markdown,
+				fields: raw.fields,
 			};
 			activeCard.set(card);
 			messages.update(m => [...m, { role: 'card', content: '', card, interpreted: false }]);
@@ -154,6 +173,10 @@
 		if ($streaming || guestLocked) return;
 		let skipTag = false;
 
+		// Snapshot and clear practice context — injected into API call only, not the thread
+		const practiceCtx = pendingPracticeContext;
+		pendingPracticeContext = null;
+
 		// Fuzzy covenant readiness detection
 		if ($needsCovenant && !$covenantReady && text.trim()) {
 			const readyPattern = /^(yes|ready|sure|let'?s go|absolutely|of course|okay|ok|yeah|yep|i'?m ready|i accept|let'?s do it|let'?s begin|please|go ahead)/i;
@@ -177,7 +200,8 @@
 		streaming.set(true);
 
 		try {
-			for await (const _ of enquire(token, text, sessionId, (event) => {
+			const apiText = practiceCtx && text.trim() ? `${practiceCtx}\n\n${text}` : text;
+		for await (const _ of enquire(token, apiText, sessionId, (event) => {
 				if (event.type === 'session') {
 					sessionId = event.session_id as string;
 					needsCovenant.set(!!event.needs_covenant);
@@ -226,6 +250,8 @@
 						title: raw.title,
 						keywords: raw.keywords ?? [],
 						body: raw.body ?? '',
+						markdown: raw.markdown,
+						fields: raw.fields,
 					};
 					messages.update(m => [...m, { role: 'card', content: '', card: cardData, interpreted: false }]);
 				} else if (event.type === 'rite' && event.rite) {
@@ -469,6 +495,7 @@
 			onDrawCard={drawCard}
 			onInterpretCard={handleInterpretCard}
 			onAcceptRite={handleAcceptRite}
+			onDiscussPractice={handleDiscussPractice}
 			{drawing}
 			streaming={$streaming}
 		/>
@@ -507,6 +534,7 @@
 		</div>
 
 		<textarea
+			bind:this={inputEl}
 			bind:value={input}
 			onkeydown={handleKey}
 			placeholder={guestLocked ? 'sign in to continue…' : 'Type to speak…'}
