@@ -6,6 +6,15 @@
   const MAX_HZ = 100;
   const LOG_RANGE = Math.log(MAX_HZ / MIN_HZ);
 
+  // φ-derived preset frequencies — tapping the label cycles through these
+  const PRESETS = [
+    { hz: 1.618,  label: '1.618 Hz δ' },
+    { hz: 4.236,  label: '4.236 Hz θ' },
+    { hz: 6.180,  label: '6.180 Hz α' },
+    { hz: 16.180, label: '16.18 Hz β' },
+    { hz: 61.803, label: '61.80 Hz γ' },
+  ] as const;
+
   function sliderToHz(pos: number): number {
     return MIN_HZ * Math.exp((pos / 1000) * LOG_RANGE);
   }
@@ -22,8 +31,23 @@
     return 'γ';
   }
 
-  const sliderPos  = $derived(hzToSlider($binauralBeat));
-  const beatLabel  = $derived(`${band($binauralBeat)} · ${$binauralBeat < 10 ? $binauralBeat.toFixed(1) : Math.round($binauralBeat)} Hz`);
+  const sliderPos = $derived(hzToSlider($binauralBeat));
+
+  // Show preset label when on a preset, otherwise generic band · Hz format
+  const beatLabel = $derived(() => {
+    const preset = PRESETS.find(p => Math.abs(p.hz - $binauralBeat) < 0.01);
+    return preset?.label ?? `${band($binauralBeat)} · ${$binauralBeat < 10 ? $binauralBeat.toFixed(1) : Math.round($binauralBeat)} Hz`;
+  });
+
+  function cyclePreset() {
+    const idx = PRESETS.findIndex(p => Math.abs(p.hz - $binauralBeat) < 0.01);
+    const next = PRESETS[(idx + 1) % PRESETS.length];
+    if ($ambientRunning && $ambientScene === 'binaural') {
+      updateBinauralBeat(next.hz);
+    } else {
+      binauralBeat.set(next.hz);
+    }
+  }
 
   function onSlide(e: Event) {
     const hz = Math.round(sliderToHz(Number((e.target as HTMLInputElement).value)) * 10) / 10;
@@ -52,7 +76,7 @@
 
   {#if $ambientScene === 'binaural'}
     <div class="beat-ctrl">
-      <span class="beat-label">{beatLabel}</span>
+      <button class="beat-label beat-cycle" onclick={cyclePreset} title="cycle preset frequency">{beatLabel()}</button>
       <input
         type="range"
         class="beat-slider"
@@ -141,4 +165,15 @@
   letter-spacing: 0.06em;
   white-space: nowrap;
 }
+
+.beat-cycle {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color 0.15s;
+  text-align: left;
+}
+.beat-cycle:hover { color: var(--accent); }
 </style>

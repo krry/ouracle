@@ -88,6 +88,11 @@
 
 	const BASE_URL = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
 
+	// Warm up Kokoro when TTS is toggled on (deferred to avoid eager memory use on mobile)
+	$effect(() => {
+		if ($ttsEnabled) preloadKokoro();
+	});
+
 	// Persist conversation to localStorage
 	$effect(() => {
 	  if (browser) {
@@ -339,7 +344,9 @@
 		window.addEventListener('keydown', handleGlobalKey);
 		window.addEventListener('keyup', handleGlobalKey);
 		audioQueue = createAudioQueue((t) => synthesize(t, get(ttsVoice)));
-		preloadKokoro();
+		// Only preload the 100 MB Kokoro model when TTS is already on.
+		// Unconditional preload on mobile causes memory pressure → browser tab discard → reload loop.
+		if (get(ttsEnabled)) preloadKokoro();
 		if (guestMode) {
 			await ensureGuestToken();
 		} else if ($authed && $creds) {

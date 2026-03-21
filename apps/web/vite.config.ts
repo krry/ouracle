@@ -30,11 +30,15 @@ export default defineConfig({
         ]
       },
       workbox: {
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB — kokoro-js bundle exceeds 2MB default
+        // Raise precache chunk limit — kokoro-js and Three.js exceed the 2 MiB default.
+        // Set high enough that adding new large deps won't break the build silently.
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         navigateFallback: '/index.html',
-        navigationPreload: true,
-        // Cache-busting: use revisioned static assets from Vite manifest
+        // Prevent the navigate fallback from swallowing auth callback routes.
+        navigateFallbackDenylist: [/^\/api\//],
+        // navigationPreload removed — it races the SW cache lookup and can cause
+        // the wrong response to be served on iOS PWA, triggering spurious reloads.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
