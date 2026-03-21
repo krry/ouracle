@@ -29,7 +29,8 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 import { makeLlmClient } from './llm-client.js';
 import { CLEA_SYSTEM_PROMPT } from './clea-prompt.js';
 import { randomUUID } from 'crypto';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, mkdirSync, unlink } from 'fs';
+import { execSync } from 'child_process';
 const pkgPath = new URL('package.json', import.meta.url);
 const { version } = JSON.parse(readFileSync(pkgPath));
 import {
@@ -147,14 +148,18 @@ app.use(rateLimitMiddleware);
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
-// Resolve RITES corpus location (Railway & local)
-const isRailway = process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_NAME;
-const RITES_ROOT = isRailway
-  ? '/app/rites'
-  : join(__dirname, '..', 'rites');
+// Resolve RITES corpus location (works both locally and on Railway)
+const RITES_RELATIVE = join(__dirname, '..', 'rites');
+const RITES_RAILWAY = '/app/rites';
+// Choose the path that actually exists
+const RITES_ROOT = existsSync(RITES_RELATIVE) ? RITES_RELATIVE : RITES_RAILWAY;
 const RITES_DIR = join(RITES_ROOT, 'dist');
 
-console.log('[RITES] RITES_ROOT:', RITES_ROOT, 'RITES_DIR:', RITES_DIR);
+console.log('[RITES] __dirname:', __dirname);
+console.log('[RITES] RITES_RELATIVE:', RITES_RELATIVE);
+console.log('[RITES] RITES_RAILWAY:', RITES_RAILWAY);
+console.log('[RITES] RITES_ROOT (chosen):', RITES_ROOT);
+console.log('[RITES] RITES_DIR:', RITES_DIR);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 app.use('/ambient', express.static(join(__dirname, 'data/ambient'), {
   maxAge: '7d',
@@ -1647,18 +1652,9 @@ app.post('/stt', authenticateOrGuest, async (req, res) => {
 });
 
 
-// ── Self-healing: ensure RITES corpus exists on Railway/Nixpacks ─────────
-import { existsSync, mkdirSync } from 'fs';
-import { join } from 'path';
-import { execSync } from 'child_process';
-import { pipeline } from 'stream/promises';
-import { createWriteStream, unlink } from 'fs';
-import https from 'https';
-import { pipeline as pipe } from 'stream';
-import { createGunzip } from 'zlib';
 
 function ensureRitesCorpus() {
-  console.log("[DEBUG] ensureRitesCorpus() called. RITES_ROOT:", RITES_ROOT, "RITES_DIR:", RITES_DIR || join(RITES_ROOT, \'dist\'));
+  console.log("[DEBUG] ensureRitesCorpus() called. RITES_ROOT:", RITES_ROOT, "RITES_DIR:", RITES_DIR || join(RITES_ROOT, 'dist'));
   const INDEX = join(RITES_ROOT, 'index.json');
   try {
     if (!existsSync(join(RITES_DIR, 'stepstates.json'))) {
