@@ -148,19 +148,9 @@ app.use(rateLimitMiddleware);
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
-// Resolve RITES corpus location (works both locally and on Railway)
-const RITES_RELATIVE = join(__dirname, '..', 'rites');
-const RITES_RAILWAY = '/app/rites';
-// Choose the path that actually exists
-const RITES_ROOT = existsSync(RITES_RELATIVE) ? RITES_RELATIVE : RITES_RAILWAY;
-const RITES_DIR = join(RITES_ROOT, 'dist');
-
-console.log('[RITES] __dirname:', __dirname);
-console.log('[RITES] RITES_RELATIVE:', RITES_RELATIVE);
-console.log('[RITES] RITES_RAILWAY:', RITES_RAILWAY);
-console.log('[RITES] RITES_ROOT (chosen):', RITES_ROOT);
-console.log('[RITES] RITES_DIR:', RITES_DIR);
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const RITES_DIR = join(__dirname, 'data', 'rites');
+
 app.use('/ambient', express.static(join(__dirname, 'data/ambient'), {
   maxAge: '7d',
   setHeaders: (res) => res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin'),
@@ -1653,50 +1643,9 @@ app.post('/stt', authenticateOrGuest, async (req, res) => {
 
 
 
-function ensureRitesCorpus() {
-  console.log("[DEBUG] ensureRitesCorpus() called. RITES_ROOT:", RITES_ROOT, "RITES_DIR:", RITES_DIR || join(RITES_ROOT, 'dist'));
-  const INDEX = join(RITES_ROOT, 'index.json');
-  try {
-    if (!existsSync(join(RITES_DIR, 'stepstates.json'))) {
-      console.log('[RITES] Corpus missing — attempting auto-download...');
-      // Try git clone first (if git available)
-      try {
-        execSync('git --version', { stdio: 'ignore' });
-        if (!existsSync(RITES_ROOT)) {
-          execSync('git clone --depth=1 https://github.com/krry/rites.git ../rites', { cwd: __dirname, stdio: 'pipe' });
-        } else {
-          execSync('git -C ../rites pull', { stdio: 'pipe' });
-        }
-        console.log('[RITES] Git fetch successful');
-        return;
-      } catch (e) {
-        console.log('[RITES] git not available, falling back to tarball');
-        // Fallback: curl + tar
-        try {
-          execSync('curl --version', { stdio: 'ignore' });
-          const tarPath = '/tmp/rites.tar.gz';
-          execSync(`curl -sL https://github.com/krry/rites/archive/refs/heads/main.tar.gz -o ${tarPath}`, { stdio: 'pipe' });
-          // Ensure target dir exists
-          if (!existsSync(RITES_ROOT)) mkdirSync(RITES_ROOT, { recursive: true });
-          // Extract
-          execSync(`tar -xzf ${tarPath} -C ../rites --strip-components=1`, { cwd: __dirname, stdio: 'pipe' });
-          unlink(tarPath, () => {});
-          console.log('[RITES] Tarball extraction successful');
-        } catch (e2) {
-          console.error('[RITES] Auto-download failed:', e2.message);
-        }
-      }
-    }
-  } catch (err) {
-    console.error('[RITES] ensureRitesCorpus error:', err);
-  }
-}
-
-ensureRitesCorpus();
 // ─────────────────────────────────────────────────────────────────────────────
 // ── RITES Corpus ───────────────────────────────────────────────────────
-// Serve indexed practices from the rites submodule.
-// Build artifacts: ./rites/dist/stepstates.json, stepstate_engagement.json, index.json
+// Serve indexed practices from data/rites/ (synced at build time by scripts/sync-rites.js).
 
 // GET /api/v1/rites/stepstates — polyvagal step definitions
 app.get('/api/v1/rites/stepstates', async (req, res) => {
@@ -1721,16 +1670,27 @@ app.get('/api/v1/rites/recommended/:stepstateId', async (req, res) => {
   }
 });
 
-// GET /api/v1/rites/:slug — full practice data by slug
+// GET /api/v1/rites — catalog of all practices
+app.get('/api/v1/rites', async (req, res) => {
+  try {
+    const catalog = JSON.parse(readFileSync(join(RITES_DIR, 'catalog.json'), 'utf8'));
+    res.json(catalog);
+  } catch (e) {
+    console.error('[rites]', e);
+    res.status(500).json({ error: 'Failed to load rites catalog', details: String(e) });
+  }
+});
+
+// GET /api/v1/rites/:slug — full practice data + markdown body
 app.get('/api/v1/rites/:slug', async (req, res) => {
   try {
-    const indexPath = join(__dirname, '../rites/index.json');
-    const index = JSON.parse(readFileSync(indexPath, 'utf8'));
-    // index is { generated, totalPractices, practices: [...] }
-    const practices = index.practices || index;
+    const catalog = JSON.parse(readFileSync(join(RITES_DIR, 'catalog.json'), 'utf8'));
+    const practices = catalog.practices || catalog;
     const practice = practices.find(p => p.slug === req.params.slug);
     if (!practice) return res.status(404).json({ error: 'Practice not found' });
-    res.json(practice);
+    const mdPath = join(RITES_DIR, 'practices', practice.file);
+    const markdown = existsSync(mdPath) ? readFileSync(mdPath, 'utf8') : null;
+    res.json({ ...practice, markdown });
   } catch (e) {
     console.error('[rites/:slug]', e);
     res.status(500).json({ error: 'Failed to load practice', details: String(e) });

@@ -8,7 +8,7 @@
     "test": "bun test.js",
     "sync-decks": "bun scripts/sync-decks.js",
     "download-ambient": "bun scripts/download-ambient.js",
-    "postinstall": "cd .. && git submodule update --init --recursive"
+    "sync-rites": "bun scripts/sync-rites.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
