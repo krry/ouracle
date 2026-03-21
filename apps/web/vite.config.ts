@@ -35,6 +35,8 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         navigateFallback: '/index.html',
+        // Prevent the navigate fallback from swallowing auth callback routes.
+        navigateFallbackDenylist: [/^\/api\//],
         // navigationPreload removed — it races the SW cache lookup and can cause
         // the wrong response to be served on iOS PWA, triggering spurious reloads.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
