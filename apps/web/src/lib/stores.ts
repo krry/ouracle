@@ -40,6 +40,8 @@ export interface CardData {
 	title: string;
 	keywords: string[];
 	body: string;
+	markdown?: string;  // full practice text (rites only)
+	fields?: Record<string, unknown>; // practice metadata (act, duration, vagalStates, textures, …)
 }
 
 export interface Message {

@@ -101,9 +101,12 @@ const ALLOWED_ORIGINS = [
   'https://souvenir.local:2532',
 ];
 
+// Vercel preview deployments: ouracle-<hash>-kerry.vercel.app
+const ALLOWED_ORIGIN_RE = /^https:\/\/ouracle(-[a-z0-9]+)*-kerry\.vercel\.app$/;
+
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+  if (origin && (ALLOWED_ORIGINS.includes(origin) || ALLOWED_ORIGIN_RE.test(origin))) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
