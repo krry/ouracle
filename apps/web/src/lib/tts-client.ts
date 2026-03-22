@@ -49,7 +49,7 @@ async function getKokoro() {
 	_kokoroLoading = true;
 	try {
 		const { KokoroTTS } = await import('kokoro-js');
-		_kokoro = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0', { dtype: 'q8' });
+		_kokoro = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', { dtype: 'q8' });
 		_kokoroReady = true;
 	} catch (e) {
 		console.warn('[TTS] Kokoro failed to load — falling back to Web Speech', e);
