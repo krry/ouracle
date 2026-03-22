@@ -217,24 +217,34 @@
                 const tokenText = event.text as string;
                 messageHasTokens = true;
                 if (skipTag) {
+                    // We're inside a multi-token [tag] — wait for the closing bracket
                     if (tokenText.includes(']')) {
                         skipTag = false;
+                        // Strip the closing bracket and anything before it; keep any remainder
+                        const after = tokenText.slice(tokenText.indexOf(']') + 1);
+                        if (after) {
+                            messages.update(m => {
+                                const last = m[m.length - 1];
+                                last.content += after;
+                                return [...m];
+                            });
+                        }
                     }
                 } else {
-                    const currentMsgs = get(messages);
-                    const lastMsg = currentMsgs[currentMsgs.length - 1];
-                    if (lastMsg.role === 'assistant' && lastMsg.content === '' && tokenText.startsWith('[')) {
-                        if (!tokenText.includes(']')) {
-                            skipTag = true;
-                        }
-                    } else {
+                    // Strip any complete [tag] spans inline, then check for an unclosed opener
+                    let cleaned = tokenText.replace(/\[[^\]]*\]/g, '');
+                    if (cleaned.includes('[')) {
+                        // Unclosed tag started — drop from [ onward, set skip mode
+                        cleaned = cleaned.slice(0, cleaned.lastIndexOf('['));
+                        skipTag = true;
+                    }
+                    if (cleaned) {
                         messages.update(m => {
                             const last = m[m.length - 1];
-                            last.content += tokenText;
+                            last.content += cleaned;
                             return [...m];
                         });
                     }
-                }
             } else if (event.type === 'sentence_text') {
                 // Complete sentence — speak it, and only render if no token events
                 // have arrived (i.e. static content like greetings, not streamed LLM output)
@@ -248,7 +258,7 @@
                         return [...m];
                     });
                 }
-                if ($ttsEnabled && audioQueue) audioQueue.enqueue(sentence);
+                if ($ttsEnabled && audioQueue) audioQueue.enqueue(sentence.replace(/\[[^\]]*\]/g, '').trim());
             } else if (event.type === 'break') {
                 // Start a fresh assistant message block
         // Always add a fresh empty assistant message for the next turn
@@ -317,9 +327,13 @@
 		}
 	}, mode, $ttsEnabled, get(ttsVoice))) { /* yield */ }
 		} catch (e: unknown) {
+			const status = (e as { status?: number }).status;
 			const msg = e instanceof Error ? e.message : String(e);
 			if (msg.includes('guest_limit')) {
 				guestTurns.set(GUEST_LIMIT);
+			} else if (status === 401 || status === 403) {
+				// Stale or invalid auth token — clear it so the user is prompted to sign in
+				creds.logout();
 			}
 		} finally {
 			// Remove any trailing empty assistant message
@@ -328,14 +342,30 @@
 		}
 	}
 
+	// Re-greet when auth transitions from unauthed → authed and conversation is empty.
+	// Handles: (a) guest greeting failed silently due to server error,
+	//          (b) social sign-in redirect landed on empty session.
+	let initiallyAuthed = $state(get(authed));
+	$effect(() => {
+		if (!initiallyAuthed && $authed && !guestMode && !$streaming) {
+			if (get(messages).length === 0) send('');
+		}
+		if (!$authed) initiallyAuthed = false; // reset on logout so next sign-in is detected
+	});
+
 	// Open session on mount — /enquire with no session_id bootstraps it
 	onMount(async () => {
-		// Restore saved messages if available
+		// Restore saved messages, cleaning up any trailing empty assistant message
+		// left by interrupted streaming (tab was killed before the finally block ran).
 		if (browser) {
 		  try {
 		    const saved = localStorage.getItem('clea_messages');
 		    if (saved) {
-		      messages.set(JSON.parse(saved));
+		      const parsed: Message[] = JSON.parse(saved);
+		      const cleaned = parsed.filter((m, i) =>
+		        !(m.role === 'assistant' && !m.content.trim() && i === parsed.length - 1)
+		      );
+		      messages.set(cleaned);
 		    }
 		  } catch (e) {
 		    console.error('Failed to load saved messages:', e);

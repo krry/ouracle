@@ -69,30 +69,34 @@ export class AudioQueue {
     return new Promise((resolve) => {
       this.ctx ??= new AudioContext();
       const ctx = this.ctx;
-      ctx.resume().catch(() => {});
 
-      if (!this.analyser) {
-        this.analyser = ctx.createAnalyser();
-        this.analyser.fftSize = 128;
-        this.analyser.connect(ctx.destination);
-      }
+      // Must await resume before decoding/starting — on iOS/Safari the AudioContext
+      // starts in "suspended" state. If ctx is still suspended when src.start() runs,
+      // src.onended NEVER fires, _play() hangs, and the drain loop deadlocks forever.
+      ctx.resume().then(() => {
+        if (!this.analyser) {
+          this.analyser = ctx.createAnalyser();
+          this.analyser.fftSize = 128;
+          this.analyser.connect(ctx.destination);
+        }
 
-      ctx.decodeAudioData(arrayBuffer.slice(0), (decoded) => {
-        const src = ctx.createBufferSource();
-        src.buffer = decoded;
-        src.connect(this.analyser!);
-        src.onended = () => resolve();
-        src.start();
+        ctx.decodeAudioData(arrayBuffer.slice(0), (decoded) => {
+          const src = ctx.createBufferSource();
+          src.buffer = decoded;
+          src.connect(this.analyser!);
+          src.onended = () => resolve();
+          src.start();
 
-        const buf = new Float32Array(this.analyser!.frequencyBinCount);
-        const tick = () => {
-          if (!this._playing) return;
-          this.analyser!.getFloatTimeDomainData(buf);
-          waveform.set(buf.slice());
-          this.rafId = requestAnimationFrame(tick);
-        };
-        tick();
-      }, () => resolve());
+          const buf = new Float32Array(this.analyser!.frequencyBinCount);
+          const tick = () => {
+            if (!this._playing) return;
+            this.analyser!.getFloatTimeDomainData(buf);
+            waveform.set(buf.slice());
+            this.rafId = requestAnimationFrame(tick);
+          };
+          tick();
+        }, () => resolve());
+      }).catch(() => resolve()); // resume failed — skip item, don't deadlock
     });
   }
 }
