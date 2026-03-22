@@ -23,6 +23,9 @@ function credStore() {
 		},
 		logout() {
 			localStorage.removeItem('clea_creds');
+			localStorage.removeItem('clea_session_id');
+			localStorage.removeItem('clea_pending_rite');
+			localStorage.removeItem('clea_guest_token');
 			set(null);
 		}
 	};

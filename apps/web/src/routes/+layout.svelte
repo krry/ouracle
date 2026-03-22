@@ -6,7 +6,7 @@
   import TopBar from '$lib/TopBar.svelte';
   import AmbientControls from '$lib/AmbientControls.svelte';
   import SeekerStatusPanel from '$lib/SeekerStatusPanel.svelte';
-  import { ttsEnabled, ttsVoice, creds, authed, seekerState } from '$lib/stores';
+  import { ttsEnabled, ttsVoice, creds, authed, seekerState, pendingRite, messages } from '$lib/stores';
   import type { Credentials } from '$lib/stores';
   import { KOKORO_VOICES } from '$lib/tts-client';
   import { signOut } from '$lib/auth';
@@ -21,10 +21,12 @@
   function closeDrawer() { drawerOpen = false; }
 
   async function leave() {
-    await signOut({ fetchOptions: { onSuccess: () => creds.logout() } });
     creds.logout();
+    pendingRite.set(null);
+    messages.set([]);
     seekerState.reset();
     closeDrawer();
+    await signOut({});
   }
 
   // Sync handle from credentials → seekerState for the status panel
