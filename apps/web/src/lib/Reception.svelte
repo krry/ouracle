@@ -84,13 +84,14 @@
     error = '';
     busy = true;
     try {
-      const result = await signIn.social({ provider, callbackURL: window.location.href });
-      await handleCredResult(result as AuthResult);
+      // social() does an OAuth redirect — it never returns a token directly.
+      // The post-redirect exchange is handled by onMount in enquire/+page.svelte.
+      await signIn.social({ provider, callbackURL: window.location.href });
     } catch (e: unknown) {
       error = e instanceof Error ? e.message : 'something went wrong';
-    } finally {
       busy = false;
     }
+    // Don't reset busy — the page is about to redirect away.
   }
 
   async function passkeySignIn() {
