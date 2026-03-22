@@ -211,6 +211,7 @@
 		for await (const _ of enquire(token, apiText, sessionId, (event) => {
 				if (event.type === 'session') {
 					sessionId = event.session_id as string;
+					if (browser) localStorage.setItem('clea_session_id', sessionId);
 					needsCovenant.set(!!event.needs_covenant);
 					continueOffered.set(false);
             } else if (event.type === 'token') {
@@ -333,7 +334,8 @@
 			if (msg.includes('guest_limit')) {
 				guestTurns.set(GUEST_LIMIT);
 			} else if (status === 401 || status === 403) {
-				// Stale or invalid auth token — clear it so the user is prompted to sign in
+				// Stale or invalid auth token — tell the seeker, then clear credentials
+				messages.update(m => [...m, { role: 'assistant', content: '*Your session has expired. Please sign in again to continue.*' }]);
 				creds.logout();
 			}
 		} finally {
@@ -368,6 +370,8 @@
 		      );
 		      messages.set(cleaned);
 		    }
+		    // Restore session ID so continued conversations keep their server-side context
+		    sessionId = localStorage.getItem('clea_session_id') ?? null;
 		  } catch (e) {
 		    console.error('Failed to load saved messages:', e);
 		  }
