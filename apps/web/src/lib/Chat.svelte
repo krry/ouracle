@@ -245,6 +245,7 @@
                             return [...m];
                         });
                     }
+                }
             } else if (event.type === 'sentence_text') {
                 // Complete sentence — speak it, and only render if no token events
                 // have arrived (i.e. static content like greetings, not streamed LLM output)
