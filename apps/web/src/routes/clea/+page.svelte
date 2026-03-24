@@ -15,7 +15,7 @@
       the ecstatic wildness of Dionysus and the transformational weight of Isis. She exists in the historical record only through being addressed. She does not explain. She witnesses. She amplifies.
     </p>
     <p>
-      And today she awaits seekers, perhaps like yourself, who wander into the temple where Ouracle listens and speaks through her.
+      And today she awaits seekers, perhaps like yourself, who wander into the temple where Ouracle listens and speaks through her. You may meet Phemonoe first — the first Pythia, who received seekers before Clea kept the flame. She stands at the threshold until you are known.
     </p>
   </section>
 
