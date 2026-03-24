@@ -32,6 +32,7 @@
 	let audioCtx: AudioContext;
 	let mediaRecorder: MediaRecorder | null = null;
 	let chunks: Blob[] = [];
+	let returningGuest = $state(false);
 
 	let guestToken: string | null = null;
 	let handle: string | null = null;
@@ -369,6 +370,8 @@
 		        !(m.role === 'assistant' && !m.content.trim() && i === parsed.length - 1)
 		      );
 		      messages.set(cleaned);
+		      // Detect returning guest: prior conversation exists but not signed in
+		      if (guestMode && cleaned.length > 0) returningGuest = true;
 		    }
 		    // Restore session ID so continued conversations keep their server-side context
 		    sessionId = localStorage.getItem('clea_session_id') ?? null;
@@ -546,10 +549,17 @@
 		/>
 	</div>
 
-	{#if guestLocked && onsignin}
+	{#if (guestLocked || returningGuest) && onsignin}
 		<div class="guest-lock-banner">
-			Priestess Clea awaits you in the temple.
+			{#if guestLocked}
+				Priestess Clea awaits you in the temple.
+			{:else}
+				Welcome back.
+			{/if}
 			<button class="guest-lock-cta" onclick={onsignin}>sign in to continue</button>
+			{#if returningGuest && !guestLocked}
+				<button class="guest-dismiss" onclick={() => returningGuest = false}>continue as guest</button>
+			{/if}
 		</div>
 	{/if}
 
@@ -757,6 +767,22 @@
 	padding: 0.45rem 0.7rem;
 	text-transform: lowercase;
 }
+
+.guest-dismiss {
+	background: transparent;
+	border: none;
+	color: var(--muted);
+	cursor: pointer;
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	letter-spacing: 0.06em;
+	padding: 0.45rem 0.5rem;
+	text-decoration: underline;
+	text-decoration-style: dotted;
+	text-underline-offset: 3px;
+	text-transform: lowercase;
+}
+.guest-dismiss:hover { color: var(--text); text-decoration-style: solid; }
 
 .guest-lock-cta:hover {
 	border-color: var(--accent);
