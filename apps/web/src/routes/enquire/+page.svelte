@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { authed, creds, guestTurns, covenantReady, needsCovenant } from '$lib/stores';
+  import Nebula from '$lib/Nebula.svelte';
   import { GUEST_LIMIT } from '$lib/guestSession';
   import { authClient } from '$lib/auth';
   import Reception from '$lib/Reception.svelte';
@@ -82,6 +83,10 @@
   <style>html, body { height: 100%; overflow: hidden; }</style>
 </svelte:head>
 
+<div class="nebula-bg" aria-hidden="true">
+  <Nebula opacity={0.18} />
+</div>
+
 <div class="content-wrapper" class:blurred={modalActive}>
   <div class="chat-stage">
     <Chat guestMode={!$authed} guestLocked={guestLocked} onsignin={handleEnter} />
@@ -104,7 +109,16 @@
 {/if}
 
 <style>
+  .nebula-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
   .content-wrapper {
+    position: relative;
+    z-index: 1;
     height: 100%;
   }
   .content-wrapper.blurred .chat-stage {
