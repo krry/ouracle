@@ -511,7 +511,7 @@
 			{#if msg.role !== 'system' && msg.role !== 'card'}
 				<div class="msg {msg.role}" class:covenant-reminder={msg.isCovenantReminder}>
 					{#if !msg.isCovenantReminder}
-						<span class="label">{msg.role === 'user' ? 'you' : 'clea'}</span>
+						<span class="label">{msg.role === 'user' ? 'you' : guestMode ? 'phemonoe' : 'clea'}</span>
 					{/if}
 					<div class="prose">{@html renderMarkdown(msg.content)}</div>
 				</div>
@@ -550,7 +550,7 @@
 			{#if guestLocked}
 				Priestess Clea awaits you in the temple.
 			{:else}
-				Welcome back.
+				Phemonoe remembers you.
 			{/if}
 			<button class="guest-lock-cta" onclick={onsignin}>sign in to continue</button>
 			{#if returningGuest && !guestLocked}
