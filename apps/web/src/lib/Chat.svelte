@@ -553,8 +553,13 @@
 	// ── PTT keyboard shortcut (Space, held) ───────────────────────────────────
 	function handleGlobalKey(e: KeyboardEvent) {
 		if (guestLocked) return;
-		// Only when textarea is not focused
-		if (document.activeElement?.tagName === 'TEXTAREA') return;
+		// Don't intercept Space while the user is typing in any editable element
+		const el = document.activeElement;
+		if (
+			el?.tagName === 'TEXTAREA' ||
+			el?.tagName === 'INPUT' ||
+			(el as HTMLElement)?.isContentEditable
+		) return;
 		if (e.code === 'Space' && !e.repeat) {
 			e.preventDefault();
 			if (e.type === 'keydown') startListening();
