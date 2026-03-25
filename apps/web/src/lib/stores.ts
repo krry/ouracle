@@ -128,11 +128,14 @@ function ttsStore() {
 }
 export const ttsEnabled = ttsStore();
 
-export type TtsVoice = string; // Kokoro voice id, e.g. 'af_bella'
+export type TtsVoice = string; // Fish Audio voice id, e.g. 'elf'
 
 function ttsVoiceStore() {
 	const stored = browser ? localStorage.getItem('clea_tts_voice') : null;
-	const { subscribe, set } = writable<TtsVoice>(stored ?? 'af_bella');
+	// Migrate legacy Kokoro ids (af_*, am_*, bf_*, bm_*) to Fish Audio default
+	const raw = stored ?? 'elf';
+	const migrated = /^(af_|am_|bf_|bm_)/.test(raw) ? 'elf' : raw;
+	const { subscribe, set } = writable<TtsVoice>(migrated);
 	return {
 		subscribe,
 		set(v: TtsVoice) {

@@ -16,7 +16,6 @@
     "@vercel/analytics": "^2.0.1",
     "better-auth": "^1.5.5",
     "dompurify": "^3.3.3",
-    "kokoro-js": "^1.2.1",
     "marked": "^17.0.4"
   },
   "devDependencies": {

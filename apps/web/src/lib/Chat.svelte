@@ -5,7 +5,7 @@
 	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState } from './stores';
 	import type { CardData, RiteData, VagalInfo, BeliefInfo, QualityInfo, Message } from './stores';
 	import { enquire, stt } from './api';
-	import { synthesize, preloadKokoro, KOKORO_VOICES, DEFAULT_VOICE } from './tts-client';
+	import { webSpeech, KOKORO_VOICES, DEFAULT_VOICE } from './tts-client';
 	import Breath from './Breath.svelte';
 	import OraclePanel from './OraclePanel.svelte';
 	import SeekerStatusPanel from './SeekerStatusPanel.svelte';
@@ -37,6 +37,10 @@
 	let guestToken: string | null = null;
 	let handle: string | null = null;
 	let totemSession: TotemSession | null = null;
+	// Fish Audio tracking: server sends sentence_audio events (base64 MP3) when configured.
+	// If none arrive during a turn, we fall back to Web Speech at completion time.
+	let serverAudioReceived = false;
+	let fallbackSentences: string[] = [];
 	// Guard: only save messages to localStorage after onMount has restored them.
 	// Without this, the initial $effect run (with messages = []) would wipe any saved
 	// conversation before onMount has a chance to read it back — e.g. after iOS tab discard.
@@ -93,10 +97,6 @@
 
 	const BASE_URL = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
 
-	// Warm up Kokoro when TTS is toggled on (deferred to avoid eager memory use on mobile)
-	$effect(() => {
-		if ($ttsEnabled) preloadKokoro();
-	});
 
 	// Persist conversation to localStorage — gated on didRestore to prevent the initial
 	// $effect run (with messages=[]) from wiping a saved conversation before onMount restores it.
@@ -199,6 +199,8 @@
 		}
 
 		audioQueue?.prime();
+		serverAudioReceived = false;
+		fallbackSentences = [];
 		const token = !guestMode ? ($creds as Credentials | null)?.access_token ?? '' : guestToken ?? '';
 		// Only push user message if there's actual text (first turn may be empty — opens the session)
 		if (text.trim()) {
@@ -253,8 +255,8 @@
                     }
                 }
             } else if (event.type === 'sentence_text') {
-                // Complete sentence — speak it, and only render if no token events
-                // have arrived (i.e. static content like greetings, not streamed LLM output)
+                // Complete sentence — render if no token events (static content like greetings),
+                // and collect for Web Speech fallback in case Fish Audio isn't available.
                 const sentence = event.text as string;
                 if (!messageHasTokens) {
                     messages.update(m => {
@@ -265,7 +267,17 @@
                         return [...m];
                     });
                 }
-                if ($ttsEnabled && audioQueue) audioQueue.enqueue(sentence.replace(/\[[^\]]*\]/g, '').trim());
+                // Collect for Web Speech fallback (used at complete time if no server audio arrived)
+                if ($ttsEnabled) fallbackSentences.push(sentence.replace(/\[[^\]]*\]/g, '').trim());
+            } else if (event.type === 'sentence_audio') {
+                // Server pre-fetched this sentence via Fish Audio — decode base64 MP3 and play.
+                if ($ttsEnabled && audioQueue && event.audio) {
+                    serverAudioReceived = true;
+                    const binary = atob(event.audio as string);
+                    const bytes = new Uint8Array(binary.length);
+                    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                    audioQueue.enqueueBuffer(bytes.buffer);
+                }
             } else if (event.type === 'break') {
                 // Start a fresh assistant message block
         // Always add a fresh empty assistant message for the next turn
@@ -294,6 +306,11 @@
 					const stage = (event as { type: string; stage?: string }).stage;
 					if (stage === 'complete' || stage === 'reintegration_complete') {
 						pendingRite.set(null);
+					}
+					// Web Speech fallback: if no Fish Audio arrived, speak sentences now
+					if ($ttsEnabled && !serverAudioReceived && fallbackSentences.length > 0) {
+						const sentences = fallbackSentences.splice(0);
+						(async () => { for (const s of sentences) await webSpeech(s); })();
 					}
 } else if (event.type === 'continue_offered') {
 			continueOffered.set(true);
@@ -401,10 +418,9 @@
 		window.addEventListener('keydown', handleGlobalKey);
 		window.addEventListener('keyup', handleGlobalKey);
 		window.addEventListener('visibilitychange', handleVisibilityChange);
-		audioQueue = createAudioQueue((t) => synthesize(t, get(ttsVoice)));
-		// Only preload the 100 MB Kokoro model when TTS is already on.
-		// Unconditional preload on mobile causes memory pressure → browser tab discard → reload loop.
-		if (get(ttsEnabled)) preloadKokoro();
+		// AudioQueue fetch function is Web Speech fallback only — primary audio
+		// arrives as sentence_audio SSE events (Fish Audio, pre-fetched on server).
+		audioQueue = createAudioQueue((t) => webSpeech(t).then(() => null));
 		if (guestMode) {
 			await ensureGuestToken();
 		} else if ($authed && $creds) {
