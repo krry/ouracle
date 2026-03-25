@@ -15,6 +15,18 @@
 		<meta name="apple-mobile-web-app-title" content="Ouracle" />
 		<meta name="theme-color" content="#0a0a0a" />
 		<script src="https://kerry.ink/widgets/webring/webring.wc.js"></script>
+		<script>
+			// Register the service worker WITHOUT the controllerchange→reload handler that
+			// VitePWA injects by default. On iOS, the SW is evicted under memory pressure
+			// and reinstalls on return, firing controllerchange → window.location.reload()
+			// every few minutes. We skip that listener entirely — the SW still caches assets,
+			// we just never force a reload because of it.
+			if ('serviceWorker' in navigator) {
+				window.addEventListener('load', function () {
+					navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function () {});
+				});
+			}
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

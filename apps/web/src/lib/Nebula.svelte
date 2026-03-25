@@ -292,8 +292,19 @@
     }
     tick();
 
+    // Pause RAF when backgrounded — keeps GPU pipeline off iOS memory pressure watchdog.
+    const onVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(raf);
+      } else {
+        tick();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
     return () => {
       cancelAnimationFrame(raf);
+      document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('resize', onResize);
       renderer.dispose();
     };
