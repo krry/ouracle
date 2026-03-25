@@ -157,8 +157,13 @@
   }
 
   onMount(() => {
+    // Skip Three.js entirely on touch/mobile — WebGL + 220 sprites + 6 textures at device
+    // pixel ratio consumes enough GPU memory to push iOS past the tab-eviction threshold.
+    // The nebula is purely decorative; mobile users get the dark background instead.
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(devicePixelRatio);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); // cap at 2× — 3× is wasteful on Retina
     renderer.setClearColor(0x000000, 0);
 
     const scene = new THREE.Scene();

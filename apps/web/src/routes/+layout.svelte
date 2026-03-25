@@ -2,7 +2,7 @@
   import '../app.css';
   import { inject } from '@vercel/analytics';
   import { page } from '$app/stores';
-  import type { Snippet } from 'svelte';
+  import { onMount, type Snippet } from 'svelte';
   import TopBar from '$lib/TopBar.svelte';
   import AmbientControls from '$lib/AmbientControls.svelte';
   import SeekerStatusPanel from '$lib/SeekerStatusPanel.svelte';
@@ -14,6 +14,27 @@
   inject();
 
   let { children }: { children: Snippet } = $props();
+
+  // Sync visual viewport height to --app-h so the app shell tracks the actual
+  // visible area. In iOS PWA standalone mode, the layout viewport never resizes
+  // when the software keyboard appears — the keyboard overlays from below.
+  // Using vv.height keeps the bar visible and eliminates the blank bottom strip.
+  onMount(() => {
+    const vv = window.visualViewport;
+    const sync = () => {
+      document.documentElement.style.setProperty(
+        '--app-h',
+        `${(vv?.height ?? window.innerHeight)}px`
+      );
+    };
+    sync();
+    vv?.addEventListener('resize', sync);
+    vv?.addEventListener('scroll', sync);
+    return () => {
+      vv?.removeEventListener('resize', sync);
+      vv?.removeEventListener('scroll', sync);
+    };
+  });
   const isEnquire = $derived($page.url.pathname.startsWith('/enquire'));
 
   let drawerOpen = $state(false);
@@ -147,7 +168,8 @@
 .app {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  height: 100dvh; /* fallback before JS sync */
+  height: var(--app-h, 100dvh); /* tracks visualViewport — shrinks with keyboard on iOS PWA */
   overflow: hidden;
 }
 
