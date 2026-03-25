@@ -1011,6 +1011,10 @@ class SentenceAudioStreamer {
     this.nextAudioEmitIdx = 0; // next audio sequence to emit
     this.preFetchLimit = 2; // pre-fetch up to 2 sentences ahead
     this.buffer = ''; // accumulated tokens for current incomplete sentence
+    // Stage-direction stripping: Clea prepends [emotional cue] to every response.
+    // We strip it before emitting tokens to the client so it never appears in the UI.
+    this.stageDone = false;  // true once we've resolved the leading bracket
+    this.stageBuffer = '';   // accumulates tokens before we know if a bracket is present
   }
 
   emit(obj) {
@@ -1076,7 +1080,9 @@ class SentenceAudioStreamer {
 
   // For static text (fully known upfront)
   async processFullText(fullText) {
-    const sentences = splitSentences(fullText).map(s => s.raw.trim()).filter(s => s.length > 0);
+    // Strip leading stage direction [emotional cue] if present
+    const stripped = fullText.replace(/^\s*\[[^\]]*\]\s*/, '');
+    const sentences = splitSentences(stripped).map(s => s.raw.trim()).filter(s => s.length > 0);
     for (let i = 0; i < sentences.length; i++) {
       const sentence = sentences[i];
       this.emitSentenceText(sentence, i === sentences.length - 1);
@@ -1095,6 +1101,30 @@ class SentenceAudioStreamer {
 
   // For incremental LLM token stream
   feedToken(token) {
+    if (!this.stageDone) {
+      this.stageBuffer += token;
+      const trimmed = this.stageBuffer.trimStart();
+      if (!trimmed) return; // only whitespace so far — keep buffering
+      if (trimmed[0] !== '[') {
+        // No stage direction — flush buffer as-is and proceed
+        this.stageDone = true;
+        this._feedRaw(this.stageBuffer);
+        this.stageBuffer = '';
+        return;
+      }
+      const close = this.stageBuffer.indexOf(']');
+      if (close === -1) return; // still inside bracket — keep buffering
+      // Closing bracket found — discard tag, emit whatever follows
+      this.stageDone = true;
+      const rest = this.stageBuffer.slice(close + 1).replace(/^\s+/, '');
+      this.stageBuffer = '';
+      if (rest) this._feedRaw(rest);
+      return;
+    }
+    this._feedRaw(token);
+  }
+
+  _feedRaw(token) {
     this.emit({ type: 'token', text: token }); // client renders tokens in real-time
     this.buffer += token;
     const sentences = splitSentences(this.buffer);
@@ -1469,7 +1499,7 @@ Most responses will NOT include [READY].`;
       }
       streamer.finish();
 
-      let response = chunks.join('').trim();
+      let response = chunks.join('').trim().replace(/^\[[^\]]*\]\s*/, '');
       const readySignal = /\s*\[READY\]\s*$/i.test(response);
       if (readySignal) response = response.replace(/\s*\[READY\]\s*$/i, '').trim();
 
@@ -1547,7 +1577,7 @@ Most responses will NOT include [REPORT].`;
       }
       streamer.finish();
 
-      let response = chunks.join('').trim();
+      let response = chunks.join('').trim().replace(/^\[[^\]]*\]\s*/, '');
       const reportSignal = /\s*\[REPORT\]\s*$/i.test(response);
       if (reportSignal) response = response.replace(/\s*\[REPORT\]\s*$/i, '').trim();
 
