@@ -1180,7 +1180,12 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
     const llm = makeLlmClient();
     const stream = await llm.chat({
       system: CLEA_SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: message }],
+      // Include the opening greeting so Clea knows the conversation has already started
+      // and doesn't re-introduce herself on the seeker's first reply.
+      messages: [
+        { role: 'assistant', content: 'Speak. What brings you to the threshold?' },
+        { role: 'user', content: message },
+      ],
       temperature: 0.9,
       maxTokens: 512,
       stream: true,

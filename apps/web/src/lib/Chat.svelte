@@ -339,9 +339,17 @@
 			if (msg.includes('guest_limit')) {
 				guestTurns.set(GUEST_LIMIT);
 			} else if (status === 401 || status === 403) {
-				// Stale or invalid auth token — tell the seeker, then clear credentials
-				messages.update(m => [...m, { role: 'assistant', content: '*Your session has expired. Please sign in again to continue.*' }]);
 				creds.logout();
+				if (text.trim()) {
+					// Expired mid-conversation — tell the seeker
+					messages.update(m => [...m, { role: 'assistant', content: '*Your session has expired. Please sign in again to continue.*' }]);
+				} else {
+					// Expired on bootstrap call (empty text) — silently re-init as guest
+					// so the user sees the normal guest greeting instead of an error.
+					setTimeout(async () => {
+						try { await ensureGuestToken(); send(''); } catch { /* non-fatal */ }
+					}, 50);
+				}
 			}
 		} finally {
 			// Remove any trailing empty assistant message
@@ -350,13 +358,17 @@
 		}
 	}
 
-	// Re-greet when auth transitions from unauthed → authed and conversation is empty.
-	// Handles: (a) guest greeting failed silently due to server error,
-	//          (b) social sign-in redirect landed on empty session.
+	// When a guest signs in, clear the guest conversation and bootstrap a fresh authed session.
+	// Without this, the first user message after sign-in goes to the API without a session_id,
+	// which creates a new session and returns the opening question — ignoring the user's message.
 	let initiallyAuthed = $state(get(authed));
 	$effect(() => {
 		if (!initiallyAuthed && $authed && !guestMode && !$streaming) {
-			if (get(messages).length === 0) send('');
+			// Always re-bootstrap on sign-in — clear any guest conversation first
+			messages.set([]);
+			sessionId = null;
+			if (browser) localStorage.removeItem('clea_session_id');
+			send('');
 		}
 		if (!$authed) initiallyAuthed = false; // reset on logout so next sign-in is detected
 	});
