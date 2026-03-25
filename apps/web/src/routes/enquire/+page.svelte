@@ -79,7 +79,7 @@
 </script>
 
 <svelte:head>
-  <title>Aspire | Ouracle</title>
+  <title>Enquire | Ouracle</title>
   <style>html, body { height: 100%; overflow: hidden; }</style>
 </svelte:head>
 
