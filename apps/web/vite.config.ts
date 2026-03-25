@@ -6,17 +6,23 @@ export default defineConfig({
   plugins: [
     sveltekit(),
     VitePWA({
+      // injectRegister: false — VitePWA's default registration code listens for
+      // 'controllerchange' and calls window.location.reload(). On iOS, the SW is
+      // evicted from storage under memory pressure and reinstalls on return, firing
+      // controllerchange every time → periodic app reloads. We register the SW
+      // ourselves in app.html without the reload handler.
+      injectRegister: false,
       registerType: 'prompt',
       includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'],
       manifest: {
         name: 'Ouracle',
         short_name: 'Ouracle',
-        description: 'Speak to Ouracle.',
-        theme_color: '#6366f1',
+        description: 'A reflective AI companion',
+        theme_color: '#0a0a0a',
         background_color: '#0a0a0a',
         display: 'standalone',
         display_override: ['standalone', 'fullscreen', 'minimal-ui'],
-        orientation: 'any',
+        orientation: 'portrait-primary',
         scope: '/',
         start_url: '/?source=pwa',
         icons: [

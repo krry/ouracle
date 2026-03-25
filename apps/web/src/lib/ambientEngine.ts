@@ -753,3 +753,15 @@ export function updateBinauralBeat(hz: number) {
 export function setScene(scene: SceneId, volume: number) {
   startAmbient(scene, volume);
 }
+
+/** Suspend/resume AudioContext on page hide/show — releases CoreAudio hardware resources. */
+if (browser) {
+  document.addEventListener('visibilitychange', () => {
+    if (!ctx) return;
+    if (document.hidden) {
+      ctx.suspend().catch(() => {});
+    } else if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+  });
+}

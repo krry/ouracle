@@ -3,7 +3,7 @@
 	import { get } from 'svelte/store';
 	import { browser } from '$app/environment';
 	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState } from './stores';
-	import type { CardData, RiteData, VagalInfo, BeliefInfo, QualityInfo } from './stores';
+	import type { CardData, RiteData, VagalInfo, BeliefInfo, QualityInfo, Message } from './stores';
 	import { enquire, stt } from './api';
 	import { synthesize, preloadKokoro, KOKORO_VOICES, DEFAULT_VOICE } from './tts-client';
 	import Breath from './Breath.svelte';
@@ -37,13 +37,17 @@
 	let guestToken: string | null = null;
 	let handle: string | null = null;
 	let totemSession: TotemSession | null = null;
+	// Guard: only save messages to localStorage after onMount has restored them.
+	// Without this, the initial $effect run (with messages = []) would wipe any saved
+	// conversation before onMount has a chance to read it back — e.g. after iOS tab discard.
+	let didRestore = $state(false);
 
 	// ── Deck / Oracle Panel ───────────────────────────────────────────────────
 	type DeckMeta = { id: string; meta: { name?: string; description?: string }; count: number };
 	let availableDecks = $state<DeckMeta[]>([]);
 	let selectedDecks = $state<Set<string>>(new Set());
 	let drawing = $state(false);
-	let inputEl: HTMLTextAreaElement | undefined;
+	let inputEl: HTMLDivElement | undefined;
 	let pendingPracticeContext: string | null = null;
 
 	function handleDeckToggle(id: string, checked: boolean) {
@@ -94,14 +98,14 @@
 		if ($ttsEnabled) preloadKokoro();
 	});
 
-	// Persist conversation to localStorage
+	// Persist conversation to localStorage — gated on didRestore to prevent the initial
+	// $effect run (with messages=[]) from wiping a saved conversation before onMount restores it.
 	$effect(() => {
-	  if (browser) {
-	    try {
-	      localStorage.setItem('clea_messages', JSON.stringify($messages));
-	    } catch (e) {
-	      console.error('Failed to save messages:', e);
-	    }
+	  if (!didRestore || !browser) return;
+	  try {
+	    localStorage.setItem('clea_messages', JSON.stringify($messages));
+	  } catch (e) {
+	    console.error('Failed to save messages:', e);
 	  }
 	});
 
@@ -378,9 +382,13 @@
 		  } catch (e) {
 		    console.error('Failed to load saved messages:', e);
 		  }
+		  // Unlock the messages save $effect now that localStorage has been read.
+		  // This must happen AFTER the restore so the effect never writes [] over saved data.
+		  didRestore = true;
 		}
 		window.addEventListener('keydown', handleGlobalKey);
 		window.addEventListener('keyup', handleGlobalKey);
+		window.addEventListener('visibilitychange', handleVisibilityChange);
 		audioQueue = createAudioQueue((t) => synthesize(t, get(ttsVoice)));
 		// Only preload the 100 MB Kokoro model when TTS is already on.
 		// Unconditional preload on mobile causes memory pressure → browser tab discard → reload loop.
@@ -404,6 +412,7 @@
 	onDestroy(() => {
 		window.removeEventListener('keydown', handleGlobalKey);
 		window.removeEventListener('keyup', handleGlobalKey);
+		window.removeEventListener('visibilitychange', handleVisibilityChange);
 		audioQueue?.flush();
 		audioQueue = null;
 		if (totemSession && sessionId) {
@@ -411,13 +420,33 @@
 		}
 	});
 
+	function handleInput(e: Event) {
+		const el = e.target as HTMLElement;
+		const raw = el.innerText ?? '';
+		// iOS can leave a lone '\n' in an "empty" contenteditable
+		input = raw === '\n' ? '' : raw;
+	}
+
+	function handlePaste(e: ClipboardEvent) {
+		e.preventDefault();
+		const text = e.clipboardData?.getData('text/plain') ?? '';
+		document.execCommand('insertText', false, text);
+	}
+
+	function handleSend() {
+		if ($streaming || guestLocked) return;
+		const text = input.trim();
+		if (!text) return;
+		input = '';
+		if (inputEl) inputEl.innerText = '';
+		send(text);
+	}
+
 	function handleKey(e: KeyboardEvent) {
 		if (guestLocked) return;
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
-			const text = input.trim();
-			input = '';
-			send(text);
+			handleSend();
 		}
 	}
 
@@ -487,6 +516,26 @@
 			console.error('STT failed:', e);
 			voiceState.set('idle');
 		}
+	}
+
+	// ── iOS tab-restore guard ─────────────────────────────────────────────────
+	// iOS kills background tabs under memory pressure. When the user returns, the page
+	// reloads from scratch. If messages are somehow empty after becoming visible
+	// (e.g. the effect flush raced with onMount), re-read from localStorage as a fallback.
+	function handleVisibilityChange() {
+		if (document.visibilityState !== 'visible' || !browser) return;
+		if (get(messages).length > 0) return; // state intact — nothing to do
+		try {
+			const saved = localStorage.getItem('clea_messages');
+			if (!saved) return;
+			const parsed: Message[] = JSON.parse(saved);
+			const cleaned = parsed.filter((m, i) =>
+				!(m.role === 'assistant' && !m.content.trim() && i === parsed.length - 1)
+			);
+			if (cleaned.length === 0) return;
+			messages.set(cleaned);
+			sessionId = localStorage.getItem('clea_session_id') ?? sessionId;
+		} catch { /* non-fatal */ }
 	}
 
 	// ── PTT keyboard shortcut (Space, held) ───────────────────────────────────
@@ -588,14 +637,31 @@
 			</div>
 		</div>
 
-		<textarea
-			bind:this={inputEl}
-			bind:value={input}
-			onkeydown={handleKey}
-			placeholder={guestLocked ? 'sign in to continue…' : 'Type to speak…'}
-			rows="1"
-			disabled={$streaming || guestLocked}
-		></textarea>
+		<div class="input-wrap">
+			<!-- svelte-ignore a11y_interactive_supports_focus -->
+			<div
+				class="chat-input"
+				class:empty={!input}
+				role="textbox"
+				aria-multiline="true"
+				aria-label="Type to speak…"
+				data-placeholder={guestLocked ? 'sign in to continue…' : 'Type to speak…'}
+				contenteditable={$streaming || guestLocked ? 'false' : 'true'}
+				enterkeyhint="send"
+				autocapitalize="sentences"
+				spellcheck="true"
+				bind:this={inputEl}
+				oninput={handleInput}
+				onkeydown={handleKey}
+				onpaste={handlePaste}
+			></div>
+			<button
+				class="send-inline"
+				onclick={handleSend}
+				aria-label="Send"
+				disabled={!input.trim() || $streaming || guestLocked}
+			>ꜛ</button>
+		</div>
 
 		<div class="bar-trailing">
 			<label class="tts-toggle" title={$ttsEnabled ? 'mute Clea\'s voice' : 'enable Clea\'s voice'}>
@@ -798,7 +864,14 @@
 	background: var(--bg);
 }
 
-textarea {
+.input-wrap {
+	flex: 1;
+	position: relative;
+	display: flex;
+	align-items: flex-end;
+}
+
+.chat-input {
 	flex: 1;
 	background: var(--surface);
 	border: 1px solid var(--border);
@@ -807,19 +880,58 @@ textarea {
 	font-family: var(--font-mono);
 	font-size: 0.95rem;
 	line-height: 1.5;
-	padding: 0.5rem 0.75rem;
-	resize: none;
+	padding: 0.5rem 2.4rem 0.5rem 0.75rem; /* right padding reserves space for send-inline */
 	outline: none;
 	transition: border-color 0.15s;
 	max-height: 8rem;
+	min-height: calc(1.5em + 1rem);
 	overflow-y: auto;
+	white-space: pre-wrap;
+	word-break: break-word;
+	-webkit-user-select: text;
+	user-select: text;
+	cursor: text;
 }
 
-textarea:focus { border-color: var(--accent); }
+.chat-input:focus { border-color: var(--accent); }
 
-textarea:disabled {
+.chat-input[contenteditable="false"] {
 	opacity: 0.6;
 	cursor: not-allowed;
+	pointer-events: none;
+}
+
+/* placeholder via pseudo-element (avoids native placeholder behaviour on non-input) */
+.chat-input.empty::before {
+	content: attr(data-placeholder);
+	color: var(--muted);
+	pointer-events: none;
+}
+
+.send-inline {
+	position: absolute;
+	right: 0.35rem;
+	bottom: 0.35rem;
+	background: none;
+	border: none;
+	color: var(--muted);
+	cursor: pointer;
+	font-size: 1.1rem;
+	line-height: 1;
+	padding: 0.2rem 0.3rem;
+	transition: color 0.15s, opacity 0.15s;
+	opacity: 0.5;
+}
+
+.send-inline:not(:disabled):hover,
+.send-inline:not(:disabled):active {
+	color: var(--accent);
+	opacity: 1;
+}
+
+.send-inline:disabled {
+	opacity: 0.2;
+	cursor: default;
 }
 
 .ptt-wrap {
