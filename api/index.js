@@ -89,6 +89,7 @@ import {
 import { auth } from './auth-config.js';
 import { toNodeHandler } from 'better-auth/node';
 import { draw, listDecks, drawContextual, loadDecks } from './decks.js';
+import { buildSunoPackage } from './suno.js';
 
 const app = express();
 
@@ -1892,6 +1893,28 @@ Return only valid JSON.`;
     });
   } catch (e) {
     console.error('distill error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Suno export ───────────────────────────────────────────────────────────────
+
+app.post('/suno', authenticateOrGuest, async (req, res) => {
+  try {
+    const { card, poem } = req.body ?? {};
+    if (!card || typeof card !== 'object') {
+      return res.status(400).json({ error: 'card object required' });
+    }
+    const text = (typeof poem === 'string' && poem.trim())
+      ? poem.trim()
+      : (card.body ?? card.text ?? '').trim();
+    if (!text) return res.status(400).json({ error: 'poem text required' });
+
+    const llm = makeLlmClient();
+    const result = await buildSunoPackage({ card, poem: text, llmClient: llm });
+    res.json(result);
+  } catch (e) {
+    console.error('suno error:', e);
     res.status(500).json({ error: e.message });
   }
 });
