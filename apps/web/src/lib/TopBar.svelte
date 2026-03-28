@@ -32,6 +32,9 @@
 
   <div class="trail">
     <div class="ambient-wrap"><AmbientControls /></div>
+    {#if $authed && !isEnquire}
+      <a href="/thread" class="thread-link" title="your thread">thread</a>
+    {/if}
   </div>
 </header>
 
@@ -155,4 +158,14 @@
   white-space: nowrap;
 }
 .enter:hover { background: var(--accent); color: var(--bg); }
+
+.thread-link {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.thread-link:hover { color: var(--accent); }
 </style>

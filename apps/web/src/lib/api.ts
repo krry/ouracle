@@ -101,3 +101,42 @@ export async function stt(blob: Blob, token: string): Promise<string> {
 	const json = await r.json();
 	return json.text ?? '';
 }
+
+// ── Thread ─────────────────────────────────────────────────────────────────────
+export interface ThreadSession {
+	id: string;
+	stage: string;
+	quality: string | null;
+	enacted: boolean | null;
+	rite_name: string | null;
+	rite_json: Record<string, unknown> | null;
+	report: string | null;
+	created_at: string;
+	prescribed_at: string | null;
+	completed_at: string | null;
+}
+
+export async function getThread(seekerId: string, token: string): Promise<ThreadSession[]> {
+	const r = await fetch(`${BASE}/seeker/${seekerId}/thread`, {
+		headers: authHeaders(token),
+	});
+	if (!r.ok) throw new Error(await r.text());
+	const json = await r.json();
+	return json.thread ?? [];
+}
+
+export async function redactSession(seekerId: string, sessionId: string, token: string): Promise<void> {
+	const r = await fetch(`${BASE}/seeker/${seekerId}/thread/${sessionId}/redact`, {
+		method: 'PATCH',
+		headers: authHeaders(token),
+	});
+	if (!r.ok) throw new Error(await r.text());
+}
+
+export async function deleteAccount(seekerId: string, token: string): Promise<void> {
+	const r = await fetch(`${BASE}/seeker/${seekerId}`, {
+		method: 'DELETE',
+		headers: authHeaders(token),
+	});
+	if (!r.ok) throw new Error(await r.text());
+}

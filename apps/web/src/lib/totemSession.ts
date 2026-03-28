@@ -1,4 +1,4 @@
-import { loadTotem, decryptDistillation } from './totem';
+import { loadTotem, saveTotem, initDevice, loadPrivateKey, loadDevicePublicKey, generateTotemKey, wrapTotemKey } from './totem';
 import type { TotemData } from './totem';
 
 type LoadFn = (seekerId: string) => Promise<TotemData | null>;
@@ -7,14 +7,21 @@ type FetchFn = (sessionId: string, token: string) => Promise<Response>;
 
 export class TotemSession {
   private totem: TotemData | null = null;
+  private totemKey: CryptoKey | null = null;
 
   constructor(
     private token: string,
     private seekerId: string,
-    // loadTotem real signature takes (seekerId, token) — default wraps that
     private _load: LoadFn = (id) => loadTotem(id, token),
-    // saveTotem requires CryptoKey + device key; full ceremony not wired yet
-    private _save: SaveFn = async (_id, _totem) => { /* TODO: wire full key ceremony */ },
+    private _save: SaveFn = async (_id, totem) => {
+      if (!this.totemKey) {
+        const result = await initDevice(token);
+        this.totemKey = result.totemKey;
+      }
+      const publicKeyJwk = loadDevicePublicKey();
+      if (!publicKeyJwk) return;
+      await saveTotem(totem, this.totemKey!, publicKeyJwk, token);
+    },
   ) {}
 
   get isLoaded() { return this.totem !== null; }
