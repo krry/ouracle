@@ -685,6 +685,27 @@ export function auditLoveFear(rite) {
 // OPENING QUESTIONS
 // ─────────────────────────────────────────────
 
+// Tidal questions — loaded from tides.json, refreshed by scripts/refresh-tide.js.
+// Chef edits the briefing; the script regenerates questions from the LLM.
+// The tidal closing map lets getClosingDedication handle dynamically-generated questions.
+const __tidesPath = path.join(path.dirname(fileURLToPath(import.meta.url)), 'tides.json');
+let _tidesCache = null;
+
+function loadTides() {
+  if (_tidesCache) return _tidesCache;
+  try {
+    const raw = fs.readFileSync(__tidesPath, 'utf8');
+    const data = JSON.parse(raw);
+    const questions = Array.isArray(data.questions) ? data.questions : [];
+    const weight = typeof data.weight === 'number' ? Math.max(0, Math.min(1, data.weight)) : 0;
+    const map = new Map(questions.map(({ question, closing }) => [question, closing]));
+    _tidesCache = { questions, weight, map };
+  } catch {
+    _tidesCache = { questions: [], weight: 0, map: new Map() };
+  }
+  return _tidesCache;
+}
+
 export const OPENING_QUESTIONS = [
   "What's the thing you keep almost doing, but not quite?",
   "Where in your body do you feel the most resistance right now?",
@@ -722,7 +743,10 @@ export const CLOSING_DEDICATIONS = [
 
 export function getClosingDedication(openingQuestion) {
   const i = OPENING_QUESTIONS.indexOf(openingQuestion);
-  return i >= 0 ? CLOSING_DEDICATIONS[i] : null;
+  if (i >= 0) return CLOSING_DEDICATIONS[i];
+  // Check tidal questions
+  const tides = loadTides();
+  return tides.map.get(openingQuestion) ?? null;
 }
 
 export function chooseOpeningQuestion(context = {}) {
@@ -730,6 +754,20 @@ export function chooseOpeningQuestion(context = {}) {
   if (context.hint === 'story')  return OPENING_QUESTIONS[2];
   if (context.hint === 'honest') return OPENING_QUESTIONS[3];
   if (context.hint === 'unsaid') return OPENING_QUESTIONS[4];
+
+  const tides = loadTides();
+  const hasTidal = tides.questions.length > 0;
+
+  // Draw from the tidal pool when the weight calls for it,
+  // unless we just asked a tidal question (avoid immediate repeat).
+  const lastWasTidal = hasTidal && tides.map.has(context.last_question);
+  if (hasTidal && !lastWasTidal && Math.random() < tides.weight) {
+    const tidalPool = tides.questions
+      .map((q) => q.question)
+      .filter((q) => q !== context.last_question);
+    if (tidalPool.length) return tidalPool[Math.floor(Math.random() * tidalPool.length)];
+  }
+
   const pool = context.last_question
     ? OPENING_QUESTIONS.filter((q) => q !== context.last_question)
     : [...OPENING_QUESTIONS];
