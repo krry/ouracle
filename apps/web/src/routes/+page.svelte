@@ -157,7 +157,11 @@
   animation: enter-pulse 2.5s ease-in-out infinite;
   mix-blend-mode: color-burn;
   @media (prefers-color-scheme: light) {
-      mix-blend-mode: color-dodge;
+    mix-blend-mode: color-dodge;
+  }
+  /* Blend modes only look right against the WebGL nebula — disable on touch devices */
+  @media (pointer: coarse) {
+    mix-blend-mode: normal;
   }
 }
 .enter:hover {
