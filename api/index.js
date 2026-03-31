@@ -104,8 +104,8 @@ const ALLOWED_ORIGINS = [
   'https://souvenir.local:2532',
 ];
 
-// Vercel preview deployments: ouracle-<hash>-kerry.vercel.app
-const ALLOWED_ORIGIN_RE = /^https:\/\/ouracle(-[a-z0-9]+)*-kerry\.vercel\.app$/;
+// Any *.kerry.ink subdomain + Vercel preview deployments
+const ALLOWED_ORIGIN_RE = /^https:\/\/([a-z0-9-]+\.)*kerry\.ink$|^https:\/\/ouracle(-[a-z0-9]+)*-kerry\.vercel\.app$/;
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
