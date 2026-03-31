@@ -95,6 +95,8 @@ const app = express();
 
 const ALLOWED_ORIGINS = [
   'https://ouracle.kerry.ink',
+  'https://poiesis.kerry.ink',
+  'http://localhost:3000',
   'http://localhost:2532',
   'https://localhost:2532',
   'http://localhost:5173',
