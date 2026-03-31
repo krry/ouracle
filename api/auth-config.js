@@ -53,10 +53,20 @@ export const auth = betterAuth({
     },
   },
   // passkey plugin requires better-auth ≥2.x; deferred until upgrade
+  // Shared session cookies across all *.kerry.ink subdomains (Poiesis, etc.)
+  // Set COOKIE_DOMAIN=.kerry.ink and BETTER_AUTH_SECRET to the same value on all apps.
+  advanced: {
+    crossSubDomainCookies: {
+      enabled: !!process.env.COOKIE_DOMAIN,
+      domain: process.env.COOKIE_DOMAIN ?? '',
+    },
+  },
   trustedOrigins: [
     'https://ouracle.kerry.ink',
+    'https://poiesis.kerry.ink',
     'https://localhost:2532',
     'https://souvenir.local:2532',
+    'http://localhost:3000',
   ],
 });
 
