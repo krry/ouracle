@@ -3,6 +3,7 @@
   import { inject } from '@vercel/analytics';
   import { page } from '$app/stores';
   import { onMount, type Snippet } from 'svelte';
+  import Nebula from '$lib/Nebula.svelte';
   import TopBar from '$lib/TopBar.svelte';
   import AmbientControls from '$lib/AmbientControls.svelte';
   import SeekerStatusPanel from '$lib/SeekerStatusPanel.svelte';
@@ -64,6 +65,8 @@
 <svelte:head>
   <title>Ouracle</title>
 </svelte:head>
+
+<div class="nebula-backdrop" aria-hidden="true"><Nebula /></div>
 
 <div class="app">
   <TopBar {drawerOpen} ontoggle={toggleDrawer} />
@@ -164,6 +167,14 @@
 </div>
 
 <style>
+/* ── Nebula backdrop ──────────────────────────────────────────────────── */
+.nebula-backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
 /* ── App shell ────────────────────────────────────────────────────────── */
 .app {
   display: flex;
