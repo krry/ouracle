@@ -68,3 +68,11 @@ apps/web/src/
 - **Phase 0** Foundation ✅
 - **Phase 1** The Plexus 🔄 (`infer.js` built, prompt tuning pending)
 - **Phase 2** The Temple (web Priestess — in progress)
+
+## Nebula background
+
+`apps/web/src/lib/Nebula.svelte` is **pure CSS** — no Three.js, no canvas, no WebGL. Do not restore the WebGL implementation; it filled iOS tab cache.
+
+- Accepts `opacity` prop (default 1); used at full opacity on homepage hero, `0.18` on enquire page background
+- Two `::before`/`::after` pseudo-elements with Ouracle hue vocabulary (core 185°, teal 172°, gold 38°, pink 295°, amber 22°)
+- Animation: prime-factor durations (32s / 41s / 58s hue-rotate), `transform` + `filter` only

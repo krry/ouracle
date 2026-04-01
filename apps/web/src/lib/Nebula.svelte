@@ -1,329 +1,88 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import * as THREE from 'three';
-
   let { opacity = 1 }: { opacity?: number } = $props();
-
-  let canvas: HTMLCanvasElement;
-
-  // ── Deterministic hash ──────────────────────────────────────────────────────
-  function h(seed: number, salt: number): number {
-    let v = (seed ^ (salt * 0x9e3779b9)) >>> 0;
-    v = Math.imul(v ^ (v >>> 16), 0x85ebca6b) >>> 0;
-    v = Math.imul(v ^ (v >>> 13), 0xc2b2ae35) >>> 0;
-    return ((v ^ (v >>> 16)) >>> 0) / 0xffffffff;
-  }
-
-  // ── Nebula palette ──────────────────────────────────────────────────────────
-  const HUES = {
-    core:  185,
-    teal:  172,
-    gold:   38,
-    pink:  295,
-    amber:  22,
-  } as const;
-
-  const ZONES = [
-    { maxP: 0.05, rMin: 0.00, rMax: 0.06, hue: HUES.core  },
-    { maxP: 0.17, rMin: 0.04, rMax: 0.20, hue: HUES.teal  },
-    { maxP: 0.44, rMin: 0.14, rMax: 0.44, hue: HUES.gold  },
-    { maxP: 0.74, rMin: 0.30, rMax: 0.75, hue: HUES.pink  },
-    { maxP: 1.00, rMin: 0.60, rMax: 1.70, hue: HUES.amber },
-  ];
-
-  // ── Sigil texture ───────────────────────────────────────────────────────────
-  function makeSigilTexture(seed: number, forceHue?: number): THREE.CanvasTexture {
-    const size = 192;
-    const cvs  = document.createElement('canvas');
-    cvs.width  = cvs.height = size;
-    const ctx  = cvs.getContext('2d')!;
-    const cx   = size / 2, cy = size / 2;
-    const maxR = size * 0.44;
-
-    const nArms = 5 + Math.floor(h(seed, 0) * 4);
-    const hue   = forceHue ?? Object.values(HUES)[Math.floor(h(seed, 99) * 5)];
-    const lit   = 55 + Math.floor(h(seed, 98) * 25);
-    const a0    = 0.70 + h(seed, 97) * 0.30;
-
-    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
-    grd.addColorStop(0,    `hsla(${hue},65%,${lit}%,${a0})`);
-    grd.addColorStop(0.30, `hsla(${hue},60%,${lit}%,${(a0 * 0.8).toFixed(2)})`);
-    grd.addColorStop(0.70, `hsla(${hue},55%,${lit}%,0.2)`);
-    grd.addColorStop(1,    `hsla(${hue},50%,${lit}%,0)`);
-
-    const pts: [number, number][] = [];
-    for (let i = 0; i < nArms; i++) {
-      const outer = (i * 2 * Math.PI) / nArms - Math.PI / 2;
-      const inner = outer + Math.PI / nArms;
-      const oR    = maxR * (0.55 + h(seed, i * 4 + 1) * 0.45);
-      pts.push([cx + oR * Math.cos(outer), cy + oR * Math.sin(outer)]);
-      const iR    = maxR * (0.12 + h(seed, i * 4 + 2) * 0.22);
-      const aShift = (h(seed, i * 4 + 3) - 0.5) * 0.55;
-      pts.push([cx + iR * Math.cos(inner + aShift), cy + iR * Math.sin(inner + aShift)]);
-    }
-    ctx.beginPath();
-    ctx.moveTo(pts[0][0], pts[0][1]);
-    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
-    ctx.closePath();
-    ctx.fillStyle = grd;
-    ctx.fill();
-
-    if (h(seed, 200) > 0.35) {
-      ctx.fillStyle = `hsla(${hue},70%,${Math.min(lit + 15, 95)}%,0.6)`;
-      for (let i = 0; i < nArms; i++) {
-        const [px, py] = pts[i * 2];
-        ctx.beginPath();
-        ctx.arc(px, py, 1.5 + h(seed, i + 300) * 2.5, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-    if (h(seed, 400) > 0.55) {
-      const sHue  = Object.values(HUES)[Math.floor(h(seed, 401) * 5)];
-      const sAngle = h(seed, 402) * Math.PI;
-      const sLen   = maxR * (0.5 + h(seed, 403) * 0.5);
-      ctx.strokeStyle = `hsla(${sHue},60%,${lit + 10}%,0.4)`;
-      ctx.lineWidth   = 0.8;
-      ctx.beginPath();
-      ctx.moveTo(cx + sLen * Math.cos(sAngle), cy + sLen * Math.sin(sAngle));
-      ctx.lineTo(cx - sLen * Math.cos(sAngle), cy - sLen * Math.sin(sAngle));
-      ctx.stroke();
-    }
-    return new THREE.CanvasTexture(cvs);
-  }
-
-  // ── Star field ──────────────────────────────────────────────────────────────
-  interface Star {
-    sprite: THREE.Sprite;
-    rotRate: number;
-    opacity: number;
-    size: number;
-    twinkleHz: number;
-    twinkleAmp: number;
-    twinkleOff: number;
-  }
-
-  function makeStar(seed: number): Star {
-    const p    = h(seed, 600);
-    const zone = ZONES.find(z => p < z.maxP) ?? ZONES[ZONES.length - 1];
-    const r    = zone.rMin + h(seed, 601) * (zone.rMax - zone.rMin);
-    const theta = h(seed, 602) * Math.PI * 2;
-    const zPos  = (h(seed, 603) - 0.5) * 4;
-
-    const starOpacity = 0.30 + h(seed, 500) * 0.50;
-    const size    = 0.022 + h(seed, 501) * 0.060;
-    const mat = new THREE.SpriteMaterial({
-      map: makeSigilTexture(seed, zone.hue),
-      transparent: true,
-      opacity: starOpacity,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-      rotation: h(seed, 502) * Math.PI * 2,
-    });
-    const sprite = new THREE.Sprite(mat);
-    sprite.position.set(r * Math.cos(theta), r * Math.sin(theta), zPos);
-    sprite.scale.setScalar(size);
-
-    return {
-      sprite,
-      rotRate:    (0.001 + h(seed, 506) * 0.004) * (h(seed, 507) > 0.5 ? 1 : -1),
-      opacity:    starOpacity,
-      size,
-      twinkleHz:  0.04 + h(seed, 508) * 0.12,
-      twinkleAmp: 0.04 + h(seed, 509) * 0.08,
-      twinkleOff: h(seed, 510) * Math.PI * 2,
-    };
-  }
-
-  // ── Glow layers ─────────────────────────────────────────────────────────────
-  interface GlowLayer {
-    sprite:        THREE.Sprite;
-    baseScale:     number;
-    computedScale: number;
-  }
-
-  type GlowStop = { t: number; h: number; s: number; l: number; a: number };
-
-  function makeGlowTex(stops: GlowStop[]): THREE.CanvasTexture {
-    const sz  = 512;
-    const cv  = document.createElement('canvas');
-    cv.width  = cv.height = sz;
-    const ctx = cv.getContext('2d')!;
-    const r   = sz / 2;
-    const grd = ctx.createRadialGradient(r, r, 0, r, r, r);
-    stops.forEach(({ t, h: hue, s, l, a }) => grd.addColorStop(t, `hsla(${hue},${s}%,${l}%,${a})`));
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, sz, sz);
-    return new THREE.CanvasTexture(cv);
-  }
-
-  onMount(() => {
-    // Skip Three.js entirely on touch/mobile — WebGL + 220 sprites + 6 textures at device
-    // pixel ratio consumes enough GPU memory to push iOS past the tab-eviction threshold.
-    // The nebula is purely decorative; mobile users get the dark background instead.
-    if (window.matchMedia('(pointer: coarse)').matches) return;
-
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); // cap at 2× — 3× is wasteful on Retina
-    renderer.setClearColor(0x000000, 0);
-
-    const scene = new THREE.Scene();
-    let aspect = canvas.clientWidth / canvas.clientHeight;
-    renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
-
-    const camera = new THREE.OrthographicCamera(-aspect, aspect, 1, -1, 0.1, 100);
-    camera.position.z = 5;
-
-    // ── Glow layers ────────────────────────────────────────────────────────
-    const glowLayers: GlowLayer[] = [];
-
-    function addGlow(stops: GlowStop[], baseScale: number, glowOpacity: number): GlowLayer {
-      const mat = new THREE.SpriteMaterial({
-        map: makeGlowTex(stops),
-        transparent: true,
-        opacity: glowOpacity,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-      });
-      const sprite = new THREE.Sprite(mat);
-      sprite.position.z = -2;
-      scene.add(sprite);
-      const layer: GlowLayer = { sprite, baseScale, computedScale: 0 };
-      glowLayers.push(layer);
-      return layer;
-    }
-
-    addGlow([
-      { t: 0.00, h: HUES.amber, s:  0, l:  0, a: 0.00 },
-      { t: 0.25, h: HUES.amber, s: 65, l: 30, a: 0.30 },
-      { t: 0.60, h: HUES.amber, s: 55, l: 20, a: 0.12 },
-      { t: 1.00, h: HUES.amber, s: 40, l: 10, a: 0.00 },
-    ], 1.50, 0.9);
-
-    addGlow([
-      { t: 0.00, h: HUES.pink, s:  0, l:  0, a: 0.00 },
-      { t: 0.20, h: HUES.pink, s: 45, l: 40, a: 0.35 },
-      { t: 0.55, h: HUES.pink, s: 40, l: 30, a: 0.18 },
-      { t: 1.00, h: HUES.pink, s: 30, l: 15, a: 0.00 },
-    ], 1.10, 0.85);
-
-    addGlow([
-      { t: 0.00, h: HUES.teal, s:  0, l:  0, a: 0.00 },
-      { t: 0.18, h: HUES.teal, s: 65, l: 50, a: 0.28 },
-      { t: 0.50, h: HUES.pink, s: 45, l: 45, a: 0.18 },
-      { t: 1.00, h: HUES.pink, s: 30, l: 20, a: 0.00 },
-    ], 0.80, 0.80);
-
-    addGlow([
-      { t: 0.00, h: HUES.gold, s:  0, l:  0, a: 0.00 },
-      { t: 0.14, h: HUES.gold, s:  0, l:  0, a: 0.00 },
-      { t: 0.38, h: HUES.gold, s: 80, l: 60, a: 0.55 },
-      { t: 0.58, h: HUES.gold, s: 70, l: 45, a: 0.20 },
-      { t: 1.00, h: HUES.gold, s: 50, l: 20, a: 0.00 },
-    ], 0.55, 0.80);
-
-    addGlow([
-      { t: 0.00, h: HUES.teal, s: 70, l: 65, a: 0.55 },
-      { t: 0.40, h: HUES.teal, s: 65, l: 55, a: 0.35 },
-      { t: 0.75, h: HUES.teal, s: 55, l: 35, a: 0.08 },
-      { t: 1.00, h: HUES.teal, s:  0, l:  0, a: 0.00 },
-    ], 0.28, 0.90);
-
-    addGlow([
-      { t: 0.00, h: HUES.core, s: 30, l: 95, a: 0.90 },
-      { t: 0.30, h: HUES.teal, s: 60, l: 70, a: 0.55 },
-      { t: 0.70, h: HUES.teal, s: 55, l: 45, a: 0.10 },
-      { t: 1.00, h: HUES.teal, s:  0, l:  0, a: 0.00 },
-    ], 0.07, 0.95);
-
-    function updateGlowScales() {
-      const fill = 2 * Math.max(1, aspect);
-      glowLayers.forEach(layer => {
-        layer.computedScale = layer.baseScale * fill;
-        layer.sprite.scale.setScalar(layer.computedScale);
-      });
-    }
-    updateGlowScales();
-
-    // ── Stars ──────────────────────────────────────────────────────────────
-    const groupA = new THREE.Group();
-    const groupB = new THREE.Group();
-    scene.add(groupA, groupB);
-
-    const stars: Star[] = [];
-    for (let i = 0; i < 220; i++) {
-      const star = makeStar(i + 1);
-      (i % 3 === 0 ? groupB : groupA).add(star.sprite);
-      stars.push(star);
-    }
-
-    // ── Resize ─────────────────────────────────────────────────────────────
-    const onResize = () => {
-      const nw = canvas.clientWidth, nh = canvas.clientHeight;
-      aspect = nw / nh;
-      camera.left  = -aspect;
-      camera.right =  aspect;
-      camera.updateProjectionMatrix();
-      renderer.setSize(nw, nh, false);
-      updateGlowScales();
-    };
-    window.addEventListener('resize', onResize);
-
-    // ── Animation loop ─────────────────────────────────────────────────────
-    let raf: number;
-    let t = 0;
-    function tick() {
-      raf = requestAnimationFrame(tick);
-      t += 0.016;
-
-      groupA.rotation.y += 0.00025;
-      groupA.rotation.x += 0.00008;
-      groupB.rotation.y -= 0.00015;
-      groupB.rotation.x += 0.00012;
-
-      const breath = 1 + Math.sin(t * 0.04 * Math.PI * 2) * 0.02;
-      glowLayers.forEach(layer => {
-        layer.sprite.scale.setScalar(layer.computedScale * breath);
-      });
-
-      stars.forEach(({ sprite, rotRate, opacity: starOpacity, size, twinkleHz, twinkleAmp, twinkleOff }) => {
-        const mat   = sprite.material as THREE.SpriteMaterial;
-        mat.rotation += rotRate;
-        const pulse  = Math.sin(t * twinkleHz * Math.PI * 2 + twinkleOff);
-        mat.opacity  = Math.max(0.05, starOpacity + pulse * twinkleAmp);
-        sprite.scale.setScalar(size * (1 + pulse * twinkleAmp * 0.15));
-      });
-
-      renderer.render(scene, camera);
-    }
-    tick();
-
-    // Pause RAF when backgrounded — keeps GPU pipeline off iOS memory pressure watchdog.
-    const onVisibility = () => {
-      if (document.hidden) {
-        cancelAnimationFrame(raf);
-      } else {
-        tick();
-      }
-    };
-    document.addEventListener('visibilitychange', onVisibility);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      document.removeEventListener('visibilitychange', onVisibility);
-      window.removeEventListener('resize', onResize);
-      renderer.dispose();
-    };
-  });
 </script>
 
-<canvas bind:this={canvas} style="opacity: {opacity}" aria-hidden="true"></canvas>
+<div class="nebula" style="opacity: {opacity}" aria-hidden="true"></div>
 
 <style>
-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
+  /* ── Nebula — pure CSS shimmer replacement for WebGL cosmos ──────────────
+     Two pseudo-element layers carrying Ouracle's hue vocabulary drift at
+     prime-factor speeds; ::after also slow-cycles hue-rotate to produce
+     iridescence without any JS, canvas, or GPU memory budget.
+     ───────────────────────────────────────────────────────────────────── */
+
+  .nebula {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* Layer 1 — core nebula arc (core/teal → pink → amber) */
+  .nebula::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+    background:
+      radial-gradient(ellipse 70% 55% at 20% 35%, hsl(185 65% 35% / 0.70), transparent 70%),
+      radial-gradient(ellipse 55% 65% at 78% 62%, hsl(295 45% 35% / 0.60), transparent 65%),
+      radial-gradient(ellipse 80% 42% at 50% 92%, hsl(22  65% 28% / 0.55), transparent 65%);
+    animation: nebula-a 32s ease-in-out infinite alternate;
+  }
+
+  /* Layer 2 — warm arc (gold → teal), drifts opposite + hue cycles */
+  .nebula::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    will-change: transform, filter;
+    background:
+      radial-gradient(ellipse 60% 68% at 80% 18%, hsl(38  80% 42% / 0.52), transparent 65%),
+      radial-gradient(ellipse 52% 58% at 14% 74%, hsl(172 65% 38% / 0.58), transparent 60%);
+    animation:
+      nebula-b   41s ease-in-out infinite alternate-reverse,
+      nebula-hue 58s linear      infinite;
+  }
+
+  /* Light mode — pastels so the shimmer reads on near-white */
+  @media (prefers-color-scheme: light) {
+    .nebula::before {
+      background:
+        radial-gradient(ellipse 70% 55% at 20% 35%, hsl(185 55% 78% / 0.60), transparent 70%),
+        radial-gradient(ellipse 55% 65% at 78% 62%, hsl(295 40% 80% / 0.50), transparent 65%),
+        radial-gradient(ellipse 80% 42% at 50% 92%, hsl(22  55% 82% / 0.45), transparent 65%);
+    }
+    .nebula::after {
+      background:
+        radial-gradient(ellipse 60% 68% at 80% 18%, hsl(38  70% 78% / 0.45), transparent 65%),
+        radial-gradient(ellipse 52% 58% at 14% 74%, hsl(172 55% 76% / 0.50), transparent 60%);
+    }
+  }
+
+  @keyframes nebula-a {
+    0%   { transform: translate( 0.0%,  0.0%); }
+    20%  { transform: translate(-2.5%,  1.5%); }
+    40%  { transform: translate( 1.5%, -2.5%); }
+    60%  { transform: translate(-1.5%,  2.5%); }
+    80%  { transform: translate( 2.5%, -1.5%); }
+    100% { transform: translate(-0.5%,  1.0%); }
+  }
+
+  @keyframes nebula-b {
+    0%   { transform: translate( 0.0%,  0.0%); }
+    25%  { transform: translate( 2.0%, -2.5%); }
+    50%  { transform: translate(-2.5%,  1.5%); }
+    75%  { transform: translate( 1.5%,  2.0%); }
+    100% { transform: translate(-2.0%, -1.5%); }
+  }
+
+  @keyframes nebula-hue {
+    from { filter: hue-rotate(  0deg); }
+    to   { filter: hue-rotate(360deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nebula::before,
+    .nebula::after { animation: none; }
+  }
 </style>
