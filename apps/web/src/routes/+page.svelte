@@ -99,21 +99,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  /* Fallback for mobile — Three.js nebula is skipped on touch devices */
   background: var(--bg);
-}
-/* CSS nebula fallback: visible on touch devices where WebGL is skipped */
-@media (pointer: coarse) {
-  .hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 55% at 52% 48%, hsl(185, 45%, 12%) 0%, transparent 65%),
-      radial-gradient(ellipse 40% 40% at 38% 60%, hsl(295, 30%, 10%) 0%, transparent 60%),
-      radial-gradient(ellipse 30% 35% at 65% 35%, hsl(38, 40%, 9%) 0%, transparent 55%);
-    pointer-events: none;
-  }
 }
 .wordmark {
   font-family: var(--font-display);
@@ -158,10 +144,6 @@
   mix-blend-mode: color-burn;
   @media (prefers-color-scheme: light) {
     mix-blend-mode: color-dodge;
-  }
-  /* Blend modes only look right against the WebGL nebula — disable on touch devices */
-  @media (pointer: coarse) {
-    mix-blend-mode: normal;
   }
 }
 .enter:hover {
