@@ -100,7 +100,7 @@ body {
 
 /* ── Nebula backdrop — pure CSS, global, no canvas ────────────────────── */
 
-/* Layer 1 — core arc (teal → pink → amber), drifts slowly */
+/* Layer 1 — anchor: wide, bright, slow. Sets the scene. */
 body::before {
 	content: '';
 	position: fixed;
@@ -109,13 +109,13 @@ body::before {
 	pointer-events: none;
 	will-change: transform;
 	background:
-		radial-gradient(ellipse 70% 55% at 20% 35%, hsl(185 70% 45% / 0.80), transparent 70%),
-		radial-gradient(ellipse 55% 65% at 78% 62%, hsl(295 55% 45% / 0.70), transparent 65%),
-		radial-gradient(ellipse 80% 42% at 50% 92%, hsl(22  75% 38% / 0.65), transparent 65%);
+		radial-gradient(ellipse 80% 65% at 20% 40%, hsl(185 65% 55% / 0.55), transparent 72%),
+		radial-gradient(ellipse 65% 75% at 80% 65%, hsl(295 50% 55% / 0.45), transparent 68%),
+		radial-gradient(ellipse 90% 50% at 50% 95%, hsl(22  70% 45% / 0.38), transparent 68%);
 	animation: nebula-a 32s ease-in-out infinite alternate;
 }
 
-/* Layer 2 — warm arc (gold → teal), drifts opposite + hue cycles */
+/* Layer 2 — shimmer: smaller, dimmer, iridescent cycle. Adds life. */
 body::after {
 	content: '';
 	position: fixed;
@@ -124,25 +124,25 @@ body::after {
 	pointer-events: none;
 	will-change: transform, filter;
 	background:
-		radial-gradient(ellipse 60% 68% at 80% 18%, hsl(38  85% 48% / 0.65), transparent 65%),
-		radial-gradient(ellipse 52% 58% at 14% 74%, hsl(172 70% 42% / 0.72), transparent 60%);
+		radial-gradient(ellipse 45% 50% at 78% 22%, hsl(38  80% 55% / 0.30), transparent 60%),
+		radial-gradient(ellipse 38% 45% at 18% 72%, hsl(172 65% 50% / 0.28), transparent 55%);
 	animation:
 		nebula-b   41s ease-in-out infinite alternate-reverse,
 		nebula-hue 58s linear      infinite;
 }
 
-/* Light mode — visible pastels on near-white */
+/* Light mode — lift lightness, ease alpha (near-white absorbs more) */
 @media (prefers-color-scheme: light) {
 	body::before {
 		background:
-			radial-gradient(ellipse 70% 55% at 20% 35%, hsl(185 60% 62% / 0.65), transparent 70%),
-			radial-gradient(ellipse 55% 65% at 78% 62%, hsl(295 48% 66% / 0.58), transparent 65%),
-			radial-gradient(ellipse 80% 42% at 50% 92%, hsl(22  65% 68% / 0.52), transparent 65%);
+			radial-gradient(ellipse 80% 65% at 20% 40%, hsl(185 55% 68% / 0.55), transparent 72%),
+			radial-gradient(ellipse 65% 75% at 80% 65%, hsl(295 44% 70% / 0.48), transparent 68%),
+			radial-gradient(ellipse 90% 50% at 50% 95%, hsl(22  60% 70% / 0.42), transparent 68%);
 	}
 	body::after {
 		background:
-			radial-gradient(ellipse 60% 68% at 80% 18%, hsl(38  72% 66% / 0.55), transparent 65%),
-			radial-gradient(ellipse 52% 58% at 14% 74%, hsl(172 62% 60% / 0.62), transparent 60%);
+			radial-gradient(ellipse 45% 50% at 78% 22%, hsl(38  68% 68% / 0.38), transparent 60%),
+			radial-gradient(ellipse 38% 45% at 18% 72%, hsl(172 58% 64% / 0.35), transparent 55%);
 	}
 }
 
