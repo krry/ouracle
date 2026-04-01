@@ -79,7 +79,6 @@ html {
 html, body {
 	height: 100%;
 	overflow: hidden; /* Prevent body scroll, handle in .app-content */
-	background: var(--bg);
 	color: var(--text);
 	font-family: var(--font-display);
 	-webkit-font-smoothing: antialiased;
@@ -88,6 +87,90 @@ html, body {
 	--safe-right: env(safe-area-inset-right, 0px);
 	--safe-bottom: env(safe-area-inset-bottom, 0px);
 	--safe-left: env(safe-area-inset-left, 0px);
+}
+
+html {
+	background: var(--bg);
+}
+
+body {
+	background: transparent;
+	isolation: isolate;
+}
+
+/* ── Nebula backdrop — pure CSS, global, no canvas ────────────────────── */
+
+/* Layer 1 — core arc (teal → pink → amber), drifts slowly */
+body::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	will-change: transform;
+	background:
+		radial-gradient(ellipse 70% 55% at 20% 35%, hsl(185 70% 45% / 0.45), transparent 70%),
+		radial-gradient(ellipse 55% 65% at 78% 62%, hsl(295 55% 45% / 0.38), transparent 65%),
+		radial-gradient(ellipse 80% 42% at 50% 92%, hsl(22  75% 38% / 0.35), transparent 65%);
+	animation: nebula-a 32s ease-in-out infinite alternate;
+}
+
+/* Layer 2 — warm arc (gold → teal), drifts opposite + hue cycles */
+body::after {
+	content: '';
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	will-change: transform, filter;
+	background:
+		radial-gradient(ellipse 60% 68% at 80% 18%, hsl(38  85% 48% / 0.35), transparent 65%),
+		radial-gradient(ellipse 52% 58% at 14% 74%, hsl(172 70% 42% / 0.40), transparent 60%);
+	animation:
+		nebula-b   41s ease-in-out infinite alternate-reverse,
+		nebula-hue 58s linear      infinite;
+}
+
+/* Light mode — visible pastels on near-white */
+@media (prefers-color-scheme: light) {
+	body::before {
+		background:
+			radial-gradient(ellipse 70% 55% at 20% 35%, hsl(185 60% 62% / 0.50), transparent 70%),
+			radial-gradient(ellipse 55% 65% at 78% 62%, hsl(295 48% 66% / 0.42), transparent 65%),
+			radial-gradient(ellipse 80% 42% at 50% 92%, hsl(22  65% 68% / 0.38), transparent 65%);
+	}
+	body::after {
+		background:
+			radial-gradient(ellipse 60% 68% at 80% 18%, hsl(38  72% 66% / 0.38), transparent 65%),
+			radial-gradient(ellipse 52% 58% at 14% 74%, hsl(172 62% 60% / 0.44), transparent 60%);
+	}
+}
+
+@keyframes nebula-a {
+	0%   { transform: translate( 0.0%,  0.0%); }
+	20%  { transform: translate(-2.5%,  1.5%); }
+	40%  { transform: translate( 1.5%, -2.5%); }
+	60%  { transform: translate(-1.5%,  2.5%); }
+	80%  { transform: translate( 2.5%, -1.5%); }
+	100% { transform: translate(-0.5%,  1.0%); }
+}
+
+@keyframes nebula-b {
+	0%   { transform: translate( 0.0%,  0.0%); }
+	25%  { transform: translate( 2.0%, -2.5%); }
+	50%  { transform: translate(-2.5%,  1.5%); }
+	75%  { transform: translate( 1.5%,  2.0%); }
+	100% { transform: translate(-2.0%, -1.5%); }
+}
+
+@keyframes nebula-hue {
+	from { filter: hue-rotate(  0deg); }
+	to   { filter: hue-rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	body::before,
+	body::after { animation: none; }
 }
 
 /* Safe areas handled per-component (fixed elements are viewport-relative;

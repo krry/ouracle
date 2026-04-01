@@ -1,6 +1,4 @@
 <script lang="ts">
-  import Nebula from '$lib/Nebula.svelte';
-
   let showInstall = $state(false);
 
   // Detect platform for install instructions
@@ -15,7 +13,6 @@
 </script>
 
 <div class="hero">
-  <Nebula />
   <a href="/enquire" class="enter"><span class="enter-label">enter</span></a>
 </div>
 
