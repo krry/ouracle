@@ -9,7 +9,7 @@
   import SeekerStatusPanel from '$lib/SeekerStatusPanel.svelte';
   import { ttsEnabled, ttsVoice, creds, authed, seekerState, pendingRite, messages } from '$lib/stores';
   import type { Credentials } from '$lib/stores';
-  import { KOKORO_VOICES } from '$lib/tts-client';
+  import { TTS_VOICES } from '$lib/tts-client';
   import { signOut } from '$lib/auth';
 
   inject();
@@ -119,7 +119,7 @@
           onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value)}
           aria-label="Clea's voice"
         >
-          {#each KOKORO_VOICES as v}
+          {#each TTS_VOICES as v}
             <option value={v.id}>{v.label}</option>
           {/each}
         </select>
@@ -144,26 +144,25 @@
 
     <div class="drawer-footer">
       {#if $authed}
-        <button class="drawer-exit" onclick={leave}>exit the temple</button>
+        <button class="drawer-exit" onclick={leave}>sign out</button>
       {:else}
-        <a href="/enquire" class="drawer-enter" onclick={closeDrawer}>enter the temple</a>
+        <a href="/enquire" class="drawer-enter" onclick={closeDrawer}>sign in</a>
       {/if}
     </div>
   </div>
 
   <main class="app-content">
     {@render children()}
+    {#if !isEnquire}
+      <footer>
+        <span><span class="flip-x">©</span> 2026 <a href="https://kerry.ink">kerry.ink</a></span>
+      </footer>
+      <webring-widget
+        data-source="https://kerry.ink/widgets/webring/webring.json"
+        theme="auto"
+      ></webring-widget>
+    {/if}
   </main>
-
-  {#if !isEnquire}
-    <footer>
-      <span><span class="flip-x">©</span> 2026 <a href="https://kerry.ink">kerry.ink</a></span>
-    </footer>
-    <webring-widget
-      data-source="https://kerry.ink/widgets/webring/webring.json"
-      theme="auto"
-    ></webring-widget>
-  {/if}
 </div>
 
 <style>
@@ -173,6 +172,7 @@
   inset: 0;
   pointer-events: none;
   z-index: -1;
+  opacity: 0.9;
 }
 
 /* ── App shell ────────────────────────────────────────────────────────── */
@@ -195,7 +195,7 @@
   position: fixed;
   inset: 0;
   z-index: 38;
-  background: hsl(0 0% 0% / 0.5);
+  background: color-mix(in srgb, var(--bg) 56%, transparent);
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
 }
@@ -207,8 +207,10 @@
   left: 0;
   bottom: 0;
   width: min(76vw, 300px);
-  background: var(--surface);
-  border-right: 1px solid var(--border);
+  background: var(--glass-wash), var(--glass-bg-strong);
+  border-right: 1px solid var(--glass-border);
+  backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
   z-index: 39;
   display: flex;
   flex-direction: column;
@@ -407,15 +409,13 @@
 /* ── Footer ───────────────────────────────────────────────────────────── */
 footer {
   display: flex;
-  position: absolute;
-  bottom: 0;
-  right: 0;
   justify-content: space-between;
   padding: var(--space-xs) var(--space-sm);
   font-size: 0.75rem;
   color: var(--muted);
   flex-shrink: 0;
   justify-content: flex-end;
+  width: 100%;
 }
 footer a { color: var(--muted); }
 .flip-x {

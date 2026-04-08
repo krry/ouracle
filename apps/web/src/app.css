@@ -21,6 +21,15 @@
 	--muted:     hsl(var(--hue), 8%, 62%);
 	--text:      hsl(var(--hue), 10%, 82%);
 	--accent:    hsl(var(--accent-hue), 60%, 65%);
+	--glass-bg: hsl(var(--hue) 18% 8% / 0.42);
+	--glass-bg-strong: hsl(var(--hue) 20% 8% / 0.62);
+	--glass-border: hsl(var(--hue) 12% 78% / 0.12);
+	--glass-shadow: 0 24px 80px hsl(0 0% 0% / 0.22);
+	--glass-blur: 18px;
+	--glass-saturate: 135%;
+	--glass-wash:
+		linear-gradient(180deg, hsl(0 0% 100% / 0.08), hsl(0 0% 100% / 0.01)),
+		linear-gradient(135deg, hsl(var(--accent-hue) 70% 70% / 0.08), transparent 55%);
 
 	--accent-hue: var(--hue-jing);
 	animation: accent-breathe 90s ease-in-out infinite;
@@ -61,6 +70,13 @@
     --muted:   hsl(var(--hue), 8%, 38%);
     --text:    hsl(var(--hue), 10%, 10%);
     --accent:  hsl(var(--accent-hue), 60%, 40%);
+		--glass-bg: hsl(var(--hue) 35% 98% / 0.46);
+		--glass-bg-strong: hsl(var(--hue) 26% 96% / 0.72);
+		--glass-border: hsl(var(--hue) 16% 18% / 0.12);
+		--glass-shadow: 0 28px 72px hsl(var(--hue) 30% 30% / 0.12);
+		--glass-wash:
+			linear-gradient(180deg, hsl(0 0% 100% / 0.42), hsl(0 0% 100% / 0.12)),
+			linear-gradient(135deg, hsl(var(--accent-hue) 80% 48% / 0.06), transparent 55%);
   }
 }
 
@@ -96,6 +112,22 @@ html {
 body {
 	background: transparent;
 	isolation: isolate;
+}
+
+.thin-material {
+	background: var(--glass-wash), var(--glass-bg);
+	border: 1px solid var(--glass-border);
+	box-shadow: var(--glass-shadow);
+	backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+	-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+}
+
+.thin-material-strong {
+	background: var(--glass-wash), var(--glass-bg-strong);
+	border: 1px solid var(--glass-border);
+	box-shadow: var(--glass-shadow);
+	backdrop-filter: blur(calc(var(--glass-blur) + 4px)) saturate(calc(var(--glass-saturate) + 10%));
+	-webkit-backdrop-filter: blur(calc(var(--glass-blur) + 4px)) saturate(calc(var(--glass-saturate) + 10%));
 }
 
 /* Safe areas handled per-component (fixed elements are viewport-relative;

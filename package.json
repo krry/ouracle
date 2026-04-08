@@ -4,6 +4,7 @@
   "description": "Multimodal oracle drawing on Tarot de Marseilles, I Ching, Gene Keys, Delphic maxims, and other divination traditions.",
   "scripts": {
     "postinstall": "bash scripts/init-rites.sh",
+    "dev": "bash -lc 'trap \"kill 0\" EXIT INT TERM; (cd api && bun run dev) & (cd apps/web && npm run dev) & wait'",
     "start": "cd api && bun start"
   },
   "repository": {

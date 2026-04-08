@@ -7,7 +7,7 @@
  */
 import { browser } from '$app/environment';
 
-// ── Voice catalogue (Fish Audio voices) ──────────────────────────────────────
+// ── Voice catalogue ───────────────────────────────────────────────────────────
 
 export interface FishVoice {
 	id: string;
@@ -15,15 +15,12 @@ export interface FishVoice {
 	note: string;
 }
 
-export const FISH_VOICES: FishVoice[] = [
+export const TTS_VOICES: FishVoice[] = [
 	{ id: 'elf',       label: 'Galadriel',  note: 'warm · otherworldly' },
 	{ id: 'poet',      label: 'Ondrea',     note: 'calm · expressive'   },
 	{ id: 'alien',     label: 'Alf',        note: 'strange · distinct'  },
 	{ id: 'president', label: 'Oprah',      note: 'rich · resonant'     },
 ];
-
-// Backward-compat alias — layout and Chat import KOKORO_VOICES; no rename needed yet
-export const KOKORO_VOICES = FISH_VOICES;
 
 export const DEFAULT_VOICE = 'elf';
 
@@ -45,9 +42,6 @@ export function webSpeech(text: string): Promise<void> {
 		speechSynthesis.speak(u);
 	});
 }
-
-/** No-op: Kokoro removed. Web Speech fallback is triggered directly in Chat.svelte. */
-export function preloadKokoro() { /* no-op */ }
 
 /**
  * synthesize() — kept for AudioQueue API compatibility.

@@ -8,8 +8,8 @@
 <div class="inner">
   <button class="close-btn" onclick={ondismiss} aria-label="Close">✕</button>
   <p class="quip">{quip}</p>
-  <button onclick={onsignin}>enter the temple</button>
-  <p class="sub">or close this tab and carry the questions with you</p>
+  <button onclick={onsignin}>sign in to continue</button>
+  <p class="sub">or back away and carry the mystery with you</p>
 </div>
 
 <style>
@@ -53,7 +53,7 @@ button {
   cursor: pointer;
   font-family: var(--font-mono);
   font-size: 0.9rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
   padding: 0.75rem 1.5rem;
   transition: opacity 0.15s;
 }

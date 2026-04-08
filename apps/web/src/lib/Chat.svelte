@@ -5,7 +5,7 @@
 	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState } from './stores';
 	import type { CardData, RiteData, VagalInfo, BeliefInfo, QualityInfo, Message } from './stores';
 	import { enquire, stt } from './api';
-	import { webSpeech, KOKORO_VOICES, DEFAULT_VOICE } from './tts-client';
+	import { webSpeech, TTS_VOICES, DEFAULT_VOICE } from './tts-client';
 	import Breath from './Breath.svelte';
 	import OraclePanel from './OraclePanel.svelte';
 	import SeekerStatusPanel from './SeekerStatusPanel.svelte';
@@ -359,7 +359,7 @@
 				creds.logout();
 				if (text.trim()) {
 					// Expired mid-conversation — tell the seeker
-					messages.update(m => [...m, { role: 'assistant', content: '*Your session has expired. Please sign in again to continue.*' }]);
+					messages.update(m => [...m, { role: 'assistant', content: '*The priestess has slipped out. Please sign in again to continue.*' }]);
 				} else {
 					// Expired on bootstrap call (empty text) — silently re-init as guest
 					// so the user sees the normal guest greeting instead of an error.
@@ -597,7 +597,7 @@
 			{#if msg.role !== 'system' && msg.role !== 'card'}
 				<div class="msg {msg.role}" class:covenant-reminder={msg.isCovenantReminder}>
 					{#if !msg.isCovenantReminder}
-						<span class="label">{msg.role === 'user' ? 'you' : guestMode ? 'phemonoe' : 'clea'}</span>
+						<span class="label">{msg.role === 'user' ? 'you' : guestMode ? 'Phemonoe' : 'Clea'}</span>
 					{/if}
 					<div class="prose">{@html renderMarkdown(msg.content)}</div>
 				</div>
@@ -631,19 +631,28 @@
 		/>
 	</div>
 
-	{#if (guestLocked || returningGuest) && onsignin}
-		<div class="guest-lock-banner">
-			{#if guestLocked}
-				Priestess Clea awaits you in the temple.
-			{:else}
-				Phemonoe remembers you.
-			{/if}
-			<button class="guest-lock-cta" onclick={onsignin}>sign in to continue</button>
-			{#if returningGuest && !guestLocked}
-				<button class="guest-dismiss" onclick={() => returningGuest = false}>continue as guest</button>
-			{/if}
-		</div>
-	{/if}
+		{#if (guestLocked || returningGuest) && onsignin}
+			<div class="guest-lock-banner">
+				<div class="guest-lock-copy">
+					{#if guestLocked}
+						Clea awaits you.
+					{:else}
+						Phemonoe greets you.
+					{/if}
+				</div>
+				<div class="guest-lock-actions">
+					<button class="guest-lock-cta" onclick={onsignin}>
+						<span>Sign in</span>
+						{#if guestLocked}
+							<span>to continue</span>
+						{/if}
+					</button>
+					{#if returningGuest && !guestLocked}
+						<button class="guest-dismiss" onclick={() => returningGuest = false}>or remain a guest</button>
+					{/if}
+				</div>
+			</div>
+		{/if}
 
 	<!-- input bar -->
 	<div class="bar">
@@ -664,7 +673,7 @@
 					<div class="ptt-hint-pop" class:listening={$voiceState === 'listening'} class:transcribing={$voiceState === 'transcribing'}>
 						{#if $voiceState === 'listening'}listening…
 						{:else if $voiceState === 'transcribing'}transcribing…
-						{:else}hold to speak · space{/if}
+						{:else}hold [space] to speak{/if}
 					</div>
 				{/if}
 			</div>
@@ -678,7 +687,7 @@
 				role="textbox"
 				aria-multiline="true"
 				aria-label="Type to speak…"
-				data-placeholder={guestLocked ? 'sign in to continue…' : 'Type to speak…'}
+				data-placeholder={guestLocked ? 'Sign in to continue…' : 'Type to speak…'}
 				contenteditable={$streaming || guestLocked ? 'false' : 'true'}
 				enterkeyhint="send"
 				autocapitalize="sentences"
@@ -708,10 +717,10 @@
 				aria-label="Clea's voice"
 				title="Clea's voice"
 			>
-				{#each KOKORO_VOICES as v}
-					<option value={v.id}>{v.label}</option>
-				{/each}
-			</select>
+					{#each TTS_VOICES as v}
+						<option value={v.id}>{v.label}</option>
+					{/each}
+				</select>
 		</div>
 	</div>
 </div>
@@ -722,6 +731,18 @@
 	display: flex;
 	flex-direction: column;
 	position: relative;
+	isolation: isolate;
+}
+
+.shell::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background:
+		linear-gradient(180deg, color-mix(in srgb, var(--glass-bg) 82%, transparent), transparent 24%),
+		radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 46%);
+	z-index: 0;
 }
 
 .breath-layer {
@@ -729,6 +750,7 @@
 	inset: 0;
 	pointer-events: none;
 	opacity: calc(var(--ambience, 1) * 0.6);
+	z-index: 0;
 }
 
 .msgs {
@@ -741,6 +763,7 @@
 	justify-content: flex-end;
 	gap: 1.5rem;
 	scroll-behavior: smooth;
+	z-index: 1;
 }
 
 /* ── Oracle Panel wrapper ───────────────────────────────────────────────── */
@@ -749,9 +772,9 @@
 	top: var(--topbar-h, 2.5rem);
 	right: 1.25rem;
 	z-index: 20;
-	width: 300px;
-	backdrop-filter: blur(1rem);
-	-webkit-backdrop-filter: blur(1rem);
+	width: clamp(360px, 28vw, 460px);
+	backdrop-filter: blur(calc(var(--glass-blur) + 1px)) saturate(var(--glass-saturate));
+	-webkit-backdrop-filter: blur(calc(var(--glass-blur) + 1px)) saturate(var(--glass-saturate));
 }
 @media (max-width: 640px) {
 	.panel-wrap {
@@ -779,7 +802,7 @@
 @media (min-width: 1025px) {
 	.msgs {
 		padding-left: 280px;  /* space for left panel + gap */
-		padding-right: 320px; /* space for right panel + gap */
+		padding-right: 480px; /* space for right panel + gap */
 	}
 }
 
@@ -845,13 +868,25 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	flex-wrap: wrap;
 	gap: 0.75rem;
 	padding: 0.75rem 1rem;
 	color: var(--muted);
 	font-size: 0.72rem;
 	font-family: var(--font-mono);
 	letter-spacing: 0.06em;
-	text-transform: lowercase;
+}
+
+.guest-lock-copy {
+	text-align: center;
+}
+
+.guest-lock-actions {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
+	flex-wrap: wrap;
 }
 
 .guest-lock-cta {
@@ -887,14 +922,28 @@
 	border-color: var(--accent);
 }
 
+@media (max-width: 720px) {
+	.guest-lock-banner {
+		flex-direction: column;
+	}
+
+	.guest-lock-actions {
+		width: 100%;
+	}
+}
+
 .bar {
 	display: flex;
 	align-items: flex-end;
 	gap: 1rem;
 	padding: 0.75rem 1rem;
 	padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
-	border-top: 1px solid var(--border);
-	background: var(--bg);
+	border-top: 1px solid var(--glass-border);
+	background: var(--glass-wash), color-mix(in srgb, var(--glass-bg-strong) 94%, transparent);
+	backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
+	-webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
+	position: relative;
+	z-index: 2;
 }
 
 .input-wrap {
@@ -906,8 +955,8 @@
 
 .chat-input {
 	flex: 1;
-	background: var(--surface);
-	border: 1px solid var(--border);
+	background: color-mix(in srgb, var(--glass-bg-strong) 92%, transparent);
+	border: 1px solid var(--glass-border);
 	border-radius: var(--radius);
 	color: var(--text);
 	font-family: var(--font-mono);
@@ -1014,8 +1063,8 @@
 }
 
 .ptt {
-	background: var(--surface);
-	border: 1px solid var(--border);
+	background: color-mix(in srgb, var(--glass-bg-strong) 88%, transparent);
+	border: 1px solid var(--glass-border);
 	border-radius: 50%;
 	color: var(--muted);
 	cursor: pointer;
@@ -1076,8 +1125,8 @@
 }
 
 .tts-toggle {
-	background: var(--surface);
-	border: 1px solid var(--border);
+	background: color-mix(in srgb, var(--glass-bg-strong) 88%, transparent);
+	border: 1px solid var(--glass-border);
 	border-radius: 50%;
 	color: var(--muted);
 	cursor: pointer;
@@ -1106,13 +1155,13 @@
 }
 
 .card-body {
-	border: 1px solid var(--border);
+	border: 1px solid var(--glass-border);
 	border-radius: var(--radius);
 	padding: 1rem 1.25rem;
 	display: flex;
 	flex-direction: column;
 	gap: 0.6rem;
-	background: rgba(255,255,255,0.02);
+	background: color-mix(in srgb, var(--glass-bg) 80%, transparent);
 }
 
 .card-title {

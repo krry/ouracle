@@ -108,6 +108,17 @@
     position: relative;
     z-index: 1;
     height: 100%;
+    isolation: isolate;
+  }
+  .content-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--glass-bg) 88%, transparent), transparent 28%),
+      linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--bg) 14%, transparent) 100%);
+    z-index: 0;
   }
   .content-wrapper.blurred .chat-stage {
     filter: blur(10px) saturate(180%);
@@ -115,6 +126,7 @@
   }
   .chat-stage {
     position: relative;
+    z-index: 1;
     height: 100%;
     overflow: hidden;
   }

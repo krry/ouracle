@@ -12,54 +12,51 @@
 
 </script>
 
-<div class="hero">
-  <a href="/enquire" class="enter"><span class="enter-label">enter</span></a>
-</div>
+<div class="home-shell">
+  <section class="hero thin-material">
+    <div class="hero-copy">
+      <p class="hero-kicker">A vital one-a-day</p>
+      <h1>Contemplation in Motion</h1>
+      <p class="hero-text">
+        Enter, enquire, question and answer, the priestess will listen, the ouracle speaks. You complete the rite and return again.
+      </p>
+    </div>
+    <a href="/enquire" class="enter"><span class="enter-label">enter</span></a>
+  </section>
 
-<section class="about">
-  <div class="prose">
+  <section class="about">
+    <div class="prose thin-material">
     <h2>A space, not an app</h2>
     <p>
-      Ouracle is a ritual space for reflection. Clea — named for the priestess
-      of the Oracle at Delphi — is not here to tell you what you want to hear.
-      She listens for the meaning beneath what you say, reflects what you already
-      know, and responds with what you need to hear and what you need to do next.
-      Nothing scripted. No two sessions alike.
+      Ouracle is a ritual space for reflection. Clea — named for the priestess of the Oracle at Delphi — is not here to tell you what you want to hear. She listens for the meaning beneath what you say, reflects what you already know, and responds with what you need to hear and what you need to do next. Nothing scripted. No two sessions alike.
     </p>
-  </div>
-  <div class="prose">
+    </div>
+    <div class="prose thin-material">
     <h2>A question. A rite. Return.</h2>
     <p>
-      Think of it as a daily game: bring a question, leave with a rite to enact.
-      Speak or type — Clea prefers your voice. Free to begin, no account needed.
-      <button class="install-link" onclick={() => showInstall = true}>Add to your home screen</button>
-      and treat it like a practice.
+      Think of it as a daily game: bring a question, leave with a rite to enact. Speak or type — Clea prefers your voice. Free to begin, no account needed. <button class="install-link" onclick={() => showInstall = true}>Add to your home screen</button> and treat it like a practice.
     </p>
-  </div>
-  <div class="prose">
+    </div>
+    <div class="prose thin-material">
     <h2>From here to the next octave</h2>
     <p>
-      For when advice isn't enough. For when you already know the answer but haven't
-      said it aloud yet. Clea draws on healing modalities and wisdom traditions
-      worldwide — including dozens of divination decks by <a href="https://howstrangeitistobeanythingatall.com" target="_blank" rel="noopener">Alan Botts</a>. She guides you
-      one rite at a time, and keeps an encrypted record of the journey in your Totem.
+      For when advice isn't enough. For when you already know the answer but haven't said it aloud yet. Clea draws on healing modalities and wisdom traditions worldwide — including dozens of divination decks by <a href="https://howstrangeitistobeanythingatall.com" target="_blank" rel="noopener">Alan Botts</a>. She guides you one rite at a time, and keeps an encrypted record of the journey in your Totem.
     </p>
-  </div>
-  <div class="prose">
+    </div>
+    <div class="prose thin-material">
     <h2>Drawn from everywhere. Bound to nothing.</h2>
     <p>
-      Ouracle draws from wisdom traditions across cultures and throughout human
-      history. It is not a faith, not therapy, not a diagnosis. It's a safe ritual
-      frame that meets you exactly where you are — and asks only: what is the next
-      right thing?
+      Ouracle draws from wisdom traditions across cultures and throughout human history and modernity. It is not a faith, not therapy, not a diagnosis. It's a safe ritual frame that meets you exactly where you are — and asks only: what is the next right thing?
     </p>
-  </div>
-</section>
+    </div>
+  </section>
+</div>
 
 {#if showInstall}
-  <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-  <div class="install-backdrop" role="dialog" aria-modal="true" onclick={() => showInstall = false} onkeydown={(e) => e.key === 'Escape' && (showInstall = false)}>
-    <div class="install-modal" onclick={(e) => e.stopPropagation()}>
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div class="install-backdrop" role="dialog" aria-modal="true" tabindex="-1" onclick={() => showInstall = false} onkeydown={(e) => e.key === 'Escape' && (showInstall = false)}>
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div class="install-modal" role="document" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()}>
       <button class="install-close" onclick={() => showInstall = false} aria-label="Close">✕</button>
       <h3>Add Ouracle to your home screen</h3>
 
@@ -89,65 +86,79 @@
 {/if}
 
 <style>
+.home-shell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding: clamp(1rem, 2vw, 1.5rem);
+  padding-bottom: calc(var(--space-lg) + 3rem);
+}
 .hero {
   position: relative;
-  height: calc(100dvh - 57px);
+  min-height: calc(100dvh - var(--topbar-h, 57px) - 1.5rem);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: clamp(2rem, 6vw, 6rem);
   overflow: hidden;
-  background: var(--bg);
+  border-radius: 28px;
+  padding: clamp(2rem, 5vw, 4rem);
 }
-.wordmark {
-  font-family: var(--font-display);
-  font-size: clamp(3rem, 10vw, 5rem);
-  font-weight: 600;
-  letter-spacing: 0.3em;
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  order: 2;
+  gap: 1rem;
+  max-width: 32rem;
+}
+.hero-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
   color: var(--accent);
-  line-height: 1;
-  /* Soft glow ties the wordmark into the nebula */
-  text-shadow: 0 0 48px color-mix(in srgb, var(--accent) 55%, transparent);
 }
-.tagline {
+.hero h1 {
   font-family: var(--font-display);
-  font-size: 1.2rem;
-  font-style: italic;
-  color: var(--text);
-  letter-spacing: 0.1em;
+  font-size: clamp(2.326rem, 7vw, 5.6rem);
+  font-weight: 500;
+  line-height: 0.96;
+  letter-spacing: -0.03em;
+  max-width: 12ch;
 }
-.body {
-  font-size: 0.95rem;
-  line-height: var(--leading);
-  color: var(--muted);
-  max-width: 420px;
+.hero-text {
+  max-width: 26rem;
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--text) 72%, var(--muted));
 }
 .enter {
-  display: block;
+  order: 1;
+  display: grid;
+  place-items: center;
   border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
   border-radius: 100%;
   color: var(--accent);
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 12vh;
+  font-size: clamp(3rem, 9vw, 6rem);
   letter-spacing: 0.2em;
-  padding: 0em 2.25rem 0.25em;
+  padding: 0 2.25rem 0.2em;
   text-decoration: none;
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  width: content-fit;
-  height: content-fit;
-  line-height: 4;
-  transition: color 300ms ease-in-out, background 300ms ease-in-out, backdrop-filter 300ms ease-in-out;
+  background: color-mix(in srgb, var(--glass-bg-strong) 85%, transparent);
+  min-width: clamp(12rem, 28vw, 18rem);
+  aspect-ratio: 1;
+  line-height: 1;
+  box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.18);
+  transition: color 300ms ease-in-out, background 300ms ease-in-out, backdrop-filter 300ms ease-in-out, transform 300ms ease-in-out;
   animation: enter-pulse 2.5s ease-in-out infinite;
-  mix-blend-mode: color-burn;
-  @media (prefers-color-scheme: light) {
-    mix-blend-mode: color-dodge;
-  }
+  backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
 }
 .enter:hover {
   animation: none;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: var(--bg);
+  transform: translateY(-2px) scale(1.02);
+  color: var(--text);
   border-color: var(--accent);
 }
 @keyframes enter-pulse {
@@ -168,12 +179,15 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-md);
-  max-width: var(--max-wide);
+  max-width: min(1120px, 100%);
   margin: 0 auto;
-  padding: var(--space-xl) var(--space-md);
 }
-@media (max-width: 960px)  { .about { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 960px)  { .about { grid-template-columns: 1fr; } }
 @media (max-width: 540px)  { .about { grid-template-columns: 1fr; } }
+.prose {
+  border-radius: 24px;
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+}
 .install-link {
   background: none;
   border: none;
@@ -203,8 +217,8 @@
 }
 
 .install-modal {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--glass-wash), var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
   border-radius: calc(var(--radius) * 3);
   max-width: 380px;
   width: 100%;
@@ -279,4 +293,18 @@
   color: var(--text);
 }
 .prose p { font-size: 0.95rem; line-height: 1.8; color: var(--muted); }
+.prose a { color: var(--accent); }
+
+@media (max-width: 820px) {
+  .hero {
+    min-height: auto;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .enter {
+    min-width: 11rem;
+    align-self: center;
+  }
+}
 </style>

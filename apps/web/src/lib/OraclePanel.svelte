@@ -26,6 +26,7 @@
 
 	let deckPickerOpen = $state(false);
 	let showPractice = $state(false);
+	let expandPracticeCard = $state(false);
 
 	const mode = $derived(
 		$activeRite                 ? 'rite'     :
@@ -37,7 +38,11 @@
 
 	const STAGES: Array<'offered' | 'prescribed' | 'completed'> = ['offered', 'prescribed', 'completed'];
 
-	function dismissCard() { showPractice = false; activeCard.set(null); }
+	function dismissCard() {
+		showPractice = false;
+		expandPracticeCard = false;
+		activeCard.set(null);
+	}
 	function dismissRite() { activeRite.set(null); }
 
 	function handleInterpret() {
@@ -58,6 +63,7 @@
 		if (!$activeCard) return;
 		onDiscussPractice($activeCard);
 		showPractice = false;
+		expandPracticeCard = false;
 		activeCard.set(null);
 	}
 
@@ -70,6 +76,7 @@
 
 	function handleDrawAgain() {
 		showPractice = false;
+		expandPracticeCard = false;
 		activeCard.set(null);
 		activeRite.set(null);
 		onDrawCard();
@@ -78,6 +85,10 @@
 	// Helper to read practice fields safely
 	function field<T>(key: string, fallback: T): T {
 		return ($activeCard?.fields?.[key] as T) ?? fallback;
+	}
+
+	function togglePracticeCardExpansion() {
+		expandPracticeCard = !expandPracticeCard;
 	}
 </script>
 
@@ -137,10 +148,67 @@
 				{#if $activeCard.keywords.length}
 					<div class="card-keywords">{$activeCard.keywords.join(' · ')}</div>
 				{/if}
-				<pre class="card-body">{$activeCard.body}</pre>
+				{#if $activeCard.deck === 'rites'}
+					{#if field('description', '')}
+						<p class="card-summary">{field('description', '')}</p>
+					{/if}
+
+					<div class="practice-meta">
+						{#if field('duration', '')}
+							<span class="practice-chip">{field('duration', '')}</span>
+						{/if}
+						{#if field('movement', '') && (field('movement', '') as string) !== 'none'}
+							<span class="practice-chip">movement: {field('movement', '')}</span>
+						{/if}
+						{#if field('voice', '') && (field('voice', '') as string) !== 'none'}
+							<span class="practice-chip">voice: {field('voice', '')}</span>
+						{/if}
+					</div>
+
+					{#if expandPracticeCard}
+						{#if field('act', '')}
+							<div class="card-detail-block">
+								<div class="card-detail-label">Act</div>
+								<div class="rite-act">{field('act', '')}</div>
+							</div>
+						{/if}
+
+						{#if field('source', '')}
+							<div class="card-detail-block">
+								<div class="card-detail-label">Source</div>
+								<div class="card-source">{field('source', '')}</div>
+							</div>
+						{/if}
+
+						{#if field('invocation', '')}
+							<div class="card-detail-block">
+								<div class="card-detail-label">Invocation</div>
+								<div class="rite-invocation">{field('invocation', '')}</div>
+							</div>
+						{/if}
+
+						{#if (field('textures', []) as string[]).length}
+							<div class="card-detail-block">
+								<div class="card-detail-label">Textures</div>
+								<ul class="rite-textures">
+									{#each field('textures', []) as string[] as t}
+										<li>{t}</li>
+									{/each}
+								</ul>
+							</div>
+						{/if}
+					{/if}
+				{:else}
+					<pre class="card-body">{$activeCard.body}</pre>
+				{/if}
 			</div>
 
 			<div class="panel-actions">
+				{#if $activeCard.deck === 'rites' && (field('act', '') || field('source', '') || field('invocation', ''))}
+					<button class="action-secondary" onclick={togglePracticeCardExpansion}>
+						{expandPracticeCard ? 'Show Less' : 'Show More'}
+					</button>
+				{/if}
 				<button class="action-primary" onclick={handleInterpret} disabled={streaming}>
 					Interpret
 				</button>
@@ -161,12 +229,26 @@
 			<div class="practice-content">
 				<div class="rite-name">{$activeCard.title}</div>
 
+				{#if field('description', '')}
+					<div class="rite-description">{field('description', '')}</div>
+				{/if}
+
 				{#if field('act', '')}
 					<div class="rite-act">{field('act', '')}</div>
 				{/if}
 
 				{#if field('source', '')}
-					<div class="rite-invocation">{field('source', '')}</div>
+					<div class="card-detail-block">
+						<div class="card-detail-label">Source</div>
+						<div class="card-source">{field('source', '')}</div>
+					</div>
+				{/if}
+
+				{#if field('invocation', '')}
+					<div class="card-detail-block">
+						<div class="card-detail-label">Invocation</div>
+						<div class="rite-invocation">{field('invocation', '')}</div>
+					</div>
 				{/if}
 
 				{#if (field('vagalStates', []) as string[]).length}
@@ -290,6 +372,7 @@
 		inset 0 1px 0 rgba(255, 255, 255, 0.1);
 	overflow: hidden;
 	width: 100%;
+	max-height: calc(100vh - var(--topbar-h, 2.5rem) - 1.5rem);
 }
 
 .panel-section {
@@ -297,6 +380,7 @@
 	flex-direction: column;
 	gap: 0.75rem;
 	padding: 1rem;
+	min-height: 0;
 }
 
 /* ── Header row (card / rite) ───────────────────────────────────────────── */
@@ -371,7 +455,9 @@
 	gap: 0;
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
-	overflow: hidden;
+	max-height: min(40vh, 24rem);
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .deck-item {
@@ -394,6 +480,10 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0.4rem;
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	padding-right: 0.2rem;
 }
 
 .card-title {
@@ -421,13 +511,44 @@
 	overflow-y: auto;
 }
 
+.card-summary,
+.rite-description {
+	font-size: 0.86rem;
+	line-height: 1.55;
+	color: var(--text);
+	opacity: 0.88;
+	margin: 0;
+}
+
+.card-detail-block {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+}
+
+.card-detail-label {
+	font-family: var(--font-mono);
+	font-size: 0.58rem;
+	letter-spacing: 0.12em;
+	color: var(--muted);
+	text-transform: uppercase;
+}
+
+.card-source {
+	font-size: 0.78rem;
+	line-height: 1.45;
+	color: var(--muted);
+}
+
 /* ── Practice section ───────────────────────────────────────────────────── */
 .practice-content {
 	display: flex;
 	flex-direction: column;
 	gap: 0.6rem;
+	flex: 1 1 auto;
+	min-height: 0;
 	overflow-y: auto;
-	max-height: 60vh;
+	padding-right: 0.2rem;
 }
 
 .practice-meta {
@@ -452,6 +573,10 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0.6rem;
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	padding-right: 0.2rem;
 }
 
 .rite-name {

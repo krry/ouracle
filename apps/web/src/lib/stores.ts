@@ -129,12 +129,13 @@ function ttsStore() {
 export const ttsEnabled = ttsStore();
 
 export type TtsVoice = string; // Fish Audio voice id, e.g. 'elf'
+const VALID_TTS_VOICES = new Set(['elf', 'poet', 'alien', 'president']);
 
 function ttsVoiceStore() {
 	const stored = browser ? localStorage.getItem('clea_tts_voice') : null;
-	// Migrate legacy Kokoro ids (af_*, am_*, bf_*, bm_*) to Fish Audio default
+	// Migrate legacy Kokoro ids (af_*, am_*, bf_*, bm_*) and stale values to the default voice
 	const raw = stored ?? 'elf';
-	const migrated = /^(af_|am_|bf_|bm_)/.test(raw) ? 'elf' : raw;
+	const migrated = /^(af_|am_|bf_|bm_)/.test(raw) || !VALID_TTS_VOICES.has(raw) ? 'elf' : raw;
 	const { subscribe, set } = writable<TtsVoice>(migrated);
 	return {
 		subscribe,

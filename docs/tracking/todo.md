@@ -1,8 +1,8 @@
 **TODO**
 
+
 # Next to do for v0.4-v0.5
 - [ ] octave-ambiance — requires mapping work first
-- [ ] emo-detector — display the cartesian plot?
 - [ ] companions — post v1.0      
 - [ ] tui-stt — testing + wiring
 - [ ] web-aura — bigger, WebGL work

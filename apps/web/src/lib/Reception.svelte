@@ -117,7 +117,7 @@
 
   <header>
     <h1 class="wordmark">Ouracle</h1>
-    <p class="sub">hear and be heard</p>
+    <p class="sub">contemplation in motion</p>
   </header>
 
   <div class="social-row">
@@ -147,7 +147,7 @@
     {#if error}<p class="error">{error}</p>{/if}
 
     <button type="submit" class="primary" disabled={busy}>
-      {busy ? '…' : mode === 'sign-in' ? 'enter the temple' : 'begin'}
+      {busy ? '…' : mode === 'sign-in' ? 'sign in' : 'begin'}
     </button>
   </form>
 

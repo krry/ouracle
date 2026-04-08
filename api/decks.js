@@ -27,21 +27,65 @@ function parseFrontmatter(raw) {
     if (!kv) { i++; continue; }
     const key = kv[1];
     const val = kv[2].trim();
-    if (val === '[' || val === '') {
-      // multi-line array
+    if (val === '|' || val === '>') {
+      const block = [];
+      i++;
+      while (i < lines.length) {
+        const next = lines[i];
+        if (/^\w+:\s*/.test(next)) break;
+        if (next.startsWith('  ')) {
+          block.push(next.slice(2));
+          i++;
+          continue;
+        }
+        if (next.trim() === '') {
+          block.push('');
+          i++;
+          continue;
+        }
+        break;
+      }
+      result[key] = block.join('\n').trim();
+      continue;
+    } else if (val === '[') {
+      // bracket-opened multi-line array
       const arr = [];
       i++;
-      while (i < lines.length && !lines[i].trim().startsWith(']') && lines[i].trim() !== '') {
+      while (i < lines.length && !lines[i].trim().startsWith(']')) {
         const item = lines[i].trim().replace(/^-\s*/, '').replace(/^"|"$/g, '');
         if (item) arr.push(item);
         i++;
       }
       result[key] = arr;
+    } else if (val === '') {
+      // YAML list written as:
+      // key:
+      //   - item
+      const arr = [];
+      let j = i + 1;
+      while (j < lines.length) {
+        const next = lines[j];
+        if (/^\s*-\s+/.test(next)) {
+          const item = next.trim().replace(/^-\s*/, '').replace(/^"|"$/g, '');
+          if (item) arr.push(item);
+          j++;
+          continue;
+        }
+        if (next.trim() === '') {
+          j++;
+          continue;
+        }
+        break;
+      }
+      result[key] = arr;
+      i = j;
+      continue;
     } else if (val.startsWith('[')) {
       // inline array: ["a", "b"]
       result[key] = val.slice(1, -1).split(',').map(s => s.trim().replace(/^"|"$/g, '')).filter(Boolean);
     } else {
-      result[key] = val.replace(/^"|"$/g, '');
+      const scalar = val.replace(/^"|"$/g, '');
+      result[key] = scalar === 'null' ? '' : scalar;
     }
     i++;
   }
@@ -142,7 +186,9 @@ async function loadRitesDeck() {
 
   for (const p of practices) {
     let markdown = '';
+    let description = '';
     let act = '';
+    let invocation = '';
     let themes = [];
     let octave_qualities = [];
     let textures = [];
@@ -152,7 +198,9 @@ async function loadRitesDeck() {
       const fmMatch = markdown.match(/^---\n([\s\S]*?)\n---/);
       if (fmMatch) {
         const fm = parseFrontmatter(fmMatch[1]);
+        description = typeof fm.description === 'string' ? fm.description : '';
         act = typeof fm.act === 'string' ? fm.act : '';
+        invocation = typeof fm.invocation === 'string' ? fm.invocation : '';
         themes = Array.isArray(fm.themes) ? fm.themes : [];
         octave_qualities = Array.isArray(fm.octave_qualities) ? fm.octave_qualities : [];
         textures = Array.isArray(fm.textures) ? fm.textures : [];
@@ -166,10 +214,12 @@ async function loadRitesDeck() {
       deck: 'rites',
       title: p.name,
       keywords,
-      body: act || p.duration || '',
+      body: description || act || p.duration || '',
       markdown,
       fields: {
+        description,
         act,
+        invocation,
         source: p.source,
         duration: p.duration,
         movement: p.movement,

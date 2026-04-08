@@ -45,14 +45,16 @@
   justify-content: space-between;
   /* top padding absorbs the status bar; side padding stays constant */
   padding: calc(env(safe-area-inset-top, 0px) + 0.6rem) 1rem 0.6rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
+  border-bottom: 1px solid var(--glass-border);
+  background: var(--glass-wash), color-mix(in srgb, var(--glass-bg-strong) 92%, transparent);
   position: sticky;
   top: 0;
   z-index: 30;
   height: var(--topbar-h, 57px);
   box-sizing: border-box;
   transition: opacity 0.4s ease;
+  backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
 }
 
 :global(html.modal-open) .topbar {
