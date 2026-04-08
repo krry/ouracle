@@ -1,4 +1,4 @@
-import { loadTotem, saveTotem, initDevice, loadDevicePublicKey } from './totem';
+import { loadTotem, saveTotem, initDevice, loadDevicePublicKey, decryptDistillation } from './totem';
 import type { TotemData } from './totem';
 
 type LoadFn = (seekerId: string) => Promise<TotemData | null>;

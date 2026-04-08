@@ -149,8 +149,8 @@
 					<div class="card-keywords">{$activeCard.keywords.join(' · ')}</div>
 				{/if}
 				{#if $activeCard.deck === 'rites'}
-					{#if field('description', '')}
-						<p class="card-summary">{field('description', '')}</p>
+					{#if field('summary', '') || field('description', '') || $activeCard.body}
+						<p class="card-summary">{field('summary', '') || field('description', '') || $activeCard.body}</p>
 					{/if}
 
 					<div class="practice-meta">

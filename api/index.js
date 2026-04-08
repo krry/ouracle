@@ -1726,13 +1726,11 @@ app.get('/api/v1/rites', async (req, res) => {
 // GET /api/v1/rites/:slug — full practice data + markdown body
 app.get('/api/v1/rites/:slug', async (req, res) => {
   try {
-    const catalog = JSON.parse(readFileSync(join(RITES_DIR, 'catalog.json'), 'utf8'));
-    const practices = catalog.practices || catalog;
+    const index = JSON.parse(readFileSync(join(RITES_DIR, 'index.json'), 'utf8'));
+    const practices = index.practices || index;
     const practice = practices.find(p => p.slug === req.params.slug);
     if (!practice) return res.status(404).json({ error: 'Practice not found' });
-    const mdPath = join(RITES_DIR, 'practices', practice.file);
-    const markdown = existsSync(mdPath) ? readFileSync(mdPath, 'utf8') : null;
-    res.json({ ...practice, markdown });
+    res.json(practice);
   } catch (e) {
     console.error('[rites/:slug]', e);
     res.status(500).json({ error: 'Failed to load practice', details: String(e) });

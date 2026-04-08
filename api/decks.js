@@ -170,66 +170,52 @@ export async function loadDecks({ force = false } = {}) {
 
 // ── Rites deck loader ─────────────────────────────────────────────────────────
 
-const RITES_CATALOG = join(__dirname, 'data', 'rites', 'catalog.json');
-const RITES_PRACTICES = join(__dirname, 'data', 'rites', 'practices');
+const RITES_INDEX = join(__dirname, 'data', 'rites', 'index.json');
 
 async function loadRitesDeck() {
-  let catalog;
+  let index;
   try {
-    catalog = JSON.parse(await readFile(RITES_CATALOG, 'utf8'));
+    index = JSON.parse(await readFile(RITES_INDEX, 'utf8'));
   } catch {
     return null; // not synced yet — skip silently
   }
 
-  const practices = catalog.practices || catalog;
+  const practices = index.practices || index;
   const cards = [];
 
   for (const p of practices) {
-    let markdown = '';
-    let description = '';
-    let act = '';
-    let invocation = '';
-    let themes = [];
-    let octave_qualities = [];
-    let textures = [];
-
-    try {
-      markdown = await readFile(join(RITES_PRACTICES, p.file), 'utf8');
-      const fmMatch = markdown.match(/^---\n([\s\S]*?)\n---/);
-      if (fmMatch) {
-        const fm = parseFrontmatter(fmMatch[1]);
-        description = typeof fm.description === 'string' ? fm.description : '';
-        act = typeof fm.act === 'string' ? fm.act : '';
-        invocation = typeof fm.invocation === 'string' ? fm.invocation : '';
-        themes = Array.isArray(fm.themes) ? fm.themes : [];
-        octave_qualities = Array.isArray(fm.octave_qualities) ? fm.octave_qualities : [];
-        textures = Array.isArray(fm.textures) ? fm.textures : [];
-      }
-    } catch { /* file missing — catalog-only */ }
-
-    const keywords = [...new Set([...(p.categories || []), ...themes])];
+    const description = typeof p.description === 'string' ? p.description : '';
+    const summary = typeof p.summary === 'string' ? p.summary : '';
+    const act = typeof p.act === 'string' ? p.act : '';
+    const invocation = typeof p.invocation === 'string' ? p.invocation : '';
+    const themes = Array.isArray(p.themes) ? p.themes : [];
+    const octave_qualities = Array.isArray(p.octave_qualities) ? p.octave_qualities : [];
+    const textures = Array.isArray(p.textures) ? p.textures : [];
+    const categories = Array.isArray(p.categories) ? p.categories : [];
+    const keywords = [...new Set([...categories, ...themes])];
 
     cards.push({
       id: p.slug,
       deck: 'rites',
       title: p.name,
       keywords,
-      body: description || act || p.duration || '',
-      markdown,
+      body: summary || description || act || p.duration || '',
+      markdown: p.markdown || '',
       fields: {
         description,
+        summary,
         act,
         invocation,
         source: p.source,
         duration: p.duration,
-        movement: p.movement,
-        voice: p.voice,
-        vagalStates: p.vagalStates || [],
-        categories: p.categories || [],
+        movement: p.movement_component || p.movement || 'none',
+        voice: p.voice_component || p.voice || 'none',
+        vagalStates: p.vagal_states || p.vagalStates || [],
+        categories,
         themes,
         octave_qualities,
         textures,
-        primaryStep: p.primaryStep,
+        primaryStep: p.primary_step || p.primaryStep,
       },
     });
   }

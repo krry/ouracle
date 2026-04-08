@@ -2,8 +2,7 @@
 /**
  * sync-rites.js — fetch rites corpus from krry/rites via GitHub API
  *
- * Downloads dist artifacts (catalog, stepstates, engagement map) and
- * all practice markdown files to api/data/rites/.
+ * Downloads canonical dist artifacts from krry/rites to api/data/rites/.
  *
  * Usage:
  *   bun run sync-rites
@@ -41,23 +40,13 @@ async function downloadRaw(remotePath, localPath) {
 
 async function main() {
   await mkdir(RITES_DIR, { recursive: true });
-  await mkdir(join(RITES_DIR, 'practices'), { recursive: true });
 
   // dist artifacts
   console.log('Fetching rites dist artifacts...');
-  for (const file of ['catalog.json', 'stepstates.json', 'stepstate_engagement.json']) {
+  for (const file of ['index.json', 'catalog.json', 'stepstates.json', 'stepstate_engagement.json']) {
     await downloadRaw(`dist/${file}`, join(RITES_DIR, file));
     console.log(`  ✓ ${file}`);
   }
-
-  // practice markdown files
-  console.log('Fetching practice files...');
-  const entries = await ghGet('practices');
-  const mdFiles = entries.filter(e => e.type === 'file' && e.name.endsWith('.md'));
-  for (const entry of mdFiles) {
-    await downloadRaw(`practices/${entry.name}`, join(RITES_DIR, 'practices', entry.name));
-  }
-  console.log(`  ✓ ${mdFiles.length} practices`);
 
   console.log('Done.');
 }
