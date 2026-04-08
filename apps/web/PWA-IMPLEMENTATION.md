@@ -23,29 +23,32 @@ Enhanced VitePWA plugin with:
 - Cleanup outdated caches on activate
 
 ### 2. `src/routes/+layout.svelte`
-- Added PWA viewport meta tags and Apple/Android links
-- Service Worker registration with update detection
-- Preload link for SW
+- Initializes the PWA registration from `src/lib/pwa.ts`
 - Layout already had safe area CSS; TopBar updated for safe-top
 
-### 3. `src/app.css`
+### 3. `src/lib/pwa.ts`
+- Registers the VitePWA-generated service worker in production only
+- Triggers `registration.update()` on load, focus, visibility changes, and a 5-minute interval
+- Lets VitePWA auto-activate updates and reload the app when a new deployment is available
+
+### 4. `src/app.css`
 - Added CSS custom properties for safe area insets
 - Applied padding to body, fixed elements, and overlays
 - Prevent overscroll rubber-banding on iOS
 
-### 4. `static/offline.html`
+### 5. `static/offline.html`
 Offline fallback page shown when API unavailable
 
-### 5. `static/icon.svg`
+### 6. `static/icon.svg`
 Source SVG for PWA icons (generate PNGs via script)
 
-### 6. `scripts/build-pwa.js`
+### 7. `scripts/build-pwa.js`
 Build helper:
 - Generates all icon sizes from icon.svg using sharp
 - Optionally bumps cache version (`--bump`)
 - Creates `.nojekyll` for GitHub Pages
 
-### 7. `package.json`
+### 8. `package.json`
 Added script: `build:pwa` → runs icon generation then Vite build
 Added `sharp` as dev dependency
 
@@ -56,7 +59,7 @@ Added `sharp` as dev dependency
 cd apps/web
 npm run dev
 ```
-- Service Worker **not registered** (plugin `devOptions` disables it)
+- Service Worker is not registered
 - Cache-busting through query params works automatically
 - Safe area tested via device emulation in Chrome DevTools
 
@@ -66,7 +69,7 @@ cd apps/web
 npm run build:pwa   # Generates icons then builds with SW enabled
 ```
 - Icons generated to `static/icons/` and root `static/`
-- Vite emits `service-worker.js` and `manifest.webmanifest`
+- Vite emits `sw.js` and `manifest.webmanifest`
 - Assets include content hash for cache busting
 
 ## Deployment Notes

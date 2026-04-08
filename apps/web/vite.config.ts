@@ -6,13 +6,8 @@ export default defineConfig({
   plugins: [
     sveltekit(),
     VitePWA({
-      // injectRegister: false — VitePWA's default registration code listens for
-      // 'controllerchange' and calls window.location.reload(). On iOS, the SW is
-      // evicted from storage under memory pressure and reinstalls on return, firing
-      // controllerchange every time → periodic app reloads. We register the SW
-      // ourselves in app.html without the reload handler.
       injectRegister: false,
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'],
       manifest: {
         name: 'Ouracle',
@@ -101,7 +96,7 @@ export default defineConfig({
       },
       // Dev mode: disable caching entirely
       devOptions: {
-        enabled: process.env.NODE_ENV === 'development',
+        enabled: false,
         type: 'module'
       }
     })

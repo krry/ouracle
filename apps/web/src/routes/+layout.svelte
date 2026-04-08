@@ -11,6 +11,7 @@
   import type { Credentials } from '$lib/stores';
   import { TTS_VOICES } from '$lib/tts-client';
   import { signOut } from '$lib/auth';
+  import { initPwa } from '$lib/pwa';
 
   inject();
 
@@ -21,6 +22,7 @@
   // when the software keyboard appears — the keyboard overlays from below.
   // Using vv.height keeps the bar visible and eliminates the blank bottom strip.
   onMount(() => {
+    const destroyPwa = initPwa();
     const vv = window.visualViewport;
     const sync = () => {
       document.documentElement.style.setProperty(
@@ -32,6 +34,7 @@
     vv?.addEventListener('resize', sync);
     vv?.addEventListener('scroll', sync);
     return () => {
+      destroyPwa();
       vv?.removeEventListener('resize', sync);
       vv?.removeEventListener('scroll', sync);
     };
