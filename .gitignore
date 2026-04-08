@@ -14,3 +14,4 @@ data/tts_cache/
 apps/web/.svelte-kit/
 apps/web/*.pem
 api/data/decks/
+.serena/
