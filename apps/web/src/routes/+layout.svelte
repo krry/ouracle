@@ -5,63 +5,42 @@
   import { onMount, type Snippet } from 'svelte';
   import Nebula from '$lib/Nebula.svelte';
   import TopBar from '$lib/TopBar.svelte';
-  import AmbientControls from '$lib/AmbientControls.svelte';
-  import SeekerStatusPanel from '$lib/SeekerStatusPanel.svelte';
-  import { ttsEnabled, ttsVoice, creds, authed, seekerState, pendingRite, messages } from '$lib/stores';
-  import type { Credentials } from '$lib/stores';
-  import { TTS_VOICES } from '$lib/tts-client';
-  import { signOut } from '$lib/auth';
+  import ControlPanel from '$lib/ControlPanel.svelte';
+  import { creds, seekerState } from '$lib/stores';
   import { initPwa } from '$lib/pwa';
 
   inject();
 
   let { children }: { children: Snippet } = $props();
 
-  // Sync visual viewport height to --app-h so the app shell tracks the actual
-  // visible area. In iOS PWA standalone mode, the layout viewport never resizes
-  // when the software keyboard appears — the keyboard overlays from below.
-  // Using vv.height keeps the bar visible and eliminates the blank bottom strip.
   onMount(() => {
     const destroyPwa = initPwa();
     const vv = window.visualViewport;
     const sync = () => {
-      document.documentElement.style.setProperty(
-        '--app-h',
-        `${(vv?.height ?? window.innerHeight)}px`
-      );
+      document.documentElement.style.setProperty('--app-h', `${vv?.height ?? window.innerHeight}px`);
     };
+
     sync();
     vv?.addEventListener('resize', sync);
     vv?.addEventListener('scroll', sync);
+
     return () => {
       destroyPwa();
       vv?.removeEventListener('resize', sync);
       vv?.removeEventListener('scroll', sync);
     };
   });
+
   const isEnquire = $derived($page.url.pathname.startsWith('/enquire'));
 
   let drawerOpen = $state(false);
   function toggleDrawer() { drawerOpen = !drawerOpen; }
   function closeDrawer() { drawerOpen = false; }
 
-  async function leave() {
-    creds.logout();
-    pendingRite.set(null);
-    messages.set([]);
-    seekerState.reset();
-    closeDrawer();
-    await signOut({});
-  }
-
-  // Sync handle from credentials → seekerState for the status panel
   $effect(() => {
     const c = $creds;
-    if (c?.handle) {
-      seekerState.setPartial({ handle: c.handle });
-    } else {
-      seekerState.setPartial({ handle: null });
-    }
+    if (c?.handle) seekerState.setPartial({ handle: c.handle });
+    else seekerState.setPartial({ handle: null });
   });
 </script>
 
@@ -74,7 +53,6 @@
 <div class="app">
   <TopBar {drawerOpen} ontoggle={toggleDrawer} />
 
-  <!-- Drawer backdrop -->
   {#if drawerOpen}
     <div
       class="backdrop"
@@ -84,73 +62,14 @@
     ></div>
   {/if}
 
-  <!-- Left drawer -->
   <div class="drawer" class:open={drawerOpen} aria-hidden={!drawerOpen}>
     <div class="drawer-header">
       <a href="/" class="drawer-wordmark" onclick={closeDrawer}>Ouracle</a>
       <button class="drawer-close" onclick={closeDrawer} aria-label="Close menu">✕</button>
     </div>
 
-    <nav class="drawer-nav">
-      <a href="/clea" onclick={closeDrawer}>
-        <span class="drawer-icon">⌬</span>
-        <span>Clea</span>
-      </a>
-      <a href="/ripl" onclick={closeDrawer}>
-        <span class="drawer-icon">◎</span>
-        <span>ripl</span>
-      </a>
-      <a href="/diy" onclick={closeDrawer}>
-        <span class="drawer-icon">◈</span>
-        <span>D.I.Y.</span>
-      </a>
-    </nav>
-
-    <!-- Mobile-only controls: TTS, voice, ambient, identity -->
-    <div class="drawer-mobile">
-      <hr class="drawer-divider" />
-
-      <div class="drawer-mobile-row">
-        <label class="dm-tts-toggle" title={$ttsEnabled ? "mute Clea's voice" : "enable Clea's voice"}>
-          <input type="checkbox" bind:checked={$ttsEnabled} />
-          <span class="dm-tts-icon">〲</span>
-          <span class="dm-label">voice</span>
-        </label>
-        <select
-          class="dm-voice-select"
-          value={$ttsVoice}
-          onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value)}
-          aria-label="Clea's voice"
-        >
-          {#each TTS_VOICES as v}
-            <option value={v.id}>{v.label}</option>
-          {/each}
-        </select>
-      </div>
-
-      <div class="drawer-mobile-row">
-        <AmbientControls />
-      </div>
-
-      {#if $authed && $creds}
-        <!--<div class="drawer-mobile-row dm-identity">
-          {#if ($creds as Credentials | null)?.handle}
-            <span class="dm-handle">{($creds as Credentials | null)?.handle}</span>
-          {/if}
-        </div>-->
-        <!-- Seeker status panel in drawer (shows brief) -->
-        <div class="drawer-mobile-row dm-seeker-status">
-          <svelte:component this={SeekerStatusPanel} />
-        </div>
-      {/if}
-    </div>
-
-    <div class="drawer-footer">
-      {#if $authed}
-        <button class="drawer-exit" onclick={leave}>sign out</button>
-      {:else}
-        <a href="/enquire" class="drawer-enter" onclick={closeDrawer}>sign in</a>
-      {/if}
+    <div class="drawer-body">
+      <ControlPanel onclose={closeDrawer} />
     </div>
   </div>
 
@@ -169,7 +88,6 @@
 </div>
 
 <style>
-/* ── Nebula backdrop ──────────────────────────────────────────────────── */
 .nebula-backdrop {
   position: fixed;
   inset: 0;
@@ -178,12 +96,11 @@
   opacity: 0.9;
 }
 
-/* ── App shell ────────────────────────────────────────────────────────── */
 .app {
   display: flex;
   flex-direction: column;
-  height: 100dvh; /* fallback before JS sync */
-  height: var(--app-h, 100dvh); /* tracks visualViewport — shrinks with keyboard on iOS PWA */
+  height: 100dvh;
+  height: var(--app-h, 100dvh);
   overflow: hidden;
 }
 
@@ -193,7 +110,6 @@
   overflow-y: auto;
 }
 
-/* ── Drawer backdrop ──────────────────────────────────────────────────── */
 .backdrop {
   position: fixed;
   inset: 0;
@@ -203,13 +119,12 @@
   -webkit-backdrop-filter: blur(3px);
 }
 
-/* ── Left drawer ──────────────────────────────────────────────────────── */
 .drawer {
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
-  width: min(76vw, 300px);
+  width: min(82vw, 360px);
   background: var(--glass-wash), var(--glass-bg-strong);
   border-right: 1px solid var(--glass-border);
   backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
@@ -221,6 +136,7 @@
   transition: transform 0.30s cubic-bezier(0.4, 0, 0.2, 1);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
 .drawer.open { transform: translateX(0); }
 
 .drawer-header {
@@ -253,174 +169,27 @@
   place-items: center;
   transition: color 0.15s;
 }
+
 .drawer-close:hover { color: var(--text); }
 
-.drawer-nav {
+.drawer-body {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 0.75rem 0;
   overflow-y: auto;
+  padding: 1rem;
 }
 
-.drawer-nav a {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.85rem 1.5rem;
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-  text-decoration: none;
-  transition: background 0.12s, color 0.12s;
-  min-height: 48px;
-}
-.drawer-nav a:hover,
-.drawer-nav a:focus-visible {
-  background: color-mix(in srgb, var(--accent) 6%, transparent);
-  color: var(--text);
-  outline: none;
-}
-
-.drawer-icon {
-  font-size: 0.9rem;
-  color: var(--accent);
-  opacity: 0.7;
-  width: 1.2rem;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.drawer-footer {
-  display: flex;
-  padding: 1rem 1.25rem;
-  border-top: 1px solid var(--border);
-  justify-content: center;
-}
-
-.drawer-enter {
-  border: 1px solid var(--accent);
-  border-radius: var(--radius);
-  color: var(--accent);
-  font-family: var(--font-sans);
-  font-size: 0.85rem;
-  letter-spacing: 0.18em;
-  padding: 0.65rem;
-  text-decoration: none;
-  transition: background 0.15s, color 0.15s;
-  min-height: 48px;
-  display: grid;
-  place-items: center;
-}
-.drawer-enter:hover { background: var(--accent); color: var(--bg); }
-
-.drawer-exit {
-  border: 1px solid var(--muted);
-  border-radius: var(--radius);
-  color: var(--muted);
-  font-family: var(--font-sans);
-  font-size: 0.85rem;
-  letter-spacing: 0.18em;
-  padding: 0.65rem;
-  text-decoration: none;
-  transition: background 0.15s, color 0.15s;
-  min-height: 48px;
-  display: grid;
-  place-items: center;
-  background: transparent;
-  cursor: pointer;
-}
-.drawer-exit:hover {
-  background: var(--muted);
-  color: var(--bg);
-}
-
-/* ── Drawer mobile controls ───────────────────────────────────────────── */
-.drawer-mobile {
-  display: none; /* hidden on desktop */
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0 1.25rem 0.75rem;
-}
-
-@media (max-width: 767px) {
-  .drawer-mobile { display: flex; }
-}
-
-.drawer-divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 0.25rem 0;
-}
-
-.drawer-mobile-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  min-height: 40px;
-}
-
-.dm-tts-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  cursor: pointer;
-  color: var(--muted);
-  transition: color 0.15s;
-}
-.dm-tts-toggle input { display: none; }
-.dm-tts-toggle:has(input:checked) { color: var(--accent); }
-
-.dm-tts-icon {
-  font-size: 1rem;
-  line-height: 1;
-}
-
-.dm-label {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.08em;
-}
-
-.dm-voice-select {
-  appearance: none;
-  background: none;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.08em;
-  padding: 0;
-  transition: color 0.15s;
-}
-.dm-voice-select:hover, .dm-voice-select:focus { color: var(--accent); outline: none; }
-.dm-voice-select option { background: var(--bg); color: var(--text); }
-
-.dm-identity {
-  justify-content: space-between;
-}
-
-.dm-handle {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-}
-
-/* ── Footer ───────────────────────────────────────────────────────────── */
 footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  width: 100%;
   padding: var(--space-xs) var(--space-sm);
   font-size: 0.75rem;
   color: var(--muted);
   flex-shrink: 0;
-  justify-content: flex-end;
-  width: 100%;
 }
+
 footer a { color: var(--muted); }
+
 .flip-x {
   display: inline-block;
   transform: rotateY(180deg);

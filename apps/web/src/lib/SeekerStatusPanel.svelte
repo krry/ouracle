@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { seekerState } from './stores';
 	import type { VagalInfo, BeliefInfo, QualityInfo, AffectInfo } from './stores';
+	let { variant = 'compact' }: { variant?: 'compact' | 'expanded' } = $props();
 
 	// Color helpers
 	const confidenceColor = (c: 'low' | 'medium' | 'high' | null) => {
@@ -37,7 +38,7 @@
 	}
 </script>
 
-<div class="seeker-status" class:has-data={$seekerState.affect.valence !== null}>
+<div class="seeker-status" class:has-data={$seekerState.affect.valence !== null} class:expanded={variant === 'expanded'}>
 	<div class="ss-header">
 		<div class="ss-identity">
 			<span class="ss-label">Seeker</span>
@@ -214,6 +215,30 @@
 	.badge-confidence {
 		font-size: 0.6rem;
 		opacity: 0.7;
+	}
+
+	.seeker-status.expanded {
+		padding: 1rem;
+		gap: 0.8rem;
+	}
+	.seeker-status.expanded .ss-header {
+		padding-bottom: 0.2rem;
+		border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+	}
+	.seeker-status.expanded .ss-handle {
+		font-size: 1rem;
+	}
+	.seeker-status.expanded .ss-label {
+		font-size: 0.6rem;
+	}
+	.seeker-status.expanded .ss-affect-plot {
+		max-width: 180px;
+	}
+	.seeker-status.expanded .badge-row {
+		font-size: 0.72rem;
+	}
+	.seeker-status.expanded .badge-label {
+		min-width: 4rem;
 	}
 
 	/* Compact variant for drawer (stacked, no plot? Actually drawer is narrow, we may keep plot small) */

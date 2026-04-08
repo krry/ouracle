@@ -5,10 +5,9 @@
 	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState } from './stores';
 	import type { CardData, RiteData, VagalInfo, BeliefInfo, QualityInfo, Message } from './stores';
 	import { enquire, stt } from './api';
-	import { webSpeech, TTS_VOICES, DEFAULT_VOICE } from './tts-client';
+	import { webSpeech, DEFAULT_VOICE } from './tts-client';
 	import Breath from './Breath.svelte';
-	import OraclePanel from './OraclePanel.svelte';
-	import SeekerStatusPanel from './SeekerStatusPanel.svelte';
+	import SeekerPanel from './SeekerPanel.svelte';
 	import type { Credentials } from './stores';
 	import { incrementGuestTurns, getGuestTurns, GUEST_LIMIT } from './guestSession';
 	import { TotemSession } from './totemSession';
@@ -53,6 +52,7 @@
 	let drawing = $state(false);
 	let inputEl: HTMLDivElement | undefined;
 	let pendingPracticeContext: string | null = null;
+	let railCollapsed = $state(false);
 
 	function handleDeckToggle(id: string, checked: boolean) {
 		const next = new Set(selectedDecks);
@@ -592,7 +592,7 @@
 	</div>
 
 	<!-- message list -->
-	<div class="msgs" bind:this={msgList}>
+	<div class="msgs" class:rail-collapsed={railCollapsed} bind:this={msgList}>
 		{#each $messages as msg}
 			{#if msg.role !== 'system' && msg.role !== 'card'}
 				<div class="msg {msg.role}" class:covenant-reminder={msg.isCovenantReminder}>
@@ -609,16 +609,8 @@
 
 		</div>
 
-	<!-- Left: seeker status panel (desktop) -->
-	{#if $authed}
-	<div class="seeker-panel-wrap">
-		<SeekerStatusPanel />
-	</div>
-	{/if}
-
-	<!-- Right: oracle panel -->
-	<div class="panel-wrap">
-		<OraclePanel
+	<div class="panel-wrap" class:collapsed={railCollapsed}>
+		<SeekerPanel
 			{availableDecks}
 			{selectedDecks}
 			onDeckToggle={handleDeckToggle}
@@ -628,6 +620,7 @@
 			onDiscussPractice={handleDiscussPractice}
 			{drawing}
 			streaming={$streaming}
+			onCollapseChange={(next) => (railCollapsed = next)}
 		/>
 	</div>
 
@@ -705,23 +698,6 @@
 			>ꜛ</button>
 		</div>
 
-		<div class="bar-trailing">
-			<label class="tts-toggle" title={$ttsEnabled ? 'mute Clea\'s voice' : 'enable Clea\'s voice'}>
-				<input type="checkbox" bind:checked={$ttsEnabled} />
-				<span>〲</span>
-			</label>
-			<select
-				class="voice-select"
-				value={$ttsVoice}
-				onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value)}
-				aria-label="Clea's voice"
-				title="Clea's voice"
-			>
-					{#each TTS_VOICES as v}
-						<option value={v.id}>{v.label}</option>
-					{/each}
-				</select>
-		</div>
 	</div>
 </div>
 
@@ -770,39 +746,42 @@
 .panel-wrap {
 	position: fixed;
 	top: var(--topbar-h, 2.5rem);
-	right: 1.25rem;
+	right: 0.5em;
 	z-index: 20;
-	width: clamp(360px, 28vw, 460px);
-	backdrop-filter: blur(calc(var(--glass-blur) + 1px)) saturate(var(--glass-saturate));
-	-webkit-backdrop-filter: blur(calc(var(--glass-blur) + 1px)) saturate(var(--glass-saturate));
+	bottom: calc(var(--input-bar-h) + env(safe-area-inset-bottom, 0px) + 1rem);
+	display: flex;
+	width: max(20rem, 38.2dvw);
+	max-width: calc(100vw - 2rem);
+	overflow: visible;
+	transition: width 0.24s ease, opacity 0.18s ease;
+}
+
+.panel-wrap.collapsed {
+	width: 1rem;
 }
 @media (max-width: 640px) {
 	.panel-wrap {
-		right: 0;
-		left: 0;
-		width: 100%;
+		right: 0.5rem;
+		left: 0.5rem;
+		bottom: calc(var(--input-bar-h) + env(safe-area-inset-bottom, 0px) + 1rem);
+		width: auto;
+		max-width: none;
 	}
-}
 
-/* ── Seeker Status Panel wrapper (desktop left) ───────────────────────────── */
-.seeker-panel-wrap {
-	position: absolute;
-  bottom: 5rem;
-	right: 1.25rem;
-	z-index: 20;
-	width: 260px; /* slightly narrower, fits the status panel */
-}
-@media (max-width: 1024px) {
-	.seeker-panel-wrap {
-		display: none;
+	.panel-wrap.collapsed {
+		left: auto;
+		width: calc(1.25rem + 0.5ch);
 	}
 }
 
 /* ── Main content padding when side panels are visible ─────────────────────── */
 @media (min-width: 1025px) {
 	.msgs {
-		padding-left: 280px;  /* space for left panel + gap */
-		padding-right: 480px; /* space for right panel + gap */
+		padding-right: calc(max(20rem, 38.2dvw) + 1.75rem);
+	}
+
+	.msgs.rail-collapsed {
+		padding-right: 2.75rem;
 	}
 }
 
@@ -820,8 +799,10 @@
 
 .label {
 	font-size: 0.65rem;
-	letter-spacing: 0.15em;
+	letter-spacing: 0.06em;
 	color: var(--muted);
+	font-family: var(--font-mono);
+	text-transform: uppercase;
 }
 
 .msg.user .label { color: var(--accent); }
@@ -934,23 +915,24 @@
 
 .bar {
 	display: flex;
-	align-items: flex-end;
-	gap: 1rem;
-	padding: 0.75rem 1rem;
-	padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+	align-items: center;
+	gap: 0.85rem;
+	padding: 0.45rem 1rem;
+	padding-bottom: max(0.45rem, env(safe-area-inset-bottom, 0px));
 	border-top: 1px solid var(--glass-border);
 	background: var(--glass-wash), color-mix(in srgb, var(--glass-bg-strong) 94%, transparent);
 	backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
 	-webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
 	position: relative;
 	z-index: 2;
+	min-height: var(--input-bar-h);
 }
 
 .input-wrap {
 	flex: 1;
 	position: relative;
 	display: flex;
-	align-items: flex-end;
+	align-items: center;
 }
 
 .chat-input {
@@ -960,13 +942,13 @@
 	border-radius: var(--radius);
 	color: var(--text);
 	font-family: var(--font-mono);
-	font-size: 0.95rem;
+	font-size: 0.9rem;
 	line-height: 1.5;
-	padding: 0.5rem 2.4rem 0.5rem 0.75rem; /* right padding reserves space for send-inline */
+	padding: 0.45rem 2.4rem 0.45rem 0.75rem; /* right padding reserves space for send-inline */
 	outline: none;
 	transition: border-color 0.15s;
 	max-height: 8rem;
-	min-height: calc(1.5em + 1rem);
+	min-height: calc(1.5em + 0.9rem);
 	overflow-y: auto;
 	white-space: pre-wrap;
 	word-break: break-word;
@@ -1031,9 +1013,9 @@
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	color: var(--muted);
-	font-family: var(--font-sans, system-ui, sans-serif);
+	font-family: var(--font-mono);
 	font-size: 0.6rem;
-	letter-spacing: 0.08em;
+	letter-spacing: 0.05em;
 	text-transform: uppercase;
 	white-space: nowrap;
 	padding: 0.3rem 0.6rem;
@@ -1071,11 +1053,16 @@
 	font-size: 1.2rem;
 	height: 2.5rem;
 	width: 2.5rem;
-	display: grid;
-	place-items: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	line-height: 1;
+	font-family: var(--font-mono);
 	transition: all 0.15s;
 	touch-action: none;
 	user-select: none;
+	transform: translateY(-2px);
 }
 
 .ptt.active {
@@ -1095,21 +1082,6 @@
 	opacity: 0.7;
 }
 
-.voice-select {
-	appearance: none;
-	background: none;
-	border: none;
-	color: var(--muted);
-	cursor: pointer;
-	font-family: var(--font-mono);
-	font-size: 0.65rem;
-	letter-spacing: 0.08em;
-	padding: 0;
-	transition: color 0.15s;
-}
-.voice-select:hover, .voice-select:focus { color: var(--accent); outline: none; }
-.voice-select option { background: var(--bg); color: var(--text); }
-
 .bar-leading {
 	display: flex;
 	align-items: center;
@@ -1117,41 +1089,14 @@
 	flex-shrink: 0;
 }
 
-.bar-trailing {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	flex-shrink: 0;
-}
-
-.tts-toggle {
-	background: color-mix(in srgb, var(--glass-bg-strong) 88%, transparent);
-	border: 1px solid var(--glass-border);
-	border-radius: 50%;
-	color: var(--muted);
-	cursor: pointer;
-	font-size: 1.1rem;
-	height: 2.5rem;
-	width: 2.5rem;
-	display: grid;
-	place-items: center;
-	opacity: 0.4;
-	transition: all 0.15s;
-	flex-shrink: 0;
-}
-.tts-toggle input { display: none; }
-.tts-toggle:has(input:checked) {
-	border-color: var(--accent);
-	color: var(--accent);
-	opacity: 1;
-}
-
 /* ── Card message ──────────────────────────────────────────────────────── */
 .card-msg { max-width: 480px; }
 
 .card-label {
 	color: var(--accent) !important;
-	letter-spacing: 0.12em;
+	letter-spacing: 0.06em;
+	font-family: var(--font-mono);
+	text-transform: uppercase;
 }
 
 .card-body {
@@ -1189,7 +1134,4 @@
 
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-@media (max-width: 767px) {
-	.bar-trailing { display: none; }
-}
 </style>

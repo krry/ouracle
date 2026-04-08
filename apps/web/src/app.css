@@ -8,6 +8,12 @@
 	initial-value: 217;
 }
 
+@property --focus-hue {
+	syntax: '<number>';
+	inherits: true;
+	initial-value: 354;
+}
+
 /* ── Ouracle design tokens ─────────────────────────────────────────────── */
 :root {
 	--hue-jing: 217;
@@ -21,6 +27,8 @@
 	--muted:     hsl(var(--hue), 8%, 62%);
 	--text:      hsl(var(--hue), 10%, 82%);
 	--accent:    hsl(var(--accent-hue), 60%, 65%);
+	--focus:     hsl(var(--focus-hue), 78%, 70%);
+	--focus-soft: hsl(var(--focus-hue) 82% 72% / 0.28);
 	--glass-bg: hsl(var(--hue) 18% 8% / 0.42);
 	--glass-bg-strong: hsl(var(--hue) 20% 8% / 0.62);
 	--glass-border: hsl(var(--hue) 12% 78% / 0.12);
@@ -32,6 +40,7 @@
 		linear-gradient(135deg, hsl(var(--accent-hue) 70% 70% / 0.08), transparent 55%);
 
 	--accent-hue: var(--hue-jing);
+	--focus-hue: var(--hue-shen);
 	animation: accent-breathe 90s ease-in-out infinite;
 
 	--radius: 4px;
@@ -50,16 +59,17 @@
 	--space-xl: 8rem;
 	--max-prose: 640px;
 	--max-wide: 1024px;
+	--input-bar-h: 4.35rem;
 
 	/* Topbar height includes status bar safe area so fixed/absolute children can use it */
 	--topbar-h: calc(57px + env(safe-area-inset-top, 0px));
 }
 
 @keyframes accent-breathe {
-	0%   { --accent-hue: 217; }  /* jing — steel blue */
-	33%  { --accent-hue: 354; }  /* shen — crimson    */
-	66%  { --accent-hue:  80; }  /* qi   — gold-green */
-	100% { --accent-hue: 217; }  /* jing — back home  */
+	0%   { --accent-hue: 217; --focus-hue: 354; }  /* jing / shen */
+	33%  { --accent-hue: 354; --focus-hue:  80; }  /* shen / qi   */
+	66%  { --accent-hue:  80; --focus-hue: 217; }  /* qi   / jing */
+	100% { --accent-hue: 217; --focus-hue: 354; }  /* home        */
 }
 
 @media (prefers-color-scheme: light) {
@@ -70,6 +80,8 @@
     --muted:   hsl(var(--hue), 8%, 38%);
     --text:    hsl(var(--hue), 10%, 10%);
     --accent:  hsl(var(--accent-hue), 60%, 40%);
+		--focus:   hsl(var(--focus-hue), 82%, 42%);
+		--focus-soft: hsl(var(--focus-hue) 88% 46% / 0.16);
 		--glass-bg: hsl(var(--hue) 35% 98% / 0.46);
 		--glass-bg-strong: hsl(var(--hue) 26% 96% / 0.72);
 		--glass-border: hsl(var(--hue) 16% 18% / 0.12);
@@ -161,10 +173,68 @@ code, pre, kbd, samp {
 }
 
 button, input, select, textarea, label, .cta {
-	font-family: var(--font-sans);
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	letter-spacing: 0.04em;
+	font-weight: 500;
+}
+
+:where(
+	a,
+	button,
+	input,
+	select,
+	textarea,
+	summary,
+	[role="button"],
+	[tabindex]:not([tabindex="-1"])
+):focus {
+	outline: none;
+}
+
+:where(
+	a,
+	button,
+	input,
+	select,
+	textarea,
+	summary,
+	[role="button"],
+	[tabindex]:not([tabindex="-1"])
+):focus-visible {
+	outline: 2px solid var(--focus);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 4px var(--focus-soft);
+}
+
+:where(button, a, [role="button"]).focus-ring-contained:focus-visible,
+.focus-ring-contained:focus-visible {
+	outline-offset: 0;
+	box-shadow:
+		0 0 0 1px var(--focus),
+		0 0 0 3px var(--focus-soft),
+		inset 0 0 0 1px color-mix(in srgb, var(--focus) 72%, transparent);
 }
 
 p {
 	line-height: var(--leading);
 	color: var(--text);
+}
+
+.glass-block {
+	background: color-mix(in srgb, var(--glass-bg-strong) 86%, transparent);
+	border: 1px solid var(--glass-border);
+	border-radius: 18px;
+	box-shadow:
+		inset 0 1px 0 hsl(0 0% 100% / 0.06),
+		0 8px 28px hsl(0 0% 0% / 0.12);
+}
+
+.rail-shell {
+	background: var(--glass-wash), color-mix(in srgb, var(--glass-bg-strong) 92%, transparent);
+	border: 1px solid var(--glass-border);
+	border-radius: 18px;
+	box-shadow: var(--glass-shadow);
+	backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+	-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
 }

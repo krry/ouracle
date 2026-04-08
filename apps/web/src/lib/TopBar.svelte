@@ -1,19 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { creds, authed, seekerState } from './stores';
-  import type { Credentials } from './stores';
-  import { signOut } from './auth';
-  import AmbientControls from './AmbientControls.svelte';
-
   let { drawerOpen, ontoggle }: { drawerOpen: boolean; ontoggle: () => void } = $props();
-
-  const isEnquire = $derived($page.url.pathname.startsWith('/enquire'));
-
-  async function leave() {
-    await signOut({ fetchOptions: { onSuccess: () => creds.logout() } });
-    creds.logout();
-    seekerState.reset();
-  }
 </script>
 
 <header class="topbar">
@@ -30,12 +16,7 @@
 
   <a href="/" class="wordmark">Ouracle</a>
 
-  <div class="trail">
-    <div class="ambient-wrap"><AmbientControls /></div>
-    {#if $authed && !isEnquire}
-      <a href="/thread" class="thread-link" title="your thread">thread</a>
-    {/if}
-  </div>
+  <div class="trail" aria-hidden="true"></div>
 </header>
 
 <style>
@@ -43,7 +24,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* top padding absorbs the status bar; side padding stays constant */
   padding: calc(env(safe-area-inset-top, 0px) + 0.6rem) 1rem 0.6rem;
   border-bottom: 1px solid var(--glass-border);
   background: var(--glass-wash), color-mix(in srgb, var(--glass-bg-strong) 92%, transparent);
@@ -61,7 +41,6 @@
   opacity: 0;
 }
 
-/* Hamburger */
 .menu-btn {
   display: flex;
   flex-direction: column;
@@ -75,6 +54,7 @@
   height: 36px;
   flex-shrink: 0;
 }
+
 .menu-btn span {
   display: block;
   width: 100%;
@@ -83,91 +63,29 @@
   transform-origin: center;
   transition: transform 0.22s ease, opacity 0.22s ease, background 0.15s;
 }
+
 .menu-btn:hover span { background: var(--text); }
 .menu-btn span:nth-child(1).open { transform: translateY(6px) rotate(45deg); }
 .menu-btn span:nth-child(2).open { opacity: 0; transform: scaleX(0); }
 .menu-btn span:nth-child(3).open { transform: translateY(-6px) rotate(-45deg); }
 
-/* Centered wordmark */
 .wordmark {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--font-display);
-  font-size: 1.1rem;
-  letter-spacing: 0.22em;
+  font-size: 1.02rem;
+  letter-spacing: 0.08em;
   color: var(--accent);
   text-decoration: none;
   white-space: nowrap;
   transition: opacity 0.15s;
-  font-weight: 600;
+  font-weight: 500;
 }
+
 .wordmark:hover { opacity: 0.75; }
 
-/* Trailing right side */
 .trail {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-left: auto;
+  width: 36px;
 }
-
-.identity {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.handle {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-}
-
-.leave {
-  background: none;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 1rem;
-  line-height: 1;
-  padding: 0.25rem 0.45rem;
-  transition: border-color 0.15s, color 0.15s;
-  min-height: 32px;
-  display: grid;
-  place-items: center;
-}
-.leave:hover { border-color: var(--border); color: var(--text); }
-
-@media (max-width: 767px) {
-  .ambient-wrap { display: none; }
-  .identity { display: none; }
-  .the-temple { display: none; }
-}
-
-.enter {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--accent);
-  font-family: var(--font-sans);
-  font-size: 0.8rem;
-  letter-spacing: 0.15em;
-  padding: 0.3rem 0.9rem;
-  text-decoration: none;
-  transition: background 0.15s, color 0.15s;
-  white-space: nowrap;
-}
-.enter:hover { background: var(--accent); color: var(--bg); }
-
-.thread-link {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-  text-decoration: none;
-  transition: color 0.15s;
-}
-.thread-link:hover { color: var(--accent); }
 </style>

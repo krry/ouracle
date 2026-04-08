@@ -360,19 +360,20 @@
 <style>
 /* ── Panel shell ────────────────────────────────────────────────────────── */
 .oracle-panel {
-	/* Overlay — positioned by the parent (chat/+page.svelte) */
 	display: flex;
 	flex-direction: column;
-	background: color-mix(in srgb, var(--bg) 82%, transparent);
-	border: 1px solid rgba(255, 255, 255, 0.15);
-	border-radius: var(--radius);
-	box-shadow:
-		0 1px 3px rgba(0, 0, 0, 0.08),
-		0 8px 24px rgba(0, 0, 0, 0.1),
-		inset 0 1px 0 rgba(255, 255, 255, 0.1);
+	background: var(--glass-wash), color-mix(in srgb, var(--glass-bg-strong) 92%, transparent);
+	border: 1px solid var(--glass-border);
+	border-radius: 18px;
+	box-shadow: var(--glass-shadow);
+	backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
+	-webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
 	overflow: hidden;
 	width: 100%;
-	max-height: calc(100vh - var(--topbar-h, 2.5rem) - 1.5rem);
+	height: 100%;
+	max-height: none;
+	--panel-measure: min(100%, clamp(36ch, 92%, 72ch));
+	--panel-copy-size: clamp(0.78rem, 0.72rem + 0.14vw, 0.94rem);
 }
 
 .panel-section {
@@ -381,6 +382,15 @@
 	gap: 0.75rem;
 	padding: 1rem;
 	min-height: 0;
+	flex: 1 1 auto;
+}
+
+.card-content,
+.practice-content,
+.rite-content,
+.deck-section,
+.pending-section {
+	width: 100%;
 }
 
 /* ── Header row (card / rite) ───────────────────────────────────────────── */
@@ -388,14 +398,18 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	max-width: 39rem;
+	width: 100%;
+	margin: 0 auto;
 }
 
 .panel-label {
 	font-family: var(--font-mono);
 	font-size: 0.62rem;
-	letter-spacing: 0.15em;
+	letter-spacing: 0.04em;
 	color: var(--accent);
 	text-transform: uppercase;
+	font-weight: 300;
 }
 
 .dismiss-btn {
@@ -423,10 +437,12 @@
 	color: var(--muted);
 	cursor: pointer;
 	font-family: var(--font-mono);
-	font-size: 0.65rem;
-	letter-spacing: 0.1em;
+	font-size: 0.67rem;
+	letter-spacing: 0.08em;
 	padding: 0;
 	transition: color 0.15s;
+	text-transform: lowercase;
+	font-weight: 500;
 }
 .deck-toggle:hover, .deck-toggle.open { color: var(--accent); }
 
@@ -441,10 +457,12 @@
 	color: var(--muted);
 	cursor: pointer;
 	font-family: var(--font-mono);
-	font-size: 0.6rem;
+	font-size: 0.62rem;
 	letter-spacing: 0.08em;
 	padding: 0;
 	transition: color 0.15s;
+	text-transform: lowercase;
+	font-weight: 500;
 }
 .deck-all:hover { color: var(--accent); }
 .sep { color: var(--border); font-size: 0.6rem; }
@@ -467,6 +485,8 @@
 	padding: 0.3rem 0.6rem;
 	cursor: pointer;
 	font-size: 0.72rem;
+	font-family: var(--font-mono);
+	letter-spacing: 0.03em;
 	color: var(--muted);
 	transition: background 0.1s, color 0.1s;
 }
@@ -484,19 +504,24 @@
 	min-height: 0;
 	overflow-y: auto;
 	padding-right: 0.2rem;
+	max-width: var(--panel-measure);
+	margin: 0 auto;
 }
 
 .card-title {
-	font-size: 1rem;
+	font-size: 0.96rem;
 	font-weight: 600;
 	color: var(--text);
-	letter-spacing: 0.04em;
+	letter-spacing: 0.01em;
 }
 
 .card-keywords {
-	font-size: 0.68rem;
+	font-size: 0.62rem;
 	color: var(--muted);
-	letter-spacing: 0.1em;
+	letter-spacing: 0.04em;
+	font-family: var(--font-mono);
+	text-transform: uppercase;
+	font-weight: 300;
 }
 
 .card-body {
@@ -513,7 +538,7 @@
 
 .card-summary,
 .rite-description {
-	font-size: 0.86rem;
+	font-size: var(--panel-copy-size);
 	line-height: 1.55;
 	color: var(--text);
 	opacity: 0.88;
@@ -529,9 +554,10 @@
 .card-detail-label {
 	font-family: var(--font-mono);
 	font-size: 0.58rem;
-	letter-spacing: 0.12em;
+	letter-spacing: 0.04em;
 	color: var(--muted);
 	text-transform: uppercase;
+	font-weight: 300;
 }
 
 .card-source {
@@ -549,6 +575,8 @@
 	min-height: 0;
 	overflow-y: auto;
 	padding-right: 0.2rem;
+	max-width: var(--panel-measure);
+	margin: 0 auto;
 }
 
 .practice-meta {
@@ -560,12 +588,14 @@
 .practice-chip {
 	font-family: var(--font-mono);
 	font-size: 0.6rem;
-	letter-spacing: 0.08em;
+	letter-spacing: 0.04em;
 	color: var(--muted);
 	border: 1px solid var(--border);
 	border-radius: 2px;
 	padding: 0.15rem 0.4rem;
 	opacity: 0.75;
+	font-weight: 300;
+	text-transform: uppercase;
 }
 
 /* ── Rite section ───────────────────────────────────────────────────────── */
@@ -577,17 +607,19 @@
 	min-height: 0;
 	overflow-y: auto;
 	padding-right: 0.2rem;
+	max-width: var(--panel-measure);
+	margin: 0 auto;
 }
 
 .rite-name {
 	font-family: var(--font-display);
-	font-size: 1.05rem;
+	font-size: 1rem;
 	color: var(--text);
-	letter-spacing: 0.06em;
+	letter-spacing: 0.01em;
 }
 
 .rite-act {
-	font-size: 0.88rem;
+	font-size: var(--panel-copy-size);
 	line-height: 1.55;
 	color: var(--text);
 	opacity: 0.9;
@@ -608,7 +640,7 @@
 	gap: 0.2rem;
 }
 .rite-textures li {
-	font-size: 0.78rem;
+	font-size: var(--panel-copy-size);
 	color: var(--muted);
 	line-height: 1.4;
 }
@@ -623,7 +655,7 @@
 	font-family: var(--font-mono);
 	font-size: 0.65rem;
 	color: var(--muted);
-	letter-spacing: 0.08em;
+	letter-spacing: 0.05em;
 	opacity: 0.6;
 }
 
@@ -657,7 +689,7 @@
 .progress-label {
 	font-family: var(--font-mono);
 	font-size: 0.55rem;
-	letter-spacing: 0.1em;
+	letter-spacing: 0.06em;
 	color: var(--muted);
 	text-transform: uppercase;
 }
@@ -681,7 +713,11 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0.4rem;
-	margin-top: 0.25rem;
+	margin-top: auto;
+	max-width: var(--panel-measure);
+	width: 100%;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 .draw-btn,
@@ -690,12 +726,14 @@
 	border-radius: var(--radius);
 	cursor: pointer;
 	font-family: var(--font-mono);
-	font-size: 0.75rem;
-	letter-spacing: 0.1em;
+	font-size: 0.66rem;
+	letter-spacing: 0.08em;
 	padding: 0.5rem 0.75rem;
 	text-align: center;
 	transition: all 0.15s;
 	width: 100%;
+	text-transform: lowercase;
+	font-weight: 500;
 }
 
 .draw-btn,
