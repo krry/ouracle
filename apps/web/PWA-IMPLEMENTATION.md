@@ -15,6 +15,8 @@ The PWA has been specifically optimized to prevent spurious reloads on iOS, whic
 - **iOS-Safe Refresh Handling**: `onNeedRefresh` callback prevents auto-reload on iOS
 - **Storage Monitoring**: Automatic monitoring of localStorage/IndexedDB usage with cleanup suggestions
 - **Conversation Recovery**: Enhanced visibility change handlers to restore state after iOS tab termination
+- **Keyboard Layout**: Input bar uses `position: sticky; bottom: 0` with `visualViewport` sync to stay anchored during keyboard transitions
+- **Form Navigation Suppression**: Chat input uses `autocomplete="off"`, `autocorrect="off"`, `data-form-type="other"` to minimize iOS form navigation bar
 
 ## Features
 - **Safe Area Support**: Full `viewport-fit=cover` and CSS `env(safe-area-inset-*)` for notch/Dynamic Island

@@ -24,6 +24,13 @@
     vv?.addEventListener('resize', sync);
     vv?.addEventListener('scroll', sync);
 
+    // iOS form navigation bar suppression
+    // Prevent iOS from showing the form field navigation bar above keyboard
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      // Set autocomplete off on all inputs to reduce iOS form UI
+      document.body.setAttribute('autocomplete', 'off');
+    }
+
     return () => {
       destroyPwa();
       vv?.removeEventListener('resize', sync);

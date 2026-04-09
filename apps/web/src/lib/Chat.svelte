@@ -838,6 +838,9 @@ import { storageMonitor } from './storage-monitor';
 				enterkeyhint="send"
 				autocapitalize="sentences"
 				spellcheck="true"
+				autocomplete="off"
+				autocorrect="off"
+				data-form-type="other"
 				bind:this={inputEl}
 				oninput={handleInput}
 				onkeydown={handleKey}
@@ -1076,9 +1079,12 @@ import { storageMonitor } from './storage-monitor';
 	background: var(--glass-wash), color-mix(in srgb, var(--glass-bg-strong) 94%, transparent);
 	backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
 	-webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
-	position: relative;
+	position: sticky;
+	bottom: 0;
 	z-index: 2;
 	min-height: var(--input-bar-h);
+	/* iOS keyboard handling: prevent layout shift */
+	flex-shrink: 0;
 }
 
 .input-wrap {
