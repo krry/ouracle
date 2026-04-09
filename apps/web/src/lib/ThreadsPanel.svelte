@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { authed, creds } from './stores';
+  import { goto } from '$app/navigation';
+  import { authed, creds, pendingRite } from './stores';
   import type { MergedRecord } from './records';
   import { loadMergedRecords } from './records';
   import { controlPanelRouteById } from './ControlPanel.svelte';
@@ -40,6 +41,10 @@
   function stageLabel(stage: string): string {
     return stage === 'prescribed' ? 'received' : 'enacted';
   }
+
+  function startFreshSession() {
+    goto(`${controlPanelRouteById.oracle.href}?fresh=1`);
+  }
 </script>
 
 <section class="threads-panel rail-shell">
@@ -63,6 +68,20 @@
   {:else if visibleSessions.length === 0}
     <p class="tp-empty">No rites sealed yet.</p>
   {:else}
+    {#if $pendingRite}
+      <button class="tp-new-thread" onclick={startFreshSession}>
+        <div class="tp-new-inner">
+          <span class="tp-new-pip">◬</span>
+          <div class="tp-new-body">
+            <div class="tp-title">{$pendingRite.rite.rite_name}</div>
+            <div class="tp-new-meta">
+              <span class="tp-stage">received</span>
+              <span class="tp-new-cta">tell Clea →</span>
+            </div>
+          </div>
+        </div>
+      </button>
+    {/if}
     <ol class="tp-list">
       {#each visibleSessions as session (session.id)}
         <li class="tp-item">
@@ -208,5 +227,53 @@
 
 .tp-signin-link:hover {
   text-decoration: underline;
+}
+
+/* ── Ghosted new-thread card ────────────────────────────────────────────── */
+.tp-new-thread {
+  display: block;
+  width: 100%;
+  padding: 0.8rem 0.85rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 40%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--accent) 35%, var(--glass-border));
+  cursor: pointer;
+  text-align: left;
+  opacity: 0.55;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+.tp-new-thread:hover {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--glass-border));
+}
+.tp-new-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+.tp-new-pip {
+  font-size: 0.75rem;
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+.tp-new-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.tp-new-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.tp-new-cta {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  color: var(--accent);
+  font-weight: 500;
 }
 </style>

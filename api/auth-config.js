@@ -64,6 +64,7 @@ export const auth = betterAuth({
   trustedOrigins: [
     'https://ouracle.kerry.ink',
     'https://poiesis.kerry.ink',
+    'http://localhost:2532',
     'https://localhost:2532',
     'https://souvenir.local:2532',
     'http://localhost:3000',

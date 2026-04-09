@@ -1,4 +1,4 @@
-import { loadTotem, saveTotem, initDevice, loadDevicePublicKey, decryptDistillation } from './totem';
+import { loadTotem, saveTotem, initDevice, loadDevicePublicKey, decryptDistillation, BASE } from './totem';
 import type { TotemData } from './totem';
 
 type LoadFn = (seekerId: string) => Promise<TotemData | null>;
@@ -48,7 +48,7 @@ export class TotemSession {
    */
   async distillAndSave(
     sessionId: string,
-    fetchFn: FetchFn = (sid, tok) => fetch('/totem/distill', {
+    fetchFn: FetchFn = (sid, tok) => fetch(`${BASE}/totem/distill`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${tok}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ session_id: sid }),

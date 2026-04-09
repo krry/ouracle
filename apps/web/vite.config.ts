@@ -6,7 +6,8 @@ export default defineConfig({
   plugins: [
     sveltekit(),
     VitePWA({
-      injectRegister: false,
+      // iOS PWA Stability: Let VitePWA manage service worker entirely
+      // Removed injectRegister: false - let VitePWA inject its own registration
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'],
       manifest: {

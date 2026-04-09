@@ -196,7 +196,7 @@ export async function decryptRecoveredTotemKey(
 
 // ── Load / save (API-backed) ──────────────────────────────────────────────────
 
-const BASE = (typeof import.meta !== 'undefined' && (import.meta as { env?: { VITE_OURACLE_BASE_URL?: string } }).env?.VITE_OURACLE_BASE_URL) ?? 'https://api.ouracle.kerry.ink';
+export const BASE = (typeof import.meta !== 'undefined' && (import.meta as { env?: { VITE_OURACLE_BASE_URL?: string } }).env?.VITE_OURACLE_BASE_URL) ?? 'https://api.ouracle.kerry.ink';
 
 const DEVICE_PUBLIC_KEY_STORAGE = 'ouracle_device_public_key';
 

@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { activeRite, activeCard, pendingRite } from './stores';
 	import type { CardData, RiteData } from './stores';
+	import { controlPanelRouteById } from './ControlPanel.svelte';
 
 	let {
 		availableDecks = [],
@@ -89,6 +91,10 @@
 
 	function togglePracticeCardExpansion() {
 		expandPracticeCard = !expandPracticeCard;
+	}
+
+	function startFreshSession() {
+		goto(`${controlPanelRouteById.oracle.href}?fresh=1`);
 	}
 
 	// Check all decks
@@ -190,6 +196,16 @@
 			>
 				{drawing ? '…' : 'draw card'}
 			</button>
+
+			{#if $pendingRite && selectedDecks.has('rites')}
+				<button class="rite-nudge" onclick={startFreshSession}>
+					<span class="rite-nudge-pip">◬</span>
+					<span class="rite-nudge-text">
+						<span class="rite-nudge-name">{$pendingRite.rite.rite_name}</span>
+						<span class="rite-nudge-cta">rite in motion · new rite →</span>
+					</span>
+				</button>
+			{/if}
 		</div>
 
 	{:else if mode === 'card' && $activeCard}
@@ -410,6 +426,12 @@
 			</div>
 
 			<p class="pending-prompt">Clea is waiting to hear what happened.</p>
+
+			<div class="panel-actions">
+				<button class="action-primary" onclick={startFreshSession}>
+					Tell Clea
+				</button>
+			</div>
 		</div>
 	{/if}
 </aside>
@@ -825,4 +847,53 @@
 }
 
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+/* ── Rite nudge (idle mode, rites deck selected) ────────────────────────── */
+.rite-nudge {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	width: 100%;
+	padding: 0.5rem 0.75rem;
+	background: none;
+	border: 1px dashed color-mix(in srgb, var(--accent) 30%, var(--border));
+	border-radius: var(--radius);
+	cursor: pointer;
+	text-align: left;
+	opacity: 0.6;
+	transition: opacity 0.15s, border-color 0.15s;
+}
+.rite-nudge:hover {
+	opacity: 1;
+	border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+.rite-nudge-pip {
+	font-size: 0.75rem;
+	color: var(--accent);
+	flex-shrink: 0;
+}
+.rite-nudge-text {
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+	min-width: 0;
+}
+.rite-nudge-name {
+	font-family: var(--font-mono);
+	font-size: 0.65rem;
+	font-weight: 500;
+	letter-spacing: 0.03em;
+	color: var(--text);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.rite-nudge-cta {
+	font-family: var(--font-mono);
+	font-size: 0.58rem;
+	letter-spacing: 0.06em;
+	color: var(--accent);
+	text-transform: lowercase;
+	font-weight: 300;
+}
 </style>

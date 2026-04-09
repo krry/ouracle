@@ -89,9 +89,11 @@
     error = '';
     busy = true;
     try {
-      // social() does an OAuth redirect — it never returns a token directly.
-      // The post-redirect exchange is handled by onMount in enquire/+page.svelte.
-      await signIn.social({ provider, callbackURL: window.location.href });
+      // Always return to /oracle so the session exchange runs regardless of
+      // which page the modal was opened from. Apple's form_post can lose state,
+      // so we can't rely on window.location.href being preserved.
+      const callbackURL = `${window.location.origin}/oracle`;
+      await signIn.social({ provider, callbackURL });
     } catch (e: unknown) {
       error = e instanceof Error ? e.message : 'something went wrong';
       busy = false;

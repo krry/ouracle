@@ -1,18 +1,19 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
-	import { get } from 'svelte/store';
-	import { browser } from '$app/environment';
-	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState, covenantAcceptedTick, covenantPromptArmed } from './stores';
-	import type { CardData, RiteData, VagalInfo, BeliefInfo, QualityInfo, Message } from './stores';
-	import { enquire, stt } from './api';
-	import { webSpeech, cancelWebSpeech, DEFAULT_VOICE } from './tts-client';
-	import Breath from './Breath.svelte';
-	import SeekerPanel from './SeekerPanel.svelte';
-	import type { Credentials } from './stores';
-	import { incrementGuestTurns, getGuestTurns, GUEST_LIMIT } from './guestSession';
-	import { TotemSession } from './totemSession';
-	import { renderMarkdown } from './markdown';
-	import { createAudioQueue, type AudioQueue } from './audio';
+import { onMount, onDestroy } from 'svelte';
+import { get } from 'svelte/store';
+import { browser } from '$app/environment';
+import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState, covenantAcceptedTick, covenantPromptArmed } from './stores';
+import type { CardData, RiteData, VagalInfo, BeliefInfo, QualityInfo, Message } from './stores';
+import { enquire, stt } from './api';
+import { webSpeech, cancelWebSpeech, DEFAULT_VOICE } from './tts-client';
+import Breath from './Breath.svelte';
+import SeekerPanel from './SeekerPanel.svelte';
+import type { Credentials } from './stores';
+import { incrementGuestTurns, getGuestTurns, GUEST_LIMIT } from './guestSession';
+import { TotemSession } from './totemSession';
+import { renderMarkdown } from './markdown';
+import { createAudioQueue, type AudioQueue } from './audio';
+import { storageMonitor } from './storage-monitor';
 
 	let {
 		guestMode = false,
@@ -147,12 +148,23 @@
 	const BASE_URL = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
 
 
+	// ── iOS PWA Stability: Global streaming flag ────────────────────────────────
+	// Expose streaming state to pwa.ts so service worker updates can be deferred
+	// during active LLM conversations, preventing reload race conditions.
+	$effect(() => {
+		if (!browser) return;
+		(window as any).__ouracleStreaming = $streaming;
+		return () => { (window as any).__ouracleStreaming = false; };
+	});
+
 	// Persist conversation to localStorage — gated on didRestore to prevent the initial
 	// $effect run (with messages=[]) from wiping a saved conversation before onMount restores it.
 	$effect(() => {
 	  if (!didRestore || !browser) return;
 	  try {
 	    localStorage.setItem('clea_messages', JSON.stringify($messages));
+	    // Also save a timestamp for recovery validation
+	    localStorage.setItem('clea_messages_timestamp', Date.now().toString());
 	  } catch (e) {
 	    console.error('Failed to save messages:', e);
 	  }
@@ -399,7 +411,9 @@
 				} else if (event.type === 'complete') {
 					const stage = (event as { type: string; stage?: string }).stage;
 					if (stage === 'complete' || stage === 'reintegration_complete') {
-						pendingRite.set(null);
+						// Only clear the pending rite on reintegration — a plain 'complete' means the
+						// session where the rite was prescribed ended; the rite is still in motion.
+						if (stage === 'reintegration_complete') pendingRite.set(null);
 						const completedSessionId = (event as { session_id?: string }).session_id ?? sessionId;
 						if (totemSession && completedSessionId) {
 							totemSession.distillAndSave(completedSessionId).catch(() => {});

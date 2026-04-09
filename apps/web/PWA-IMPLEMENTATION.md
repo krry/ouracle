@@ -3,11 +3,25 @@
 ## Overview
 This document describes the PWA configuration for Ouracle web app (apps/web).
 
+## iOS PWA Stability (Critical Fixes)
+The PWA has been specifically optimized to prevent spurious reloads on iOS, which were caused by:
+1. Aggressive service worker update checks racing with page restoration
+2. Memory pressure from long-running SSE connections
+3. Storage quota exceeded errors
+
+### Fixes Applied:
+- **Service Worker Update Debouncing**: SW updates only check when app becomes visible, with 30-minute debounce
+- **Streaming State Coordination**: Global `__ouracleStreaming` flag prevents SW updates during active LLM conversations
+- **iOS-Safe Refresh Handling**: `onNeedRefresh` callback prevents auto-reload on iOS
+- **Storage Monitoring**: Automatic monitoring of localStorage/IndexedDB usage with cleanup suggestions
+- **Conversation Recovery**: Enhanced visibility change handlers to restore state after iOS tab termination
+
 ## Features
 - **Safe Area Support**: Full `viewport-fit=cover` and CSS `env(safe-area-inset-*)` for notch/Dynamic Island
 - **Cache Busting**: Automatic via Vite asset revision hashes; service worker disabled in dev
 - **Offline Fallback**: Custom offline.html displayed when network unavailable
 - **App-like Experience**: Standalone display, theme color, Apple/Android meta tags
+- **iOS Stability**: Prevents spurious reloads during conversations
 
 ## Files Modified/Created
 
