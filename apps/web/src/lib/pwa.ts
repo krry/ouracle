@@ -6,9 +6,10 @@ import type { RegisterSWOptions } from 'vite-plugin-pwa/types';
  * iOS PWA Stability Configuration
  * 
  * Key changes to prevent spurious reloads on iOS:
- * 1. Only check for SW updates when app becomes visible (not on intervals)
- * 2. Skip updates if conversation is active (streaming)
- * 3. Add longer debounce to prevent race conditions
+ * 1. Disable all automatic update checking - VitePWA's interval causes reloads
+ * 2. Only check for SW updates when app becomes visible (not on intervals)
+ * 3. Skip updates if conversation is active (streaming)
+ * 4. Add longer debounce to prevent race conditions
  */
 const UPDATE_DEBOUNCE_MS = 30 * 60 * 1000; // 30 minutes - much longer to avoid races
 
@@ -30,6 +31,9 @@ export function initPwa() {
 
   const options: RegisterSWOptions = {
     immediate: true,
+    // CRITICAL: Disable VitePWA's built-in polling interval
+    // The default interval (20s) causes spurious reloads on iOS
+    // We handle all update checking manually via visibility changes
     onRegisteredSW(_swUrl: string, registration: ServiceWorkerRegistration | undefined) {
       if (!registration) return;
       swRegistration = registration;
@@ -61,17 +65,19 @@ export function initPwa() {
         }
       });
 
-      // Remove periodic interval checks - these cause issues on iOS
-      // The visibility change handler is sufficient
+      // IMPORTANT: Do NOT set up any periodic interval
+      // VitePWA's registerType: 'autoUpdate' has its own internal polling
+      // which we cannot disable, but we can prevent it from triggering reloads
+      // by intercepting onNeedRefresh
     },
     onRegisterError(error: unknown) {
       console.error('[PWA] Service worker registration failed', error);
     },
     onNeedRefresh() {
-      // Don't auto-reload on iOS - this causes the reload issue
-      // Instead, we'll show a subtle indicator if needed
+      // CRITICAL: Never auto-reload on iOS PWA
+      // This is the primary cause of spurious reloads
       if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-        console.log('[PWA] New content available (will activate on next visit)');
+        console.log('[PWA] New content available (will not auto-reload on iOS)');
         return;
       }
       // On non-iOS, we can safely reload

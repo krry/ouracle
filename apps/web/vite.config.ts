@@ -6,9 +6,9 @@ export default defineConfig({
   plugins: [
     sveltekit(),
     VitePWA({
-      // iOS PWA Stability: Let VitePWA manage service worker entirely
-      // Removed injectRegister: false - let VitePWA inject its own registration
-      registerType: 'autoUpdate',
+      // iOS PWA Stability: Disable autoUpdate polling to prevent spurious reloads
+      // Use manual update checking instead via our custom pwa.ts implementation
+      registerType: 'prompt',
       includeAssets: ['favicon.ico', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'],
       manifest: {
         name: 'Ouracle',
