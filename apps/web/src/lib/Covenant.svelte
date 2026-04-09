@@ -75,7 +75,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 2rem;
-  max-width: 480px;
+  max-width: min(30rem, 92vw);
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -95,14 +95,17 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  max-width: 42ch;
+  margin: 0 auto;
 }
 
 .text p {
   font-family: var(--font-display);
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: clamp(0.9rem, 0.84rem + 0.12vw, 1rem);
+  line-height: 1.55;
   color: var(--text);
   margin: 0;
+  text-wrap: pretty;
 }
 
 .actions {

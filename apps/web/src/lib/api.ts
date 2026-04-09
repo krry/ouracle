@@ -64,11 +64,14 @@ export async function* enquire(
 	}
 	const reader = r.body!.getReader();
 	const dec = new TextDecoder();
+	let buffer = '';
 	while (true) {
 		const { done, value } = await reader.read();
 		if (done) break;
-		const text = dec.decode(value, { stream: true });
-		for (const line of text.split('\n')) {
+		buffer += dec.decode(value, { stream: true });
+		const lines = buffer.split('\n');
+		buffer = lines.pop() ?? '';
+		for (const line of lines) {
 			if (!line.startsWith('data: ')) continue;
 			try {
 				const event = JSON.parse(line.slice(6));
@@ -76,6 +79,14 @@ export async function* enquire(
 			} catch { /* skip malformed */ }
 		}
 		yield;
+	}
+	buffer += dec.decode();
+	for (const line of buffer.split('\n')) {
+		if (!line.startsWith('data: ')) continue;
+		try {
+			const event = JSON.parse(line.slice(6));
+			onEvent(event);
+		} catch { /* skip malformed */ }
 	}
 }
 
@@ -110,7 +121,7 @@ export interface ThreadSession {
 	enacted: boolean | null;
 	rite_name: string | null;
 	rite_json: Record<string, unknown> | null;
-	report: string | null;
+	report: unknown;
 	created_at: string;
 	prescribed_at: string | null;
 	completed_at: string | null;

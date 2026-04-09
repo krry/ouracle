@@ -132,19 +132,57 @@ function confidenceFromScores(topScore, margin, minScore) {
   return 'high';
 }
 
+function countLexicalMatches(text, phrases) {
+  const hay = text.toLowerCase();
+  return phrases.reduce((count, phrase) => count + (hay.includes(String(phrase).toLowerCase()) ? 1 : 0), 0);
+}
+
 export async function inferSemanticsEmbeddings(text) {
   await ensureEmbeddingsReady();
   const [textEmbedding] = await embedTexts([text]);
 
   // Vagal state
-  const vagalScores = bestClass(textEmbedding, 'vagal:');
+  const vagalScores = bestClass(textEmbedding, 'vagal:').map((entry) => {
+    const state = entry.key.replace('vagal:', '');
+    const lexicalMatches = countLexicalMatches(text, VAGAL_CLUE_MAP[state] || []);
+    const lexicalBoost = Math.min(0.12, lexicalMatches * 0.035);
+    return {
+      ...entry,
+      lexicalMatches,
+      adjustedScore: entry.score + lexicalBoost,
+    };
+  }).sort((a, b) => b.adjustedScore - a.adjustedScore);
   const vagalTop = vagalScores[0];
   const vagalSecond = vagalScores[1];
-  const vagalMargin = vagalSecond ? vagalTop.score - vagalSecond.score : vagalTop.score;
-  const vagalConfidence = confidenceFromScores(vagalTop.score, vagalMargin, 0.24);
+  const vagalMargin = vagalSecond ? vagalTop.adjustedScore - vagalSecond.adjustedScore : vagalTop.adjustedScore;
+  let vagalConfidence = confidenceFromScores(vagalTop.adjustedScore, vagalMargin, 0.24);
   const vagalBestPhrase = bestPhrase(textEmbedding, vagalTop.key);
   const vagalState = vagalTop.key.replace('vagal:', '');
-  const mixed = vagalSecond && vagalTop.score >= 0.26 && vagalSecond.score >= 0.26 && vagalMargin <= 0.03;
+  const dorsalMatches = vagalScores.find((entry) => entry.key === 'vagal:dorsal')?.lexicalMatches ?? 0;
+  const sympatheticMatches = vagalScores.find((entry) => entry.key === 'vagal:sympathetic')?.lexicalMatches ?? 0;
+  const ventralMatches = vagalScores.find((entry) => entry.key === 'vagal:ventral')?.lexicalMatches ?? 0;
+  const mixed = (vagalSecond && vagalTop.adjustedScore >= 0.26 && vagalSecond.adjustedScore >= 0.26 && vagalMargin <= 0.03)
+    || (dorsalMatches > 0 && sympatheticMatches > 0 && Math.abs(dorsalMatches - sympatheticMatches) <= 1);
+  const dorsalExplicit = dorsalMatches >= 2 && sympatheticMatches === 0;
+  const sympatheticExplicit = sympatheticMatches >= 2 && dorsalMatches === 0;
+  const ventralExplicit = ventralMatches >= 2 && dorsalMatches === 0 && sympatheticMatches === 0;
+  const strongDorsalCluster = dorsalMatches >= 4 && sympatheticMatches === 0;
+  const strongSympatheticCluster = sympatheticMatches >= 4 && dorsalMatches === 0;
+  const strongVentralCluster = ventralMatches >= 4 && dorsalMatches === 0 && sympatheticMatches === 0;
+  const resolvedVagalState = mixed
+    ? 'mixed'
+    : dorsalExplicit
+      ? 'dorsal'
+      : sympatheticExplicit
+        ? 'sympathetic'
+        : ventralExplicit
+          ? 'ventral'
+        : vagalState;
+  if (strongDorsalCluster || strongSympatheticCluster || strongVentralCluster) {
+    vagalConfidence = 'high';
+  } else if (dorsalMatches > 0 && sympatheticMatches > 0) {
+    vagalConfidence = vagalConfidence === 'high' ? 'medium' : vagalConfidence;
+  }
 
   // Belief pattern
   const beliefScores = bestClass(textEmbedding, 'belief:');
@@ -166,9 +204,21 @@ export async function inferSemanticsEmbeddings(text) {
 
   return {
     vagal: {
-      probable: mixed ? 'mixed' : vagalState,
+      probable: resolvedVagalState,
       confidence: vagalConfidence,
-      reasoning: vagalBestPhrase?.phrase || 'Matched semantic proximity to vagal signatures.',
+      reasoning: strongDorsalCluster
+        ? 'A dense cluster of explicit dorsal language dominated the reading.'
+        : strongVentralCluster
+          ? 'A dense cluster of explicit ventral language dominated the reading.'
+        : dorsalExplicit
+          ? 'Explicit dorsal language outweighed the embedding match.'
+        : ventralExplicit
+          ? 'Explicit ventral language outweighed the embedding match.'
+        : strongSympatheticCluster
+          ? 'A dense cluster of explicit sympathetic language dominated the reading.'
+        : mixed && dorsalMatches > 0 && sympatheticMatches > 0
+          ? 'Both mobilized and collapsed signals are present in the language.'
+          : vagalBestPhrase?.phrase || 'Matched semantic proximity to vagal signatures.',
     },
     belief: {
       pattern: beliefPattern,

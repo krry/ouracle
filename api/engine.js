@@ -481,8 +481,8 @@ export const RITES = {
 
 export const VAGAL_CLUE_MAP = {
   sympathetic: ['urgent', 'urgency', "can't stop", 'racing', 'tight', 'tense', 'scared', 'fear', 'must', 'control', 'not enough', 'deadline', 'running out', 'anxious', 'anxiety', 'hoarding', 'gripping', 'panicking', 'restless', 'spinning'],
-  dorsal:      ['numb', "what's the point", "can't feel", 'flat', 'hopeless', 'frozen', 'heavy', 'shutdown', 'disconnected', 'why bother', 'exhausted', 'collapsed', "don't care", 'giving up', 'pointless'],
-  ventral:     ['curious', 'open', 'possible', 'connected', 'enough', 'present', 'playful', 'grateful', 'flowing', 'clear', 'easy', 'spacious', 'calm'],
+  dorsal:      ['numb', "what's the point", "can't feel", 'flat', 'hopeless', 'frozen', 'heavy', 'shutdown', 'shut down', 'disconnected', 'why bother', 'exhausted', 'collapsed', "don't care", 'giving up', 'pointless', 'nothing matters', "i'm done", 'done with this', "don't want to move", 'can’t move', "i can't move", 'empty', 'drained', 'spent', 'stop trying', 'want to disappear', 'disappear into the floor', 'checked out'],
+  ventral:     ['curious', 'open', 'possible', 'connected', 'enough', 'present', 'playful', 'grateful', 'flowing', 'clear', 'easy', 'spacious', 'calm', 'safe', 'settled', 'steady', 'grounded', 'relieved', 'supported', 'held', 'warm', 'soft', 'okay', 'at ease', 'welcomed', 'resourced', 'in contact', 'here with', 'available'],
 };
 
 export const BELIEF_CLUE_MAP = {
@@ -592,7 +592,118 @@ function keywordInfer(text) {
     vagal:  { probable: vagal.probable, confidence: vagal.confidence },
     belief: { pattern: belief.pattern, confidence: belief.confidence, meta: belief.meta },
     quality: { quality: quality.quality, confidence: quality.confidence, is_shock: quality.is_shock, seeker_language: quality.seeker_language },
+    affect: { valence: 0, arousal: 0, gloss: 'neutral', confidence: 'low', reasoning: 'keyword fallback affect' },
   };
+}
+
+function countMatches(text, phrases) {
+  const hay = text.toLowerCase();
+  return phrases.reduce((count, phrase) => count + (hay.includes(String(phrase).toLowerCase()) ? 1 : 0), 0);
+}
+
+function adjustVagalFromSignals(text, vagal, affect) {
+  const dorsalMatches = countMatches(text, VAGAL_CLUE_MAP.dorsal);
+  const sympatheticMatches = countMatches(text, VAGAL_CLUE_MAP.sympathetic);
+  const ventralMatches = countMatches(text, VAGAL_CLUE_MAP.ventral);
+  const arousal = affect?.arousal ?? 0;
+  const valence = affect?.valence ?? 0;
+
+  if (ventralMatches >= 2 && dorsalMatches === 0 && sympatheticMatches === 0 && valence >= 0.15 && arousal >= -0.2 && arousal <= 0.4) {
+    return {
+      ...vagal,
+      probable: 'ventral',
+      confidence: ventralMatches >= 4 ? 'high' : 'medium',
+      reasoning: ventralMatches >= 4
+        ? 'A dense cluster of explicit ventral language strongly signaled safety and connection.'
+        : 'Explicit ventral language aligned with regulated affect.',
+    };
+  }
+
+  if (dorsalMatches >= 2 && sympatheticMatches === 0 && arousal <= -0.15) {
+    return {
+      ...vagal,
+      probable: 'dorsal',
+      confidence: dorsalMatches >= 4 ? 'high' : vagal.confidence === 'high' ? 'medium' : vagal.confidence,
+      reasoning: 'Explicit shutdown/collapse language aligned with low activation.',
+    };
+  }
+
+  if (dorsalMatches >= 1 && sympatheticMatches === 0 && arousal <= -0.45 && valence <= -0.35) {
+    return {
+      ...vagal,
+      probable: 'dorsal',
+      confidence: 'medium',
+      reasoning: 'Low-arousal negative affect and dorsal language outweighed mobilization cues.',
+    };
+  }
+
+  if (dorsalMatches > 0 && sympatheticMatches > 0 && arousal < 0.1) {
+    return {
+      ...vagal,
+      probable: 'mixed',
+      confidence: 'medium',
+      reasoning: 'Both collapse and activation signals are present.',
+    };
+  }
+
+  if (dorsalMatches >= 3 && sympatheticMatches <= 1) {
+    return {
+      ...vagal,
+      probable: 'dorsal',
+      confidence: dorsalMatches >= 5 ? 'high' : 'medium',
+      reasoning: dorsalMatches >= 5
+        ? 'A dense cluster of dorsal phrases strongly signaled shutdown/collapse.'
+        : 'Explicit dorsal language outweighed the embedding match.',
+    };
+  }
+
+  return vagal;
+}
+
+function adjustAffectFromVagalLexicon(text, affect) {
+  const dorsalMatches = countMatches(text, VAGAL_CLUE_MAP.dorsal);
+  const sympatheticMatches = countMatches(text, VAGAL_CLUE_MAP.sympathetic);
+  const ventralMatches = countMatches(text, VAGAL_CLUE_MAP.ventral);
+
+  if (dorsalMatches >= 2 && sympatheticMatches === 0) {
+    const nextArousal = Math.min(affect.arousal, -0.45 - Math.min(0.25, (dorsalMatches - 2) * 0.08));
+    return {
+      ...affect,
+      arousal: nextArousal,
+      confidence: affect.confidence === 'high' ? 'medium' : affect.confidence,
+      reasoning: `Adjusted toward deactivation from explicit dorsal language. ${affect.reasoning ?? ''}`.trim(),
+    };
+  }
+
+  if (sympatheticMatches >= 2 && dorsalMatches === 0) {
+    const nextArousal = Math.max(affect.arousal, 0.35 + Math.min(0.3, (sympatheticMatches - 2) * 0.08));
+    return {
+      ...affect,
+      arousal: nextArousal,
+      reasoning: `Adjusted toward activation from explicit sympathetic language. ${affect.reasoning ?? ''}`.trim(),
+    };
+  }
+
+  if (ventralMatches >= 2 && dorsalMatches === 0 && sympatheticMatches === 0) {
+    const nextValence = Math.max(affect.valence, 0.25 + Math.min(0.35, (ventralMatches - 2) * 0.08));
+    const nextArousal = Math.max(-0.15, Math.min(0.28, affect.arousal));
+    return {
+      ...affect,
+      valence: nextValence,
+      arousal: nextArousal,
+      reasoning: `Adjusted toward regulated positive affect from explicit ventral language. ${affect.reasoning ?? ''}`.trim(),
+    };
+  }
+
+  if (dorsalMatches > 0 && sympatheticMatches > 0) {
+    return {
+      ...affect,
+      confidence: 'low',
+      reasoning: `Mixed dorsal and sympathetic language detected. ${affect.reasoning ?? ''}`.trim(),
+    };
+  }
+
+  return affect;
 }
 
 export async function infer(text) {
@@ -601,9 +712,11 @@ export async function infer(text) {
     try {
       let result;
       if (mode === 'embeddings') {
-        result = await (await import('./semantic-embeddings.js')).inferSemanticsEmbeddings(text);
-        // For embeddings mode, we cannot derive affect; use neutral fallback
-        result.affect = { valence: 0, arousal: 0, gloss: 'neutral', confidence: 'low', reasoning: 'embeddings mode; no affect inference' };
+        const [semantics, affect] = await Promise.all([
+          (await import('./semantic-embeddings.js')).inferSemanticsEmbeddings(text),
+          (await import('./infer.js')).inferAffect(text),
+        ]);
+        result = { ...semantics, affect: affect.affect };
       } else {
         // Parallel LLM calls for semantics and affect
         const [semantics, affect] = await Promise.all([
@@ -640,6 +753,9 @@ export async function infer(text) {
         }
       }
 
+      result.affect = adjustAffectFromVagalLexicon(text, result.affect);
+      result.vagal = adjustVagalFromSignals(text, result.vagal, result.affect);
+
       // Attach seeker_language from OCTAVE for the quality node
       if (result.quality.quality) {
         const node = Object.values(OCTAVE).find(n => n.quality === result.quality.quality);
@@ -659,7 +775,8 @@ export async function infer(text) {
 
   // SEMANTIC_INFERENCE off: static neutral affect
   const keywordResult = keywordInfer(text);
-  keywordResult.affect = { valence: 0, arousal: 0, gloss: 'neutral', confidence: 'low', reasoning: 'inference disabled' };
+  keywordResult.affect = adjustAffectFromVagalLexicon(text, { valence: 0, arousal: 0, gloss: 'neutral', confidence: 'low', reasoning: 'inference disabled' });
+  keywordResult.vagal = adjustVagalFromSignals(text, keywordResult.vagal, keywordResult.affect);
   return keywordResult;
 }
 

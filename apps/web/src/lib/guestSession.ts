@@ -1,5 +1,5 @@
 const KEY = 'clea_guest_turns';
-export const GUEST_LIMIT = 5;
+export const GUEST_LIMIT = 3;
 
 export const ALTAR_QUIPS: string[] = [
   "the sacrificial fire needs tending\nreturn when you've spoken your name.",

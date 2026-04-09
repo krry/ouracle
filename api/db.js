@@ -379,6 +379,14 @@ export async function upsertTotem(seekerId, ciphertext, publicKey) {
   `;
 }
 
+export async function updateTotemKeyInfo(seekerId, publicKey) {
+  await sql`
+    UPDATE totems
+    SET public_key = ${publicKey}, updated_at = NOW()
+    WHERE seeker_id = ${seekerId}
+  `;
+}
+
 export async function getDevices(seekerId) {
   return sql`
     SELECT * FROM totem_devices WHERE seeker_id = ${seekerId} ORDER BY created_at
@@ -386,6 +394,22 @@ export async function getDevices(seekerId) {
 }
 
 export async function addDevice(seekerId, deviceName, publicKey, wrappedKey) {
+  const [existing] = await sql`
+    SELECT id FROM totem_devices
+    WHERE seeker_id = ${seekerId} AND public_key = ${publicKey}
+    LIMIT 1
+  `;
+
+  if (existing) {
+    await sql`
+      UPDATE totem_devices
+      SET device_name = COALESCE(${deviceName ?? null}, device_name),
+          wrapped_key = COALESCE(${wrappedKey ?? null}, wrapped_key)
+      WHERE id = ${existing.id}
+    `;
+    return;
+  }
+
   await sql`
     INSERT INTO totem_devices (seeker_id, device_name, public_key, wrapped_key)
     VALUES (${seekerId}, ${deviceName ?? null}, ${publicKey}, ${wrappedKey ?? null})

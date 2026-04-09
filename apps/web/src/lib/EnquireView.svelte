@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { authed, creds, guestTurns, covenantReady, needsCovenant } from '$lib/stores';
+  import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+  import { authed, creds, guestTurns, covenantReady, needsCovenant, covenantAcceptedTick, covenantPromptArmed } from '$lib/stores';
   import { GUEST_LIMIT } from '$lib/guestSession';
   import { authClient } from '$lib/auth';
   import Reception from '$lib/Reception.svelte';
@@ -13,7 +15,16 @@
   let exchanging = $state(false);
   let altarDismissed = $state(false);
 
-  $effect(() => { if ($authed) wantsSignin = false; });
+  const signinRequested = $derived($page.url.searchParams.get('signin') === '1');
+  const freshRequested = $derived($page.url.searchParams.get('fresh') === '1');
+
+  $effect(() => {
+    if ($authed) {
+      wantsSignin = false;
+      return;
+    }
+    if (signinRequested) wantsSignin = true;
+  });
 
   onMount(async () => {
     if ($authed) return;
@@ -41,6 +52,8 @@
     }
     covenantReady.set(false);
     needsCovenant.set(false);
+    covenantPromptArmed.disarm();
+    covenantAcceptedTick.update((n) => n + 1);
   }
 
   const handleEnter = () => {
@@ -52,7 +65,34 @@
     altarDismissed = true;
   };
 
-  const handleClose = () => { wantsSignin = false; };
+  async function clearSigninParam() {
+    if (!signinRequested) return;
+    await clearQueryParam('signin');
+  }
+
+  async function clearFreshParam() {
+    if (!freshRequested) return;
+    await clearQueryParam('fresh');
+  }
+
+  async function clearQueryParam(name: string) {
+    const url = new URL($page.url);
+    url.searchParams.delete(name);
+    await goto(`${url.pathname}${url.search}${url.hash}`, {
+      replaceState: true,
+      noScroll: true,
+      keepFocus: true
+    });
+  }
+
+  const handleClose = async () => {
+    wantsSignin = false;
+    await clearSigninParam();
+  };
+
+  const handleFreshHandled = async () => {
+    await clearFreshParam();
+  };
 
   const thresholdReached = $derived(!$authed && !exchanging && $guestTurns >= GUEST_LIMIT);
   const showAltarOverlay = $derived(thresholdReached && !wantsSignin && !altarDismissed);
@@ -62,6 +102,18 @@
   $effect(() => {
     if ($authed || $guestTurns < GUEST_LIMIT) {
       altarDismissed = false;
+    }
+  });
+
+  $effect(() => {
+    if ($authed && signinRequested) {
+      clearSigninParam().catch(() => {});
+    }
+  });
+
+  $effect(() => {
+    if ($authed && $covenantPromptArmed) {
+      covenantReady.set(true);
     }
   });
 
@@ -79,7 +131,13 @@
 
 <div class="content-wrapper" class:blurred={modalActive}>
   <div class="chat-stage">
-    <Chat guestMode={!$authed} guestLocked={guestLocked} onsignin={handleEnter} />
+    <Chat
+      guestMode={!$authed}
+      guestLocked={guestLocked}
+      freshStart={freshRequested && $authed}
+      onsignin={handleEnter}
+      onfreshhandled={handleFreshHandled}
+    />
   </div>
 </div>
 
@@ -94,7 +152,7 @@
   />
 {/if}
 
-{#if $covenantReady}
+  {#if $covenantReady && $covenantPromptArmed}
   <Covenant onaccept={handleCovenantAccepted} />
 {/if}
 

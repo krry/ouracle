@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { authed, creds } from './stores';
-  import { getThread } from './api';
-  import type { ThreadSession } from './api';
+  import type { MergedRecord } from './records';
+  import { loadMergedRecords } from './records';
   import { controlPanelRouteById } from './ControlPanel.svelte';
 
-  let sessions = $state<ThreadSession[]>([]);
+  let sessions = $state<MergedRecord[]>([]);
   let loading = $state(true);
   let error = $state<string | null>(null);
 
@@ -16,7 +16,7 @@
     }
 
     try {
-      sessions = await getThread($creds.seeker_id, $creds.access_token);
+      sessions = await loadMergedRecords($creds.seeker_id, $creds.access_token);
     } catch (e) {
       error = e instanceof Error ? e.message : 'Could not load your thread.';
     } finally {
@@ -33,7 +33,13 @@
     });
   }
 
-  const completeSessions = $derived(sessions.filter((s) => s.stage === 'complete'));
+  const visibleSessions = $derived(
+    sessions.filter((s) => s.stage === 'complete' || s.stage === 'prescribed')
+  );
+
+  function stageLabel(stage: string): string {
+    return stage === 'prescribed' ? 'received' : 'enacted';
+  }
 </script>
 
 <section class="threads-panel rail-shell">
@@ -46,24 +52,35 @@
   </header>
 
   {#if !$authed}
-    <p class="tp-empty">Sign in to seal and revisit your sessions.</p>
+    <p class="tp-empty">
+      <a href={`${controlPanelRouteById.draw.href}?signin=1`} class="tp-signin-link">sign in</a>
+      to seal and revisit your sessions.
+    </p>
   {:else if loading}
     <p class="tp-empty">reading…</p>
   {:else if error}
     <p class="tp-empty">{error}</p>
-  {:else if completeSessions.length === 0}
-    <p class="tp-empty">No completed rites yet.</p>
+  {:else if visibleSessions.length === 0}
+    <p class="tp-empty">No rites sealed yet.</p>
   {:else}
     <ol class="tp-list">
-      {#each completeSessions as session (session.id)}
+      {#each visibleSessions as session (session.id)}
         <li class="tp-item">
-          <div class="tp-date">{formatDate(session.completed_at ?? session.created_at)}</div>
-          <div class="tp-title">{session.rite_name ?? 'Redacted rite'}</div>
-          {#if session.quality}
-            <div class="tp-quality">{session.quality}</div>
+          <div class="tp-date">{formatDate(session.completed_at ?? session.prescribed_at ?? session.created_at)}</div>
+          <div class="tp-title">{session.encrypted_rite_name ?? 'sealed record'}</div>
+          <div class="tp-quality-row">
+            {#if session.encrypted_quality}
+              <div class="tp-quality">{session.encrypted_quality}</div>
+            {/if}
+            <div class="tp-stage">{stageLabel(session.stage)}</div>
+          </div>
+          {#if session.encrypted_note}
+            <p class="tp-report">{session.encrypted_note}</p>
+          {:else}
+            <p class="tp-report">Encrypted details will appear here on this authenticated device.</p>
           {/if}
-          {#if session.report}
-            <p class="tp-report">{session.report}</p>
+          {#if session.encrypted_feedback}
+            <p class="tp-feedback">“{session.encrypted_feedback}”</p>
           {/if}
         </li>
       {/each}
@@ -137,12 +154,20 @@
 }
 
 .tp-date,
-.tp-quality {
+.tp-quality,
+.tp-stage {
   font-family: var(--font-mono);
   font-size: 0.6rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+.tp-quality-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
 }
 
 .tp-title {
@@ -160,5 +185,28 @@
   line-height: 1.55;
   color: var(--muted);
   max-width: min(100%, clamp(36ch, 92%, 72ch));
+}
+
+.tp-feedback {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text);
+  opacity: 0.9;
+  font-style: italic;
+}
+
+.tp-signin-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  font-weight: 500;
+}
+
+.tp-signin-link:hover {
+  text-decoration: underline;
 }
 </style>

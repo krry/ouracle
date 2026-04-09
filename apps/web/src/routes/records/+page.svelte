@@ -2,11 +2,12 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { creds, authed } from '$lib/stores';
-  import { getThread, redactSession, deleteAccount } from '$lib/api';
-  import type { ThreadSession } from '$lib/api';
+  import { redactSession, deleteAccount } from '$lib/api';
+  import type { MergedRecord } from '$lib/records';
+  import { loadMergedRecords } from '$lib/records';
   import { controlPanelRouteById } from '$lib/ControlPanel.svelte';
 
-  let sessions = $state<ThreadSession[]>([]);
+  let sessions = $state<MergedRecord[]>([]);
   let loading = $state(true);
   let error = $state<string | null>(null);
   let confirmDelete = $state(false);
@@ -18,7 +19,7 @@
       return;
     }
     try {
-      sessions = await getThread($creds.seeker_id, $creds.access_token);
+      sessions = await loadMergedRecords($creds.seeker_id, $creds.access_token);
     } catch (e) {
       error = e instanceof Error ? e.message : 'Could not load your records.';
     } finally {
@@ -62,8 +63,12 @@
     });
   }
 
-  const completeSessions = $derived(sessions.filter((s) => s.stage === 'complete'));
-  const hasAny = $derived(completeSessions.length > 0);
+  const visibleSessions = $derived(sessions.filter((s) => s.stage === 'complete' || s.stage === 'prescribed'));
+  const hasAny = $derived(visibleSessions.length > 0);
+
+  function stageLabel(stage: string): string {
+    return stage === 'prescribed' ? 'received' : 'enacted';
+  }
 </script>
 
 <svelte:head>
@@ -83,26 +88,46 @@
   {:else if !hasAny}
     <div class="empty">
       <p>No rites sealed yet. Begin your first session.</p>
-      <a href={controlPanelRouteById.oracle.href} class="begin-link">enter</a>
+      <a href={`${controlPanelRouteById.oracle.href}?fresh=1`} class="begin-link">enter</a>
     </div>
   {:else}
     <ol class="sessions">
-      {#each completeSessions as s (s.id)}
+      {#each visibleSessions as s (s.id)}
         <li class="session" class:redacted={!s.rite_name}>
-          <time class="session-date">{formatDate(s.completed_at ?? s.created_at)}</time>
+          <time class="session-date">{formatDate(s.completed_at ?? s.prescribed_at ?? s.created_at)}</time>
 
           {#if s.rite_name}
-            <div class="rite-name">{s.rite_name}</div>
-            {#if s.quality}
-              <div class="quality">{s.quality}</div>
-            {/if}
+            <div class="rite-name">{s.encrypted_rite_name ?? 'sealed record'}</div>
+            <div class="quality-row">
+              {#if s.encrypted_quality}
+                <div class="quality">{s.encrypted_quality}</div>
+              {/if}
+              <div class="stage">{stageLabel(s.stage)}</div>
+            </div>
             {#if s.enacted !== null}
               <div class="enacted" class:yes={s.enacted} class:no={!s.enacted}>
                 {s.enacted ? 'enacted' : 'not yet enacted'}
               </div>
             {/if}
-            {#if s.report}
-              <blockquote class="report">{s.report}</blockquote>
+            {#if s.encrypted_note}
+              <blockquote class="report">{s.encrypted_note}</blockquote>
+            {:else}
+              <blockquote class="report report-muted">
+                Encrypted details are not available on this device yet.
+              </blockquote>
+            {/if}
+            {#if s.encrypted_feedback}
+              <p class="feedback">Rite feedback: “{s.encrypted_feedback}”</p>
+            {/if}
+            {#if s.encrypted_context}
+              <p class="context">{s.encrypted_context}</p>
+            {/if}
+            {#if s.encrypted_beliefs.length}
+              <ul class="beliefs">
+                {#each s.encrypted_beliefs as belief}
+                  <li>{belief}</li>
+                {/each}
+              </ul>
             {/if}
             <button
               class="redact-btn"
@@ -221,6 +246,7 @@
 }
 
 .quality,
+.stage,
 .enacted,
 .redacted-notice {
   font-family: var(--font-mono);
@@ -228,6 +254,12 @@
   letter-spacing: 0.06em;
   text-transform: lowercase;
   color: var(--muted);
+}
+
+.quality-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .enacted.yes { color: var(--accent); }
@@ -238,6 +270,41 @@
   padding-left: 1rem;
   border-left: 1px solid var(--border);
   color: var(--text);
+}
+
+.context {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.feedback {
+  margin: 0.2rem 0 0;
+  color: var(--text);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.beliefs {
+  list-style: none;
+  padding: 0;
+  margin: 0.25rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.beliefs li {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  text-transform: lowercase;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.22rem 0.48rem;
 }
 
 .redact-btn,

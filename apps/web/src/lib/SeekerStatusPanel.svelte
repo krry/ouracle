@@ -27,7 +27,7 @@
 	}
 	function getDotY(): number {
 		const a = $seekerState.affect.arousal;
-		return a !== null ? 50 + a * 45 : 50; // map [-1,1] to [5%,95%]
+		return a !== null ? 50 - a * 45 : 50; // map [-1,1] to [95%,5%]
 	}
 
 	// Tooltip for dot

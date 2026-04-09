@@ -2,10 +2,10 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
 	import { browser } from '$app/environment';
-	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState } from './stores';
+	import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState, covenantAcceptedTick, covenantPromptArmed } from './stores';
 	import type { CardData, RiteData, VagalInfo, BeliefInfo, QualityInfo, Message } from './stores';
 	import { enquire, stt } from './api';
-	import { webSpeech, DEFAULT_VOICE } from './tts-client';
+	import { webSpeech, cancelWebSpeech, DEFAULT_VOICE } from './tts-client';
 	import Breath from './Breath.svelte';
 	import SeekerPanel from './SeekerPanel.svelte';
 	import type { Credentials } from './stores';
@@ -17,11 +17,15 @@
 	let {
 		guestMode = false,
 		guestLocked = false,
+		freshStart = false,
 		onsignin,
+		onfreshhandled = () => {},
 	}: {
 		guestMode?: boolean;
 		guestLocked?: boolean;
+		freshStart?: boolean;
 		onsignin?: () => void;
+		onfreshhandled?: () => void;
 	} = $props();
 
 	let audioQueue: AudioQueue | null = null;
@@ -52,7 +56,49 @@
 	let drawing = $state(false);
 	let inputEl: HTMLDivElement | undefined;
 	let pendingPracticeContext: string | null = null;
+	let pendingAuthContext: string | null = null;
 	let railCollapsed = $state(false);
+	let freshHandled = $state(false);
+	let lastSeenCovenantAcceptedTick = $state(0);
+	const covenantPending = $derived($authed && $covenantPromptArmed);
+
+	function buildAuthTranscriptContext(history: Message[]): string | null {
+		const transcript = history
+			.filter((msg) => msg.role === 'user' || msg.role === 'assistant' || msg.role === 'card')
+			.map((msg) => {
+				if (msg.role === 'card' && msg.card) {
+					return `card: ${msg.card.title} (${msg.card.deckLabel})${msg.card.body ? `\n${msg.card.body}` : ''}`;
+				}
+				return `${msg.role === 'user' ? 'seeker' : 'priestess'}: ${msg.content}`;
+			})
+			.filter(Boolean)
+			.slice(-8);
+
+		if (transcript.length === 0) return null;
+		return [
+			'[Prior guest conversation context]',
+			'The seeker has just signed up after this guest exchange. Continue naturally from here rather than restarting.',
+			...transcript
+		].join('\n');
+	}
+
+	function resetConversationState() {
+		messages.set([]);
+		activeCard.set(null);
+		activeRite.set(null);
+		pendingRite.set(null);
+		continueOffered.set(false);
+		sessionId = null;
+		if (browser) {
+			localStorage.removeItem('clea_messages');
+			localStorage.removeItem('clea_session_id');
+			localStorage.removeItem('clea_pending_rite');
+		}
+		if ($authed && $creds) {
+			seekerState.reset();
+			seekerState.setPartial({ handle: $creds.handle ?? null });
+		}
+	}
 
 	function handleDeckToggle(id: string, checked: boolean) {
 		const next = new Set(selectedDecks);
@@ -71,6 +117,9 @@
 	}
 
 	function handleAcceptRite(_rite: RiteData) {
+		if ($pendingRite) {
+			pendingRite.set({ ...$pendingRite, stage: 'received' });
+		}
 		// Seeker accepted — send an acknowledgement into the conversation
 		send('I accept this rite.');
 	}
@@ -195,13 +244,28 @@
 	});
 
 	async function send(text: string, mode?: string) {
-		if ($streaming || guestLocked) return;
+		if ($streaming || guestLocked || covenantPending) return;
 		let skipTag = false;
 		let messageHasTokens = false; // true once token events arrive for current message
+		const sentenceTexts = new Map<number, string>();
+		const spokenSentenceSeqs = new Set<number>();
+
+		function enqueueMissingSentences(beforeSeq = Number.POSITIVE_INFINITY) {
+			if (!$ttsEnabled || !audioQueue) return;
+			for (const [seq, sentence] of sentenceTexts) {
+				if (seq >= beforeSeq) continue;
+				if (spokenSentenceSeqs.has(seq)) continue;
+				if (!sentence.trim()) continue;
+				spokenSentenceSeqs.add(seq);
+				audioQueue.enqueue(sentence);
+			}
+		}
 
 		// Snapshot and clear practice context — injected into API call only, not the thread
 		const practiceCtx = pendingPracticeContext;
+		const authCtx = !sessionId ? pendingAuthContext : null;
 		pendingPracticeContext = null;
+		pendingAuthContext = null;
 
 		// Fuzzy covenant readiness detection
 		if ($needsCovenant && !$covenantReady && text.trim()) {
@@ -213,6 +277,7 @@
 		}
 
 		audioQueue?.prime();
+		cancelWebSpeech();
 		serverAudioReceived = false;
 		fallbackSentences = [];
 		const token = !guestMode ? ($creds as Credentials | null)?.access_token ?? '' : guestToken ?? '';
@@ -228,7 +293,10 @@
 		streaming.set(true);
 
 		try {
-			const apiText = practiceCtx && text.trim() ? `${practiceCtx}\n\n${text}` : text;
+			const contextParts = [authCtx, practiceCtx].filter((part): part is string => !!part);
+			const apiText = contextParts.length > 0 && text.trim()
+				? `${contextParts.join('\n\n')}\n\n${text}`
+				: text;
 		for await (const _ of enquire(token, apiText, sessionId, (event) => {
 				if (event.type === 'session') {
 					sessionId = event.session_id as string;
@@ -272,6 +340,8 @@
                 // Complete sentence — render if no token events (static content like greetings),
                 // and collect for Web Speech fallback in case Fish Audio isn't available.
                 const sentence = event.text as string;
+                const sequence = typeof event.sequence === 'number' ? event.sequence : sentenceTexts.size;
+                const cleanSentence = sentence.replace(/\[[^\]]*\]/g, '').trim();
                 if (!messageHasTokens) {
                     messages.update(m => {
                         const last = m[m.length - 1];
@@ -281,16 +351,26 @@
                         return [...m];
                     });
                 }
-                // Collect for Web Speech fallback (used at complete time if no server audio arrived)
-                if ($ttsEnabled) fallbackSentences.push(sentence.replace(/\[[^\]]*\]/g, '').trim());
+                if ($ttsEnabled && cleanSentence) {
+                    sentenceTexts.set(sequence, cleanSentence);
+                }
             } else if (event.type === 'sentence_audio') {
                 // Server pre-fetched this sentence via Fish Audio — decode base64 MP3 and play.
                 if ($ttsEnabled && audioQueue && event.audio) {
+                    const sequence = typeof event.sequence === 'number' ? event.sequence : 0;
+                    enqueueMissingSentences(sequence);
+                    spokenSentenceSeqs.add(sequence);
                     serverAudioReceived = true;
+                    cancelWebSpeech();
                     const binary = atob(event.audio as string);
                     const bytes = new Uint8Array(binary.length);
                     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
                     audioQueue.enqueueBuffer(bytes.buffer);
+                }
+            } else if (event.type === 'sentence_audio_missing') {
+                const sequence = typeof event.sequence === 'number' ? event.sequence : -1;
+                if ($ttsEnabled && audioQueue && sequence >= 0) {
+                    enqueueMissingSentences(sequence + 1);
                 }
             } else if (event.type === 'break') {
                 // Start a fresh assistant message block
@@ -315,17 +395,17 @@
 					messages.update(m => [...m, { role: 'card', content: '', card: cardData, interpreted: false }]);
 				} else if (event.type === 'rite' && event.rite) {
 					activeRite.set(event.rite as RiteData);
-					pendingRite.set({ rite: event.rite as RiteData, stage: 'prescribed' });
+					pendingRite.set({ rite: event.rite as RiteData, stage: 'offered' });
 				} else if (event.type === 'complete') {
 					const stage = (event as { type: string; stage?: string }).stage;
 					if (stage === 'complete' || stage === 'reintegration_complete') {
 						pendingRite.set(null);
+						const completedSessionId = (event as { session_id?: string }).session_id ?? sessionId;
+						if (totemSession && completedSessionId) {
+							totemSession.distillAndSave(completedSessionId).catch(() => {});
+						}
 					}
-					// Web Speech fallback: if no Fish Audio arrived, speak sentences now
-					if ($ttsEnabled && !serverAudioReceived && fallbackSentences.length > 0) {
-						const sentences = fallbackSentences.splice(0);
-						(async () => { for (const s of sentences) await webSpeech(s); })();
-					}
+					enqueueMissingSentences();
 } else if (event.type === 'continue_offered') {
 			continueOffered.set(true);
 		} else if (event.type === 'affect') {
@@ -395,20 +475,37 @@
 	let initiallyAuthed = $state(get(authed));
 	$effect(() => {
 		if (!initiallyAuthed && $authed && !guestMode && !$streaming) {
-			// Always re-bootstrap on sign-in — clear any guest conversation first
-			messages.set([]);
-			sessionId = null;
-			if (browser) localStorage.removeItem('clea_session_id');
-			send('');
+			initiallyAuthed = true;
+			if ($covenantPromptArmed) {
+				pendingAuthContext = buildAuthTranscriptContext(get(messages));
+				sessionId = null;
+				if (browser) {
+					localStorage.removeItem('clea_session_id');
+					localStorage.removeItem('clea_guest_token');
+				}
+			} else {
+				// Returning sign-in gets a fresh authed surface.
+				messages.set([]);
+				sessionId = null;
+				if (browser) {
+					localStorage.removeItem('clea_session_id');
+					localStorage.removeItem('clea_guest_token');
+				}
+				send('');
+			}
 		}
-		if (!$authed) initiallyAuthed = false; // reset on logout so next sign-in is detected
+		if ($authed) {
+			returningGuest = false;
+		} else {
+			initiallyAuthed = false; // reset on logout so next sign-in is detected
+		}
 	});
 
 	// Open session on mount — /enquire with no session_id bootstraps it
 	onMount(async () => {
 		// Restore saved messages, cleaning up any trailing empty assistant message
 		// left by interrupted streaming (tab was killed before the finally block ran).
-		if (browser) {
+		if (browser && !freshStart) {
 		  try {
 		    const saved = localStorage.getItem('clea_messages');
 		    if (saved) {
@@ -428,6 +525,13 @@
 		  // Unlock the messages save $effect now that localStorage has been read.
 		  // This must happen AFTER the restore so the effect never writes [] over saved data.
 		  didRestore = true;
+		} else {
+			resetConversationState();
+			didRestore = true;
+			if (freshStart) {
+				freshHandled = true;
+				onfreshhandled();
+			}
 		}
 		window.addEventListener('keydown', handleGlobalKey);
 		window.addEventListener('keyup', handleGlobalKey);
@@ -451,15 +555,36 @@
 		}
 	});
 
+	$effect(() => {
+		if (!freshStart) {
+			freshHandled = false;
+			return;
+		}
+		if (freshHandled || $streaming) return;
+		resetConversationState();
+		freshHandled = true;
+		onfreshhandled();
+		send('');
+	});
+
+	$effect(() => {
+		if ($covenantAcceptedTick === 0) {
+			lastSeenCovenantAcceptedTick = 0;
+			return;
+		}
+		if ($covenantAcceptedTick === lastSeenCovenantAcceptedTick) return;
+		if ($streaming) return;
+		lastSeenCovenantAcceptedTick = $covenantAcceptedTick;
+		send('I accept the covenant.');
+	});
+
 	onDestroy(() => {
+		cancelWebSpeech();
 		window.removeEventListener('keydown', handleGlobalKey);
 		window.removeEventListener('keyup', handleGlobalKey);
 		window.removeEventListener('visibilitychange', handleVisibilityChange);
 		audioQueue?.flush();
 		audioQueue = null;
-		if (totemSession && sessionId) {
-			totemSession.distillAndSave(sessionId).catch(() => {});
-		}
 	});
 
 	function handleInput(e: Event) {
@@ -476,7 +601,7 @@
 	}
 
 	function handleSend() {
-		if ($streaming || guestLocked) return;
+		if ($streaming || guestLocked || covenantPending) return;
 		const text = input.trim();
 		if (!text) return;
 		input = '';
@@ -485,7 +610,7 @@
 	}
 
 	function handleKey(e: KeyboardEvent) {
-		if (guestLocked) return;
+		if (guestLocked || covenantPending) return;
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
 			handleSend();
@@ -494,7 +619,7 @@
 
 	// ── PTT voice ─────────────────────────────────────────────────────────────
 	async function startListening() {
-		if (guestLocked) return;
+		if (guestLocked || covenantPending) return;
 		if (!navigator.mediaDevices?.getUserMedia) {
 			console.warn('getUserMedia not available — requires a secure context (HTTPS or localhost)');
 			return;
@@ -532,7 +657,7 @@
 	}
 
 	async function stopListening() {
-		if (guestLocked) return;
+		if (guestLocked || covenantPending) return;
 		if (!mediaRecorder) return;
 		voiceState.set('transcribing');
 		mediaRecorder.stop();
@@ -582,7 +707,7 @@
 
 	// ── PTT keyboard shortcut (Space, held) ───────────────────────────────────
 	function handleGlobalKey(e: KeyboardEvent) {
-		if (guestLocked) return;
+		if (guestLocked || covenantPending) return;
 		// Don't intercept Space while the user is typing in any editable element
 		const el = document.activeElement;
 		if (
@@ -638,7 +763,7 @@
 		/>
 	</div>
 
-		{#if (guestLocked || returningGuest) && onsignin}
+		{#if !$authed && (guestLocked || returningGuest) && onsignin}
 			<div class="guest-lock-banner">
 				<div class="guest-lock-copy">
 					{#if guestLocked}
@@ -672,7 +797,7 @@
 					onpointerdown={startListening}
 					onpointerup={stopListening}
 					aria-label="hold to speak"
-					disabled={guestLocked}
+					disabled={guestLocked || covenantPending}
 				>
 					{$voiceState === 'listening' ? '◉' : $voiceState === 'transcribing' ? '…' : '◎'}
 				</button>
@@ -694,8 +819,8 @@
 				role="textbox"
 				aria-multiline="true"
 				aria-label="Type to speak…"
-				data-placeholder={guestLocked ? 'Sign in to continue…' : 'Type to speak…'}
-				contenteditable={$streaming || guestLocked ? 'false' : 'true'}
+				data-placeholder={guestLocked ? 'Sign in to continue…' : covenantPending ? 'Enter the covenant to continue…' : 'Type to speak…'}
+				contenteditable={$streaming || guestLocked || covenantPending ? 'false' : 'true'}
 				enterkeyhint="send"
 				autocapitalize="sentences"
 				spellcheck="true"
@@ -708,7 +833,7 @@
 				class="send-inline"
 				onclick={handleSend}
 				aria-label="Send"
-				disabled={!input.trim() || $streaming || guestLocked}
+				disabled={!input.trim() || $streaming || guestLocked || covenantPending}
 			>ꜛ</button>
 		</div>
 

@@ -26,8 +26,8 @@ export default defineConfig({
           { src: '/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ],
         shortcuts: [
-          { name: 'New Reading', url: '/enquire', description: 'Start a new divination reading' },
-          { name: 'Clea', url: '/clea', description: 'Speak with Clea' }
+          { name: 'Draw', url: '/draw', description: 'Begin a new draw' },
+          { name: 'About', url: '/about', description: 'Learn the shape of the temple' }
         ]
       },
       workbox: {

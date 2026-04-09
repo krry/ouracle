@@ -43,6 +43,11 @@ export function webSpeech(text: string): Promise<void> {
 	});
 }
 
+export function cancelWebSpeech(): void {
+	if (!browser || !('speechSynthesis' in window)) return;
+	speechSynthesis.cancel();
+}
+
 /**
  * synthesize() — kept for AudioQueue API compatibility.
  * Speaks via Web Speech and returns null (already audible; nothing to buffer).

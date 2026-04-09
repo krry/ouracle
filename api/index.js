@@ -245,12 +245,58 @@ async function authenticateOrGuest(req, res, next) {
 }
 
 // Request logging (minimal, no body)
+const ANSI = {
+  reset: '\x1b[0m',
+  dim: '\x1b[2m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  red: '\x1b[31m',
+  brightRed: '\x1b[91m',
+};
+
+function colorStatus(status) {
+  if (status >= 500) return ANSI.brightRed;
+  if (status >= 400) return ANSI.red;
+  if (status >= 300) return ANSI.yellow;
+  if (status >= 200) return ANSI.green;
+  return ANSI.dim;
+}
+
 app.use((req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
     const ms = Date.now() - start;
-    console.log(`${req.method} ${req.originalUrl} -> ${res.statusCode} ${ms}ms`);
+    const statusColor = colorStatus(res.statusCode);
+    console.log(
+      `${ANSI.dim}${req.method}${ANSI.reset} ${req.originalUrl} -> ${statusColor}${res.statusCode}${ANSI.reset} ${ms}ms`
+    );
   });
+  next();
+});
+
+app.use('/totem/devices', (req, res, next) => {
+  const requestId = randomUUID().slice(0, 8);
+  const authHeader = req.headers.authorization;
+  const bodyKeys = req.body && typeof req.body === 'object' ? Object.keys(req.body) : [];
+  const originalJson = res.json.bind(res);
+
+  console.log(
+    `[totem/devices:${requestId}] in method=${req.method} url=${req.originalUrl} origin=${req.headers.origin ?? '-'} auth=${authHeader ? 'yes' : 'no'} contentType=${req.headers['content-type'] ?? '-'} bodyKeys=${bodyKeys.join(',') || '-'}`
+  );
+
+  res.json = (payload) => {
+    console.log(
+      `[totem/devices:${requestId}] out status=${res.statusCode} payloadKeys=${payload && typeof payload === 'object' ? Object.keys(payload).join(',') : '-'}`
+    );
+    return originalJson(payload);
+  };
+
+  res.on('finish', () => {
+    console.log(
+      `[totem/devices:${requestId}] finish status=${res.statusCode} seeker=${req.seeker_id ?? '-'} bodyPublicKey=${req.body?.public_key ? 'yes' : 'no'} wrapped=${req.body?.wrapped_key ? 'yes' : 'no'}`
+    );
+  });
+
   next();
 });
 
@@ -286,6 +332,10 @@ const COVENANT = {
 };
 
 const COVENANT_REMINDER = 'But, before we enter the temple, I must ask that we enter a covenant. Are you ready?';
+const READY_MESSAGE_RE = /\b(yes|yeah|yep|yup|ready|i(?:'| a)?m ready|i want it|i do|let'?s|go ahead|please|okay|ok|sure|absolutely|definitely|i(?:'| a)?m open|open to it|i accept)\b/i;
+const REPORT_MESSAGE_RE = /\b(i did it|i tried it|i did the rite|i did the practice|i tried the practice|after doing it|when i did it|i felt|it felt|i noticed|it helped|it didn't help|nothing happened|i resisted|i avoided it|i couldn't do it|i didn't do it|here's what happened|my experience was|afterward|afterwards)\b/i;
+const RITE_FEEDBACK_PROMPT = "Take this rite with you. When you've met it, come back and tell me what happened.";
+const RITE_FEEDBACK_FOLLOWUP = 'What else presented, came up, or arose?';
 
 function deriveStage(seeker) {
   return seeker?.covenant_at ? 'covenanted' : 'known';
@@ -951,7 +1001,10 @@ app.patch('/seeker/:id/thread/:session_id/redact', authenticate, async (req, res
 // DIRECT DOMAIN ENDPOINTS — wildcard, must be last
 // POST /:domain/:verb
 // ─────────────────────────────────────────────
-app.post('/:domain/:verb', authenticate, async (req, res) => {
+app.post('/:domain/:verb', (req, res, next) => {
+  if (req.params.domain === 'totem') return next('route');
+  next();
+}, authenticate, async (req, res) => {
   const { domain, verb } = req.params;
   const { seeker_id, instruction, duration } = req.body;
 
@@ -1060,6 +1113,8 @@ class SentenceAudioStreamer {
       const data = this.readyAudio.get(this.nextAudioEmitIdx);
       if (data !== null) {
         this.emit({ type: 'sentence_audio', sequence: this.nextAudioEmitIdx, audio: data });
+      } else {
+        this.emit({ type: 'sentence_audio_missing', sequence: this.nextAudioEmitIdx });
       }
       this.nextAudioEmitIdx++;
     }
@@ -1073,6 +1128,8 @@ class SentenceAudioStreamer {
         const data = this.readyAudio.get(this.nextAudioEmitIdx);
         if (data !== null) {
           this.emit({ type: 'sentence_audio', sequence: this.nextAudioEmitIdx, audio: data });
+        } else {
+          this.emit({ type: 'sentence_audio_missing', sequence: this.nextAudioEmitIdx });
         }
         this.nextAudioEmitIdx++;
       } else {
@@ -1163,6 +1220,7 @@ async function streamText(emit, text) {
 app.post('/enquire', authenticateOrGuest, async (req, res) => {
   const { session_id, message, mode } = req.body || {};
   const seeker_id = req.seeker_id;
+  console.log(`[enquire] seeker=${seeker_id ?? 'guest'} session=${session_id ?? 'new'} mode=${mode ?? 'default'} message=${message ? 'yes' : 'no'}`);
 
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
@@ -1199,7 +1257,7 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
 
   // ── Guest path ──────────────────────────────────────────
   if (req.is_guest) {
-    const GUEST_TURN_LIMIT = 5;
+    const GUEST_TURN_LIMIT = 3;
     const guest = await getGuestSession(req.guest_session_id);
     if (!guest) return fail('Guest session not found.');
     if (guest.turns_used >= GUEST_TURN_LIMIT) return fail('guest_limit');
@@ -1245,122 +1303,45 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
     const seeker = await getSeeker(seeker_id);
     if (!seeker) return fail('Seeker not found.');
 
-    // ── New session ──────────────────────────────
-    if (!session_id) {
-      // Covenant is NOT auto-recorded — seeker enters it via the modal
-      // after Clea introduces it conversationally.
-
-      const sessionCount = await getSeekerSessionCount(seeker_id);
-      const lastSession = await getSeekerLatestSession(seeker_id);
-      const lastQuestion = Array.isArray(lastSession?.conversation)
-        ? lastSession.conversation.find((e) => e?.role === 'priestess')?.text
-        : null;
-      const lastAt = lastSession?.completed_at || lastSession?.created_at;
-      const daysSinceLast = lastAt
-        ? Math.floor((Date.now() - new Date(lastAt).getTime()) / (1000 * 60 * 60 * 24))
-        : null;
-
-      const covenantPayload = {
-        version: COVENANT.version,
-        accepted: true,
-        timestamp: new Date().toISOString(),
-      };
-      const session = await createSession(seeker_id, covenantPayload);
-      const question = chooseOpeningQuestion({
-        session_count: sessionCount,
-        last_question: lastQuestion,
-        last_quality: lastSession?.quality ?? null,
-        last_rite_name: lastSession?.rite_name ?? null,
-        days_since_last: daysSinceLast,
-      });
-      const nowIso = new Date().toISOString();
-      const lastAct = lastSession?.rite_json?.act;
-      const returningGreeting = lastAct
-        ? `Welcome back. You were going to ${lastAct.replace(/\.$/, '')}.`
-        : lastSession?.rite_name
-          ? `Welcome back. You were working with ${lastSession.rite_name}.`
-          : null;
-      const greeting = daysSinceLast !== null && daysSinceLast >= 90
-        ? "Three months. What's been happening?"
-        : returningGreeting;
-
-      const conversation = [
-        ...(greeting ? [{ role: 'priestess', text: greeting, at: nowIso }] : []),
-        { role: 'priestess', text: question, at: nowIso },
-      ];
-      await updateSession(session.id, { stage: 'inquiry', turn: 0, conversation });
-
-      emit({ type: 'session', session_id: session.id, stage: 'inquiry', needs_covenant: !seeker.covenant_at });
-      if (greeting) {
-        await streamer.processFullText(greeting);
-        emit({ type: 'break' });
+    const inferSessionState = async (session, incomingMessage, conversation, currentSessionId, contextLabel) => {
+      // Weight the latest turn twice so current language can move the live seeker reading.
+      const nextFullText = `${session.full_text || ''} ${incomingMessage} ${incomingMessage}`.trim();
+      const { vagal, belief, quality, affect } = await infer(nextFullText);
+      const lastSeekerIdx = conversation.findLastIndex(e => e.role === 'seeker');
+      if (lastSeekerIdx !== -1) {
+        conversation[lastSeekerIdx] = { ...conversation[lastSeekerIdx], affect };
       }
-      await streamer.processFullText(question);
-      // Covenant reminder for seekers who haven't entered the covenant
-      if (!seeker.covenant_at) {
-        emit({ type: 'break' });
-        await streamer.processFullText(COVENANT_REMINDER);
-      }
-      return finish('inquiry', { session_id: session.id });
-    }
+      emit({ type: 'vagal', probable: vagal.probable, confidence: vagal.confidence, reasoning: vagal.reasoning });
+      emit({ type: 'belief', pattern: belief.pattern, confidence: belief.confidence, reasoning: belief.reasoning });
+      emit({ type: 'quality', quality: quality.quality, confidence: quality.confidence, is_shock: quality.is_shock, reasoning: quality.reasoning });
+      emit({ type: 'affect', valence: affect.valence, arousal: affect.arousal, gloss: affect.gloss, confidence: affect.confidence });
+      console.log(`[enquire/${contextLabel}] session=${currentSessionId} vagal=${vagal.probable ?? 'null'}/${vagal.confidence ?? 'null'} belief=${belief.pattern ?? 'null'}/${belief.confidence ?? 'null'} quality=${quality.quality ?? 'null'}/${quality.confidence ?? 'null'} affect=${affect.gloss ?? 'null'}`);
+      return { nextFullText, vagal, belief, quality, affect, conversation };
+    };
 
-    // ── Continue existing session ─────────────────
-    const session = await getSession(session_id);
-    if (!session) return fail('Session not found.');
+    const handleInquiryTurn = async (session, incomingMessage, currentSessionId) => {
+      if (!incomingMessage) return fail('message required during inquiry.');
 
-    // ── Card interpretation — bypass OCTAVE, respond as Clea directly ────────
-    if (mode === 'interpret' && message) {
-      const conversation = Array.isArray(session.conversation) ? [...session.conversation] : [];
-      const llmMessages = conversation
-        .filter((e) => e.role === 'seeker' || e.role === 'priestess')
-        .map((e) => ({ role: e.role === 'seeker' ? 'user' : 'assistant', content: e.text }));
-      llmMessages.push({ role: 'user', content: message });
-      const llm = makeLlmClient();
-      const stream = await llm.chat({
-        system: `${CLEA_SYSTEM_PROMPT}\n\n--- The seeker has drawn a divination card and is asking for your interpretation. Respond as Clea — do not prescribe a rite, do not run an assessment. Simply receive the card and the seeker together, and speak.`,
-        messages: llmMessages,
-        temperature: 0.9,
-        maxTokens: 512,
-        stream: true,
-      });
-      try {
-        for await (const chunk of stream) {
-          const token = chunk.choices?.[0]?.delta?.content;
-          if (token) streamer.feedToken(token);
-        }
-      } finally {
-        streamer.finish();
-      }
-      return finish(session.stage, { session_id });
-    }
-
-    const stage = session.stage;
-
-    if (stage === 'inquiry') {
-      if (!message) return fail('message required during inquiry.');
-
-      const newText = `${session.full_text || ''} ${message}`.trim();
+      const newText = `${session.full_text || ''} ${incomingMessage}`.trim();
       const newTurn = (session.turn || 0) + 1;
       const conversation = Array.isArray(session.conversation) ? [...session.conversation] : [];
-      conversation.push({ role: 'seeker', text: message, at: new Date().toISOString() });
+      conversation.push({ role: 'seeker', text: incomingMessage, at: new Date().toISOString() });
 
       const { vagal, belief, quality, affect } = await infer(newText);
-       // Attach affect to the seeker entry
-       const lastSeekerIdx = conversation.findLastIndex(e => e.role === 'seeker');
-       if (lastSeekerIdx !== -1) {
-         conversation[lastSeekerIdx] = { ...conversation[lastSeekerIdx], affect };
-       }
-       // Emit inference events for real-time UI updates
-       emit({ type: 'vagal', probable: vagal.probable, confidence: vagal.confidence, reasoning: vagal.reasoning });
-       emit({ type: 'belief', pattern: belief.pattern, confidence: belief.confidence, reasoning: belief.reasoning });
-       emit({ type: 'quality', quality: quality.quality, confidence: quality.confidence, is_shock: quality.is_shock, reasoning: quality.reasoning });
-       emit({ type: 'affect', valence: affect.valence, arousal: affect.arousal, gloss: affect.gloss, confidence: affect.confidence });
+      const lastSeekerIdx = conversation.findLastIndex(e => e.role === 'seeker');
+      if (lastSeekerIdx !== -1) {
+        conversation[lastSeekerIdx] = { ...conversation[lastSeekerIdx], affect };
+      }
+      emit({ type: 'vagal', probable: vagal.probable, confidence: vagal.confidence, reasoning: vagal.reasoning });
+      emit({ type: 'belief', pattern: belief.pattern, confidence: belief.confidence, reasoning: belief.reasoning });
+      emit({ type: 'quality', quality: quality.quality, confidence: quality.confidence, is_shock: quality.is_shock, reasoning: quality.reasoning });
+      emit({ type: 'affect', valence: affect.valence, arousal: affect.arousal, gloss: affect.gloss, confidence: affect.confidence });
 
       const threshold = vagal.confidence === 'high' || (vagal.confidence === 'medium' && belief.confidence !== 'low');
+      console.log(`[enquire/inquiry] session=${currentSessionId} turn=${newTurn} threshold=${threshold} vagal=${vagal.probable ?? 'null'}/${vagal.confidence ?? 'null'} belief=${belief.pattern ?? 'null'}/${belief.confidence ?? 'null'} quality=${quality.quality ?? 'null'}/${quality.confidence ?? 'null'} affect=${affect.gloss ?? 'null'}`);
 
       if (threshold || newTurn >= 3) {
-        // Save inference; move to offering — Clea asks if seeker is ready.
-        await updateSession(session_id, {
+        await updateSession(currentSessionId, {
           stage: 'offering',
           turn: newTurn,
           full_text: newText,
@@ -1395,9 +1376,9 @@ Brief — one or two sentences. Let it breathe. Do not describe the rite yet.`;
         }
 
         conversation.push({ role: 'priestess', text: offeringQ, at: new Date().toISOString() });
-        await updateSession(session_id, { conversation });
+        await updateSession(currentSessionId, { conversation });
         await streamer.processFullText(offeringQ);
-        return finish('offering', { session_id });
+        return finish('offering', { session_id: currentSessionId });
       }
 
       const clarifiers = [
@@ -1427,7 +1408,6 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
         const llm = makeLlmClient();
         nextQ = await llm.chat({ system: systemWithSuggestion, messages: llmMessages, temperature: 0.85, maxTokens: 300 });
         nextQ = nextQ.trim();
-        // Detect and strip draw signal
         const drawMatch = nextQ.match(/\s*\[DRAW(?::([^\]]+))?\]\s*$/i);
         if (drawMatch) {
           drawSignal = true;
@@ -1439,11 +1419,10 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
       }
 
       conversation.push({ role: 'priestess', text: nextQ, at: new Date().toISOString() });
-      await updateSession(session_id, { turn: newTurn, full_text: newText, conversation });
+      await updateSession(currentSessionId, { turn: newTurn, full_text: newText, conversation });
 
       await streamer.processFullText(nextQ);
 
-      // Clea requested a draw — pick a contextually relevant card server-side
       if (drawSignal) {
         try {
           const allDecks = await loadDecks();
@@ -1466,7 +1445,113 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
         }
       }
 
-      return finish('inquiry', { session_id, turn: newTurn });
+      return finish('inquiry', { session_id: currentSessionId, turn: newTurn });
+    };
+
+    // ── New session ──────────────────────────────
+    if (!session_id) {
+      // Covenant is NOT auto-recorded — seeker enters it via the modal
+      // after Clea introduces it conversationally.
+
+      const sessionCount = await getSeekerSessionCount(seeker_id);
+      const lastSession = await getSeekerLatestSession(seeker_id);
+      const lastQuestion = Array.isArray(lastSession?.conversation)
+        ? lastSession.conversation.find((e) => e?.role === 'priestess')?.text
+        : null;
+      const lastAt = lastSession?.completed_at || lastSession?.created_at;
+      const daysSinceLast = lastAt
+        ? Math.floor((Date.now() - new Date(lastAt).getTime()) / (1000 * 60 * 60 * 24))
+        : null;
+
+      const covenantPayload = {
+        version: COVENANT.version,
+        accepted: true,
+        timestamp: new Date().toISOString(),
+      };
+      const session = await createSession(seeker_id, covenantPayload);
+      console.log(`[enquire/new] session=${session.id} seeker=${seeker_id} covenanted=${seeker.covenant_at ? 'yes' : 'no'} carriedMessage=${message ? 'yes' : 'no'}`);
+      emit({ type: 'session', session_id: session.id, stage: 'inquiry', needs_covenant: !seeker.covenant_at });
+
+      if (message) {
+        await updateSession(session.id, { stage: 'inquiry', turn: 0, conversation: [] });
+        if (!seeker.covenant_at) {
+          await streamer.processFullText(COVENANT_REMINDER);
+          return finish('inquiry', { session_id: session.id });
+        }
+        return handleInquiryTurn({ ...session, stage: 'inquiry', turn: 0, conversation: [], full_text: '' }, message, session.id);
+      }
+
+      const question = chooseOpeningQuestion({
+        session_count: sessionCount,
+        last_question: lastQuestion,
+        last_quality: lastSession?.quality ?? null,
+        last_rite_name: lastSession?.rite_name ?? null,
+        days_since_last: daysSinceLast,
+      });
+      const nowIso = new Date().toISOString();
+      const lastAct = lastSession?.rite_json?.act;
+      const returningGreeting = lastAct
+        ? `Welcome back. You were going to ${lastAct.replace(/\.$/, '')}.`
+        : lastSession?.rite_name
+          ? `Welcome back. You were working with ${lastSession.rite_name}.`
+          : null;
+      const greeting = daysSinceLast !== null && daysSinceLast >= 90
+        ? "Three months. What's been happening?"
+        : returningGreeting;
+
+      const conversation = [
+        ...(greeting ? [{ role: 'priestess', text: greeting, at: nowIso }] : []),
+        { role: 'priestess', text: question, at: nowIso },
+      ];
+      await updateSession(session.id, { stage: 'inquiry', turn: 0, conversation });
+
+      if (greeting) {
+        await streamer.processFullText(greeting);
+        emit({ type: 'break' });
+      }
+      await streamer.processFullText(question);
+      if (!seeker.covenant_at) {
+        emit({ type: 'break' });
+        await streamer.processFullText(COVENANT_REMINDER);
+      }
+      return finish('inquiry', { session_id: session.id });
+    }
+
+    // ── Continue existing session ─────────────────
+    const session = await getSession(session_id);
+    if (!session) return fail('Session not found.');
+    console.log(`[enquire/continue] session=${session_id} stage=${session.stage} turn=${session.turn ?? 0}`);
+
+    // ── Card interpretation — bypass OCTAVE, respond as Clea directly ────────
+    if (mode === 'interpret' && message) {
+      const conversation = Array.isArray(session.conversation) ? [...session.conversation] : [];
+      const llmMessages = conversation
+        .filter((e) => e.role === 'seeker' || e.role === 'priestess')
+        .map((e) => ({ role: e.role === 'seeker' ? 'user' : 'assistant', content: e.text }));
+      llmMessages.push({ role: 'user', content: message });
+      const llm = makeLlmClient();
+      const stream = await llm.chat({
+        system: `${CLEA_SYSTEM_PROMPT}\n\n--- The seeker has drawn a divination card and is asking for your interpretation. Respond as Clea — do not prescribe a rite, do not run an assessment. Simply receive the card and the seeker together, and speak.`,
+        messages: llmMessages,
+        temperature: 0.9,
+        maxTokens: 512,
+        stream: true,
+      });
+      try {
+        for await (const chunk of stream) {
+          const token = chunk.choices?.[0]?.delta?.content;
+          if (token) streamer.feedToken(token);
+        }
+      } finally {
+        streamer.finish();
+      }
+      return finish(session.stage, { session_id });
+    }
+
+    const stage = session.stage;
+
+    if (stage === 'inquiry') {
+      return handleInquiryTurn(session, message, session_id);
     }
 
     if (stage === 'offering') {
@@ -1474,6 +1559,18 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
 
       const conversation = Array.isArray(session.conversation) ? [...session.conversation] : [];
       conversation.push({ role: 'seeker', text: message, at: new Date().toISOString() });
+      const offeringState = await inferSessionState(session, message, conversation, session_id, 'offering-state');
+      await updateSession(session_id, {
+        full_text: offeringState.nextFullText,
+        conversation,
+        vagal_probable: offeringState.vagal.probable,
+        vagal_confidence: offeringState.vagal.confidence,
+        belief_pattern: offeringState.belief.pattern,
+        belief_confidence: offeringState.belief.confidence,
+        quality: offeringState.quality.quality,
+        quality_confidence: offeringState.quality.confidence,
+        quality_is_shock: offeringState.quality.is_shock,
+      });
 
       const offeringSystem = `${CLEA_SYSTEM_PROMPT}
 
@@ -1503,15 +1600,25 @@ Most responses will NOT include [READY].`;
       streamer.finish();
 
       let response = chunks.join('').trim().replace(/^\[[^\]]*\]\s*/, '');
-      const readySignal = /\s*\[READY\]\s*$/i.test(response);
+      const readySignal = /\s*\[READY\]\s*$/i.test(response) || READY_MESSAGE_RE.test(message);
       if (readySignal) response = response.replace(/\s*\[READY\]\s*$/i, '').trim();
 
       conversation.push({ role: 'priestess', text: response, at: new Date().toISOString() });
 
       if (readySignal) {
-        const belief = { pattern: session.belief_pattern, confidence: session.belief_confidence, meta: BELIEFS[session.belief_pattern] };
-        const quality = { quality: session.quality, confidence: session.quality_confidence, is_shock: session.quality_is_shock };
-        const prescription = buildPrescription(session.vagal_probable, belief, quality);
+        const belief = {
+          pattern: offeringState.belief.pattern,
+          confidence: offeringState.belief.confidence,
+          meta: BELIEFS[offeringState.belief.pattern]
+        };
+        const quality = {
+          quality: offeringState.quality.quality,
+          confidence: offeringState.quality.confidence,
+          is_shock: offeringState.quality.is_shock,
+          seeker_language: offeringState.quality.seeker_language
+        };
+        const prescription = buildPrescription(offeringState.vagal.probable, belief, quality);
+        console.log(`[enquire/offering] session=${session_id} ready=yes rite=${prescription.rite?.rite_name ?? 'none'}`);
         const divination = drawDivinationSource(null, quality.quality);
         const history = await getSeekerHistory(seeker_id, 1);
         const lastRite = history?.[0]?.rite_name || null;
@@ -1523,7 +1630,15 @@ Most responses will NOT include [READY].`;
         const ritePayload = divination ? { ...prescription.rite, divination } : prescription.rite;
         await updateSession(session_id, {
           stage: 'prescribed',
+          full_text: offeringState.nextFullText,
           conversation,
+          vagal_probable: offeringState.vagal.probable,
+          vagal_confidence: offeringState.vagal.confidence,
+          belief_pattern: offeringState.belief.pattern,
+          belief_confidence: offeringState.belief.confidence,
+          quality: offeringState.quality.quality,
+          quality_confidence: offeringState.quality.confidence,
+          quality_is_shock: offeringState.quality.is_shock,
           rite_name: prescription.rite?.rite_name,
           rite_json: ritePayload,
           love_fear_audit: prescription.love_fear_audit,
@@ -1536,10 +1651,15 @@ Most responses will NOT include [READY].`;
         }
         // Emit structured rite event — frontend renders in OraclePanel, not chat stream
         emit({ type: 'rite', rite: ritePayload });
+        emit({ type: 'break' });
+        await streamer.processFullText(RITE_FEEDBACK_PROMPT);
+        conversation.push({ role: 'priestess', text: RITE_FEEDBACK_PROMPT, at: new Date().toISOString() });
+        await updateSession(session_id, { conversation });
         return finish('prescribed', { session_id, rite_name: prescription.rite?.rite_name });
       }
 
-      await updateSession(session_id, { conversation });
+      await updateSession(session_id, { full_text: offeringState.nextFullText, conversation });
+      console.log(`[enquire/offering] session=${session_id} ready=no`);
       return finish('offering', { session_id });
     }
 
@@ -1548,6 +1668,18 @@ Most responses will NOT include [READY].`;
 
       const conversation = Array.isArray(session.conversation) ? [...session.conversation] : [];
       conversation.push({ role: 'seeker', text: message, at: new Date().toISOString() });
+      const prescribedState = await inferSessionState(session, message, conversation, session_id, 'prescribed-state');
+      await updateSession(session_id, {
+        full_text: prescribedState.nextFullText,
+        conversation,
+        vagal_probable: prescribedState.vagal.probable,
+        vagal_confidence: prescribedState.vagal.confidence,
+        belief_pattern: prescribedState.belief.pattern,
+        belief_confidence: prescribedState.belief.confidence,
+        quality: prescribedState.quality.quality,
+        quality_confidence: prescribedState.quality.confidence,
+        quality_is_shock: prescribedState.quality.is_shock,
+      });
 
       const riteContext = session.rite_json
         ? `The rite prescribed: "${session.rite_json.rite_name}" — ${session.rite_json.act}`
@@ -1581,16 +1713,37 @@ Most responses will NOT include [REPORT].`;
       streamer.finish();
 
       let response = chunks.join('').trim().replace(/^\[[^\]]*\]\s*/, '');
-      const reportSignal = /\s*\[REPORT\]\s*$/i.test(response);
+      const reportSignal = /\s*\[REPORT\]\s*$/i.test(response) || REPORT_MESSAGE_RE.test(message);
       if (reportSignal) response = response.replace(/\s*\[REPORT\]\s*$/i, '').trim();
 
       conversation.push({ role: 'priestess', text: response, at: new Date().toISOString() });
 
       if (reportSignal) {
         const enacted = !!message;
+        const confirmation = session.rite_name
+          ? `I hear that in your meeting with ${session.rite_name}: ${message}`
+          : `I hear this record of your experience: ${message}`;
+        const openingQuestion = Array.isArray(session.conversation)
+          ? session.conversation.find((e) => e?.role === 'priestess')?.text
+          : null;
+        const closing = openingQuestion ? getClosingDedication(openingQuestion) : null;
+        const completedConversation = [
+          ...conversation,
+          { role: 'priestess', text: confirmation, at: new Date().toISOString() },
+          ...(closing ? [{ role: 'priestess', text: closing, at: new Date().toISOString() }] : []),
+          { role: 'priestess', text: RITE_FEEDBACK_FOLLOWUP, at: new Date().toISOString() },
+        ];
         await updateSession(session_id, {
           stage: 'complete',
-          conversation,
+          full_text: prescribedState.nextFullText,
+          conversation: completedConversation,
+          vagal_probable: prescribedState.vagal.probable,
+          vagal_confidence: prescribedState.vagal.confidence,
+          belief_pattern: prescribedState.belief.pattern,
+          belief_confidence: prescribedState.belief.confidence,
+          quality: prescribedState.quality.quality,
+          quality_confidence: prescribedState.quality.confidence,
+          quality_is_shock: prescribedState.quality.is_shock,
           enacted,
           report: { enacted, notes: message },
           completed_at: new Date().toISOString(),
@@ -1604,18 +1757,17 @@ Most responses will NOT include [REPORT].`;
           enacted,
         });
         emit({ type: 'break' });
-        const openingQuestion = Array.isArray(session.conversation)
-          ? session.conversation.find((e) => e?.role === 'priestess')?.text
-          : null;
-        const closing = openingQuestion ? getClosingDedication(openingQuestion) : null;
+        await streamer.processFullText(confirmation);
+        emit({ type: 'break' });
         if (closing) {
           await streamer.processFullText(closing);
           emit({ type: 'break' });
         }
+        await streamer.processFullText(RITE_FEEDBACK_FOLLOWUP);
         return finish('complete', { session_id });
       }
 
-      await updateSession(session_id, { conversation });
+      await updateSession(session_id, { full_text: prescribedState.nextFullText, conversation });
       return finish('prescribed', { session_id });
     }
 
@@ -1776,11 +1928,73 @@ app.get('/totem', authenticate, async (req, res) => {
 });
 
 // PUT /totem
+function toBase64(buf) {
+  return Buffer.from(buf).toString('base64');
+}
+
+function fromBase64(s) {
+  return Buffer.from(s, 'base64');
+}
+
+async function importRecoveryKey() {
+  const secret = process.env.TOTEM_RECOVERY_SECRET || process.env.JWT_SECRET;
+  if (!secret) throw new Error('TOTEM_RECOVERY_SECRET or JWT_SECRET required for totem recovery.');
+  const raw = await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(secret));
+  return globalThis.crypto.subtle.importKey('raw', raw, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+
+async function encryptRecoveryKey(rawKeyB64) {
+  const recoveryKey = await importRecoveryKey();
+  const iv = globalThis.crypto.getRandomValues(new Uint8Array(12));
+  const ciphertext = await globalThis.crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    recoveryKey,
+    fromBase64(rawKeyB64)
+  );
+  return JSON.stringify({ v: 1, iv: toBase64(iv), ct: toBase64(new Uint8Array(ciphertext)) });
+}
+
+async function decryptRecoveryKey(payload) {
+  const parsed = typeof payload === 'string' ? JSON.parse(payload) : payload;
+  if (!parsed?.iv || !parsed?.ct) throw new Error('Invalid recovery payload.');
+  const recoveryKey = await importRecoveryKey();
+  const plain = await globalThis.crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: fromBase64(parsed.iv) },
+    recoveryKey,
+    fromBase64(parsed.ct)
+  );
+  return new Uint8Array(plain);
+}
+
+function parseTotemKeyInfo(raw) {
+  if (!raw) return { device_public_key: null, recovery_wrapped_key: null };
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') {
+      return {
+        device_public_key: parsed.device_public_key ?? null,
+        recovery_wrapped_key: parsed.recovery_wrapped_key ?? null,
+      };
+    }
+  } catch {
+    // legacy plain string
+  }
+  return { device_public_key: raw, recovery_wrapped_key: null };
+}
+
 app.put('/totem', authenticate, async (req, res) => {
-  const { ciphertext, public_key } = req.body || {};
+  const { ciphertext, public_key, recovery_key } = req.body || {};
   if (!ciphertext || !public_key) return res.status(400).json({ error: 'ciphertext and public_key required.' });
   try {
-    await upsertTotem(req.seeker_id, ciphertext, public_key);
+    const recovery_wrapped_key = recovery_key ? await encryptRecoveryKey(recovery_key) : null;
+    await upsertTotem(
+      req.seeker_id,
+      ciphertext,
+      JSON.stringify({
+        device_public_key: public_key,
+        recovery_wrapped_key,
+      })
+    );
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -1790,6 +2004,7 @@ app.put('/totem', authenticate, async (req, res) => {
 // GET /totem/devices
 app.get('/totem/devices', authenticate, async (req, res) => {
   try {
+    console.log(`[totem/devices] list seeker=${req.seeker_id}`);
     res.json(await getDevices(req.seeker_id));
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -1801,9 +2016,69 @@ app.post('/totem/devices', authenticate, async (req, res) => {
   const { device_name, public_key, wrapped_key } = req.body || {};
   if (!public_key) return res.status(400).json({ error: 'public_key required.' });
   try {
+    console.log(`[totem/devices] register seeker=${req.seeker_id} wrapped=${wrapped_key ? 'yes' : 'no'}`);
     await addDevice(req.seeker_id, device_name ?? null, public_key, wrapped_key ?? null);
     res.json({ ok: true });
   } catch (e) {
+    console.error('[totem/devices] register error', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/totem/recover-key', authenticate, async (req, res) => {
+  const { public_key } = req.body || {};
+  if (!public_key) return res.status(400).json({ error: 'public_key required.' });
+
+  try {
+    const totem = await getTotem(req.seeker_id);
+    if (!totem?.public_key) {
+      console.log(`[totem/recover-key] seeker=${req.seeker_id} no-totem`);
+      return res.status(404).json({ error: 'Totem not found.' });
+    }
+
+    const { recovery_wrapped_key } = parseTotemKeyInfo(totem.public_key);
+    if (!recovery_wrapped_key) {
+      console.log(`[totem/recover-key] seeker=${req.seeker_id} no-recovery-key`);
+      return res.status(404).json({ error: 'No recoverable totem key found.' });
+    }
+
+    console.log(`[totem/recover-key] seeker=${req.seeker_id} recovering`);
+
+    const rawKey = await decryptRecoveryKey(recovery_wrapped_key);
+    const subtle = globalThis.crypto.subtle;
+    const recipientPublicKey = await subtle.importKey(
+      'jwk',
+      JSON.parse(public_key),
+      { name: 'ECDH', namedCurve: 'P-256' },
+      false,
+      []
+    );
+
+    const ephemeralKeyPair = await subtle.generateKey(
+      { name: 'ECDH', namedCurve: 'P-256' },
+      true,
+      ['deriveKey']
+    );
+    const ephemeralPublicKeyJwk = await subtle.exportKey('jwk', ephemeralKeyPair.publicKey);
+    const sharedKey = await subtle.deriveKey(
+      { name: 'ECDH', public: recipientPublicKey },
+      ephemeralKeyPair.privateKey,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt']
+    );
+    const iv = globalThis.crypto.getRandomValues(new Uint8Array(12));
+    const encrypted = await subtle.encrypt({ name: 'AES-GCM', iv }, sharedKey, rawKey);
+
+    res.json({
+      encrypted_key: JSON.stringify({
+        iv: toBase64(iv),
+        ct: toBase64(new Uint8Array(encrypted)),
+      }),
+      ephemeral_public_key: ephemeralPublicKeyJwk,
+    });
+  } catch (e) {
+    console.error('recover-key error:', e);
     res.status(500).json({ error: e.message });
   }
 });
@@ -1832,13 +2107,14 @@ app.post('/totem/distill', authenticate, async (req, res) => {
       .map((e) => `${e.role}: ${e.text}`)
       .join('\n');
 
-    const distillationPrompt = `Given this session, extract a brief distillation as JSON:
+const distillationPrompt = `Given this session, extract a brief distillation as JSON:
 {
   "arc": "one sentence on the seeker's current arc",
   "qualities": { "dominant": "octave quality", "current": "vagal state" },
   "beliefs": ["belief patterns surfaced"],
   "rite": { "name": "rite name", "act": "core act" },
   "session_note": "1-2 sentence summary",
+  "report": "the seeker's own report or feedback about the rite, if present",
   "context": "2-3 sentences Clea should remember at next session open"
 }
 Session:
@@ -1857,6 +2133,14 @@ Return only valid JSON.`;
       distillation = JSON.parse(raw);
     } catch {
       return res.status(500).json({ error: 'LLM returned invalid JSON.' });
+    }
+
+    const reportText =
+      typeof session.report === 'string'
+        ? session.report
+        : session.report?.notes ?? session.report?.unexpected ?? null;
+    if (reportText && !distillation.report) {
+      distillation.report = reportText;
     }
 
     // Encrypt distillation to seeker's device public key via ephemeral ECDH.
@@ -1897,6 +2181,14 @@ Return only valid JSON.`;
   }
 });
 
+// Totem route fallthrough diagnostic — if anything under /totem reaches here,
+// it missed the explicit handlers above.
+app.use('/totem', (req, res, next) => {
+  if (res.headersSent) return next();
+  console.error(`[totem] unmatched method=${req.method} url=${req.originalUrl}`);
+  res.status(404).json({ error: 'Totem route not found.' });
+});
+
 // ── Suno export ───────────────────────────────────────────────────────────────
 
 app.post('/suno', authenticateOrGuest, async (req, res) => {
@@ -1920,6 +2212,26 @@ app.post('/suno', authenticateOrGuest, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3737;
-app.listen(PORT, () => console.log(`MEATAPI v0.2 on :${PORT}`));
+const bootId = randomUUID().slice(0, 8);
+const bootedAt = new Date().toISOString();
+
+function logLifecycle(event, extra = '') {
+  const suffix = extra ? ` ${extra}` : '';
+  console.log(`[api:${bootId}] ${event} pid=${process.pid} at=${new Date().toISOString()}${suffix}`);
+}
+
+const server = app.listen(PORT, () => {
+  console.log(`[api:${bootId}] boot pid=${process.pid} started=${bootedAt} port=${PORT} version=${version}`);
+});
+
+process.on('SIGINT', () => {
+  logLifecycle('shutdown', 'signal=SIGINT');
+  server.close(() => process.exit(0));
+});
+
+process.on('SIGTERM', () => {
+  logLifecycle('shutdown', 'signal=SIGTERM');
+  server.close(() => process.exit(0));
+});
 
 export default app;

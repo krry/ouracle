@@ -2,6 +2,8 @@
   import OraclePanel from './OraclePanel.svelte';
   import SeekerStatusPanel from './SeekerStatusPanel.svelte';
   import ThreadsPanel from './ThreadsPanel.svelte';
+  import { authed, activeRite, pendingRite } from './stores';
+  import { controlPanelRouteById } from './ControlPanel.svelte';
   import type { CardData, RiteData } from './stores';
 
   type DeckMeta = { id: string; meta: { name?: string; description?: string }; count: number };
@@ -33,6 +35,7 @@
 
   let activeTab = $state<TabId>('decks');
   let collapsed = $state(false);
+  let hadVisibleRite = $state(false);
 
   const tabs: Array<{ id: TabId; label: string }> = [
     { id: 'decks', label: 'Decks' },
@@ -42,6 +45,15 @@
 
   $effect(() => {
     onCollapseChange(collapsed);
+  });
+
+  $effect(() => {
+    const hasVisibleRite = !!$activeRite || !!$pendingRite;
+    if (hasVisibleRite && !hadVisibleRite) {
+      activeTab = 'decks';
+      collapsed = false;
+    }
+    hadVisibleRite = hasVisibleRite;
   });
 </script>
 
@@ -92,6 +104,11 @@
             <h3>Current state</h3>
           </div>
           <SeekerStatusPanel variant="expanded" />
+          {#if !$authed}
+            <div class="sp-pane-actions">
+              <a href={`${controlPanelRouteById.draw.href}?signin=1`} class="sp-pane-action focus-ring-contained">sign in</a>
+            </div>
+          {/if}
         </div>
       {:else}
         <div class="sp-pane">
@@ -104,6 +121,7 @@
 
 <style>
 .seeker-rail {
+  --sp-tabs-shell-h: 3.2rem;
   position: relative;
   height: 100%;
   display: flex;
@@ -115,10 +133,10 @@
 .sp-collapse {
   position: absolute;
   left: -3.75ch;
-  top: 50%;
+  top: calc(0.75em + (var(--sp-tabs-shell-h) / 2));
   transform: translateY(-50%);
   width: 1.25rem;
-  height: 4.1rem;
+  height: var(--sp-tabs-shell-h);
   border-radius: 999px;
   border: 1px solid var(--glass-border);
   display: grid;
@@ -183,6 +201,7 @@
 }
 
 .sp-tabs-wrap {
+  min-height: var(--sp-tabs-shell-h);
   padding: 0.5rem;
   flex: 0 0 auto;
   overflow: visible;
@@ -217,6 +236,37 @@
 
 .sp-tab:focus-visible {
   z-index: 1;
+}
+
+.sp-pane-actions {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.sp-pane-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.1rem;
+  padding: 0.5rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--glass-border));
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 0.67rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.sp-pane-action:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--glass-border));
 }
 
 .sp-tab.active,

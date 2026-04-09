@@ -36,7 +36,7 @@
 		'idle'
 	);
 
-	const STAGES: Array<'offered' | 'prescribed' | 'completed'> = ['offered', 'prescribed', 'completed'];
+	const STAGES: Array<'offered' | 'received' | 'enacted'> = ['offered', 'received', 'enacted'];
 
 	function dismissCard() {
 		showPractice = false;
@@ -390,7 +390,7 @@
 		<!-- ── Pending rite (prior session) ── -->
 		<div class="panel-section pending-section">
 			<div class="panel-header">
-				<span class="panel-label">◬ rite · pending</span>
+				<span class="panel-label">◬ rite · in motion</span>
 			</div>
 
 			<div class="rite-content">

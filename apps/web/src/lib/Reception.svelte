@@ -1,7 +1,8 @@
 <script lang="ts">
   import { signIn, signUp, passkey } from './auth';
-  import { creds } from './stores';
-  import { generateDeviceKeyPair, storePrivateKey } from './totem';
+  import { creds, covenantPromptArmed } from './stores';
+  import { resetGuestTurns } from './guestSession';
+  import { generateDeviceKeyPair, storePrivateKey, storeDevicePublicKey } from './totem';
 
   type Mode = 'sign-in' | 'sign-up';
   let mode = $state<Mode>('sign-in');
@@ -19,6 +20,7 @@
     try {
       const { publicKeyJwk, privateKey } = await generateDeviceKeyPair();
       await storePrivateKey(privateKey);
+      storeDevicePublicKey(publicKeyJwk);
       await fetch(`${BASE}/totem/devices`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -33,7 +35,7 @@
     | { data?: { token?: string; user?: { id: string; name?: string } } | null; error?: { message?: string } | null }
     | { token?: string; user?: { id: string; name?: string } };
 
-  async function handleCredResult(result: AuthResult) {
+  async function handleCredResult(result: AuthResult, signedUp: boolean) {
     if ('error' in result && result.error) {
       error = result.error.message ?? 'something went wrong';
       return;
@@ -57,7 +59,10 @@
     }
     const { seeker_id, access_token, refresh_token, handle, stage } = await r.json();
     if (access_token && seeker_id) {
+      resetGuestTurns();
       creds.login({ access_token, refresh_token: refresh_token ?? '', seeker_id, handle, stage });
+      if (signedUp) covenantPromptArmed.arm();
+      else covenantPromptArmed.disarm();
       await registerDeviceKey(access_token);
     }
   }
@@ -68,10 +73,10 @@
     try {
       if (mode === 'sign-up') {
         const result = await signUp.email({ email, password, name });
-        await handleCredResult(result as AuthResult);
+        await handleCredResult(result as AuthResult, true);
       } else {
         const result = await signIn.email({ email, password });
-        await handleCredResult(result as AuthResult);
+        await handleCredResult(result as AuthResult, false);
       }
     } catch (e: unknown) {
       error = e instanceof Error ? e.message : 'something went wrong';
@@ -99,7 +104,7 @@
     busy = true;
     try {
       const result = await passkey.signIn();
-      await handleCredResult(result as AuthResult);
+      await handleCredResult(result as AuthResult, false);
     } catch (e: unknown) {
       error = e instanceof Error ? e.message : 'something went wrong';
     } finally {

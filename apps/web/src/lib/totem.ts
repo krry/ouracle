@@ -14,7 +14,19 @@ export interface TotemData {
   qualities: { dominant: string; current: string };
   beliefs: string[];
   rites: Array<{ name: string; act: string; at: string }>;
-  sessions: Array<{ id: string; at: string; quality?: string; note?: string }>;
+  sessions: Array<{
+    id: string;
+    session_id?: string;
+    at: string;
+    quality?: string;
+    note?: string;
+    feedback?: string;
+    context?: string;
+    rite_name?: string;
+    beliefs?: string[];
+    current_state?: string;
+    dominant_quality?: string;
+  }>;
   context: string;
 }
 
@@ -107,6 +119,10 @@ async function importTotemKey(raw: ArrayBuffer): Promise<CryptoKey> {
   return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
 }
 
+export async function exportTotemKeyBase64(totemKey: CryptoKey): Promise<string> {
+  return toBase64(await exportTotemKey(totemKey));
+}
+
 // ── ECDH key wrapping ─────────────────────────────────────────────────────────
 
 async function deriveWrappingKey(privateKey: CryptoKey, publicKeyJwk: JsonWebKey): Promise<CryptoKey> {
@@ -166,6 +182,18 @@ export async function decryptDistillation(
   return new TextDecoder().decode(plain);
 }
 
+export async function decryptRecoveredTotemKey(
+  encryptedB64: string,
+  ephemeralPublicKeyJwk: JsonWebKey
+): Promise<CryptoKey> {
+  const privateKey = await loadPrivateKey();
+  if (!privateKey) throw new Error('No device private key found.');
+  const sharedKey = await deriveWrappingKey(privateKey, ephemeralPublicKeyJwk);
+  const { iv, ct } = JSON.parse(encryptedB64);
+  const plain = await aesDecrypt(sharedKey, fromBase64(iv), fromBase64(ct));
+  return importTotemKey(plain);
+}
+
 // ── Load / save (API-backed) ──────────────────────────────────────────────────
 
 const BASE = (typeof import.meta !== 'undefined' && (import.meta as { env?: { VITE_OURACLE_BASE_URL?: string } }).env?.VITE_OURACLE_BASE_URL) ?? 'https://api.ouracle.kerry.ink';
@@ -179,6 +207,46 @@ export function storeDevicePublicKey(jwk: JsonWebKey): void {
 export function loadDevicePublicKey(): JsonWebKey | null {
   const raw = localStorage.getItem(DEVICE_PUBLIC_KEY_STORAGE);
   return raw ? JSON.parse(raw) : null;
+}
+
+async function fetchDevices(token: string): Promise<Array<{ public_key: string; wrapped_key: string | null }>> {
+  const devRes = await fetch(`${BASE}/totem/devices`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!devRes.ok) {
+    console.warn('[totem] fetchDevices failed', devRes.status, `${BASE}/totem/devices`);
+  }
+  return devRes.ok ? await devRes.json() : [];
+}
+
+async function recoverTotemKeyForDevice(
+  token: string,
+  publicKeyStr: string,
+  publicKeyJwk: JsonWebKey,
+  privateKey: CryptoKey
+): Promise<CryptoKey | null> {
+  const recoveryRes = await fetch(`${BASE}/totem/recover-key`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ public_key: publicKeyStr }),
+  });
+
+  if (!recoveryRes.ok) {
+    console.warn('[totem] recover-key failed', recoveryRes.status, `${BASE}/totem/recover-key`);
+    return null;
+  }
+  const { encrypted_key, ephemeral_public_key } = await recoveryRes.json();
+  const totemKey = await decryptRecoveredTotemKey(encrypted_key, ephemeral_public_key);
+  const wrappedKey = await wrapTotemKey(totemKey, publicKeyJwk, privateKey);
+  const registerRes = await fetch(`${BASE}/totem/devices`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ public_key: publicKeyStr, wrapped_key: wrappedKey }),
+  });
+  if (!registerRes.ok) {
+    console.warn('[totem] device register after recovery failed', registerRes.status, `${BASE}/totem/devices`);
+  }
+  return totemKey;
 }
 
 /**
@@ -200,10 +268,7 @@ export async function initDevice(token: string): Promise<{ totemKey: CryptoKey; 
   }
 
   // Check if this device is already registered
-  const devRes = await fetch(`${BASE}/totem/devices`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const devices: Array<{ public_key: string; wrapped_key: string | null }> = devRes.ok ? await devRes.json() : [];
+  const devices = await fetchDevices(token);
   const publicKeyStr = JSON.stringify(publicKeyJwk);
   const existing = devices.find((d) => d.public_key === publicKeyStr);
 
@@ -214,19 +279,51 @@ export async function initDevice(token: string): Promise<{ totemKey: CryptoKey; 
     return { totemKey, totemData };
   }
 
-  // New device or missing wrapped key: create a fresh totem key and register
+  // Existing account but new device: recover the shared totem key via auth-backed escrow.
+  const recoveredTotemKey = await recoverTotemKeyForDevice(token, publicKeyStr, publicKeyJwk, privateKey);
+  if (recoveredTotemKey) {
+    const totemData = await _fetchAndDecrypt(token, recoveredTotemKey);
+    return { totemKey: recoveredTotemKey, totemData };
+  }
+
+  const existingTotemRes = await fetch(`${BASE}/totem`, { headers: { Authorization: `Bearer ${token}` } });
+  const existingTotem = existingTotemRes.ok ? await existingTotemRes.json() : null;
+  if (existingTotem?.ciphertext) {
+    throw new Error('Existing Totem could not be recovered on this device.');
+  }
+
+  // Brand new account: create a fresh totem key and register
   const totemKey = await generateTotemKey();
   const wrappedKey = await wrapTotemKey(totemKey, publicKeyJwk, privateKey);
 
-  await fetch(`${BASE}/totem/devices`, {
+  const registerRes = await fetch(`${BASE}/totem/devices`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ public_key: publicKeyStr, wrapped_key: wrappedKey }),
   });
+  if (!registerRes.ok) {
+    console.warn('[totem] initial device register failed', registerRes.status, `${BASE}/totem/devices`);
+  }
 
-  // Load any existing totem ciphertext encrypted with previous totem key — can't decrypt
-  // on a brand new key, so return null (fresh start). Cross-device migration is deferred.
   return { totemKey, totemData: null };
+}
+
+async function _loadExistingDeviceTotem(
+  token: string,
+  publicKeyJwk: JsonWebKey,
+  privateKey: CryptoKey
+): Promise<TotemData | null> {
+  const devices = await fetchDevices(token);
+  const publicKeyStr = JSON.stringify(publicKeyJwk);
+  const device = devices.find((d) => d.public_key === publicKeyStr);
+  if (device?.wrapped_key) {
+    const totemKey = await unwrapTotemKey(device.wrapped_key, publicKeyJwk, privateKey);
+    const totemData = await _fetchAndDecrypt(token, totemKey);
+    return totemData;
+  }
+  const recoveredTotemKey = await recoverTotemKeyForDevice(token, publicKeyStr, publicKeyJwk, privateKey);
+  if (!recoveredTotemKey) return null;
+  return _fetchAndDecrypt(token, recoveredTotemKey);
 }
 
 async function _fetchAndDecrypt(token: string, totemKey: CryptoKey): Promise<TotemData | null> {
@@ -245,26 +342,15 @@ export async function loadTotem(_seekerId: string, token: string): Promise<Totem
   const privateKey = await loadPrivateKey();
   const publicKeyJwk = loadDevicePublicKey();
   if (!privateKey || !publicKeyJwk) return null;
-
-  // Fetch this device's wrapped key from the server
-  const devRes = await fetch(`${BASE}/totem/devices`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!devRes.ok) return null;
-  const devices: Array<{ public_key: string; wrapped_key: string | null }> = await devRes.json();
-  const publicKeyStr = JSON.stringify(publicKeyJwk);
-  const device = devices.find((d) => d.public_key === publicKeyStr);
-  if (!device?.wrapped_key) return null;
-
-  const totemKey = await unwrapTotemKey(device.wrapped_key, publicKeyJwk, privateKey);
-  return _fetchAndDecrypt(token, totemKey);
+  return _loadExistingDeviceTotem(token, publicKeyJwk, privateKey);
 }
 
 export async function saveTotem(data: TotemData, totemKey: CryptoKey, devicePublicKeyJwk: JsonWebKey, token: string): Promise<void> {
   const ciphertext = await encryptTotem(data, totemKey);
+  const recovery_key = await exportTotemKeyBase64(totemKey);
   await fetch(`${BASE}/totem`, {
     method: 'PUT',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ciphertext, public_key: JSON.stringify(devicePublicKeyJwk) }),
+    body: JSON.stringify({ ciphertext, public_key: JSON.stringify(devicePublicKeyJwk), recovery_key }),
   });
 }

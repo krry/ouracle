@@ -32,7 +32,6 @@
   });
 
   const isEnquire = $derived(
-    $page.url.pathname.startsWith('/enquire') ||
     $page.url.pathname.startsWith('/draw') ||
     $page.url.pathname.startsWith('/oracle')
   );

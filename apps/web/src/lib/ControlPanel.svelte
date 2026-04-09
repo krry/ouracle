@@ -113,7 +113,7 @@
       </div>
       <button class="cp-action cp-action-muted" onclick={leave}>sign out</button>
     {:else}
-      <a href={controlPanelRouteById.draw.href} class="cp-action" onclick={onclose}>sign in</a>
+      <a href={`${controlPanelRouteById.draw.href}?signin=1`} class="cp-action" onclick={onclose}>sign in</a>
     {/if}
   </div>
 </section>

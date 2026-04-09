@@ -24,8 +24,10 @@ function credStore() {
 		logout() {
 			localStorage.removeItem('clea_creds');
 			localStorage.removeItem('clea_session_id');
+			localStorage.removeItem('clea_active_rite');
 			localStorage.removeItem('clea_pending_rite');
 			localStorage.removeItem('clea_guest_token');
+			localStorage.removeItem('clea_covenant_prompt_armed');
 			set(null);
 		}
 	};
@@ -62,6 +64,25 @@ export const streaming = writable(false);
 export const needsCovenant = writable(false); // true until seeker has entered the covenant
 export const covenantReady = writable(false); // true when fuzzy readiness detected → show modal
 export const continueOffered = writable(false); // true when Clea offers to continue
+export const covenantAcceptedTick = writable(0); // incremented when the covenant is explicitly accepted
+
+function covenantPromptArmStore() {
+	const stored = browser ? localStorage.getItem('clea_covenant_prompt_armed') : null;
+	const { subscribe, set } = writable<boolean>(stored === 'true');
+	return {
+		subscribe,
+		arm() {
+			if (browser) localStorage.setItem('clea_covenant_prompt_armed', 'true');
+			set(true);
+		},
+		disarm() {
+			if (browser) localStorage.removeItem('clea_covenant_prompt_armed');
+			set(false);
+		}
+	};
+}
+
+export const covenantPromptArmed = covenantPromptArmStore();
 
 // ── Oracle Panel ─────────────────────────────────────────────────────────────
 export interface RiteData {
@@ -74,14 +95,28 @@ export interface RiteData {
 	divination?: unknown;
 }
 
-export const activeRite = writable<RiteData | null>(null);
+function activeRiteStore() {
+	const stored = browser ? localStorage.getItem('clea_active_rite') : null;
+	const { subscribe, set } = writable<RiteData | null>(stored ? JSON.parse(stored) : null);
+	return {
+		subscribe,
+		set(v: RiteData | null) {
+			if (browser) {
+				if (v) localStorage.setItem('clea_active_rite', JSON.stringify(v));
+				else localStorage.removeItem('clea_active_rite');
+			}
+			set(v);
+		}
+	};
+}
+export const activeRite = activeRiteStore();
 // activeCard reuses CardData — set when a card is drawn, cleared on interpret/dismiss
 export const activeCard = writable<CardData | null>(null);
 
 // pendingRite persists across sessions — set when a rite is prescribed, cleared on complete
 export interface PendingRite {
 	rite: RiteData;
-	stage: 'offered' | 'prescribed' | 'completed';
+	stage: 'offered' | 'received' | 'enacted';
 }
 
 function pendingRiteStore() {
@@ -192,19 +227,43 @@ function seekerStateStore() {
 		quality: { quality: null, confidence: null, is_shock: false },
 		affect: { valence: null, arousal: null, gloss: null, confidence: null },
 	};
-	const { subscribe, set, update } = writable<SeekerState>(initial);
+	const stored = browser ? localStorage.getItem('clea_seeker_state') : null;
+	const start = stored ? { ...initial, ...JSON.parse(stored) } as SeekerState : initial;
+	const { subscribe, set, update } = writable<SeekerState>(start);
+	const persist = (value: SeekerState) => {
+		if (!browser) return;
+		localStorage.setItem('clea_seeker_state', JSON.stringify(value));
+	};
 	return {
 		subscribe,
-		set: (v: SeekerState) => set(v),
-		update: (fn: (prev: SeekerState) => SeekerState) => update(fn),
+		set: (v: SeekerState) => {
+			persist(v);
+			set(v);
+		},
+		update: (fn: (prev: SeekerState) => SeekerState) => update(prev => {
+			const next = fn(prev);
+			persist(next);
+			return next;
+		}),
 		setPartial: (fn: Partial<SeekerState> | ((prev: SeekerState) => Partial<SeekerState>)) => {
 			if (typeof fn === 'function') {
-				update(prev => ({ ...prev, ...(fn as (prev: SeekerState) => Partial<SeekerState>)(prev) }));
+				update(prev => {
+					const next = { ...prev, ...(fn as (prev: SeekerState) => Partial<SeekerState>)(prev) };
+					persist(next);
+					return next;
+				});
 			} else {
-				update(prev => ({ ...prev, ...fn }));
+				update(prev => {
+					const next = { ...prev, ...fn };
+					persist(next);
+					return next;
+				});
 			}
 		},
-		reset: () => set(initial),
+		reset: () => {
+			if (browser) localStorage.removeItem('clea_seeker_state');
+			set(initial);
+		},
 	};
 }
 

@@ -142,12 +142,11 @@
   color: var(--accent);
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: clamp(3rem, 9vw, 6rem);
+  font-size: clamp(2.4rem, 7vw, 4.2rem);
   letter-spacing: 0.2em;
-  padding: 0 2.25rem 0.2em;
   text-decoration: none;
   background: color-mix(in srgb, var(--glass-bg-strong) 85%, transparent);
-  min-width: clamp(12rem, 28vw, 18rem);
+  min-width: clamp(12rem, 36vw, 20rem);
   aspect-ratio: 1;
   line-height: 1;
   box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.18);
@@ -157,10 +156,18 @@
   -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
 }
 .enter:hover {
-  animation: none;
-  transform: translateY(-2px) scale(1.02);
-  color: var(--text);
+  animation-play-state: paused;
+  transform: scale(1.02);
   border-color: var(--accent);
+}
+@media (min-width: 640px) { 
+  .enter-label {
+    color: color-mix(in srgb, var(--focus-soft) 50%, transparent);
+    transition: color 200ms ease-in-out;
+  }
+  .enter:hover .enter-label {
+    color: var(--accent);
+  }
 }
 @keyframes enter-pulse {
   0%, 100% {
