@@ -24,7 +24,7 @@
 		streaming?: boolean;
 	} = $props();
 
-	let deckPickerOpen = $state(false);
+	let deckPickerOpen = $state(true);
 	let showPractice = $state(false);
 	let expandPracticeCard = $state(false);
 
@@ -90,6 +90,59 @@
 	function togglePracticeCardExpansion() {
 		expandPracticeCard = !expandPracticeCard;
 	}
+
+	// Check all decks
+	function selectAll() {
+		availableDecks.forEach(d => onDeckToggle(d.id, true));
+	}
+
+	// Check no decks
+	function selectNone() {
+		availableDecks.forEach(d => onDeckToggle(d.id, false));
+	}
+
+	// Helper: get a random integer in [min, max], inclusive
+	function randInt(min: number, max: number) {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+
+	// Choose a random count, then check that many random distinct decks
+	function selectSome() {
+		if (!availableDecks.length) return;
+
+		// First clear any existing selection
+		selectNone();
+
+		// Choose a random number between 1 and availableDecks.length
+		const count = randInt(1, availableDecks.length);
+
+		// Make a shallow copy so we can shuffle without mutating the original ordering
+		const pool = [...availableDecks];
+
+		// Fisher–Yates shuffle
+		for (let i = pool.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[pool[i], pool[j]] = [pool[j], pool[i]];
+		}
+
+		// Take the first `count` decks from the shuffled pool
+		for (let i = 0; i < count; i++) {
+			const deck = pool[i];
+			onDeckToggle(deck.id, true);
+		}
+	}
+
+	// Check exactly one random deck from the current list
+	function selectOne() {
+		if (!availableDecks.length) return;
+
+		selectNone();
+
+		const idx = Math.floor(Math.random() * availableDecks.length);
+		const chosen = availableDecks[idx];
+
+		onDeckToggle(chosen.id, true);
+	}
 </script>
 
 <aside class="oracle-panel" class:has-content={mode !== 'idle'}>
@@ -103,9 +156,13 @@
 					onclick={() => { deckPickerOpen = !deckPickerOpen; }}
 				>Decks {deckPickerOpen ? '▴' : '▾'}</button>
 				<div class="deck-quick">
-					<button class="deck-all" onclick={() => availableDecks.forEach(d => onDeckToggle(d.id, true))}>all</button>
+					<button class="deck-all" onclick={selectAll}>all</button>
 					<span class="sep">·</span>
-					<button class="deck-all" onclick={() => availableDecks.forEach(d => onDeckToggle(d.id, false))}>none</button>
+					<button class="deck-all" onclick={selectSome}>some</button>
+					<span class="sep">·</span>
+					<button class="deck-all" onclick={selectOne}>one</button>
+					<span class="sep">·</span>
+					<button class="deck-all" onclick={selectNone}>none</button>
 				</div>
 			</div>
 
@@ -473,7 +530,6 @@
 	gap: 0;
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
-	max-height: min(40vh, 24rem);
 	overflow-y: auto;
 	overflow-x: hidden;
 }

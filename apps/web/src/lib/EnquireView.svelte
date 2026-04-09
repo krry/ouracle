@@ -1,0 +1,131 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { authed, creds, guestTurns, covenantReady, needsCovenant } from '$lib/stores';
+  import { GUEST_LIMIT } from '$lib/guestSession';
+  import { authClient } from '$lib/auth';
+  import Reception from '$lib/Reception.svelte';
+  import AltarOverlay from '$lib/AltarOverlay.svelte';
+  import Covenant from '$lib/Covenant.svelte';
+  import Chat from '$lib/Chat.svelte';
+  import ModalVeil from '$lib/ModalVeil.svelte';
+
+  let wantsSignin = $state(false);
+  let exchanging = $state(false);
+  let altarDismissed = $state(false);
+
+  $effect(() => { if ($authed) wantsSignin = false; });
+
+  onMount(async () => {
+    if ($authed) return;
+    const BASE = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
+    const { data } = await authClient.getSession();
+    if (!data?.session?.token) return;
+    exchanging = true;
+    try {
+      const r = await fetch(`${BASE}/auth/social-exchange`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_token: data.session.token }),
+      });
+      if (!r.ok) return;
+      const { seeker_id, access_token, refresh_token, handle, stage } = await r.json();
+      if (access_token && seeker_id) creds.login({ access_token, refresh_token: refresh_token ?? '', seeker_id, handle, stage });
+    } finally {
+      exchanging = false;
+    }
+  });
+
+  function handleCovenantAccepted() {
+    if ($creds) {
+      creds.login({ ...$creds, stage: 'covenanted' });
+    }
+    covenantReady.set(false);
+    needsCovenant.set(false);
+  }
+
+  const handleEnter = () => {
+    altarDismissed = true;
+    wantsSignin = true;
+  };
+
+  const handleAltarClose = () => {
+    altarDismissed = true;
+  };
+
+  const handleClose = () => { wantsSignin = false; };
+
+  const thresholdReached = $derived(!$authed && !exchanging && $guestTurns >= GUEST_LIMIT);
+  const showAltarOverlay = $derived(thresholdReached && !wantsSignin && !altarDismissed);
+  const guestLocked = $derived(thresholdReached && altarDismissed);
+  const modalActive = $derived(showAltarOverlay || wantsSignin);
+
+  $effect(() => {
+    if ($authed || $guestTurns < GUEST_LIMIT) {
+      altarDismissed = false;
+    }
+  });
+
+  $effect(() => {
+    document.documentElement.classList.toggle('modal-open', modalActive);
+
+    return () => {
+      document.documentElement.classList.remove('modal-open');
+    };
+  });
+
+  const modalComponent = $derived(showAltarOverlay ? AltarOverlay : Reception);
+  const backdropClose = $derived(wantsSignin ? handleClose : undefined);
+</script>
+
+<div class="content-wrapper" class:blurred={modalActive}>
+  <div class="chat-stage">
+    <Chat guestMode={!$authed} guestLocked={guestLocked} onsignin={handleEnter} />
+  </div>
+</div>
+
+{#if modalActive}
+  <ModalVeil
+    active={true}
+    component={modalComponent}
+    close={backdropClose}
+    onsignin={handleEnter}
+    ondismiss={handleAltarClose}
+    onclose={handleClose}
+  />
+{/if}
+
+{#if $covenantReady}
+  <Covenant onaccept={handleCovenantAccepted} />
+{/if}
+
+<style>
+  .content-wrapper {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    isolation: isolate;
+  }
+
+  .content-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--glass-bg) 88%, transparent), transparent 28%),
+      linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--bg) 14%, transparent) 100%);
+    z-index: 0;
+  }
+
+  .content-wrapper.blurred .chat-stage {
+    filter: blur(10px) saturate(180%);
+    transition: filter 0.8s ease;
+  }
+
+  .chat-stage {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    overflow: hidden;
+  }
+</style>

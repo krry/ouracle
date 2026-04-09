@@ -119,6 +119,20 @@
 			const r = await fetch(`${BASE_URL}/decks`, { headers });
 			if (!r.ok) return;
 			availableDecks = await r.json();
+
+
+			const deckName = (deck: any) => deck.meta?.name ?? deck.id;
+
+			// Put Rites first, preserve original order otherwise
+			availableDecks.sort((a, b) => {
+				const aIsRites = deckName(a) === 'Ouracle Rites';
+				const bIsRites = deckName(b) === 'Ouracle Rites';
+
+				if (aIsRites && !bIsRites) return -1;
+				if (bIsRites && !aIsRites) return 1;
+				return 0;
+			});
+
 			selectedDecks = new Set(availableDecks.map(d => d.id));
 		} catch { /* non-fatal */ }
 	}

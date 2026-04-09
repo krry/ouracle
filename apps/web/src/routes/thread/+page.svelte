@@ -4,6 +4,7 @@
   import { creds, authed } from '$lib/stores';
   import { getThread, redactSession, deleteAccount } from '$lib/api';
   import type { ThreadSession } from '$lib/api';
+  import { controlPanelRouteById } from '$lib/ControlPanel.svelte';
 
   let sessions = $state<ThreadSession[]>([]);
   let loading = $state(true);
@@ -13,7 +14,7 @@
 
   onMount(async () => {
     if (!$authed || !$creds) {
-      goto('/enquire');
+      goto(controlPanelRouteById.draw.href);
       return;
     }
     try {
@@ -71,7 +72,7 @@
 
 <main class="thread-page">
   <header class="thread-header">
-    <a href="/enquire" class="back">← enquire</a>
+    <a href={controlPanelRouteById.draw.href} class="back">← draw</a>
     <h1 class="thread-title">the thread</h1>
   </header>
 
@@ -84,7 +85,7 @@
   {:else if !hasAny}
     <div class="empty">
       <p>The thread is empty. Begin your first session.</p>
-      <a href="/enquire" class="begin-link">enter</a>
+      <a href={controlPanelRouteById.draw.href} class="begin-link">enter</a>
     </div>
 
   {:else}

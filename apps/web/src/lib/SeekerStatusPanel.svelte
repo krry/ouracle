@@ -75,7 +75,7 @@
 	<!-- Inference badges -->
 	<div class="ss-badges">
 		<div class="badge-row">
-			<span class="badge-label">vagus</span>
+			<span class="badge-label">vagality</span>
 			<span class="badge-value" style="color: {vagalColor($seekerState.vagal.probable)}">
 				{$seekerState.vagal.probable ?? '_'}
 			</span>
@@ -84,7 +84,7 @@
 			</span>
 		</div>
 		<div class="badge-row">
-			<span class="badge-label">belief</span>
+			<span class="badge-label">credulity</span>
 			<span class="badge-value">{$seekerState.belief.pattern ?? '_'}</span>
 			<span class="badge-confidence" style="color: {confidenceColor($seekerState.belief.confidence)}">
 				({$seekerState.belief.confidence ?? '?'})
@@ -204,7 +204,7 @@
 		color: var(--muted);
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-		min-width: 3rem;
+		min-width: 4rem;
 		text-align: right;
 		margin-right: 1ch;
 	}
@@ -238,7 +238,7 @@
 		font-size: 0.72rem;
 	}
 	.seeker-status.expanded .badge-label {
-		min-width: 4rem;
+		min-width: 4.5rem;
 	}
 
 	/* Compact variant for drawer (stacked, no plot? Actually drawer is narrow, we may keep plot small) */

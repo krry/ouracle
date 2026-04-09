@@ -1,3 +1,7 @@
+<script lang="ts">
+  import { controlPanelRouteById } from '$lib/ControlPanel.svelte';
+</script>
+
 <svelte:head>
   <title>Clea | Ouracle</title>
 </svelte:head>
@@ -28,12 +32,12 @@
     <pre><code>curl -fsSL https://ouracle.kerry.ink/install.sh | sh</code></pre>
 
     <h2>In your browser</h2>
-    <a href="/enquire" class="cta">meet Clea</a>
+    <a href={controlPanelRouteById.draw.href} class="cta">meet Clea</a>
 
     <h2>Roll your own</h2>
     <p class="note">
       Want to hold Ouracle in the palm of your GPU and pet it like a llama?
-      <a href="/diy">learn how →</a>
+      <a href={controlPanelRouteById.devs.href}>learn how →</a>
     </p>
   </section>
 </div>

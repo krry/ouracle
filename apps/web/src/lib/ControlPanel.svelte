@@ -1,3 +1,40 @@
+<script module lang="ts">
+  export type ControlPanelRouteId =
+    | 'welcome'
+    | 'draw'
+    | 'oracle'
+    | 'records'
+    | 'about'
+    | 'devs';
+
+  export type ControlPanelRoute = {
+    id: ControlPanelRouteId;
+    href: string;
+    label: string;
+    epithet: string;
+    icon: string;
+    authedOnly?: boolean;
+  };
+
+  export const controlPanelNav: ControlPanelRoute[] = [
+    { id: 'welcome', href: '/', label: 'Welcome', epithet: 'προπύλαια', icon: '⛶' },
+    { id: 'draw', href: '/draw', label: 'Draw', epithet: 'ναός', icon: '✶' },
+    { id: 'oracle', href: '/oracle', label: 'Oracle', epithet: 'ἄδυτον', icon: '☉', authedOnly: true },
+    { id: 'records', href: '/records', label: 'Records', epithet: 'στοά', icon: '☷', authedOnly: true },
+    { id: 'about', href: '/about', label: 'About', epithet: 'ἱέρειαι', icon: '⚭' },
+    { id: 'devs', href: '/devs', label: 'Devs', epithet: 'δεῦς', icon: '◈' }
+  ];
+
+  export const controlPanelRouteById = Object.fromEntries(
+    controlPanelNav.map((route) => [route.id, route])
+  ) as Record<ControlPanelRouteId, ControlPanelRoute>;
+
+  export function routeIsActive(pathname: string, href: string): boolean {
+    if (href === '/') return pathname === '/';
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
+</script>
+
 <script lang="ts">
   import { page } from '$app/stores';
   import AmbientControls from './AmbientControls.svelte';
@@ -15,30 +52,25 @@
     seekerState.reset();
     onclose();
   }
-
-  const navItems = [
-    { href: '/enquire', label: 'enquire', icon: '◌' },
-    { href: '/thread', label: 'thread', icon: '⌘', authedOnly: true },
-    { href: '/clea', label: 'clea', icon: '⌬' },
-    { href: '/ripl', label: 'ripl', icon: '◎' },
-    { href: '/diy', label: 'd.i.y.', icon: '◈' }
-  ];
 </script>
 
 <section class="control-panel">
   <div class="cp-block glass-block">
     <div class="cp-kicker">Temple</div>
     <nav class="cp-nav">
-      {#each navItems as item}
+      {#each controlPanelNav as item}
         {#if !item.authedOnly || $authed}
           <a
             href={item.href}
             class="cp-link"
-            class:active={$page.url.pathname.startsWith(item.href)}
+            class:active={routeIsActive($page.url.pathname, item.href)}
             onclick={onclose}
           >
             <span class="cp-icon">{item.icon}</span>
-            <span>{item.label}</span>
+            <span class="cp-copy">
+              <span class="cp-link-label">{item.label}</span>
+              <span class="cp-link-epithet">{item.epithet}</span>
+            </span>
           </a>
         {/if}
       {/each}
@@ -68,7 +100,7 @@
   </div>
 
   <div class="cp-block glass-block">
-    <div class="cp-kicker">Ambient</div>
+    <div class="cp-kicker">Ambience</div>
     <AmbientControls />
   </div>
 
@@ -81,7 +113,7 @@
       </div>
       <button class="cp-action cp-action-muted" onclick={leave}>sign out</button>
     {:else}
-      <a href="/enquire" class="cp-action" onclick={onclose}>sign in</a>
+      <a href={controlPanelRouteById.draw.href} class="cp-action" onclick={onclose}>sign in</a>
     {/if}
   </div>
 </section>
@@ -130,6 +162,25 @@
   letter-spacing: 0.08em;
   font-weight: 500;
   text-transform: lowercase;
+}
+
+.cp-copy {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.cp-link-label {
+  min-width: 0;
+}
+
+.cp-link-epithet {
+  color: color-mix(in srgb, var(--muted) 88%, var(--accent));
+  font-size: 0.66rem;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  font-weight: 400;
 }
 
 .cp-link:hover,

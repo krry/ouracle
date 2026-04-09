@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { controlPanelRouteById } from '$lib/ControlPanel.svelte';
   let showInstall = $state(false);
 
   // Detect platform for install instructions
@@ -21,7 +22,7 @@
         Enter, enquire, question and answer, the priestess will listen, the ouracle speaks. You complete the rite and return again.
       </p>
     </div>
-    <a href="/enquire" class="enter"><span class="enter-label">enter</span></a>
+    <a href={controlPanelRouteById.draw.href} class="enter"><span class="enter-label">enter</span></a>
   </section>
 
   <section class="about">

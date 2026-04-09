@@ -3,6 +3,7 @@
   import { authed, creds } from './stores';
   import { getThread } from './api';
   import type { ThreadSession } from './api';
+  import { controlPanelRouteById } from './ControlPanel.svelte';
 
   let sessions = $state<ThreadSession[]>([]);
   let loading = $state(true);
@@ -41,7 +42,7 @@
       <div class="tp-kicker">Thread</div>
       <h3>Past rites</h3>
     </div>
-    <a href="/thread" class="tp-link">open thread</a>
+    <a href={controlPanelRouteById.records.href} class="tp-link">open thread</a>
   </header>
 
   {#if !$authed}

@@ -1,5 +1,9 @@
 **TODO**
 
+- [ ] move the identity cp-block from ControlPanel to the bottom of SeekerPanel
+- [ ] replace Seeker tab label with the username when signed in
+- [ ] add a change username field in the SeekerPanel
+- [ ] 
 
 # Next to do for v0.4-v0.5
 - [ ] octave-ambiance — requires mapping work first

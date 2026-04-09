@@ -223,7 +223,7 @@ async function loadRitesDeck() {
   if (!cards.length) return null;
   return {
     id: 'rites',
-    meta: { name: 'Rites', description: 'Contemplative practices for body and mind' },
+    meta: { name: 'Ouracle Rites', description: 'Practices of contemplation in motion' },
     cards,
   };
 }
