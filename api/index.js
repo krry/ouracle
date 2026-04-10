@@ -88,7 +88,7 @@ import {
 } from './db.js';
 import { auth } from './auth-config.js';
 import { toNodeHandler } from 'better-auth/node';
-import { draw, listDecks, drawContextual, loadDecks } from './decks.js';
+import { draw, listDecks, drawContextual, loadDecks, cardImagePath } from './decks.js';
 import { buildSunoPackage } from './suno.js';
 
 const app = express();
@@ -159,6 +159,11 @@ const RITES_DIR = join(__dirname, 'data', 'rites');
 
 app.use('/ambient', express.static(join(__dirname, 'data/ambient'), {
   maxAge: '7d',
+  setHeaders: (res) => res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin'),
+}));
+
+app.use('/tarot', express.static(join(__dirname, '../assets/tarot'), {
+  maxAge: '30d',
   setHeaders: (res) => res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin'),
 }));
 
@@ -409,7 +414,7 @@ app.get('/draw', async (req, res) => {
       ? await drawContextual(context, n, deckIds)
       : await draw(n, deckIds);
     if (cards.length === 0) return res.status(404).json({ error: 'No cards found.' });
-    res.json({ cards });
+    res.json({ cards: cards.map(c => ({ ...c, imageUrl: cardImagePath(c) })) });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -1438,6 +1443,8 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
               title: card.title,
               keywords: card.keywords ?? [],
               body: card.body ?? '',
+              fields: card.fields ?? {},
+              imageUrl: cardImagePath(card),
             }});
           }
         } catch (e) {
