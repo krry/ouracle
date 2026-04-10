@@ -30,6 +30,20 @@
     </p>
   </section>
 
+  <section class="gratitudes">
+    <h2>Gratitudes</h2>
+    <p class="note">
+      The ambient sound recordings used in the Ambience layer were contributed by artists
+      on <a href="https://freesound.org" target="_blank" rel="noopener">Freesound.org</a>:
+      <a href="https://freesound.org/people/cvltiv8r/" target="_blank" rel="noopener">cvltiv8r</a>,
+      <a href="https://freesound.org/people/klankbeeld/" target="_blank" rel="noopener">klankbeeld</a>,
+      <a href="https://freesound.org/people/newlocknew/" target="_blank" rel="noopener">newlocknew</a>,
+      <a href="https://freesound.org/people/nightcustard/" target="_blank" rel="noopener">nightcustard</a>,
+      and <a href="https://freesound.org/people/soapboxrocket/" target="_blank" rel="noopener">soapboxrocket</a>.
+      Clea's voice is synthesized via <a href="https://fish.audio" target="_blank" rel="noopener">Fish Audio</a>.
+    </p>
+  </section>
+
   <section class="install">
     <h2>In your browser</h2>
     <a href={controlPanelRouteById.draw.href} class="cta">enter the temple</a>

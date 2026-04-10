@@ -12,17 +12,18 @@ import { browser } from '$app/environment';
 export interface FishVoice {
 	id: string;
 	label: string;
-	note: string;
+ note: string;
 }
 
 export const TTS_VOICES: FishVoice[] = [
-	{ id: 'elf',       label: 'Galadriel',  note: 'warm · otherworldly' },
-	{ id: 'poet',      label: 'Ondrea',     note: 'calm · expressive'   },
-	{ id: 'alien',     label: 'Alf',        note: 'strange · distinct'  },
-	{ id: 'president', label: 'Oprah',      note: 'rich · resonant'     },
+	{ id: 'galadrielle',   label: 'elf',      note: 'warm · otherworldly' },
+	{ id: 'ondrea_gibsen', label: 'poet',     note: 'calm · expressive'   },
+	{ id: 'alff',          label: 'alien',    note: 'strange · distinct'  },
+	{ id: 'oaprah',        label: 'orator',   note: 'rich · resonant'     },
+	{ id: 'wheatbeard',    label: 'neighbor', note: 'warm · grounded'     },
 ];
 
-export const DEFAULT_VOICE = 'elf';
+export const DEFAULT_VOICE = 'galadrielle';
 
 // ── Web Speech fallback ───────────────────────────────────────────────────────
 
@@ -34,7 +35,7 @@ export function webSpeech(text: string): Promise<void> {
 		u.pitch = 0.92;
 		const voices = speechSynthesis.getVoices();
 		const preferred = voices.find(v =>
-			/Samantha|Karen|Moira|Fiona|Siri/i.test(v.name) && v.lang.startsWith('en')
+			/Fiona|Siri|Samantha|Karen|Moira/i.test(v.name) && v.lang.startsWith('en')
 		);
 		if (preferred) u.voice = preferred;
 		u.onend  = () => resolve();
