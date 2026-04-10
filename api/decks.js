@@ -356,14 +356,15 @@ function minorPath(folder, fields) {
  */
 export function cardImagePath(card) {
   const { deck, fields = {}, number, id } = card;
+  const isMinorSuit = !!SUIT_ABBR[String(fields.suit ?? '').toLowerCase()];
 
   if (deck === 'botts_tarot') {
-    if (fields.suit && fields.rank) return minorPath('soimoi', fields);
+    if (isMinorSuit && fields.rank) return minorPath('soimoi', fields);
     if (number != null) return majorPath('soimoi', number - 1); // botts: number 1=Fool→idx 0
   }
 
   if (deck === 'rider_waite_tarot') {
-    if (fields.suit && fields.rank) return minorPath('rider-waite', fields);
+    if (isMinorSuit && fields.rank) return minorPath('rider-waite', fields);
     const idx = parseInt(id); // id like "00_the_fool" → 0
     if (!isNaN(idx)) return majorPath('rider-waite', idx);
   }

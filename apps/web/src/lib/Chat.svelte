@@ -35,6 +35,8 @@ import { storageMonitor } from './storage-monitor';
 	let msgList: HTMLElement;
 	let audioCtx: AudioContext;
 	let mediaRecorder: MediaRecorder | null = null;
+	let micStream: MediaStream | null = null;
+	let micSource: MediaStreamAudioSourceNode | null = null;
 	let chunks: Blob[] = [];
 	let returningGuest = $state(false);
 
@@ -184,14 +186,14 @@ import { storageMonitor } from './storage-monitor';
 
 			const deckName = (deck: any) => deck.meta?.name ?? deck.id;
 
-			// Put Rites first, preserve original order otherwise
+			const PINNED = ['rites', 'botts_tarot', 'i_ching'];
 			availableDecks.sort((a, b) => {
-				const aIsRites = deckName(a) === 'Ouracle Rites';
-				const bIsRites = deckName(b) === 'Ouracle Rites';
-
-				if (aIsRites && !bIsRites) return -1;
-				if (bIsRites && !aIsRites) return 1;
-				return 0;
+				const ai = PINNED.indexOf(a.id);
+				const bi = PINNED.indexOf(b.id);
+				if (ai !== -1 && bi !== -1) return ai - bi;
+				if (ai !== -1) return -1;
+				if (bi !== -1) return 1;
+				return deckName(a).localeCompare(deckName(b));
 			});
 
 			selectedDecks = new Set(availableDecks.map(d => d.id));
@@ -596,6 +598,9 @@ import { storageMonitor } from './storage-monitor';
 
 	onDestroy(() => {
 		cancelWebSpeech();
+		releaseMic();
+		if (mediaRecorder?.state === 'recording') { mediaRecorder.stop(); }
+		mediaRecorder = null;
 		window.removeEventListener('keydown', handleGlobalKey);
 		window.removeEventListener('keyup', handleGlobalKey);
 		window.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -641,9 +646,8 @@ import { storageMonitor } from './storage-monitor';
 			return;
 		}
 		audioCtx ??= new AudioContext();
-		let stream: MediaStream;
 		try {
-			stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 		} catch (e) {
 			console.error('getUserMedia failed:', e);
 			voiceState.set('idle');
@@ -651,10 +655,10 @@ import { storageMonitor } from './storage-monitor';
 		}
 
 		// waveform analyser
-		const src = audioCtx.createMediaStreamSource(stream);
+		micSource = audioCtx.createMediaStreamSource(micStream);
 		const analyser = audioCtx.createAnalyser();
 		analyser.fftSize = 128;
-		src.connect(analyser);
+		micSource.connect(analyser);
 		const buf = new Float32Array(analyser.frequencyBinCount);
 		function tick() {
 			if ($voiceState !== 'listening') return;
@@ -664,12 +668,19 @@ import { storageMonitor } from './storage-monitor';
 		}
 
 		chunks = [];
-		mediaRecorder = new MediaRecorder(stream);
+		mediaRecorder = new MediaRecorder(micStream);
 		mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
 		mediaRecorder.start();
 		audioQueue?.prime();
 		voiceState.set('listening');
 		tick();
+	}
+
+	function releaseMic() {
+		micSource?.disconnect();
+		micSource = null;
+		micStream?.getTracks().forEach(t => t.stop());
+		micStream = null;
 	}
 
 	async function stopListening() {
@@ -681,8 +692,8 @@ import { storageMonitor } from './storage-monitor';
 		await new Promise<void>(res => { mediaRecorder!.onstop = () => res(); });
 		const mimeType = mediaRecorder.mimeType || 'audio/webm';
 		const blob = new Blob(chunks, { type: mimeType });
-		if (blob.size === 0) { voiceState.set('idle'); return; }
-		mediaRecorder.stream.getTracks().forEach(t => t.stop());
+		if (blob.size === 0) { voiceState.set('idle'); releaseMic(); return; }
+		releaseMic();
 		mediaRecorder = null;
 
 		try {
@@ -706,7 +717,16 @@ import { storageMonitor } from './storage-monitor';
 	// reloads from scratch. If messages are somehow empty after becoming visible
 	// (e.g. the effect flush raced with onMount), re-read from localStorage as a fallback.
 	function handleVisibilityChange() {
-		if (document.visibilityState !== 'visible' || !browser) return;
+		if (document.visibilityState === 'hidden') {
+			releaseMic();
+			if (mediaRecorder?.state === 'recording') {
+				mediaRecorder.stop();
+				mediaRecorder = null;
+				voiceState.set('idle');
+			}
+			return;
+		}
+		if (!browser) return;
 		if (get(messages).length > 0) return; // state intact — nothing to do
 		try {
 			const saved = localStorage.getItem('clea_messages');

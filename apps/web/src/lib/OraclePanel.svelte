@@ -223,14 +223,14 @@
 				<button class="dismiss-btn" onclick={dismissCard} aria-label="Dismiss card">✕</button>
 			</div>
 			<div class="card-content" class:ogham={$isOgham}>
+				<div class="card-title">{$activeCard.title}</div>
+				{#if $activeCard.keywords.length}
+					<div class="card-keywords">{$activeCard.keywords.join(' · ')}</div>
+				{/if}
 				{#if $activeCard.imageUrl}
 					<div class="card-image-wrap">
 						<img class="card-image" src={$activeCard.imageUrl} alt={$activeCard.title} loading="lazy" />
 					</div>
-				{/if}
-				<div class="card-title">{$activeCard.title}</div>
-				{#if $activeCard.keywords.length}
-					<div class="card-keywords">{$activeCard.keywords.join(' · ')}</div>
 				{/if}
 				{#if $activeCard.deck === 'rites'}
 					{#if field('summary', '') || field('description', '') || $activeCard.body}
@@ -590,8 +590,11 @@
 	flex-direction: column;
 	gap: 0.4rem;
 	flex: 1 1 auto;
+	height: 0;
 	min-height: 0;
+	max-height: 100%;
 	overflow-y: auto;
+	overscroll-behavior-y: contain;
 	padding-right: 0.2rem;
 	max-width: var(--panel-measure);
 	margin: 0 auto;
@@ -599,19 +602,15 @@
 
 .card-image-wrap {
 	width: 100%;
-	aspect-ratio: 2 / 3;
-	max-height: 22rem;
 	border-radius: 8px;
-	overflow: hidden;
 	margin-bottom: 0.2rem;
-	background: color-mix(in srgb, var(--surface) 60%, transparent);
 }
 
 .card-image {
 	width: 100%;
-	height: 100%;
-	object-fit: cover;
+	height: auto;
 	display: block;
+	object-fit: contain;
 }
 
 .card-title {
@@ -638,7 +637,6 @@
 	opacity: 0.85;
 	white-space: pre-wrap;
 	margin: 0;
-	overflow-y: auto;
 }
 
 .ogham .card-body:first-letter {
@@ -822,6 +820,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0.4rem;
+	flex-shrink: 0;
 	margin-top: auto;
 	max-width: var(--panel-measure);
 	width: 100%;

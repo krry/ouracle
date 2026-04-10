@@ -326,7 +326,7 @@
   min-height: 0;
   flex: 1;
   display: flex;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .sp-pane {
