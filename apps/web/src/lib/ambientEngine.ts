@@ -22,6 +22,23 @@ export const SCENES: { id: SceneId; label: string }[] = [
 /** Binaural beat frequency Hz — seeker-controlled, default theta (6 Hz). */
 export const binauralBeat = writable(6);
 
+// ── Audio file base URL ───────────────────────────────────────────────────────
+
+const AUDIO_BASE = (typeof import.meta !== 'undefined' && (import.meta as { env?: { VITE_OURACLE_BASE_URL?: string } }).env?.VITE_OURACLE_BASE_URL) ?? 'https://api.ouracle.kerry.ink';
+
+// ── Buffer cache (Option C: lazy-decode, then cached) ─────────────────────────
+
+const bufferCache = new Map<string, AudioBuffer>();
+
+async function fetchBuffer(audioCtx: AudioContext, url: string): Promise<AudioBuffer> {
+  if (bufferCache.has(url)) return bufferCache.get(url)!;
+  const res = await fetch(url);
+  const ab = await res.arrayBuffer();
+  const buf = await audioCtx.decodeAudioData(ab);
+  bufferCache.set(url, buf);
+  return buf;
+}
+
 // ── Stores ────────────────────────────────────────────────────────────────────
 
 export const ambientRunning = writable(false);
@@ -691,6 +708,195 @@ function buildBinaural(ctx: AudioContext, master: GainNode, beatHz: number) {
   lfo(ctx, 0.04, 0.012, shimmer.gain.gain);
 }
 
+// ── Scene layer (mp3 loop) ────────────────────────────────────────────────────
+
+export const ambientSceneFile = writable<string | null>(null);
+
+let sceneGain: GainNode | null = null;
+let sceneSource: AudioBufferSourceNode | null = null;
+
+export async function startScene(filename: string): Promise<void> {
+  if (!browser) return;
+  const audioCtx = getCtx();
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+  // Fade out and release old scene
+  if (sceneGain && sceneSource) {
+    const oldGain = sceneGain;
+    const oldSrc  = sceneSource;
+    oldGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.15);
+    setTimeout(() => { try { oldSrc.stop(); } catch { /* already stopped */ } oldGain.disconnect(); }, 600);
+    sceneGain = null;
+    sceneSource = null;
+  }
+
+  const buf = await fetchBuffer(audioCtx, `${AUDIO_BASE}/ambient/${filename}.mp3`);
+
+  const gain = audioCtx.createGain();
+  gain.gain.value = 0;
+  gain.connect(audioCtx.destination);
+
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  src.loop = true;
+  src.connect(gain);
+  src.start();
+
+  gain.gain.setTargetAtTime(0.75, audioCtx.currentTime, 0.3);
+  sceneGain = gain;
+  sceneSource = src;
+  ambientSceneFile.set(filename);
+}
+
+export function stopScene(): void {
+  if (!browser || !sceneGain || !sceneSource) return;
+  const audioCtx = getCtx();
+  const gain = sceneGain;
+  const src  = sceneSource;
+  gain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.15);
+  setTimeout(() => { try { src.stop(); } catch { /* already stopped */ } gain.disconnect(); }, 600);
+  sceneGain = null;
+  sceneSource = null;
+  ambientSceneFile.set(null);
+}
+
+// ── Bowls layer (random-interval sequential playback) ─────────────────────────
+
+export const bowlsActive = writable(false);
+
+const BOWL_FILES = [
+  'bowls-binaural-singing',
+  'bowls-clanging',
+  'bowls-dinging',
+  'bowls-rubbing',
+  'bowls-rung',
+];
+
+let bowlsGain: GainNode | null = null;
+let bowlsToken: { cancelled: boolean } | null = null;
+let bowlsCurrentSource: AudioBufferSourceNode | null = null;
+
+async function scheduleBowl(token: { cancelled: boolean }): Promise<void> {
+  if (token.cancelled || !bowlsGain) return;
+  const audioCtx = getCtx();
+  const file = BOWL_FILES[Math.floor(Math.random() * BOWL_FILES.length)];
+  try {
+    const buf = await fetchBuffer(audioCtx, `${AUDIO_BASE}/ambient/${file}.mp3`);
+    if (token.cancelled || !bowlsGain) return;
+
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    src.connect(bowlsGain);
+    src.start();
+    bowlsCurrentSource = src;
+
+    src.onended = () => {
+      bowlsCurrentSource = null;
+      if (token.cancelled) return;
+      const delay = 10_000 + Math.random() * 50_000; // 10–60 s
+      setTimeout(() => scheduleBowl(token), delay);
+    };
+  } catch {
+    if (!token.cancelled) setTimeout(() => scheduleBowl(token), 5_000);
+  }
+}
+
+export function startBowls(): void {
+  if (!browser || bowlsGain) return;
+  const audioCtx = getCtx();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  bowlsGain = audioCtx.createGain();
+  bowlsGain.gain.value = 0.85;
+  bowlsGain.connect(audioCtx.destination);
+
+  bowlsToken = { cancelled: false };
+  bowlsActive.set(true);
+  scheduleBowl(bowlsToken);
+}
+
+export function stopBowls(): void {
+  if (!browser) return;
+  if (bowlsToken) { bowlsToken.cancelled = true; bowlsToken = null; }
+  if (bowlsCurrentSource) { try { bowlsCurrentSource.stop(); } catch { /* ok */ } bowlsCurrentSource = null; }
+  if (bowlsGain) {
+    const audioCtx = getCtx();
+    bowlsGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
+    const g = bowlsGain;
+    setTimeout(() => g.disconnect(), 500);
+    bowlsGain = null;
+  }
+  bowlsActive.set(false);
+}
+
+export function skipBowl(): void {
+  if (!browser || !bowlsToken || !bowlsGain) return;
+  // Cancel old token — kills any pending inter-bowl setTimeout
+  bowlsToken.cancelled = true;
+  if (bowlsCurrentSource) { try { bowlsCurrentSource.stop(); } catch { /* ok */ } bowlsCurrentSource = null; }
+  // Fresh token, fire immediately
+  bowlsToken = { cancelled: false };
+  scheduleBowl(bowlsToken);
+}
+
+// ── Feature layers (looping mp3s with crossfade) ──────────────────────────────
+
+export const chimesActive   = writable(false);
+export const birdsongActive = writable(false);
+
+type FeatureName = 'chimes' | 'birdsong';
+
+const FEATURE_FILES: Record<FeatureName, string> = {
+  chimes:   'feature-wind-chimes',
+  birdsong: 'feature-birdsong',
+};
+
+const featureState: Record<FeatureName, { gain: GainNode | null; src: AudioBufferSourceNode | null }> = {
+  chimes:   { gain: null, src: null },
+  birdsong: { gain: null, src: null },
+};
+
+const featureStores: Record<FeatureName, ReturnType<typeof writable<boolean>>> = {
+  chimes:   chimesActive,
+  birdsong: birdsongActive,
+};
+
+export async function startFeature(name: FeatureName): Promise<void> {
+  if (!browser || featureState[name].gain) return;
+  const audioCtx = getCtx();
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+  const buf = await fetchBuffer(audioCtx, `${AUDIO_BASE}/ambient/${FEATURE_FILES[name]}.mp3`);
+  if (featureState[name].gain) return; // guard against double-tap while loading
+
+  const gain = audioCtx.createGain();
+  gain.gain.value = 0;
+  gain.connect(audioCtx.destination);
+
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  src.loop = true;
+  src.connect(gain);
+  src.start();
+
+  // τ = 0.65 s → ~95% target reached in 2 s
+  gain.gain.setTargetAtTime(0.75, audioCtx.currentTime, 0.65);
+
+  featureState[name] = { gain, src };
+  featureStores[name].set(true);
+}
+
+export function stopFeature(name: FeatureName): void {
+  if (!browser) return;
+  const { gain, src } = featureState[name];
+  if (!gain || !src) return;
+  const audioCtx = getCtx();
+  gain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.65);
+  setTimeout(() => { try { src.stop(); } catch { /* ok */ } gain.disconnect(); }, 2_500);
+  featureState[name] = { gain: null, src: null };
+  featureStores[name].set(false);
+}
+
 // ── Public API ─────────────────────────────────────────────────────────────────
 
 function teardown() {
@@ -754,14 +960,34 @@ export function setScene(scene: SceneId, volume: number) {
   startAmbient(scene, volume);
 }
 
-/** Suspend/resume AudioContext on page hide/show — releases CoreAudio hardware resources. */
+export const anySoundPlaying = {
+  subscribe: (run: (v: boolean) => void) => {
+    const stores = [ambientRunning, ambientSceneFile, bowlsActive, chimesActive, birdsongActive];
+    const unsubs = stores.map(s => s.subscribe(() => {
+      run(
+        get(ambientRunning) ||
+        !!get(ambientSceneFile) ||
+        get(bowlsActive) ||
+        get(chimesActive) ||
+        get(birdsongActive)
+      );
+    }));
+    return () => unsubs.forEach(u => u());
+  }
+};
+
+export function allOff(): void {
+  stopAmbient();
+  stopScene();
+  stopBowls();
+  stopFeature('chimes');
+  stopFeature('birdsong');
+}
+
+/** Resume AudioContext on page show — but do NOT suspend on hide so audio continues across tab switches. */
 if (browser) {
   document.addEventListener('visibilitychange', () => {
-    if (!ctx) return;
-    if (document.hidden) {
-      ctx.suspend().catch(() => {});
-    } else if (ctx.state === 'suspended') {
-      ctx.resume().catch(() => {});
-    }
+    if (!ctx || document.hidden) return;
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
   });
 }

@@ -39,6 +39,7 @@
   import { page } from '$app/stores';
   import AmbientControls from './AmbientControls.svelte';
   import { creds, authed, seekerState, pendingRite, messages, ttsEnabled, ttsVoice } from './stores';
+  import { anySoundPlaying, allOff } from './ambientEngine';
   import { TTS_VOICES } from './tts-client';
   import { signOut } from './auth';
 
@@ -79,15 +80,15 @@
 
   <div class="cp-block glass-block">
     <div class="cp-kicker">Voice</div>
-    <label class="cp-toggle" title={$ttsEnabled ? "mute Clea's voice" : "enable Clea's voice"}>
+    <label class="vb-row" class:on={$ttsEnabled} title={$ttsEnabled ? "mute Clea's voice" : "enable Clea's voice"}>
       <input type="checkbox" bind:checked={$ttsEnabled} />
-      <span class="cp-toggle-icon">〲</span>
-      <span>{$ttsEnabled ? 'voice on' : 'voice off'}</span>
+      <span class="vb-icon">〲</span>
+      <span class="vb-label">{$ttsEnabled ? 'voice on' : 'voice off'}</span>
     </label>
-    <label class="cp-field">
-      <span class="cp-label">voiceprint</span>
+    <div class="vb-row" class:on={$ttsEnabled}>
+      <span class="vb-icon">◈</span>
       <select
-        class="cp-select"
+        class="vb-select"
         value={$ttsVoice}
         onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value)}
         aria-label="Clea's voice"
@@ -96,11 +97,16 @@
           <option value={v.id}>{v.label}</option>
         {/each}
       </select>
-    </label>
+    </div>
   </div>
 
   <div class="cp-block glass-block">
-    <div class="cp-kicker">Ambience</div>
+    <button
+      class="cp-kicker cp-kicker-btn"
+      class:cp-kicker-live={$anySoundPlaying}
+      onclick={allOff}
+      title={$anySoundPlaying ? 'silence all' : 'ambience'}
+    >Ambience</button>
     <AmbientControls />
   </div>
 
@@ -140,6 +146,19 @@
   color: var(--muted);
   font-weight: 300;
 }
+
+.cp-kicker-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s;
+  border-radius: 4px;
+}
+.cp-kicker-btn:hover { color: color-mix(in srgb, var(--muted) 55%, var(--accent)); }
+.cp-kicker-live { color: var(--accent); }
 
 .cp-nav {
   display: flex;
@@ -194,57 +213,56 @@
   text-align: center;
 }
 
-.cp-toggle {
-  display: inline-flex;
+.vb-row {
+  display: flex;
   align-items: center;
   gap: 0.55rem;
-  width: fit-content;
+  padding: 0.15rem 0.4rem;
+  margin: 0 -0.4rem;
+  border-radius: 999px;
   cursor: pointer;
-  color: var(--text);
+  color: var(--muted);
+  transition: color 0.15s;
+  width: calc(100% + 0.8rem);
+}
+.vb-row:hover { color: color-mix(in srgb, var(--muted) 60%, var(--accent)); }
+.vb-row.on { color: var(--accent); }
+.vb-row input[type="checkbox"] { display: none; }
+
+.vb-icon {
+  width: 1.1rem;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.vb-label {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   letter-spacing: 0.08em;
   font-weight: 500;
   text-transform: lowercase;
 }
 
-.cp-toggle input { display: none; }
-.cp-toggle:has(input:checked) { color: var(--accent); }
-
-.cp-toggle-icon {
-  display: grid;
-  place-items: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 75%, transparent);
-}
-
-.cp-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.cp-label {
+.vb-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
   font-family: var(--font-mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 300;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+  text-transform: lowercase;
+  color: inherit;
+  border-radius: 999px;
+  outline-offset: 3px;
 }
-
-.cp-select {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--surface) 82%, transparent);
-  color: var(--text);
-  font: inherit;
-  padding: 0.6rem 0.75rem;
-}
+.vb-select option { background: var(--bg); color: var(--text); }
 
 .cp-identity {
   display: flex;

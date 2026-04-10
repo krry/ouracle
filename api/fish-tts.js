@@ -2,9 +2,15 @@
  * fish-tts.js — Fish.audio TTS for Node/Bun
  *
  * Environment:
- *   FISH_AUDIO_API_KEY          (or FISH_API_KEY)
- *   FISH_AUDIO_MODEL            default: s1
- *   FISH_AUDIO_VOICE_GALADRIEL  voice reference_id
+ *   FISH_AUDIO_API_KEY    (or FISH_API_KEY)
+ *   FISH_AUDIO_MODEL      default: s1
+ *
+ * Voice reference_ids — one env var per voice, named FISH_AUDIO_VOICE_{ID.toUpperCase()}:
+ *   FISH_AUDIO_VOICE_GALADRIELLE
+ *   FISH_AUDIO_VOICE_ONDREA_GIBSEN
+ *   FISH_AUDIO_VOICE_ALFF
+ *   FISH_AUDIO_VOICE_OAPRAH
+ *   FISH_AUDIO_VOICE_WHEATBEARD
  */
 
 import { spawn } from 'child_process';
@@ -15,15 +21,8 @@ function fishApiKey() {
   return key;
 }
 
-const VOICE_ENV = {
-  elf:     'FISH_AUDIO_VOICE_GALADRIEL',
-  poet:    'FISH_AUDIO_VOICE_ONDREA',
-  alien:   'FISH_AUDIO_VOICE_ALF',
-  president: 'FISH_AUDIO_VOICE_OPRAH',
-};
-
 function fishVoiceId(voice) {
-  const key = VOICE_ENV[voice] || VOICE_ENV.elf;
+  const key = `FISH_AUDIO_VOICE_${(voice ?? 'galadrielle').toUpperCase()}`;
   return process.env[key] || undefined;
 }
 
