@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { browser } from '$app/environment';
   import OraclePanel from './OraclePanel.svelte';
   import SeekerStatusPanel from './SeekerStatusPanel.svelte';
   import ThreadsPanel from './ThreadsPanel.svelte';
@@ -34,7 +35,7 @@
   } = $props();
 
   let activeTab = $state<TabId>('decks');
-  let collapsed = $state(false);
+  let collapsed = $state(browser ? window.matchMedia('(max-width: 639px)').matches : false);
   let hadVisibleRite = $state(false);
 
   const tabs: Array<{ id: TabId; label: string }> = [
@@ -58,18 +59,21 @@
 </script>
 
 <aside class="seeker-rail" class:collapsed>
-  <button
-    class="sp-collapse glass-block focus-ring-contained"
-    class:collapsed={collapsed}
-    onclick={() => (collapsed = !collapsed)}
-    aria-label={collapsed ? 'Expand seeker panel' : 'Collapse seeker panel'}
-    title={collapsed ? 'Expand seeker panel' : 'Collapse seeker panel'}
-  >
-    <span class="sp-collapse-chevron" class:collapsed={collapsed}>⟨</span>
-  </button>
-
   <section class="sp-shell" class:collapsed>
-    <div class="sp-tabs-wrap rail-shell">
+    <div class="sp-tabs-wrap rail-shell" class:collapsed={collapsed}>
+      <button
+        class="sp-collapse rail-shell focus-ring-contained"
+        class:collapsed={collapsed}
+        onclick={() => (collapsed = !collapsed)}
+        aria-label={collapsed ? 'Expand seeker panel' : 'Collapse seeker panel'}
+        title={collapsed ? 'Expand seeker panel' : 'Collapse seeker panel'}
+      >
+        <span class="sp-collapse-glyphs" class:collapsed={collapsed}>
+          <span class="sp-collapse-ankh">☥</span>
+          <span class="sp-collapse-chevron" class:collapsed={collapsed}>⟨</span>
+        </span>
+      </button>
+
       <div class="sp-tabs">
         {#each tabs as tab}
           <button
@@ -119,7 +123,7 @@
   </section>
 </aside>
 
-<style>
+<style lang="postcss">
 .seeker-rail {
   --sp-tabs-shell-h: 3.2rem;
   position: relative;
@@ -131,12 +135,11 @@
 }
 
 .sp-collapse {
-  position: absolute;
-  left: -3.75ch;
-  top: calc(0.75em + (var(--sp-tabs-shell-h) / 2));
-  transform: translateY(-50%);
-  width: 1.25rem;
-  height: var(--sp-tabs-shell-h);
+  position: static;
+  transform: none;
+  width: 2rem;
+  min-width: 2rem;
+  height: 2.2rem;
   border-radius: 999px;
   border: 1px solid var(--glass-border);
   display: grid;
@@ -150,33 +153,52 @@
     opacity 0.32s ease,
     background 0.32s ease,
     border-color 0.32s ease;
+  margin-right: 0.35rem;
+  background: color-mix(in srgb, var(--glass) 85%, transparent);
 }
 
-.sp-collapse.collapsed {
-  left: -0.5ch;
+.sp-collapse-glyphs {
+  position: relative;
+  display: inline-block;
+  width: 1.35rem;
+  height: 1rem;
 }
 
+.sp-collapse-ankh,
+.sp-collapse-chevron {
+  position: absolute;
+  top: 50%;
+  left: 0.12rem;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  line-height: 1;
+  transition:
+    left 0.28s ease,
+    transform 0.36s ease;
+}
 
-@media (max-width: 640px) {
-  .sp-collapse {
-    left: -0.5ch;
-    &.collapsed {
-      left: 0;
-    }
-  }
+.sp-collapse-ankh {
+  left: 0.12rem;
+  transform: translate(-2px, -50%);
 }
 
 .sp-collapse-chevron {
-  display: inline-block;
-  font-family: var(--font-mono);
-  font-size: 1rem;
-  line-height: 1;
-  transform: translateX(-2px) rotateY(180deg);
-  transition: transform 0.36s ease;
+  left: 0.72rem;
+  transform: translate(-2px, -50%) rotateY(180deg);
+}
+
+.sp-collapse-glyphs.collapsed .sp-collapse-ankh {
+  left: 0.72rem;
+}
+
+.sp-collapse-glyphs.collapsed .sp-collapse-chevron {
+  left: 0.12rem;
 }
 
 .sp-collapse-chevron.collapsed {
-  transform: translateX(-2px) rotateY(0deg);
+  transform: translate(-2px, -50%) rotateY(0deg);
 }
 
 .sp-shell {
@@ -195,16 +217,36 @@
 }
 
 .sp-shell.collapsed {
+  opacity: 1;
+  transform: none;
+}
+
+.sp-shell.collapsed .sp-tabs {
   opacity: 0;
-  transform: translateX(0.8rem);
   pointer-events: none;
+}
+
+.sp-shell.collapsed .sp-body {
+  display: none;
 }
 
 .sp-tabs-wrap {
   min-height: var(--sp-tabs-shell-h);
-  padding: 0.5rem;
+  padding: 0.4rem;
   flex: 0 0 auto;
   overflow: visible;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sp-tabs-wrap.collapsed {
+  min-height: 0;
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .sp-tabs {
@@ -329,6 +371,12 @@
   .sp-tabs {
     overflow-x: auto;
     scrollbar-width: none;
+    grid-template-columns: repeat(3, minmax(max-content, 1fr));
+    padding-right: 0.15rem;
+  }
+
+  .sp-shell.collapsed .sp-tabs {
+    display: none;
   }
 
   .sp-tabs::-webkit-scrollbar {
