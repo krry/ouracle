@@ -47,6 +47,7 @@ export interface CardData {
 	body: string;
 	markdown?: string;  // full practice text (rites only)
 	fields?: Record<string, unknown>; // practice metadata (act, duration, vagalStates, textures, …)
+	imageUrl?: string;  // full URL to card image, if available
 }
 
 export interface Message {

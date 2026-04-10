@@ -223,6 +223,11 @@
 				<button class="dismiss-btn" onclick={dismissCard} aria-label="Dismiss card">✕</button>
 			</div>
 			<div class="card-content" class:ogham={$isOgham}>
+				{#if $activeCard.imageUrl}
+					<div class="card-image-wrap">
+						<img class="card-image" src={$activeCard.imageUrl} alt={$activeCard.title} loading="lazy" />
+					</div>
+				{/if}
 				<div class="card-title">{$activeCard.title}</div>
 				{#if $activeCard.keywords.length}
 					<div class="card-keywords">{$activeCard.keywords.join(' · ')}</div>
@@ -590,6 +595,23 @@
 	padding-right: 0.2rem;
 	max-width: var(--panel-measure);
 	margin: 0 auto;
+}
+
+.card-image-wrap {
+	width: 100%;
+	aspect-ratio: 2 / 3;
+	max-height: 22rem;
+	border-radius: 8px;
+	overflow: hidden;
+	margin-bottom: 0.2rem;
+	background: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+
+.card-image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
 }
 
 .card-title {

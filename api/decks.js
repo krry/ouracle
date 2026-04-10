@@ -323,3 +323,50 @@ export async function listDecks() {
   const decks = await loadDecks();
   return decks.map(({ id, meta, cards }) => ({ id, meta, count: cards.length }));
 }
+
+// ── Tarot image mapping ───────────────────────────────────────────────────────
+
+const MAJOR_ARCANA_FILES = [
+  '00_Fool', '01_Magician', '02_High_Priestess', '03_Empress', '04_Emperor',
+  '05_Hierophant', '06_Lovers', '07_Chariot', '08_Strength', '09_Hermit',
+  '10_Wheel_of_Fortune', '11_Justice', '12_Hanged_Man', '13_Death', '14_Temperance',
+  '15_Devil', '16_Tower', '17_Star', '18_Moon', '19_Sun', '20_Judgement', '21_World',
+];
+
+const SUIT_ABBR = { wands: 'Wands', cups: 'Cups', swords: 'Swords', pentacles: 'Pents' };
+const COURT_RANK = { page: 11, knight: 12, queen: 13, king: 14 };
+
+function majorPath(folder, idx) {
+  const file = MAJOR_ARCANA_FILES[idx];
+  return file ? `/tarot/${folder}/${file}.jpg` : null;
+}
+
+function minorPath(folder, fields) {
+  const suitStr = SUIT_ABBR[String(fields.suit ?? '').toLowerCase()];
+  if (!suitStr) return null;
+  const rankRaw = String(fields.rank ?? '').toLowerCase();
+  const rankNum = isNaN(Number(rankRaw)) ? (COURT_RANK[rankRaw] ?? null) : Number(rankRaw);
+  if (!rankNum) return null;
+  return `/tarot/${folder}/${suitStr}${String(rankNum).padStart(2, '0')}.jpg`;
+}
+
+/**
+ * Returns the URL path for a card's image, or null if no image exists.
+ * e.g. "/tarot/soimoi/00_Fool.jpg"
+ */
+export function cardImagePath(card) {
+  const { deck, fields = {}, number, id } = card;
+
+  if (deck === 'botts_tarot') {
+    if (fields.suit && fields.rank) return minorPath('soimoi', fields);
+    if (number != null) return majorPath('soimoi', number - 1); // botts: number 1=Fool→idx 0
+  }
+
+  if (deck === 'rider_waite_tarot') {
+    if (fields.suit && fields.rank) return minorPath('rider-waite', fields);
+    const idx = parseInt(id); // id like "00_the_fool" → 0
+    if (!isNaN(idx)) return majorPath('rider-waite', idx);
+  }
+
+  return null;
+}

@@ -221,6 +221,7 @@ import { storageMonitor } from './storage-monitor';
 				body: raw.body ?? '',
 				markdown: raw.markdown,
 				fields: raw.fields,
+				imageUrl: raw.imageUrl ? `${BASE_URL}${raw.imageUrl}` : undefined,
 			};
 			activeCard.set(card);
 			messages.update(m => [...m, { role: 'card', content: '', card, interpreted: false }]);
@@ -403,6 +404,7 @@ import { storageMonitor } from './storage-monitor';
 						body: raw.body ?? '',
 						markdown: raw.markdown,
 						fields: raw.fields,
+						imageUrl: raw.imageUrl ? `${BASE_URL}${raw.imageUrl}` : undefined,
 					};
 					messages.update(m => [...m, { role: 'card', content: '', card: cardData, interpreted: false }]);
 				} else if (event.type === 'rite' && event.rite) {
