@@ -1248,6 +1248,55 @@ import { storageMonitor } from './storage-monitor';
 	flex-shrink: 0;
 }
 
+@media (max-width: 640px) {
+	.bar {
+		gap: 0.6rem;
+		padding: 0.5rem 0.75rem;
+		padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+		min-height: calc(var(--input-bar-h) + env(safe-area-inset-bottom, 0px));
+	}
+
+	.input-wrap {
+		min-height: 2.5rem;
+	}
+
+	.chat-input {
+		border-radius: 1.25rem;
+		font-size: 1rem;
+		min-height: 2.5rem;
+		padding: 0.55rem 2.85rem 0.55rem 0.9rem;
+	}
+
+	.send-inline {
+		right: 0.45rem;
+		top: 50%;
+		bottom: auto;
+		transform: translateY(-50%);
+		width: 2rem;
+		height: 2rem;
+		border-radius: 999px;
+		display: grid;
+		place-items: center;
+		padding: 0;
+		background: color-mix(in srgb, var(--accent) 18%, transparent);
+		border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--glass-border));
+		font-size: 1rem;
+		opacity: 0.85;
+	}
+
+	.send-inline:disabled {
+		background: color-mix(in srgb, var(--glass-bg-strong) 60%, transparent);
+		border-color: var(--glass-border);
+		opacity: 0.45;
+	}
+
+	.ptt {
+		width: 2.35rem;
+		height: 2.35rem;
+		transform: none;
+	}
+}
+
 /* ── Card message ──────────────────────────────────────────────────────── */
 .card-msg { max-width: 480px; }
 

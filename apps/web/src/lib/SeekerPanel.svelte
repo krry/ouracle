@@ -242,7 +242,7 @@
 
 .sp-tabs-wrap.collapsed {
   min-height: 0;
-  padding: 0;
+  padding: 0 0.5em 0 0;
   border-color: transparent;
   background: transparent;
   box-shadow: none;
