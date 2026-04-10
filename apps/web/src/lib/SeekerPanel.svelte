@@ -149,12 +149,16 @@
   flex: 0 0 auto;
   z-index: 3;
   transition:
-    transform 0.382s ease,
     opacity 0.32s ease,
     background 0.32s ease,
-    border-color 0.32s ease;
-  margin-right: 0.35rem;
+    border-color 0.32s ease,
+    margin 0.32s ease;
   background: color-mix(in srgb, var(--glass) 85%, transparent);
+}
+
+.sp-collapse.collapsed {
+  margin-left: -1rem;
+  margin-top: 0.25rem;
 }
 
 .sp-collapse-glyphs {

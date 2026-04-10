@@ -813,7 +813,9 @@ import { storageMonitor } from './storage-monitor';
 					aria-label="hold to speak"
 					disabled={guestLocked || covenantPending}
 				>
-					{$voiceState === 'listening' ? '◉' : $voiceState === 'transcribing' ? '…' : '◎'}
+					<span class="ptt-label">
+						{$voiceState === 'listening' ? '◉' : $voiceState === 'transcribing' ? '…' : '◎'}
+					</span>
 				</button>
 				{#if !pttSeen || $voiceState !== 'idle'}
 					<div class="ptt-hint-pop" class:listening={$voiceState === 'listening'} class:transcribing={$voiceState === 'transcribing'}>
@@ -1209,7 +1211,7 @@ import { storageMonitor } from './storage-monitor';
 	border-radius: 50%;
 	color: var(--muted);
 	cursor: pointer;
-	font-size: 1.2rem;
+	font-size: 1.75rem;
 	height: 2.5rem;
 	width: 2.5rem;
 	display: flex;
@@ -1239,6 +1241,12 @@ import { storageMonitor } from './storage-monitor';
 	border-color: var(--muted);
 	color: var(--muted);
 	opacity: 0.7;
+}
+
+.ptt-label {
+	font-weight: 300;
+	padding-left: 0.05ch;
+	padding-bottom: 0.3ch;
 }
 
 .bar-leading {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { derived } from 'svelte/store'
 	import { goto } from '$app/navigation';
 	import { activeRite, activeCard, pendingRite } from './stores';
 	import type { CardData, RiteData } from './stores';
@@ -38,6 +39,12 @@
 		'idle'
 	);
 
+  const isOgham = derived(activeCard, ($activeCard) => {
+    // handle null / undefined and ensure string
+    const label = $activeCard?.deckLabel ?? '';
+    return label.toLowerCase().includes('ogham');
+  });
+  
 	const STAGES: Array<'offered' | 'received' | 'enacted'> = ['offered', 'received', 'enacted'];
 
 	function dismissCard() {
@@ -215,8 +222,7 @@
 				<span class="panel-label">◈ {$activeCard.deckLabel}</span>
 				<button class="dismiss-btn" onclick={dismissCard} aria-label="Dismiss card">✕</button>
 			</div>
-
-			<div class="card-content">
+			<div class="card-content" class:ogham={$isOgham}>
 				<div class="card-title">{$activeCard.title}</div>
 				{#if $activeCard.keywords.length}
 					<div class="card-keywords">{$activeCard.keywords.join(' · ')}</div>
@@ -610,8 +616,11 @@
 	opacity: 0.85;
 	white-space: pre-wrap;
 	margin: 0;
-	max-height: 220px;
 	overflow-y: auto;
+}
+
+.ogham .card-body:first-letter {
+	font-size: 4em;
 }
 
 .card-summary,
