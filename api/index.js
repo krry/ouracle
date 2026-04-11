@@ -1091,7 +1091,7 @@ class SentenceAudioStreamer {
     }
   }
 
-  startAudioFetch(seq, sentence) {
+  startAudioFetch(seq, sentence, delayMs = 0) {
     if (this.audioPromises.has(seq)) return;
     // Cache check
     const cached = audioCache.get(sentence);
@@ -1100,14 +1100,31 @@ class SentenceAudioStreamer {
       this.tryEmitAudio();
       return;
     }
-    const p = fetchAudio(sentence, this.voice).then(buf => {
+    const RETRY_DELAYS = [800, 2000]; // ms between attempts (3 attempts total)
+    const doFetch = async () => {
+      if (delayMs > 0) await new Promise(r => setTimeout(r, delayMs));
+      let lastErr;
+      for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+        try {
+          return await fetchAudio(sentence, this.voice);
+        } catch (err) {
+          lastErr = err;
+          if (attempt < RETRY_DELAYS.length) {
+            console.warn(`[TTS] attempt ${attempt + 1} failed, retrying in ${RETRY_DELAYS[attempt]}ms:`, err.message);
+            await new Promise(r => setTimeout(r, RETRY_DELAYS[attempt]));
+          }
+        }
+      }
+      throw lastErr;
+    };
+    const p = doFetch().then(buf => {
       const base64 = buf.toString('base64');
       audioCache.set(sentence, { base64, timestamp: Date.now() });
       this.readyAudio.set(seq, base64);
       this.tryEmitAudio();
     }).catch(err => {
-      console.error('[TTS] sentence fetch error:', err.message);
-      this.readyAudio.set(seq, null); // mark as failed, still allow proceeding
+      console.error('[TTS] sentence fetch failed after retries:', err.message);
+      this.readyAudio.set(seq, null);
       this.tryEmitAudio();
     });
     this.audioPromises.set(seq, p);
@@ -1125,7 +1142,7 @@ class SentenceAudioStreamer {
     }
   }
 
-  async waitForRemainingAudio(timeout = 5000) {
+  async waitForRemainingAudio(timeout = 10000) {
     const deadline = Date.now() + timeout;
     while (this.nextAudioEmitIdx < this.sentenceIdx) {
       if (Date.now() > deadline) break;
@@ -1151,13 +1168,14 @@ class SentenceAudioStreamer {
     for (let i = 0; i < sentences.length; i++) {
       const sentence = sentences[i];
       this.emitSentenceText(sentence, i === sentences.length - 1);
-      // Pre-fetch next up to 2 ahead if available
+      // Pre-fetch next sentences ahead, staggered to avoid rate-limiting Fish.audio
       if (!this.muted) {
         for (let j = i + 1; j <= Math.min(i + this.preFetchLimit, sentences.length - 1); j++) {
+          const futureIdx = j;
           const futureSentence = sentences[j];
-          const futureIdx = i + 1 + (j - (i + 1));
+          const staggerMs = (j - i) * 400; // 400ms per step ahead
           if (!this.audioPromises.has(futureIdx)) {
-            this.startAudioFetch(futureIdx, futureSentence);
+            this.startAudioFetch(futureIdx, futureSentence, staggerMs);
           }
         }
       }
@@ -1462,6 +1480,29 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
 
       const sessionCount = await getSeekerSessionCount(seeker_id);
       const lastSession = await getSeekerLatestSession(seeker_id);
+
+      // ── Reintegration: seeker returning to report on an accepted rite ────────
+      // If the most recent session was prescribed but never completed, resume it
+      // instead of running a fresh inquiry that would re-prescribe the same rite.
+      if (lastSession?.stage === 'prescribed' && !lastSession?.completed_at) {
+        const resumedId = lastSession.id;
+        console.log(`[enquire/new] resuming prescribed session=${resumedId} seeker=${seeker_id}`);
+        emit({ type: 'session', session_id: resumedId, stage: 'prescribed', needs_covenant: !seeker.covenant_at });
+        const riteAct = lastSession.rite_json?.act;
+        const riteName = lastSession.rite_name;
+        const opening = riteAct
+          ? `You were going to ${riteAct.replace(/\.$/, '')}. How did it go?`
+          : riteName
+            ? `You were working with "${riteName}". How did it go?`
+            : `You've returned. How did the rite go?`;
+        const nowIso = new Date().toISOString();
+        const conversation = Array.isArray(lastSession.conversation) ? [...lastSession.conversation] : [];
+        conversation.push({ role: 'priestess', text: opening, at: nowIso });
+        await updateSession(resumedId, { conversation });
+        await streamer.processFullText(opening);
+        return finish('prescribed', { session_id: resumedId });
+      }
+
       const lastQuestion = Array.isArray(lastSession?.conversation)
         ? lastSession.conversation.find((e) => e?.role === 'priestess')?.text
         : null;
@@ -1652,10 +1693,6 @@ Most responses will NOT include [READY].`;
           prescribed_at: new Date().toISOString(),
         });
         emit({ type: 'break' });
-        if (quality.seeker_language) {
-          await streamer.processFullText(quality.seeker_language);
-          emit({ type: 'break' });
-        }
         // Emit structured rite event — frontend renders in OraclePanel, not chat stream
         emit({ type: 'rite', rite: ritePayload });
         emit({ type: 'break' });
@@ -1771,7 +1808,7 @@ Most responses will NOT include [REPORT].`;
           emit({ type: 'break' });
         }
         await streamer.processFullText(RITE_FEEDBACK_FOLLOWUP);
-        return finish('complete', { session_id });
+        return finish('reintegration_complete', { session_id });
       }
 
       await updateSession(session_id, { full_text: prescribedState.nextFullText, conversation });

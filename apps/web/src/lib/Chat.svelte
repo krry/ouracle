@@ -4,7 +4,7 @@ import { get } from 'svelte/store';
 import { browser } from '$app/environment';
 import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState, covenantAcceptedTick, covenantPromptArmed } from './stores';
 import type { CardData, RiteData, VagalInfo, BeliefInfo, QualityInfo, Message } from './stores';
-import { enquire, stt } from './api';
+import { enquire, stt, tts } from './api';
 import { webSpeech, cancelWebSpeech, DEFAULT_VOICE } from './tts-client';
 import Breath from './Breath.svelte';
 import SeekerPanel from './SeekerPanel.svelte';
@@ -47,6 +47,11 @@ import { storageMonitor } from './storage-monitor';
 	// If none arrive during a turn, we fall back to Web Speech at completion time.
 	let serverAudioReceived = false;
 	let fallbackSentences: string[] = [];
+	// Consecutive sentence_audio_missing count — only fall back to Web Speech after 3 in a row.
+	let consecutiveMissingCount = 0;
+	// "Say again / try again" state — tracks whether the last response had audio.
+	let lastResponsePlayed = $state(false);
+	let lastResponseContent = $state('');
 	// Guard: only save messages to localStorage after onMount has restored them.
 	// Without this, the initial $effect run (with messages = []) would wipe any saved
 	// conversation before onMount has a chance to read it back — e.g. after iOS tab discard.
@@ -64,6 +69,17 @@ import { storageMonitor } from './storage-monitor';
 	let freshHandled = $state(false);
 	let lastSeenCovenantAcceptedTick = $state(0);
 	const covenantPending = $derived($authed && $covenantPromptArmed);
+
+	// Index of the last assistant message that has content — used to place the retry button.
+	const lastAssistantIdx = $derived(
+		(() => {
+			const msgs = $messages;
+			for (let i = msgs.length - 1; i >= 0; i--) {
+				if (msgs[i].role === 'assistant' && msgs[i].content?.trim()) return i;
+			}
+			return -1;
+		})()
+	);
 
 	function buildAuthTranscriptContext(history: Message[]): string | null {
 		const transcript = history
@@ -85,17 +101,17 @@ import { storageMonitor } from './storage-monitor';
 		].join('\n');
 	}
 
-	function resetConversationState() {
+	function resetConversationState({ preservePendingRite = false } = {}) {
 		messages.set([]);
 		activeCard.set(null);
 		activeRite.set(null);
-		pendingRite.set(null);
+		if (!preservePendingRite) pendingRite.set(null);
 		continueOffered.set(false);
 		sessionId = null;
 		if (browser) {
 			localStorage.removeItem('clea_messages');
 			localStorage.removeItem('clea_session_id');
-			localStorage.removeItem('clea_pending_rite');
+			if (!preservePendingRite) localStorage.removeItem('clea_pending_rite');
 		}
 		if ($authed && $creds) {
 			seekerState.reset();
@@ -258,6 +274,23 @@ import { storageMonitor } from './storage-monitor';
 		}
 	});
 
+	async function sayAgain() {
+		if (!audioQueue || !lastResponseContent || !$ttsEnabled) return;
+		const token = !guestMode ? ($creds as Credentials | null)?.access_token ?? '' : guestToken ?? '';
+		try {
+			audioQueue.prime();
+			cancelWebSpeech();
+			const buf = await tts(lastResponseContent, token, get(ttsVoice));
+			audioQueue.enqueueBuffer(buf);
+		} catch {
+			webSpeech(lastResponseContent);
+		}
+	}
+
+	// tryAgain = same as sayAgain: retry Fish.audio for the existing response.
+	// Label differs to communicate "audio didn't arrive last time."
+	const tryAgain = sayAgain;
+
 	async function send(text: string, mode?: string) {
 		if ($streaming || guestLocked || covenantPending) return;
 		let skipTag = false;
@@ -295,6 +328,7 @@ import { storageMonitor } from './storage-monitor';
 		cancelWebSpeech();
 		serverAudioReceived = false;
 		fallbackSentences = [];
+		consecutiveMissingCount = 0;
 		const token = !guestMode ? ($creds as Credentials | null)?.access_token ?? '' : guestToken ?? '';
 		// Only push user message if there's actual text (first turn may be empty — opens the session)
 		if (text.trim()) {
@@ -376,6 +410,7 @@ import { storageMonitor } from './storage-monitor';
                     enqueueMissingSentences(sequence);
                     spokenSentenceSeqs.add(sequence);
                     serverAudioReceived = true;
+                    consecutiveMissingCount = 0; // reset on success
                     cancelWebSpeech();
                     const binary = atob(event.audio as string);
                     const bytes = new Uint8Array(binary.length);
@@ -383,8 +418,11 @@ import { storageMonitor } from './storage-monitor';
                     audioQueue.enqueueBuffer(bytes.buffer);
                 }
             } else if (event.type === 'sentence_audio_missing') {
+                // Only fall back to Web Speech after 3 consecutive misses — single failures
+                // are likely transient Fish.audio rate limits that the server already retried.
+                consecutiveMissingCount++;
                 const sequence = typeof event.sequence === 'number' ? event.sequence : -1;
-                if ($ttsEnabled && audioQueue && sequence >= 0) {
+                if ($ttsEnabled && audioQueue && sequence >= 0 && consecutiveMissingCount >= 3) {
                     enqueueMissingSentences(sequence + 1);
                 }
             } else if (event.type === 'break') {
@@ -424,6 +462,9 @@ import { storageMonitor } from './storage-monitor';
 						}
 					}
 					enqueueMissingSentences();
+					// Capture state for "say again / try again" button
+					lastResponsePlayed = serverAudioReceived;
+					lastResponseContent = get(messages).filter(m => m.role === 'assistant').pop()?.content?.trim() ?? '';
 } else if (event.type === 'continue_offered') {
 			continueOffered.set(true);
 		} else if (event.type === 'affect') {
@@ -544,7 +585,7 @@ import { storageMonitor } from './storage-monitor';
 		  // This must happen AFTER the restore so the effect never writes [] over saved data.
 		  didRestore = true;
 		} else {
-			resetConversationState();
+			resetConversationState({ preservePendingRite: freshStart });
 			didRestore = true;
 			if (freshStart) {
 				freshHandled = true;
@@ -579,7 +620,7 @@ import { storageMonitor } from './storage-monitor';
 			return;
 		}
 		if (freshHandled || $streaming) return;
-		resetConversationState();
+		resetConversationState({ preservePendingRite: true });
 		freshHandled = true;
 		onfreshhandled();
 		send('');
@@ -768,13 +809,20 @@ import { storageMonitor } from './storage-monitor';
 
 	<!-- message list -->
 	<div class="msgs" class:rail-collapsed={railCollapsed} bind:this={msgList}>
-		{#each $messages as msg}
+		{#each $messages as msg, msgIdx}
 			{#if msg.role !== 'system' && msg.role !== 'card'}
 				<div class="msg {msg.role}" class:covenant-reminder={msg.isCovenantReminder}>
 					{#if !msg.isCovenantReminder}
 						<span class="label">{msg.role === 'user' ? 'you' : guestMode ? 'Phemonoe' : 'Clea'}</span>
 					{/if}
 					<div class="prose">{@html renderMarkdown(msg.content)}</div>
+					{#if msg.role === 'assistant' && !$streaming && msgIdx === lastAssistantIdx && $ttsEnabled && msg.content.trim()}
+						<div class="msg-actions">
+							<button class="retry-btn" onclick={lastResponsePlayed ? sayAgain : tryAgain}>
+								↺ {lastResponsePlayed ? 'say again' : 'try again'}
+							</button>
+						</div>
+					{/if}
 				</div>
 			{/if}
 		{/each}
@@ -966,6 +1014,26 @@ import { storageMonitor } from './storage-monitor';
 }
 
 .msg { display: flex; flex-direction: column; gap: 0.25rem; }
+
+.msg-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 0.2rem;
+}
+
+.retry-btn {
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	font-family: var(--font-mono);
+	font-size: 0.62rem;
+	letter-spacing: 0.06em;
+	color: var(--muted);
+	transition: color 0.15s;
+	line-height: 1;
+}
+.retry-btn:hover { color: var(--accent); }
 
 .covenant-reminder {
 	opacity: 0.65;

@@ -3,21 +3,66 @@
 	import type { VagalInfo, BeliefInfo, QualityInfo, AffectInfo } from './stores';
 	let { variant = 'compact' }: { variant?: 'compact' | 'expanded' } = $props();
 
-	// Color helpers
-	const confidenceColor = (c: 'low' | 'medium' | 'high' | null) => {
-		if (c === 'high') return 'var(--accent)';
-		if (c === 'medium') return 'var(--muted)';
-		return 'var(--border)';
+	// Confidence → opacity: low=0.5, medium=0.75, high=1.0
+	const confidenceOpacity = (c: 'low' | 'medium' | 'high' | null): number => {
+		if (c === 'high') return 1.0;
+		if (c === 'medium') return 0.75;
+		if (c === 'low') return 0.5;
+		return 0.4;
 	};
 
+	// Vagal: sympathetic=warm red-orange, dorsal=cold blue, ventral=neutral rich green
 	const vagalColor = (v: VagalInfo['probable']) => {
 		switch (v) {
-			case 'ventral': return '#2ecc71'; // green
-			case 'sympathetic': return '#e74c3c'; // red
-			case 'dorsal': return '#3498db'; // blue
-			case 'mixed': return '#f39c12'; // orange
-			default: return 'var(--border)';
+			case 'ventral':    return 'hsl(145, 52%, 40%)';  // rich green
+			case 'sympathetic':return 'hsl(18,  82%, 54%)';  // warm red-orange
+			case 'dorsal':     return 'hsl(210, 68%, 52%)';  // cold blue
+			case 'mixed':      return 'hsl(38,  75%, 52%)';  // amber
+			default:           return 'var(--border)';
 		}
+	};
+
+	// Chakra palette — root→crown, plus transitional steps
+	const CHAKRA_COLORS: Record<string, string> = {
+		root:    'hsl(0,   68%, 52%)',   // red
+		sacral:  'hsl(25,  82%, 54%)',   // orange
+		solar:   'hsl(48,  88%, 46%)',   // gold
+		heart:   'hsl(140, 52%, 40%)',   // green
+		throat:  'hsl(190, 62%, 46%)',   // cyan
+		brow:    'hsl(240, 52%, 58%)',   // indigo
+		crown:   'hsl(275, 52%, 58%)',   // violet
+	};
+
+	// Belief pattern → chakra color
+	const beliefColor = (pattern: BeliefInfo['pattern']): string => {
+		const map: Record<string, string> = {
+			scarcity:     CHAKRA_COLORS.root,
+			unworthiness: CHAKRA_COLORS.sacral,
+			control:      CHAKRA_COLORS.solar,
+			isolation:    CHAKRA_COLORS.heart,
+			silence:      CHAKRA_COLORS.throat,
+			blindness:    CHAKRA_COLORS.brow,
+			separation:   CHAKRA_COLORS.crown,
+		};
+		return pattern ? (map[pattern] ?? 'var(--muted)') : 'var(--muted)';
+	};
+
+	// OCTAVE quality → chakra color (via engine's quality↔chakra correspondence)
+	const qualityColor = (q: string | null): string => {
+		const map: Record<string, string> = {
+			entity:    CHAKRA_COLORS.root,
+			affinity:  CHAKRA_COLORS.sacral,
+			activity:  CHAKRA_COLORS.solar,
+			capacity:  CHAKRA_COLORS.heart,
+			causality: CHAKRA_COLORS.throat,
+			eternity:  CHAKRA_COLORS.brow,
+			unity:     CHAKRA_COLORS.crown,
+			// transitional steps — no fixed chakra anchor
+			pity:      'hsl(75,  62%, 40%)',  // yellow-green (air shock)
+			calamity:  'hsl(340, 65%, 46%)',  // crimson (collapse)
+			cyclicity: 'hsl(200, 38%, 56%)',  // muted teal (all/return)
+		};
+		return q ? (map[q] ?? 'var(--muted)') : 'var(--muted)';
 	};
 
 	// Compute position for circumplex dot: valence (x), arousal (y)
@@ -76,26 +121,24 @@
 	<div class="ss-badges">
 		<div class="badge-row">
 			<span class="badge-label">vagality</span>
-			<span class="badge-value" style="color: {vagalColor($seekerState.vagal.probable)}">
-				{$seekerState.vagal.probable ?? '_'}
-			</span>
-			<span class="badge-confidence" style="color: {confidenceColor($seekerState.vagal.confidence)}">
-				({$seekerState.vagal.confidence ?? '?'})
-			</span>
+			<span
+				class="badge-value"
+				style="color: {vagalColor($seekerState.vagal.probable)}; opacity: {confidenceOpacity($seekerState.vagal.confidence)}"
+			>{$seekerState.vagal.probable ?? '_'}</span>
 		</div>
 		<div class="badge-row">
 			<span class="badge-label">credulity</span>
-			<span class="badge-value">{$seekerState.belief.pattern ?? '_'}</span>
-			<span class="badge-confidence" style="color: {confidenceColor($seekerState.belief.confidence)}">
-				({$seekerState.belief.confidence ?? '?'})
-			</span>
+			<span
+				class="badge-value"
+				style="color: {beliefColor($seekerState.belief.pattern)}; opacity: {confidenceOpacity($seekerState.belief.confidence)}"
+			>{$seekerState.belief.pattern ?? '_'}</span>
 		</div>
 		<div class="badge-row">
 			<span class="badge-label">quality</span>
-			<span class="badge-value">{$seekerState.quality.quality ?? '_'}</span>
-			<span class="badge-confidence" style="color: {confidenceColor($seekerState.quality.confidence)}">
-				({$seekerState.quality.confidence ?? '?'})
-			</span>
+			<span
+				class="badge-value"
+				style="color: {qualityColor($seekerState.quality.quality)}; opacity: {confidenceOpacity($seekerState.quality.confidence)}"
+			>{$seekerState.quality.quality ?? '_'}</span>
 		</div>
 	</div>
 </div>
@@ -211,10 +254,7 @@
 	.badge-value {
 		font-weight: 600;
 		text-transform: lowercase;
-	}
-	.badge-confidence {
-		font-size: 0.6rem;
-		opacity: 0.7;
+		transition: color 0.4s ease, opacity 0.4s ease;
 	}
 
 	.seeker-status.expanded {

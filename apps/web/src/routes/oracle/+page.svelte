@@ -14,7 +14,7 @@
 
 <svelte:head>
   <title>Oracle | Ouracle</title>
-  <style>html, body { height: 100%; overflow: hidden; }</style>
+  <style>html, body { height: 100%; overflow: hidden; } .app-content { overflow: hidden; }</style>
 </svelte:head>
 
 <EnquireView />

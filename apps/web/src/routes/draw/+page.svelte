@@ -18,7 +18,7 @@
 
 <svelte:head>
   <title>Draw | Ouracle</title>
-  <style>html, body { height: 100%; overflow: hidden; }</style>
+  <style>html, body { height: 100%; overflow: hidden; } .app-content { overflow: hidden; }</style>
 </svelte:head>
 
 <EnquireView />
