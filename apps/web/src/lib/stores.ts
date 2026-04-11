@@ -169,9 +169,11 @@ const VALID_TTS_VOICES = new Set(['galadrielle', 'ondrea_gibsen', 'alff', 'oapra
 
 function ttsVoiceStore() {
 	const stored = browser ? localStorage.getItem('clea_tts_voice') : null;
-	// Migrate legacy Kokoro ids (af_*, am_*, bf_*, bm_*) and stale values to the default voice
+	// Migrate legacy Kokoro ids (af_*, am_*, bf_*, bm_*) and stale values to the default voice.
+	// 32-char hex UUIDs are custom Fish.audio voice IDs — allow them through.
 	const raw = stored ?? 'galadrielle';
-	const migrated = /^(af_|am_|bf_|bm_)/.test(raw) || !VALID_TTS_VOICES.has(raw) ? 'galadrielle' : raw;
+	const isCustomId = /^[0-9a-f]{32}$/i.test(raw);
+	const migrated = /^(af_|am_|bf_|bm_)/.test(raw) || (!VALID_TTS_VOICES.has(raw) && !isCustomId) ? 'galadrielle' : raw;
 	const { subscribe, set } = writable<TtsVoice>(migrated);
 	return {
 		subscribe,

@@ -164,6 +164,12 @@
     filter: blur(18px);
     transform: scale(0.96);
     transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease;
+    border-radius: 18px;
+  }
+
+  .content:focus-visible {
+    outline: 2px solid var(--focus-soft);
+    outline-offset: 2px;
   }
 
   .content.visible {

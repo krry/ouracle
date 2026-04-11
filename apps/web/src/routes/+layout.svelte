@@ -6,6 +6,8 @@
   import Nebula from '$lib/Nebula.svelte';
   import TopBar from '$lib/TopBar.svelte';
   import ControlPanel from '$lib/ControlPanel.svelte';
+  import ModalVeil from '$lib/ModalVeil.svelte';
+  import CustomVoiceModal from '$lib/CustomVoiceModal.svelte';
   import { creds, seekerState } from '$lib/stores';
   import { initPwa } from '$lib/pwa';
 
@@ -47,6 +49,8 @@
   function toggleDrawer() { drawerOpen = !drawerOpen; }
   function closeDrawer() { drawerOpen = false; }
 
+  let voiceModalOpen = $state(false);
+
   $effect(() => {
     const c = $creds;
     if (c?.handle) seekerState.setPartial({ handle: c.handle });
@@ -79,9 +83,16 @@
     </div>
 
     <div class="drawer-body">
-      <ControlPanel onclose={closeDrawer} />
+      <ControlPanel onclose={closeDrawer} onopencustomvoice={() => voiceModalOpen = true} />
     </div>
   </div>
+
+  <ModalVeil
+    active={voiceModalOpen}
+    component={CustomVoiceModal}
+    close={() => voiceModalOpen = false}
+    onclose={() => voiceModalOpen = false}
+  />
 
   <main class="app-content">
     {@render children()}

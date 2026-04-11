@@ -40,10 +40,14 @@
   import AmbientControls from './AmbientControls.svelte';
   import { creds, authed, seekerState, pendingRite, messages, ttsEnabled, ttsVoice } from './stores';
   import { anySoundPlaying, allOff } from './ambientEngine';
-  import { TTS_VOICES } from './tts-client';
+  import { TTS_VOICES, DEFAULT_VOICE } from './tts-client';
   import { signOut } from './auth';
+  let { onclose = () => {}, onopencustomvoice = () => {} }: {
+    onclose?: () => void;
+    onopencustomvoice?: () => void;
+  } = $props();
 
-  let { onclose = () => {} }: { onclose?: () => void } = $props();
+  const isCustomVoice = $derived(/^[0-9a-f]{32}$/i.test($ttsVoice));
 
   async function leave() {
     await signOut({ fetchOptions: { onSuccess: () => creds.logout() } });
@@ -85,19 +89,31 @@
       <span class="vb-icon">〲</span>
       <span class="vb-label">{$ttsEnabled ? 'voice on' : 'voice off'}</span>
     </label>
-    <div class="vb-row" class:on={$ttsEnabled}>
-      <span class="vb-icon">◈</span>
-      <select
-        class="vb-select"
-        value={$ttsVoice}
-        onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value)}
-        aria-label="Clea's voice"
-      >
-        {#each TTS_VOICES as v}
-          <option value={v.id}>{v.label}</option>
-        {/each}
-      </select>
-    </div>
+    {#if isCustomVoice}
+      <div class="vb-row vb-custom-row" class:on={$ttsEnabled}>
+        <span class="vb-icon">◈</span>
+        <span class="vb-label vb-custom-id" title={$ttsVoice}>
+          {$ttsVoice.slice(0, 8)}···
+        </span>
+        <button class="vb-own-link" onclick={onopencustomvoice}>edit</button>
+        <button class="vb-own-link" onclick={() => ttsVoice.set(DEFAULT_VOICE)}>×</button>
+      </div>
+    {:else}
+      <div class="vb-row" class:on={$ttsEnabled}>
+        <span class="vb-icon">◈</span>
+        <select
+          class="vb-select"
+          value={$ttsVoice}
+          onchange={(e) => ttsVoice.set((e.target as HTMLSelectElement).value)}
+          aria-label="Clea's voice"
+        >
+          {#each TTS_VOICES as v}
+            <option value={v.id}>{v.label}</option>
+          {/each}
+        </select>
+        <button class="vb-own-link" onclick={onopencustomvoice}>use your own</button>
+      </div>
+    {/if}
   </div>
 
   <div class="cp-block glass-block">
@@ -263,6 +279,32 @@
   outline-offset: 3px;
 }
 .vb-select option { background: var(--bg); color: var(--text); }
+
+.vb-own-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: auto;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: color-mix(in srgb, var(--muted) 70%, var(--accent));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+.vb-own-link:hover { color: var(--accent); }
+
+.vb-custom-row { gap: 0.45rem; }
+.vb-custom-id {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+.vb-custom-row .vb-own-link { margin-left: 0; }
+.vb-custom-row .vb-own-link:last-child { margin-left: auto; font-size: 0.75rem; text-decoration: none; }
 
 .cp-identity {
   display: flex;
