@@ -22,6 +22,8 @@ function fishApiKey() {
 }
 
 function fishVoiceId(voice) {
+  // Custom Fish.audio reference_id — 32-char hex UUID passed directly from the client
+  if (voice && /^[0-9a-f]{32}$/i.test(voice)) return voice;
   const key = `FISH_AUDIO_VOICE_${(voice ?? 'galadrielle').toUpperCase()}`;
   return process.env[key] || undefined;
 }
