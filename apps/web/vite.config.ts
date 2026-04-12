@@ -109,6 +109,73 @@ export default defineConfig({
       key: './certs/souvenir.local+2-key.pem',
       cert: './certs/souvenir.local+2.pem',
     },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3737',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/auth': {
+        target: 'http://localhost:3737',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/aspire': {
+        target: 'http://localhost:3737',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/covenant': {
+        target: 'http://localhost:3737',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/decks': {
+        target: 'http://localhost:3737',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/enquire': {
+        target: 'http://localhost:3737',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/octave': {
+        target: 'http://localhost:3737',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/seeker': {
+        target: 'http://localhost:3737',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/session': {
+        target: 'http://localhost:3737',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/stt': {
+        target: 'http://localhost:3737',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/suno': {
+        target: 'http://localhost:3737',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/totem': {
+        target: 'http://localhost:3737',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/tts': {
+        target: 'http://localhost:3737',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   test: {
     environment: 'jsdom',

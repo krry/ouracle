@@ -62,12 +62,14 @@ import { storageMonitor } from './storage-monitor';
 	let availableDecks = $state<DeckMeta[]>([]);
 	let selectedDecks = $state<Set<string>>(new Set());
 	let drawing = $state(false);
-	let inputEl: HTMLDivElement | undefined;
+	let inputEl: HTMLTextAreaElement | undefined;
 	let pendingPracticeContext: string | null = null;
 	let pendingAuthContext: string | null = null;
 	let railCollapsed = $state(false);
 	let freshHandled = $state(false);
 	let lastSeenCovenantAcceptedTick = $state(0);
+	let teardownKeyboardDebug = () => {};
+	let msgListScrollable = $state(true);
 	const covenantPending = $derived($authed && $covenantPromptArmed);
 
 	// Index of the last assistant message that has content — used to place the retry button.
@@ -562,6 +564,42 @@ import { storageMonitor } from './storage-monitor';
 
 	// Open session on mount — /enquire with no session_id bootstraps it
 	onMount(async () => {
+		const debugKeyboard =
+			import.meta.env.DEV &&
+			new URLSearchParams(window.location.search).has('debugKeyboard');
+
+		const logKeyboardState = (label: string, extra: Record<string, unknown> = {}) => {
+			if (!debugKeyboard) return;
+			const appContent = document.querySelector<HTMLElement>('.app-content');
+			const shell = msgList?.closest('.shell') as HTMLElement | null;
+			const inputRect = inputEl?.getBoundingClientRect();
+			console.debug('[ouracle:keyboard]', {
+				label,
+				msgListScrollTop: msgList?.scrollTop ?? null,
+				msgListScrollHeight: msgList?.scrollHeight ?? null,
+				msgListClientHeight: msgList?.clientHeight ?? null,
+				appContentScrollTop: appContent?.scrollTop ?? null,
+				shellHeight: shell?.getBoundingClientRect().height ?? null,
+				inputTop: inputRect?.top ?? null,
+				inputBottom: inputRect?.bottom ?? null,
+				inputHeight: inputRect?.height ?? null,
+				inputValueLength: input.length,
+				messageCount: get(messages).length,
+				streaming: $streaming,
+				...extra
+			});
+
+			const debug = (window as any).__ouracleKeyboardDebug;
+			if (typeof debug === 'function') {
+				debug(label, {
+					msgListScrollTop: msgList?.scrollTop ?? null,
+					appContentScrollTop: appContent?.scrollTop ?? null,
+					inputTop: inputRect?.top ?? null,
+					inputBottom: inputRect?.bottom ?? null
+				});
+			}
+		};
+
 		// Restore saved messages, cleaning up any trailing empty assistant message
 		// left by interrupted streaming (tab was killed before the finally block ran).
 		if (browser && !freshStart) {
@@ -612,6 +650,37 @@ import { storageMonitor } from './storage-monitor';
 		if (get(messages).length === 0) {
 		  send('');
 		}
+
+		const resizeObserver = new ResizeObserver(() => refreshMsgListScrollability());
+		resizeObserver.observe(msgList);
+		refreshMsgListScrollability();
+
+		if (debugKeyboard) {
+			const handleMsgScroll = () => logKeyboardState('msgs-scroll');
+			const handleInputFocus = () => logKeyboardState('input-focus');
+			const handleInputBlur = () => logKeyboardState('input-blur');
+
+			msgList?.addEventListener('scroll', handleMsgScroll, { passive: true });
+			inputEl?.addEventListener('focus', handleInputFocus);
+			inputEl?.addEventListener('blur', handleInputBlur);
+			logKeyboardState('chat-mounted');
+
+			teardownKeyboardDebug = () => {
+				resizeObserver.disconnect();
+				msgList?.removeEventListener('scroll', handleMsgScroll);
+				inputEl?.removeEventListener('focus', handleInputFocus);
+				inputEl?.removeEventListener('blur', handleInputBlur);
+			};
+		} else {
+			teardownKeyboardDebug = () => {
+				resizeObserver.disconnect();
+			};
+		}
+	});
+
+	$effect(() => {
+		$messages;
+		queueMicrotask(() => refreshMsgListScrollability());
 	});
 
 	$effect(() => {
@@ -638,6 +707,7 @@ import { storageMonitor } from './storage-monitor';
 	});
 
 	onDestroy(() => {
+		teardownKeyboardDebug();
 		cancelWebSpeech();
 		releaseMic();
 		if (mediaRecorder?.state === 'recording') { mediaRecorder.stop(); }
@@ -650,16 +720,20 @@ import { storageMonitor } from './storage-monitor';
 	});
 
 	function handleInput(e: Event) {
-		const el = e.target as HTMLElement;
-		const raw = el.innerText ?? '';
-		// iOS can leave a lone '\n' in an "empty" contenteditable
-		input = raw === '\n' ? '' : raw;
+		const el = e.target as HTMLTextAreaElement;
+		input = el.value;
+		adjustInputHeight(el);
 	}
 
-	function handlePaste(e: ClipboardEvent) {
-		e.preventDefault();
-		const text = e.clipboardData?.getData('text/plain') ?? '';
-		document.execCommand('insertText', false, text);
+	function adjustInputHeight(el = inputEl) {
+		if (!el) return;
+		el.style.height = 'auto';
+		el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+	}
+
+	function refreshMsgListScrollability() {
+		if (!msgList) return;
+		msgListScrollable = msgList.scrollHeight > msgList.clientHeight + 1;
 	}
 
 	function handleSend() {
@@ -667,8 +741,16 @@ import { storageMonitor } from './storage-monitor';
 		const text = input.trim();
 		if (!text) return;
 		input = '';
-		if (inputEl) inputEl.innerText = '';
+		if (inputEl) {
+			inputEl.value = '';
+			adjustInputHeight(inputEl);
+		}
 		send(text);
+	}
+
+	function preserveInputFocus(event: PointerEvent | MouseEvent) {
+		event.preventDefault();
+		inputEl?.focus();
 	}
 
 	function handleKey(e: KeyboardEvent) {
@@ -808,7 +890,7 @@ import { storageMonitor } from './storage-monitor';
 	</div>
 
 	<!-- message list -->
-	<div class="msgs" class:rail-collapsed={railCollapsed} bind:this={msgList}>
+	<div class="msgs" class:rail-collapsed={railCollapsed} class:scrollable={msgListScrollable} bind:this={msgList}>
 		{#each $messages as msg, msgIdx}
 			{#if msg.role !== 'system' && msg.role !== 'card'}
 				<div class="msg {msg.role}" class:covenant-reminder={msg.isCovenantReminder}>
@@ -898,28 +980,24 @@ import { storageMonitor } from './storage-monitor';
 		</div>
 
 		<div class="input-wrap">
-			<!-- svelte-ignore a11y_interactive_supports_focus -->
-			<div
+			<textarea
 				class="chat-input"
-				class:empty={!input}
-				role="textbox"
-				aria-multiline="true"
 				aria-label="Type to speak…"
-				data-placeholder={guestLocked ? 'Sign in to continue…' : covenantPending ? 'Enter the covenant to continue…' : 'Type to speak…'}
-				contenteditable={$streaming || guestLocked || covenantPending ? 'false' : 'true'}
+				placeholder={guestLocked ? 'First, sign in' : covenantPending ? 'First, the covenant' : 'Type to speak…'}
 				enterkeyhint="send"
 				autocapitalize="sentences"
 				spellcheck="true"
-				autocomplete="off"
-				autocorrect="off"
-				data-form-type="other"
+				rows="1"
+				value={input}
+				disabled={guestLocked || covenantPending}
 				bind:this={inputEl}
 				oninput={handleInput}
 				onkeydown={handleKey}
-				onpaste={handlePaste}
-			></div>
+			></textarea>
 			<button
 				class="send-inline"
+				onpointerdown={preserveInputFocus}
+				onmousedown={preserveInputFocus}
 				onclick={handleSend}
 				aria-label="Send"
 				disabled={!input.trim() || $streaming || guestLocked || covenantPending}
@@ -932,6 +1010,7 @@ import { storageMonitor } from './storage-monitor';
 <style>
 .shell {
 	height: 100%;
+	min-height: 0;
 	display: flex;
 	flex-direction: column;
 	position: relative;
@@ -960,14 +1039,19 @@ import { storageMonitor } from './storage-monitor';
 .msgs {
 	position: relative;
 	flex: 1;
-	overflow-y: auto;
+	min-height: 0;
+	overflow-y: hidden;
 	padding: 2rem 1.5rem 5rem; /* bottom padding leaves room for float widget */
 	display: flex;
 	flex-direction: column;
-	justify-content: flex-end;
 	gap: 1.5rem;
 	scroll-behavior: smooth;
+	overscroll-behavior-y: contain;
 	z-index: 1;
+}
+
+.msgs.scrollable {
+	overflow-y: auto;
 }
 
 /* ── Oracle Panel wrapper ───────────────────────────────────────────────── */
@@ -976,7 +1060,7 @@ import { storageMonitor } from './storage-monitor';
 	top: var(--topbar-h, 2.5rem);
 	right: 0.5em;
 	z-index: 20;
-	bottom: calc(var(--input-bar-h) + env(safe-area-inset-bottom, 0px) + 1rem);
+	bottom: calc(var(--input-bar-h) + var(--input-safe-bottom, env(safe-area-inset-bottom, 0px)) + 1rem);
 	display: flex;
 	width: max(20rem, 38.2dvw);
 	max-width: calc(100vw - 2rem);
@@ -991,7 +1075,7 @@ import { storageMonitor } from './storage-monitor';
 	.panel-wrap {
 		right: 0.5rem;
 		left: 0.5rem;
-		bottom: calc(var(--input-bar-h) + env(safe-area-inset-bottom, 0px) + 1rem);
+		bottom: calc(var(--input-bar-h) + var(--input-safe-bottom, env(safe-area-inset-bottom, 0px)) + 1rem);
 		width: auto;
 		max-width: none;
 	}
@@ -1166,16 +1250,13 @@ import { storageMonitor } from './storage-monitor';
 	align-items: center;
 	gap: 0.85rem;
 	padding: 0.45rem 1rem;
-	padding-bottom: max(0.45rem, env(safe-area-inset-bottom, 0px));
+	padding-bottom: max(0.45rem, var(--input-safe-bottom, env(safe-area-inset-bottom, 0px)));
 	border-top: 1px solid var(--glass-border);
 	background: var(--glass-wash), color-mix(in srgb, var(--glass-bg-strong) 94%, transparent);
 	backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
 	-webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
-	position: sticky;
-	bottom: 0;
 	z-index: 2;
 	min-height: var(--input-bar-h);
-	/* iOS keyboard handling: prevent layout shift */
 	flex-shrink: 0;
 }
 
@@ -1201,8 +1282,10 @@ import { storageMonitor } from './storage-monitor';
 	max-height: 8rem;
 	min-height: calc(1.5em + 0.9rem);
 	overflow-y: auto;
+	overscroll-behavior: contain;
 	white-space: pre-wrap;
 	word-break: break-word;
+	resize: none;
 	-webkit-user-select: text;
 	user-select: text;
 	cursor: text;
@@ -1210,17 +1293,14 @@ import { storageMonitor } from './storage-monitor';
 
 .chat-input:focus { border-color: var(--accent); }
 
-.chat-input[contenteditable="false"] {
+.chat-input:disabled {
 	opacity: 0.6;
 	cursor: not-allowed;
 	pointer-events: none;
 }
 
-/* placeholder via pseudo-element (avoids native placeholder behaviour on non-input) */
-.chat-input.empty::before {
-	content: attr(data-placeholder);
+.chat-input::placeholder {
 	color: var(--muted);
-	pointer-events: none;
 }
 
 .send-inline {
@@ -1350,8 +1430,8 @@ import { storageMonitor } from './storage-monitor';
 	.bar {
 		gap: 0.6rem;
 		padding: 0.5rem 0.75rem;
-		padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
-		min-height: calc(var(--input-bar-h) + env(safe-area-inset-bottom, 0px));
+		padding-bottom: calc(0.5rem + var(--input-safe-bottom, env(safe-area-inset-bottom, 0px)));
+		min-height: calc(var(--input-bar-h) + var(--input-safe-bottom, env(safe-area-inset-bottom, 0px)));
 	}
 
 	.input-wrap {
@@ -1360,7 +1440,7 @@ import { storageMonitor } from './storage-monitor';
 
 	.chat-input {
 		border-radius: 1.25rem;
-		font-size: 1rem;
+		font-size: 0.8rem;
 		min-height: 2.5rem;
 		padding: 0.55rem 2.85rem 0.55rem 0.9rem;
 	}
@@ -1380,6 +1460,8 @@ import { storageMonitor } from './storage-monitor';
 		border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--glass-border));
 		font-size: 1rem;
 		opacity: 0.85;
+		line-height: 1.4;
+    font-size: 1.75rem;
 	}
 
 	.send-inline:disabled {

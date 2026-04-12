@@ -161,6 +161,7 @@
     position: relative;
     z-index: 1;
     height: 100%;
+    min-height: 0;
     isolation: isolate;
   }
 
@@ -184,6 +185,7 @@
     position: relative;
     z-index: 1;
     height: 100%;
+    min-height: 0;
     overflow: hidden;
   }
 </style>

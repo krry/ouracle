@@ -106,10 +106,18 @@ const ALLOWED_ORIGINS = [
 
 // Any *.kerry.ink subdomain + Vercel preview deployments
 const ALLOWED_ORIGIN_RE = /^https:\/\/([a-z0-9-]+\.)*kerry\.ink$|^https:\/\/ouracle(-[a-z0-9]+)*-kerry\.vercel\.app$/;
+const DEV_ALLOWED_ORIGIN_RE = /^https?:\/\/(?:192\.168|10\.|127\.0\.0\.1|localhost)(?::\d+)?$|^https?:\/\/(?:[a-z0-9-]+\.)*local(?::\d+)?$/;
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && (ALLOWED_ORIGINS.includes(origin) || ALLOWED_ORIGIN_RE.test(origin))) {
+  if (
+    origin &&
+    (
+      ALLOWED_ORIGINS.includes(origin) ||
+      ALLOWED_ORIGIN_RE.test(origin) ||
+      (process.env.NODE_ENV !== 'production' && DEV_ALLOWED_ORIGIN_RE.test(origin))
+    )
+  ) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');

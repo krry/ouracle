@@ -15,35 +15,152 @@
 
   let { children }: { children: Snippet } = $props();
 
+  const isEnquire = $derived(
+    $page.url.pathname.startsWith('/draw') ||
+    $page.url.pathname.startsWith('/oracle')
+  );
+
   onMount(() => {
     const destroyPwa = initPwa();
     const vv = window.visualViewport;
+    let maxViewportHeight = 0;
+    const debugKeyboard =
+      import.meta.env.DEV &&
+      new URLSearchParams(window.location.search).has('debugKeyboard');
+
+    const logKeyboardState = (label: string, extra: Record<string, unknown> = {}) => {
+      if (!debugKeyboard) return;
+      const appContent = document.querySelector<HTMLElement>('.app-content');
+      const scrolling = document.scrollingElement as HTMLElement | null;
+      console.debug('[ouracle:keyboard]', {
+        label,
+        appHeightVar: getComputedStyle(document.documentElement).getPropertyValue('--app-h').trim(),
+        innerHeight: window.innerHeight,
+        scrollY: window.scrollY,
+        visualViewportHeight: vv?.height ?? null,
+        visualViewportOffsetTop: vv?.offsetTop ?? null,
+        visualViewportPageTop: vv?.pageTop ?? null,
+        documentScrollTop: scrolling?.scrollTop ?? null,
+        appContentScrollTop: appContent?.scrollTop ?? null,
+        activeTag: document.activeElement?.tagName ?? null,
+        activeRole: document.activeElement?.getAttribute('role') ?? null,
+        ...extra
+      });
+    };
+
+    let lockingScroll = false;
+    let touchY = 0;
+    const scrollableSelector = '.msgs.scrollable, .drawer-body, .tp-list, .deck-list, .card-content, .practice-content, .rite-content';
+
+    const lockWindowScroll = () => {
+      if (!isEnquire || lockingScroll) return;
+      if (window.scrollY === 0) return;
+      lockingScroll = true;
+      window.scrollTo(0, 0);
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+        lockingScroll = false;
+      });
+    };
+
+    const resolveScrollable = (target: EventTarget | null) =>
+      target instanceof Element
+        ? (target.closest(scrollableSelector) as HTMLElement | null)
+        : null;
+
+    const handleTouchStart = (event: TouchEvent) => {
+      touchY = event.touches[0]?.clientY ?? 0;
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (!isEnquire) return;
+      const scrollable = resolveScrollable(event.target);
+      if (!scrollable) {
+        event.preventDefault();
+        return;
+      }
+
+      if (scrollable.scrollHeight <= scrollable.clientHeight + 1) {
+        event.preventDefault();
+        return;
+      }
+
+      const nextY = event.touches[0]?.clientY ?? touchY;
+      const deltaY = nextY - touchY;
+      touchY = nextY;
+
+      const atTop = scrollable.scrollTop <= 0;
+      const atBottom = scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 1;
+
+      if ((atTop && deltaY > 0) || (atBottom && deltaY < 0)) {
+        event.preventDefault();
+      }
+    };
+
     const sync = () => {
-      document.documentElement.style.setProperty('--app-h', `${vv?.height ?? window.innerHeight}px`);
+      const viewportHeight = vv?.height ?? window.innerHeight;
+      const viewportTop = vv?.offsetTop ?? 0;
+      maxViewportHeight = Math.max(maxViewportHeight, viewportHeight);
+      const keyboardOpen = maxViewportHeight - viewportHeight > 120;
+
+      document.documentElement.style.setProperty('--app-h', `${viewportHeight}px`);
+      document.documentElement.style.setProperty('--app-vv-top', `${viewportTop}px`);
+      document.documentElement.style.setProperty(
+        '--input-safe-bottom',
+        keyboardOpen ? '0px' : 'env(safe-area-inset-bottom, 0px)'
+      );
+      lockWindowScroll();
+      logKeyboardState('layout-sync', { keyboardOpen, maxViewportHeight });
     };
 
     sync();
     vv?.addEventListener('resize', sync);
     vv?.addEventListener('scroll', sync);
 
-    // iOS form navigation bar suppression
-    // Prevent iOS from showing the form field navigation bar above keyboard
-    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-      // Set autocomplete off on all inputs to reduce iOS form UI
-      document.body.setAttribute('autocomplete', 'off');
+    const handleFocusIn = (event: FocusEvent) => {
+      const target = event.target as HTMLElement | null;
+      lockWindowScroll();
+      logKeyboardState('layout-focusin', {
+        targetTag: target?.tagName ?? null,
+        targetRole: target?.getAttribute('role') ?? null
+      });
+    };
+
+    const handleFocusOut = (event: FocusEvent) => {
+      const target = event.target as HTMLElement | null;
+      logKeyboardState('layout-focusout', {
+        targetTag: target?.tagName ?? null,
+        targetRole: target?.getAttribute('role') ?? null
+      });
+    };
+
+    if (debugKeyboard) {
+      (window as any).__ouracleKeyboardDebug = logKeyboardState;
+      window.addEventListener('focusin', handleFocusIn, true);
+      window.addEventListener('focusout', handleFocusOut, true);
+      logKeyboardState('layout-mounted');
+    }
+
+    if (isEnquire) {
+      document.addEventListener('touchstart', handleTouchStart, { passive: true });
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
     }
 
     return () => {
       destroyPwa();
       vv?.removeEventListener('resize', sync);
       vv?.removeEventListener('scroll', sync);
+      if (isEnquire) {
+        document.removeEventListener('touchstart', handleTouchStart);
+        document.removeEventListener('touchmove', handleTouchMove);
+      }
+      if (debugKeyboard) {
+        window.removeEventListener('focusin', handleFocusIn, true);
+        window.removeEventListener('focusout', handleFocusOut, true);
+        delete (window as any).__ouracleKeyboardDebug;
+      }
     };
   });
-
-  const isEnquire = $derived(
-    $page.url.pathname.startsWith('/draw') ||
-    $page.url.pathname.startsWith('/oracle')
-  );
 
   let drawerOpen = $state(false);
   function toggleDrawer() { drawerOpen = !drawerOpen; }
@@ -56,6 +173,18 @@
     if (c?.handle) seekerState.setPartial({ handle: c.handle });
     else seekerState.setPartial({ handle: null });
   });
+
+  $effect(() => {
+    if (typeof document === 'undefined') return;
+
+    document.documentElement.classList.toggle('enquire-open', isEnquire);
+    document.body.classList.toggle('enquire-open', isEnquire);
+
+    return () => {
+      document.documentElement.classList.remove('enquire-open');
+      document.body.classList.remove('enquire-open');
+    };
+  });
 </script>
 
 <svelte:head>
@@ -64,7 +193,7 @@
 
 <div class="nebula-backdrop" aria-hidden="true"><Nebula /></div>
 
-<div class="app">
+<div class="app" class:is-enquire={isEnquire}>
   <TopBar {drawerOpen} ontoggle={toggleDrawer} />
 
   {#if drawerOpen}
@@ -123,6 +252,14 @@
   height: 100dvh;
   height: var(--app-h, 100dvh);
   overflow: hidden;
+}
+
+.app.is-enquire {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: var(--app-vv-top, 0px);
+  height: var(--app-h, 100dvh);
 }
 
 .app-content {
