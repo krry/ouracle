@@ -106,10 +106,18 @@ const ALLOWED_ORIGINS = [
 
 // Any *.kerry.ink subdomain + Vercel preview deployments
 const ALLOWED_ORIGIN_RE = /^https:\/\/([a-z0-9-]+\.)*kerry\.ink$|^https:\/\/ouracle(-[a-z0-9]+)*-kerry\.vercel\.app$/;
+const DEV_ALLOWED_ORIGIN_RE = /^https?:\/\/(?:192\.168|10\.|127\.0\.0\.1|localhost)(?::\d+)?$|^https?:\/\/(?:[a-z0-9-]+\.)*local(?::\d+)?$/;
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && (ALLOWED_ORIGINS.includes(origin) || ALLOWED_ORIGIN_RE.test(origin))) {
+  if (
+    origin &&
+    (
+      ALLOWED_ORIGINS.includes(origin) ||
+      ALLOWED_ORIGIN_RE.test(origin) ||
+      (process.env.NODE_ENV !== 'production' && DEV_ALLOWED_ORIGIN_RE.test(origin))
+    )
+  ) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
@@ -693,8 +701,11 @@ app.post('/prescribe', authenticate, async (req, res) => {
   const quality = { quality: session.quality, confidence: session.quality_confidence, is_shock: session.quality_is_shock };
   const prescription = buildPrescription(session.vagal_probable, belief, quality);
   const divination = drawDivinationSource(divination_source, quality.quality);
-  const history = await getSeekerHistory(session.seeker_id, 1);
-  const lastRite = history?.[0]?.rite_name || null;
+  const latestSession = await getSeekerLatestSession(session.seeker_id);
+  const history = latestSession?.id === session_id ? await getSeekerHistory(session.seeker_id, 1) : null;
+  const lastRite = latestSession?.id !== session_id
+    ? latestSession?.rite_name || null
+    : history?.[0]?.rite_name || null;
   const needsVariant = lastRite && prescription.rite?.rite_name === lastRite;
 
   if (needsVariant) {
@@ -1091,7 +1102,7 @@ class SentenceAudioStreamer {
     }
   }
 
-  startAudioFetch(seq, sentence) {
+  startAudioFetch(seq, sentence, delayMs = 0) {
     if (this.audioPromises.has(seq)) return;
     // Cache check
     const cached = audioCache.get(sentence);
@@ -1100,14 +1111,31 @@ class SentenceAudioStreamer {
       this.tryEmitAudio();
       return;
     }
-    const p = fetchAudio(sentence, this.voice).then(buf => {
+    const RETRY_DELAYS = [800, 2000]; // ms between attempts (3 attempts total)
+    const doFetch = async () => {
+      if (delayMs > 0) await new Promise(r => setTimeout(r, delayMs));
+      let lastErr;
+      for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+        try {
+          return await fetchAudio(sentence, this.voice);
+        } catch (err) {
+          lastErr = err;
+          if (attempt < RETRY_DELAYS.length) {
+            console.warn(`[TTS] attempt ${attempt + 1} failed, retrying in ${RETRY_DELAYS[attempt]}ms:`, err.message);
+            await new Promise(r => setTimeout(r, RETRY_DELAYS[attempt]));
+          }
+        }
+      }
+      throw lastErr;
+    };
+    const p = doFetch().then(buf => {
       const base64 = buf.toString('base64');
       audioCache.set(sentence, { base64, timestamp: Date.now() });
       this.readyAudio.set(seq, base64);
       this.tryEmitAudio();
     }).catch(err => {
-      console.error('[TTS] sentence fetch error:', err.message);
-      this.readyAudio.set(seq, null); // mark as failed, still allow proceeding
+      console.error('[TTS] sentence fetch failed after retries:', err.message);
+      this.readyAudio.set(seq, null);
       this.tryEmitAudio();
     });
     this.audioPromises.set(seq, p);
@@ -1125,7 +1153,7 @@ class SentenceAudioStreamer {
     }
   }
 
-  async waitForRemainingAudio(timeout = 5000) {
+  async waitForRemainingAudio(timeout = 10000) {
     const deadline = Date.now() + timeout;
     while (this.nextAudioEmitIdx < this.sentenceIdx) {
       if (Date.now() > deadline) break;
@@ -1151,13 +1179,14 @@ class SentenceAudioStreamer {
     for (let i = 0; i < sentences.length; i++) {
       const sentence = sentences[i];
       this.emitSentenceText(sentence, i === sentences.length - 1);
-      // Pre-fetch next up to 2 ahead if available
+      // Pre-fetch next sentences ahead, staggered to avoid rate-limiting Fish.audio
       if (!this.muted) {
         for (let j = i + 1; j <= Math.min(i + this.preFetchLimit, sentences.length - 1); j++) {
+          const futureIdx = j;
           const futureSentence = sentences[j];
-          const futureIdx = i + 1 + (j - (i + 1));
+          const staggerMs = (j - i) * 400; // 400ms per step ahead
           if (!this.audioPromises.has(futureIdx)) {
-            this.startAudioFetch(futureIdx, futureSentence);
+            this.startAudioFetch(futureIdx, futureSentence, staggerMs);
           }
         }
       }
@@ -1311,7 +1340,7 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
     const inferSessionState = async (session, incomingMessage, conversation, currentSessionId, contextLabel) => {
       // Weight the latest turn twice so current language can move the live seeker reading.
       const nextFullText = `${session.full_text || ''} ${incomingMessage} ${incomingMessage}`.trim();
-      const { vagal, belief, quality, affect } = await infer(nextFullText);
+      const { vagal, belief, quality, affect, inference_source } = await infer(nextFullText);
       const lastSeekerIdx = conversation.findLastIndex(e => e.role === 'seeker');
       if (lastSeekerIdx !== -1) {
         conversation[lastSeekerIdx] = { ...conversation[lastSeekerIdx], affect };
@@ -1320,8 +1349,8 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
       emit({ type: 'belief', pattern: belief.pattern, confidence: belief.confidence, reasoning: belief.reasoning });
       emit({ type: 'quality', quality: quality.quality, confidence: quality.confidence, is_shock: quality.is_shock, reasoning: quality.reasoning });
       emit({ type: 'affect', valence: affect.valence, arousal: affect.arousal, gloss: affect.gloss, confidence: affect.confidence });
-      console.log(`[enquire/${contextLabel}] session=${currentSessionId} vagal=${vagal.probable ?? 'null'}/${vagal.confidence ?? 'null'} belief=${belief.pattern ?? 'null'}/${belief.confidence ?? 'null'} quality=${quality.quality ?? 'null'}/${quality.confidence ?? 'null'} affect=${affect.gloss ?? 'null'}`);
-      return { nextFullText, vagal, belief, quality, affect, conversation };
+      console.log(`[enquire/${contextLabel}] session=${currentSessionId} source=${inference_source ?? 'unknown'} vagal=${vagal.probable ?? 'null'}/${vagal.confidence ?? 'null'} belief=${belief.pattern ?? 'null'}/${belief.confidence ?? 'null'} quality=${quality.quality ?? 'null'}/${quality.confidence ?? 'null'} affect=${affect.gloss ?? 'null'}`);
+      return { nextFullText, vagal, belief, quality, affect, inference_source, conversation };
     };
 
     const handleInquiryTurn = async (session, incomingMessage, currentSessionId) => {
@@ -1462,6 +1491,29 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
 
       const sessionCount = await getSeekerSessionCount(seeker_id);
       const lastSession = await getSeekerLatestSession(seeker_id);
+
+      // ── Reintegration: seeker returning to report on an accepted rite ────────
+      // If the most recent session was prescribed but never completed, resume it
+      // instead of running a fresh inquiry that would re-prescribe the same rite.
+      if (lastSession?.stage === 'prescribed' && !lastSession?.completed_at) {
+        const resumedId = lastSession.id;
+        console.log(`[enquire/new] resuming prescribed session=${resumedId} seeker=${seeker_id}`);
+        emit({ type: 'session', session_id: resumedId, stage: 'prescribed', needs_covenant: !seeker.covenant_at });
+        const riteAct = lastSession.rite_json?.act;
+        const riteName = lastSession.rite_name;
+        const opening = riteAct
+          ? `You were going to ${riteAct.replace(/\.$/, '')}. How did it go?`
+          : riteName
+            ? `You were working with "${riteName}". How did it go?`
+            : `You've returned. How did the rite go?`;
+        const nowIso = new Date().toISOString();
+        const conversation = Array.isArray(lastSession.conversation) ? [...lastSession.conversation] : [];
+        conversation.push({ role: 'priestess', text: opening, at: nowIso });
+        await updateSession(resumedId, { conversation });
+        await streamer.processFullText(opening);
+        return finish('prescribed', { session_id: resumedId });
+      }
+
       const lastQuestion = Array.isArray(lastSession?.conversation)
         ? lastSession.conversation.find((e) => e?.role === 'priestess')?.text
         : null;
@@ -1627,8 +1679,11 @@ Most responses will NOT include [READY].`;
         const prescription = buildPrescription(offeringState.vagal.probable, belief, quality);
         console.log(`[enquire/offering] session=${session_id} ready=yes rite=${prescription.rite?.rite_name ?? 'none'}`);
         const divination = drawDivinationSource(null, quality.quality);
-        const history = await getSeekerHistory(seeker_id, 1);
-        const lastRite = history?.[0]?.rite_name || null;
+        const latestSession = await getSeekerLatestSession(seeker_id);
+        const history = latestSession?.id === session_id ? await getSeekerHistory(seeker_id, 1) : null;
+        const lastRite = latestSession?.id !== session_id
+          ? latestSession?.rite_name || null
+          : history?.[0]?.rite_name || null;
         if (lastRite && prescription.rite?.rite_name === lastRite) {
           const altVagal = ['dorsal', 'sympathetic', 'ventral', 'uncertain'].find(v => v !== prescription.vagal_state && RITES[v]?.[quality.quality]);
           if (altVagal) prescription.rite = RITES[altVagal][quality.quality];
@@ -1652,10 +1707,6 @@ Most responses will NOT include [READY].`;
           prescribed_at: new Date().toISOString(),
         });
         emit({ type: 'break' });
-        if (quality.seeker_language) {
-          await streamer.processFullText(quality.seeker_language);
-          emit({ type: 'break' });
-        }
         // Emit structured rite event — frontend renders in OraclePanel, not chat stream
         emit({ type: 'rite', rite: ritePayload });
         emit({ type: 'break' });
@@ -1771,7 +1822,7 @@ Most responses will NOT include [REPORT].`;
           emit({ type: 'break' });
         }
         await streamer.processFullText(RITE_FEEDBACK_FOLLOWUP);
-        return finish('complete', { session_id });
+        return finish('reintegration_complete', { session_id });
       }
 
       await updateSession(session_id, { full_text: prescribedState.nextFullText, conversation });
@@ -2228,7 +2279,12 @@ function logLifecycle(event, extra = '') {
 }
 
 const server = app.listen(PORT, () => {
+  const semEnabled = process.env.SEMANTIC_INFERENCE === 'true';
+  const semMode = semEnabled ? (process.env.SEMANTIC_INFERENCE_MODE || 'llm') : 'off';
+  const cfPresent = !!(process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN);
+  const orPresent = !!(process.env.OURACLE_OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY);
   console.log(`[api:${bootId}] boot pid=${process.pid} started=${bootedAt} port=${PORT} version=${version}`);
+  console.log(`[api:${bootId}] inference mode=${semMode} cloudflare=${cfPresent} openrouter=${orPresent}`);
 });
 
 process.on('SIGINT', () => {

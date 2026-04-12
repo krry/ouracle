@@ -43,6 +43,18 @@ describe('records', () => {
         prescribed_at: null,
         completed_at: null,
       },
+      {
+        id: 'session-3',
+        stage: 'inquiry',
+        quality: null,
+        enacted: null,
+        rite_name: null,
+        rite_json: null,
+        report: null,
+        created_at: '2026-04-08T00:30:00.000Z',
+        prescribed_at: null,
+        completed_at: null,
+      },
     ]);
 
     vi.mocked(loadTotem).mockResolvedValue({
@@ -71,8 +83,9 @@ describe('records', () => {
 
     const records = await loadMergedRecords('seeker-1', 'token');
 
-    expect(records).toHaveLength(1);
+    expect(records).toHaveLength(2);
     expect(records[0].id).toBe('session-1');
+    expect(records[1].id).toBe('session-2');
     expect(records[0].encrypted_note).toBe('encrypted note');
     expect(records[0].encrypted_context).toBe('encrypted context');
     expect(records[0].encrypted_beliefs).toEqual(['a belief']);

@@ -4,7 +4,8 @@ import { get } from 'svelte/store';
 import { browser } from '$app/environment';
 import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState, covenantAcceptedTick, covenantPromptArmed } from './stores';
 import type { CardData, RiteData, VagalInfo, BeliefInfo, QualityInfo, Message } from './stores';
-import { enquire, stt } from './api';
+import { enquire, stt, tts } from './api';
+import { saveLastResponseAudio, loadLastResponseAudio, concatAudioBuffers } from './audio-response-cache';
 import { webSpeech, cancelWebSpeech, DEFAULT_VOICE } from './tts-client';
 import Breath from './Breath.svelte';
 import SeekerPanel from './SeekerPanel.svelte';
@@ -47,6 +48,13 @@ import { storageMonitor } from './storage-monitor';
 	// If none arrive during a turn, we fall back to Web Speech at completion time.
 	let serverAudioReceived = false;
 	let fallbackSentences: string[] = [];
+	// Consecutive sentence_audio_missing count — only fall back to Web Speech after 3 in a row.
+	let consecutiveMissingCount = 0;
+	// Collect audio chunks by sequence during a response; concat + save to IndexedDB on complete.
+	let responseAudioChunks = new Map<number, ArrayBuffer>();
+	// "Say again / try again" state — tracks whether the last response had audio.
+	let lastResponsePlayed = $state(false);
+	let lastResponseContent = $state('');
 	// Guard: only save messages to localStorage after onMount has restored them.
 	// Without this, the initial $effect run (with messages = []) would wipe any saved
 	// conversation before onMount has a chance to read it back — e.g. after iOS tab discard.
@@ -57,13 +65,26 @@ import { storageMonitor } from './storage-monitor';
 	let availableDecks = $state<DeckMeta[]>([]);
 	let selectedDecks = $state<Set<string>>(new Set());
 	let drawing = $state(false);
-	let inputEl: HTMLDivElement | undefined;
+	let inputEl: HTMLTextAreaElement | undefined;
 	let pendingPracticeContext: string | null = null;
 	let pendingAuthContext: string | null = null;
 	let railCollapsed = $state(false);
 	let freshHandled = $state(false);
 	let lastSeenCovenantAcceptedTick = $state(0);
+	let teardownKeyboardDebug = () => {};
+	let msgListScrollable = $state(true);
 	const covenantPending = $derived($authed && $covenantPromptArmed);
+
+	// Index of the last assistant message that has content — used to place the retry button.
+	const lastAssistantIdx = $derived(
+		(() => {
+			const msgs = $messages;
+			for (let i = msgs.length - 1; i >= 0; i--) {
+				if (msgs[i].role === 'assistant' && msgs[i].content?.trim()) return i;
+			}
+			return -1;
+		})()
+	);
 
 	function buildAuthTranscriptContext(history: Message[]): string | null {
 		const transcript = history
@@ -85,17 +106,17 @@ import { storageMonitor } from './storage-monitor';
 		].join('\n');
 	}
 
-	function resetConversationState() {
+	function resetConversationState({ preservePendingRite = false } = {}) {
 		messages.set([]);
 		activeCard.set(null);
 		activeRite.set(null);
-		pendingRite.set(null);
+		if (!preservePendingRite) pendingRite.set(null);
 		continueOffered.set(false);
 		sessionId = null;
 		if (browser) {
 			localStorage.removeItem('clea_messages');
 			localStorage.removeItem('clea_session_id');
-			localStorage.removeItem('clea_pending_rite');
+			if (!preservePendingRite) localStorage.removeItem('clea_pending_rite');
 		}
 		if ($authed && $creds) {
 			seekerState.reset();
@@ -258,6 +279,28 @@ import { storageMonitor } from './storage-monitor';
 		}
 	});
 
+	async function sayAgain() {
+		if (!audioQueue || !$ttsEnabled) return;
+		try {
+			audioQueue.prime();
+			cancelWebSpeech();
+			const cached = await loadLastResponseAudio();
+			if (cached) {
+				audioQueue.enqueueBuffer(cached);
+			} else if (lastResponseContent) {
+				// No cached buffer — fall back to a fresh Fish.audio request
+				const token = !guestMode ? ($creds as Credentials | null)?.access_token ?? '' : guestToken ?? '';
+				const buf = await tts(lastResponseContent, token, get(ttsVoice));
+				audioQueue.enqueueBuffer(buf);
+			}
+		} catch {
+			if (lastResponseContent) webSpeech(lastResponseContent);
+		}
+	}
+
+	// tryAgain: "audio didn't arrive last time" — same flow, label differs.
+	const tryAgain = sayAgain;
+
 	async function send(text: string, mode?: string) {
 		if ($streaming || guestLocked || covenantPending) return;
 		let skipTag = false;
@@ -295,6 +338,8 @@ import { storageMonitor } from './storage-monitor';
 		cancelWebSpeech();
 		serverAudioReceived = false;
 		fallbackSentences = [];
+		consecutiveMissingCount = 0;
+		responseAudioChunks = new Map();
 		const token = !guestMode ? ($creds as Credentials | null)?.access_token ?? '' : guestToken ?? '';
 		// Only push user message if there's actual text (first turn may be empty — opens the session)
 		if (text.trim()) {
@@ -376,15 +421,20 @@ import { storageMonitor } from './storage-monitor';
                     enqueueMissingSentences(sequence);
                     spokenSentenceSeqs.add(sequence);
                     serverAudioReceived = true;
+                    consecutiveMissingCount = 0; // reset on success
                     cancelWebSpeech();
                     const binary = atob(event.audio as string);
                     const bytes = new Uint8Array(binary.length);
                     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                    responseAudioChunks.set(sequence, bytes.buffer.slice(0));
                     audioQueue.enqueueBuffer(bytes.buffer);
                 }
             } else if (event.type === 'sentence_audio_missing') {
+                // Only fall back to Web Speech after 3 consecutive misses — single failures
+                // are likely transient Fish.audio rate limits that the server already retried.
+                consecutiveMissingCount++;
                 const sequence = typeof event.sequence === 'number' ? event.sequence : -1;
-                if ($ttsEnabled && audioQueue && sequence >= 0) {
+                if ($ttsEnabled && audioQueue && sequence >= 0 && consecutiveMissingCount >= 3) {
                     enqueueMissingSentences(sequence + 1);
                 }
             } else if (event.type === 'break') {
@@ -424,6 +474,16 @@ import { storageMonitor } from './storage-monitor';
 						}
 					}
 					enqueueMissingSentences();
+					// Capture state for "say again / try again" button
+					lastResponsePlayed = serverAudioReceived;
+					lastResponseContent = get(messages).filter(m => m.role === 'assistant').pop()?.content?.trim() ?? '';
+					// Persist assembled audio to IndexedDB for local replay
+					if (serverAudioReceived && responseAudioChunks.size > 0) {
+						const ordered = [...responseAudioChunks.entries()]
+							.sort(([a], [b]) => a - b)
+							.map(([, buf]) => buf);
+						saveLastResponseAudio(concatAudioBuffers(ordered)).catch(() => {});
+					}
 } else if (event.type === 'continue_offered') {
 			continueOffered.set(true);
 		} else if (event.type === 'affect') {
@@ -521,6 +581,42 @@ import { storageMonitor } from './storage-monitor';
 
 	// Open session on mount — /enquire with no session_id bootstraps it
 	onMount(async () => {
+		const debugKeyboard =
+			import.meta.env.DEV &&
+			new URLSearchParams(window.location.search).has('debugKeyboard');
+
+		const logKeyboardState = (label: string, extra: Record<string, unknown> = {}) => {
+			if (!debugKeyboard) return;
+			const appContent = document.querySelector<HTMLElement>('.app-content');
+			const shell = msgList?.closest('.shell') as HTMLElement | null;
+			const inputRect = inputEl?.getBoundingClientRect();
+			console.debug('[ouracle:keyboard]', {
+				label,
+				msgListScrollTop: msgList?.scrollTop ?? null,
+				msgListScrollHeight: msgList?.scrollHeight ?? null,
+				msgListClientHeight: msgList?.clientHeight ?? null,
+				appContentScrollTop: appContent?.scrollTop ?? null,
+				shellHeight: shell?.getBoundingClientRect().height ?? null,
+				inputTop: inputRect?.top ?? null,
+				inputBottom: inputRect?.bottom ?? null,
+				inputHeight: inputRect?.height ?? null,
+				inputValueLength: input.length,
+				messageCount: get(messages).length,
+				streaming: $streaming,
+				...extra
+			});
+
+			const debug = (window as any).__ouracleKeyboardDebug;
+			if (typeof debug === 'function') {
+				debug(label, {
+					msgListScrollTop: msgList?.scrollTop ?? null,
+					appContentScrollTop: appContent?.scrollTop ?? null,
+					inputTop: inputRect?.top ?? null,
+					inputBottom: inputRect?.bottom ?? null
+				});
+			}
+		};
+
 		// Restore saved messages, cleaning up any trailing empty assistant message
 		// left by interrupted streaming (tab was killed before the finally block ran).
 		if (browser && !freshStart) {
@@ -544,7 +640,7 @@ import { storageMonitor } from './storage-monitor';
 		  // This must happen AFTER the restore so the effect never writes [] over saved data.
 		  didRestore = true;
 		} else {
-			resetConversationState();
+			resetConversationState({ preservePendingRite: freshStart });
 			didRestore = true;
 			if (freshStart) {
 				freshHandled = true;
@@ -571,6 +667,37 @@ import { storageMonitor } from './storage-monitor';
 		if (get(messages).length === 0) {
 		  send('');
 		}
+
+		const resizeObserver = new ResizeObserver(() => refreshMsgListScrollability());
+		resizeObserver.observe(msgList);
+		refreshMsgListScrollability();
+
+		if (debugKeyboard) {
+			const handleMsgScroll = () => logKeyboardState('msgs-scroll');
+			const handleInputFocus = () => logKeyboardState('input-focus');
+			const handleInputBlur = () => logKeyboardState('input-blur');
+
+			msgList?.addEventListener('scroll', handleMsgScroll, { passive: true });
+			inputEl?.addEventListener('focus', handleInputFocus);
+			inputEl?.addEventListener('blur', handleInputBlur);
+			logKeyboardState('chat-mounted');
+
+			teardownKeyboardDebug = () => {
+				resizeObserver.disconnect();
+				msgList?.removeEventListener('scroll', handleMsgScroll);
+				inputEl?.removeEventListener('focus', handleInputFocus);
+				inputEl?.removeEventListener('blur', handleInputBlur);
+			};
+		} else {
+			teardownKeyboardDebug = () => {
+				resizeObserver.disconnect();
+			};
+		}
+	});
+
+	$effect(() => {
+		$messages;
+		queueMicrotask(() => refreshMsgListScrollability());
 	});
 
 	$effect(() => {
@@ -579,7 +706,7 @@ import { storageMonitor } from './storage-monitor';
 			return;
 		}
 		if (freshHandled || $streaming) return;
-		resetConversationState();
+		resetConversationState({ preservePendingRite: true });
 		freshHandled = true;
 		onfreshhandled();
 		send('');
@@ -597,6 +724,7 @@ import { storageMonitor } from './storage-monitor';
 	});
 
 	onDestroy(() => {
+		teardownKeyboardDebug();
 		cancelWebSpeech();
 		releaseMic();
 		if (mediaRecorder?.state === 'recording') { mediaRecorder.stop(); }
@@ -609,16 +737,20 @@ import { storageMonitor } from './storage-monitor';
 	});
 
 	function handleInput(e: Event) {
-		const el = e.target as HTMLElement;
-		const raw = el.innerText ?? '';
-		// iOS can leave a lone '\n' in an "empty" contenteditable
-		input = raw === '\n' ? '' : raw;
+		const el = e.target as HTMLTextAreaElement;
+		input = el.value;
+		adjustInputHeight(el);
 	}
 
-	function handlePaste(e: ClipboardEvent) {
-		e.preventDefault();
-		const text = e.clipboardData?.getData('text/plain') ?? '';
-		document.execCommand('insertText', false, text);
+	function adjustInputHeight(el = inputEl) {
+		if (!el) return;
+		el.style.height = 'auto';
+		el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+	}
+
+	function refreshMsgListScrollability() {
+		if (!msgList) return;
+		msgListScrollable = msgList.scrollHeight > msgList.clientHeight + 1;
 	}
 
 	function handleSend() {
@@ -626,8 +758,16 @@ import { storageMonitor } from './storage-monitor';
 		const text = input.trim();
 		if (!text) return;
 		input = '';
-		if (inputEl) inputEl.innerText = '';
+		if (inputEl) {
+			inputEl.value = '';
+			adjustInputHeight(inputEl);
+		}
 		send(text);
+	}
+
+	function preserveInputFocus(event: PointerEvent | MouseEvent) {
+		event.preventDefault();
+		inputEl?.focus();
 	}
 
 	function handleKey(e: KeyboardEvent) {
@@ -767,14 +907,21 @@ import { storageMonitor } from './storage-monitor';
 	</div>
 
 	<!-- message list -->
-	<div class="msgs" class:rail-collapsed={railCollapsed} bind:this={msgList}>
-		{#each $messages as msg}
+	<div class="msgs" class:rail-collapsed={railCollapsed} class:scrollable={msgListScrollable} bind:this={msgList}>
+		{#each $messages as msg, msgIdx}
 			{#if msg.role !== 'system' && msg.role !== 'card'}
 				<div class="msg {msg.role}" class:covenant-reminder={msg.isCovenantReminder}>
 					{#if !msg.isCovenantReminder}
 						<span class="label">{msg.role === 'user' ? 'you' : guestMode ? 'Phemonoe' : 'Clea'}</span>
 					{/if}
 					<div class="prose">{@html renderMarkdown(msg.content)}</div>
+					{#if msg.role === 'assistant' && !$streaming && msgIdx === lastAssistantIdx && $ttsEnabled && msg.content.trim()}
+						<div class="msg-actions">
+							<button class="retry-btn" onclick={lastResponsePlayed ? sayAgain : tryAgain}>
+								↺ {lastResponsePlayed ? 'say again' : 'try again'}
+							</button>
+						</div>
+					{/if}
 				</div>
 			{/if}
 		{/each}
@@ -850,28 +997,24 @@ import { storageMonitor } from './storage-monitor';
 		</div>
 
 		<div class="input-wrap">
-			<!-- svelte-ignore a11y_interactive_supports_focus -->
-			<div
+			<textarea
 				class="chat-input"
-				class:empty={!input}
-				role="textbox"
-				aria-multiline="true"
 				aria-label="Type to speak…"
-				data-placeholder={guestLocked ? 'Sign in to continue…' : covenantPending ? 'Enter the covenant to continue…' : 'Type to speak…'}
-				contenteditable={$streaming || guestLocked || covenantPending ? 'false' : 'true'}
+				placeholder={guestLocked ? 'First, sign in' : covenantPending ? 'First, the covenant' : 'Type to speak…'}
 				enterkeyhint="send"
 				autocapitalize="sentences"
 				spellcheck="true"
-				autocomplete="off"
-				autocorrect="off"
-				data-form-type="other"
+				rows="1"
+				value={input}
+				disabled={guestLocked || covenantPending}
 				bind:this={inputEl}
 				oninput={handleInput}
 				onkeydown={handleKey}
-				onpaste={handlePaste}
-			></div>
+			></textarea>
 			<button
 				class="send-inline"
+				onpointerdown={preserveInputFocus}
+				onmousedown={preserveInputFocus}
 				onclick={handleSend}
 				aria-label="Send"
 				disabled={!input.trim() || $streaming || guestLocked || covenantPending}
@@ -884,6 +1027,7 @@ import { storageMonitor } from './storage-monitor';
 <style>
 .shell {
 	height: 100%;
+	min-height: 0;
 	display: flex;
 	flex-direction: column;
 	position: relative;
@@ -912,14 +1056,19 @@ import { storageMonitor } from './storage-monitor';
 .msgs {
 	position: relative;
 	flex: 1;
-	overflow-y: auto;
+	min-height: 0;
+	overflow-y: hidden;
 	padding: 2rem 1.5rem 5rem; /* bottom padding leaves room for float widget */
 	display: flex;
 	flex-direction: column;
-	justify-content: flex-end;
 	gap: 1.5rem;
 	scroll-behavior: smooth;
+	overscroll-behavior-y: contain;
 	z-index: 1;
+}
+
+.msgs.scrollable {
+	overflow-y: auto;
 }
 
 /* ── Oracle Panel wrapper ───────────────────────────────────────────────── */
@@ -928,7 +1077,7 @@ import { storageMonitor } from './storage-monitor';
 	top: var(--topbar-h, 2.5rem);
 	right: 0.5em;
 	z-index: 20;
-	bottom: calc(var(--input-bar-h) + env(safe-area-inset-bottom, 0px) + 1rem);
+	bottom: calc(var(--input-bar-h) + var(--input-safe-bottom, env(safe-area-inset-bottom, 0px)) + 1rem);
 	display: flex;
 	width: max(20rem, 38.2dvw);
 	max-width: calc(100vw - 2rem);
@@ -943,7 +1092,7 @@ import { storageMonitor } from './storage-monitor';
 	.panel-wrap {
 		right: 0.5rem;
 		left: 0.5rem;
-		bottom: calc(var(--input-bar-h) + env(safe-area-inset-bottom, 0px) + 1rem);
+		bottom: calc(var(--input-bar-h) + var(--input-safe-bottom, env(safe-area-inset-bottom, 0px)) + 1rem);
 		width: auto;
 		max-width: none;
 	}
@@ -966,6 +1115,26 @@ import { storageMonitor } from './storage-monitor';
 }
 
 .msg { display: flex; flex-direction: column; gap: 0.25rem; }
+
+.msg-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 0.2rem;
+}
+
+.retry-btn {
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	font-family: var(--font-mono);
+	font-size: 0.62rem;
+	letter-spacing: 0.06em;
+	color: var(--muted);
+	transition: color 0.15s;
+	line-height: 1;
+}
+.retry-btn:hover { color: var(--accent); }
 
 .covenant-reminder {
 	opacity: 0.65;
@@ -1098,16 +1267,13 @@ import { storageMonitor } from './storage-monitor';
 	align-items: center;
 	gap: 0.85rem;
 	padding: 0.45rem 1rem;
-	padding-bottom: max(0.45rem, env(safe-area-inset-bottom, 0px));
+	padding-bottom: max(0.45rem, var(--input-safe-bottom, env(safe-area-inset-bottom, 0px)));
 	border-top: 1px solid var(--glass-border);
 	background: var(--glass-wash), color-mix(in srgb, var(--glass-bg-strong) 94%, transparent);
 	backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
 	-webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
-	position: sticky;
-	bottom: 0;
 	z-index: 2;
 	min-height: var(--input-bar-h);
-	/* iOS keyboard handling: prevent layout shift */
 	flex-shrink: 0;
 }
 
@@ -1133,8 +1299,10 @@ import { storageMonitor } from './storage-monitor';
 	max-height: 8rem;
 	min-height: calc(1.5em + 0.9rem);
 	overflow-y: auto;
+	overscroll-behavior: contain;
 	white-space: pre-wrap;
 	word-break: break-word;
+	resize: none;
 	-webkit-user-select: text;
 	user-select: text;
 	cursor: text;
@@ -1142,17 +1310,14 @@ import { storageMonitor } from './storage-monitor';
 
 .chat-input:focus { border-color: var(--accent); }
 
-.chat-input[contenteditable="false"] {
+.chat-input:disabled {
 	opacity: 0.6;
 	cursor: not-allowed;
 	pointer-events: none;
 }
 
-/* placeholder via pseudo-element (avoids native placeholder behaviour on non-input) */
-.chat-input.empty::before {
-	content: attr(data-placeholder);
+.chat-input::placeholder {
 	color: var(--muted);
-	pointer-events: none;
 }
 
 .send-inline {
@@ -1167,7 +1332,9 @@ import { storageMonitor } from './storage-monitor';
 	line-height: 1;
 	padding: 0.2rem 0.3rem;
 	transition: color 0.15s, opacity 0.15s;
-	opacity: 0.5;
+	opacity: 0.7;
+	line-height: 1.4;
+  font-size: 1.75rem;
 }
 
 .send-inline:not(:disabled):hover,
@@ -1177,7 +1344,7 @@ import { storageMonitor } from './storage-monitor';
 }
 
 .send-inline:disabled {
-	opacity: 0.2;
+	opacity: 0.3;
 	cursor: default;
 }
 
@@ -1282,8 +1449,8 @@ import { storageMonitor } from './storage-monitor';
 	.bar {
 		gap: 0.6rem;
 		padding: 0.5rem 0.75rem;
-		padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
-		min-height: calc(var(--input-bar-h) + env(safe-area-inset-bottom, 0px));
+		padding-bottom: calc(0.5rem + var(--input-safe-bottom, env(safe-area-inset-bottom, 0px)));
+		min-height: calc(var(--input-bar-h) + var(--input-safe-bottom, env(safe-area-inset-bottom, 0px)));
 	}
 
 	.input-wrap {
@@ -1292,7 +1459,7 @@ import { storageMonitor } from './storage-monitor';
 
 	.chat-input {
 		border-radius: 1.25rem;
-		font-size: 1rem;
+		font-size: 0.8rem;
 		min-height: 2.5rem;
 		padding: 0.55rem 2.85rem 0.55rem 0.9rem;
 	}
@@ -1312,6 +1479,8 @@ import { storageMonitor } from './storage-monitor';
 		border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--glass-border));
 		font-size: 1rem;
 		opacity: 0.85;
+		line-height: 1.4;
+    font-size: 1.75rem;
 	}
 
 	.send-inline:disabled {

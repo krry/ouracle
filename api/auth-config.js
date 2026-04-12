@@ -68,7 +68,22 @@ export const auth = betterAuth({
     'https://localhost:2532',
     'https://souvenir.local:2532',
     'http://localhost:3000',
-  ],
+  ].concat(
+    process.env.NODE_ENV !== 'production'
+      ? [
+          'http://localhost:*',
+          'https://localhost:*',
+          'http://127.0.0.1:*',
+          'https://127.0.0.1:*',
+          'http://192.168.*:*',
+          'https://192.168.*:*',
+          'http://10.*:*',
+          'https://10.*:*',
+          'http://*.local:*',
+          'https://*.local:*',
+        ]
+      : []
+  ),
 });
 
 export default auth;

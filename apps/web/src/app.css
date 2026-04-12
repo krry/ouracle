@@ -117,6 +117,19 @@ html, body {
 	--safe-left: env(safe-area-inset-left, 0px);
 }
 
+html.enquire-open,
+html.enquire-open body {
+	height: 100%;
+	overflow: hidden;
+	overscroll-behavior: none;
+}
+
+body.enquire-open {
+	position: fixed;
+	inset: 0;
+	width: 100%;
+}
+
 html {
 	background: var(--bg);
 }

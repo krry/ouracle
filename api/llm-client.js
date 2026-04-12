@@ -55,7 +55,11 @@ const PROVIDERS = {
 export function makeLlmClient(providerOverride) {
   const providerName = providerOverride
     || process.env.LLM_PROVIDER
-    || (process.env.GROQ_API_KEY ? 'groq' : 'ollama');
+    || (process.env.GROQ_API_KEY
+      ? 'groq'
+      : (process.env.OURACLE_OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY)
+        ? 'openrouter'
+        : 'ollama');
   const provider = PROVIDERS[providerName];
   if (!provider) throw new Error(`Unknown LLM provider: "${providerName}". Use 'ollama', 'groq', or 'openrouter'.`);
 
@@ -105,7 +109,11 @@ export function makeLlmClient(providerOverride) {
 export function makeRawClient(providerOverride) {
   const providerName = providerOverride
     || process.env.LLM_PROVIDER
-    || (process.env.GROQ_API_KEY ? 'groq' : 'ollama');
+    || (process.env.GROQ_API_KEY
+      ? 'groq'
+      : (process.env.OURACLE_OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY)
+        ? 'openrouter'
+        : 'ollama');
   const provider = PROVIDERS[providerName];
   if (!provider) throw new Error(`Unknown LLM provider: "${providerName}". Use 'ollama', 'groq', or 'openrouter'.`);
   const openai = new OpenAI({ baseURL: provider.baseURL(), apiKey: provider.apiKey(), defaultHeaders: provider.headers() });
