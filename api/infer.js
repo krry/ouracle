@@ -25,9 +25,9 @@ const INFERENCE_TOOL = {
       type: 'object',
       properties: {
         vagal_state: {
-          type: 'string',
-          enum: ['ventral', 'sympathetic', 'dorsal', 'mixed'],
-          description: 'The probable nervous system state expressed in the text.',
+          type: ['string', 'null'],
+          enum: ['ventral', 'sympathetic', 'dorsal', 'mixed', null],
+          description: 'The probable nervous system state expressed in the text. null if text is too short or ambiguous.',
         },
         vagal_confidence: {
           type: 'string',
@@ -74,7 +74,7 @@ const INFERENCE_TOOL = {
       required: [
         'vagal_state', 'vagal_confidence', 'vagal_reasoning',
         'belief_pattern', 'belief_confidence', 'belief_reasoning',
-        'quality', 'quality_confidence', 'quality_is_shock', 'quality_reasoning',
+        'quality_confidence', 'quality_is_shock', 'quality_reasoning',
       ],
       additionalProperties: false,
     },
