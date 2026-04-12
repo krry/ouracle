@@ -6,7 +6,7 @@ greet name:
 set shell := ["fish", "-c"]
 
 web:
-    cd apps/web; bun run dev
+    cd apps/web; bun run dev --host
 
 api:
     cd api; bun dev

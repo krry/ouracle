@@ -90,13 +90,13 @@ const AFFECT_TOOL = {
       type: 'object',
       properties: {
         valence: {
-          type: 'number',
+          type: ['number', 'string'],
           minimum: -1.0,
           maximum: 1.0,
           description: 'Valence: negative (-1.0) to positive (+1.0)',
         },
         arousal: {
-          type: 'number',
+          type: ['number', 'string'],
           minimum: -1.0,
           maximum: 1.0,
           description: 'Arousal: low/deactivated (-1.0) to high/activated (+1.0)',
@@ -185,6 +185,37 @@ RULES:
 - Numbers must be within [-1.0, +1.0] to two decimals.
 - If affect is ambiguous or mixed, say so in gloss and still give best-guess coordinates with low confidence.
 - Do not project beyond what is in the text.`;
+
+function coerceBoundedNumber(value, field) {
+  const parsed = typeof value === 'number' ? value : Number.parseFloat(String(value));
+  if (!Number.isFinite(parsed)) {
+    throw new Error(`Invalid ${field}: expected a number, got ${JSON.stringify(value)}`);
+  }
+  return Math.max(-1.0, Math.min(1.0, parsed));
+}
+
+function normalizeAffectResult(rawResult) {
+  const valenceWasString = typeof rawResult.valence === 'string';
+  const arousalWasString = typeof rawResult.arousal === 'string';
+  const valence = coerceBoundedNumber(rawResult.valence, 'valence');
+  const arousal = coerceBoundedNumber(rawResult.arousal, 'arousal');
+  const coerced = valenceWasString || arousalWasString;
+  const confidence = coerced && rawResult.confidence === 'high'
+    ? 'medium'
+    : rawResult.confidence;
+  const reasoning = coerced
+    ? `(coerced numeric affect fields) ${rawResult.reasoning}`
+    : rawResult.reasoning;
+
+  return {
+    valence,
+    arousal,
+    gloss: rawResult.gloss,
+    confidence,
+    reasoning,
+    _coerced_numeric_fields: coerced,
+  };
+}
 
 // ─────────────────────────────────────────────
 // MAIN INFERENCE FUNCTION
@@ -282,7 +313,8 @@ export async function inferAffect(text) {
     const toolCall = response.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) throw new Error('No tool call in affect inference response');
 
-    const result = JSON.parse(toolCall.function.arguments || '{}');
+    const rawResult = JSON.parse(toolCall.function.arguments || '{}');
+    const result = normalizeAffectResult(rawResult);
     const durationMs = Date.now() - startedAt;
 
     // Log — correlation ID only, no seeker data
@@ -295,6 +327,7 @@ export async function inferAffect(text) {
       valence: result.valence,
       arousal: result.arousal,
       confidence: result.confidence,
+      coerced_numeric_fields: result._coerced_numeric_fields,
     }));
 
     return {

@@ -5,6 +5,7 @@ import { browser } from '$app/environment';
 import { creds, authed, messages, streaming, voiceState, waveform, guestTurns, ttsEnabled, ttsVoice, activeRite, activeCard, pendingRite, needsCovenant, covenantReady, continueOffered, seekerState, covenantAcceptedTick, covenantPromptArmed } from './stores';
 import type { CardData, RiteData, VagalInfo, BeliefInfo, QualityInfo, Message } from './stores';
 import { enquire, stt, tts } from './api';
+import { saveLastResponseAudio, loadLastResponseAudio, concatAudioBuffers } from './audio-response-cache';
 import { webSpeech, cancelWebSpeech, DEFAULT_VOICE } from './tts-client';
 import Breath from './Breath.svelte';
 import SeekerPanel from './SeekerPanel.svelte';
@@ -49,6 +50,8 @@ import { storageMonitor } from './storage-monitor';
 	let fallbackSentences: string[] = [];
 	// Consecutive sentence_audio_missing count — only fall back to Web Speech after 3 in a row.
 	let consecutiveMissingCount = 0;
+	// Collect audio chunks by sequence during a response; concat + save to IndexedDB on complete.
+	let responseAudioChunks = new Map<number, ArrayBuffer>();
 	// "Say again / try again" state — tracks whether the last response had audio.
 	let lastResponsePlayed = $state(false);
 	let lastResponseContent = $state('');
@@ -277,20 +280,25 @@ import { storageMonitor } from './storage-monitor';
 	});
 
 	async function sayAgain() {
-		if (!audioQueue || !lastResponseContent || !$ttsEnabled) return;
-		const token = !guestMode ? ($creds as Credentials | null)?.access_token ?? '' : guestToken ?? '';
+		if (!audioQueue || !$ttsEnabled) return;
 		try {
 			audioQueue.prime();
 			cancelWebSpeech();
-			const buf = await tts(lastResponseContent, token, get(ttsVoice));
-			audioQueue.enqueueBuffer(buf);
+			const cached = await loadLastResponseAudio();
+			if (cached) {
+				audioQueue.enqueueBuffer(cached);
+			} else if (lastResponseContent) {
+				// No cached buffer — fall back to a fresh Fish.audio request
+				const token = !guestMode ? ($creds as Credentials | null)?.access_token ?? '' : guestToken ?? '';
+				const buf = await tts(lastResponseContent, token, get(ttsVoice));
+				audioQueue.enqueueBuffer(buf);
+			}
 		} catch {
-			webSpeech(lastResponseContent);
+			if (lastResponseContent) webSpeech(lastResponseContent);
 		}
 	}
 
-	// tryAgain = same as sayAgain: retry Fish.audio for the existing response.
-	// Label differs to communicate "audio didn't arrive last time."
+	// tryAgain: "audio didn't arrive last time" — same flow, label differs.
 	const tryAgain = sayAgain;
 
 	async function send(text: string, mode?: string) {
@@ -331,6 +339,7 @@ import { storageMonitor } from './storage-monitor';
 		serverAudioReceived = false;
 		fallbackSentences = [];
 		consecutiveMissingCount = 0;
+		responseAudioChunks = new Map();
 		const token = !guestMode ? ($creds as Credentials | null)?.access_token ?? '' : guestToken ?? '';
 		// Only push user message if there's actual text (first turn may be empty — opens the session)
 		if (text.trim()) {
@@ -417,6 +426,7 @@ import { storageMonitor } from './storage-monitor';
                     const binary = atob(event.audio as string);
                     const bytes = new Uint8Array(binary.length);
                     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                    responseAudioChunks.set(sequence, bytes.buffer.slice(0));
                     audioQueue.enqueueBuffer(bytes.buffer);
                 }
             } else if (event.type === 'sentence_audio_missing') {
@@ -467,6 +477,13 @@ import { storageMonitor } from './storage-monitor';
 					// Capture state for "say again / try again" button
 					lastResponsePlayed = serverAudioReceived;
 					lastResponseContent = get(messages).filter(m => m.role === 'assistant').pop()?.content?.trim() ?? '';
+					// Persist assembled audio to IndexedDB for local replay
+					if (serverAudioReceived && responseAudioChunks.size > 0) {
+						const ordered = [...responseAudioChunks.entries()]
+							.sort(([a], [b]) => a - b)
+							.map(([, buf]) => buf);
+						saveLastResponseAudio(concatAudioBuffers(ordered)).catch(() => {});
+					}
 } else if (event.type === 'continue_offered') {
 			continueOffered.set(true);
 		} else if (event.type === 'affect') {
@@ -1315,7 +1332,9 @@ import { storageMonitor } from './storage-monitor';
 	line-height: 1;
 	padding: 0.2rem 0.3rem;
 	transition: color 0.15s, opacity 0.15s;
-	opacity: 0.5;
+	opacity: 0.7;
+	line-height: 1.4;
+  font-size: 1.75rem;
 }
 
 .send-inline:not(:disabled):hover,
@@ -1325,7 +1344,7 @@ import { storageMonitor } from './storage-monitor';
 }
 
 .send-inline:disabled {
-	opacity: 0.2;
+	opacity: 0.3;
 	cursor: default;
 }
 

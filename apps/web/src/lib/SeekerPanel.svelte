@@ -3,7 +3,7 @@
   import OraclePanel from './OraclePanel.svelte';
   import SeekerStatusPanel from './SeekerStatusPanel.svelte';
   import ThreadsPanel from './ThreadsPanel.svelte';
-  import { authed, activeRite, pendingRite } from './stores';
+  import { authed, activeRite, pendingRite, seekerState } from './stores';
   import { controlPanelRouteById } from './ControlPanel.svelte';
   import type { CardData, RiteData } from './stores';
 
@@ -104,8 +104,10 @@
       {:else if activeTab === 'seeker'}
         <div class="sp-pane rail-shell">
           <div class="sp-pane-header">
-            <div class="sp-kicker">Seeker</div>
-            <h3>Current state</h3>
+            <h3>
+              seeker
+              <span class="sp-handle">{$seekerState.handle ?? 'guest'}</span>
+            </h3>
           </div>
           <SeekerStatusPanel variant="expanded" />
           {#if !$authed}
@@ -341,16 +343,7 @@
 .sp-pane-header {
   display: flex;
   flex-direction: column;
-  gap: 0.18rem;
-}
-
-.sp-kicker {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 300;
+  gap: 0;
 }
 
 .sp-pane-header h3 {
@@ -361,6 +354,11 @@
   letter-spacing: 0.03em;
   color: var(--text);
   text-transform: lowercase;
+}
+
+.sp-handle {
+  margin-left: 0.7ch;
+  color: var(--accent);
 }
 
 @media (max-width: 640px) {

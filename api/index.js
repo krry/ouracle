@@ -701,8 +701,11 @@ app.post('/prescribe', authenticate, async (req, res) => {
   const quality = { quality: session.quality, confidence: session.quality_confidence, is_shock: session.quality_is_shock };
   const prescription = buildPrescription(session.vagal_probable, belief, quality);
   const divination = drawDivinationSource(divination_source, quality.quality);
-  const history = await getSeekerHistory(session.seeker_id, 1);
-  const lastRite = history?.[0]?.rite_name || null;
+  const latestSession = await getSeekerLatestSession(session.seeker_id);
+  const history = latestSession?.id === session_id ? await getSeekerHistory(session.seeker_id, 1) : null;
+  const lastRite = latestSession?.id !== session_id
+    ? latestSession?.rite_name || null
+    : history?.[0]?.rite_name || null;
   const needsVariant = lastRite && prescription.rite?.rite_name === lastRite;
 
   if (needsVariant) {
@@ -1337,7 +1340,7 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
     const inferSessionState = async (session, incomingMessage, conversation, currentSessionId, contextLabel) => {
       // Weight the latest turn twice so current language can move the live seeker reading.
       const nextFullText = `${session.full_text || ''} ${incomingMessage} ${incomingMessage}`.trim();
-      const { vagal, belief, quality, affect } = await infer(nextFullText);
+      const { vagal, belief, quality, affect, inference_source } = await infer(nextFullText);
       const lastSeekerIdx = conversation.findLastIndex(e => e.role === 'seeker');
       if (lastSeekerIdx !== -1) {
         conversation[lastSeekerIdx] = { ...conversation[lastSeekerIdx], affect };
@@ -1346,8 +1349,8 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
       emit({ type: 'belief', pattern: belief.pattern, confidence: belief.confidence, reasoning: belief.reasoning });
       emit({ type: 'quality', quality: quality.quality, confidence: quality.confidence, is_shock: quality.is_shock, reasoning: quality.reasoning });
       emit({ type: 'affect', valence: affect.valence, arousal: affect.arousal, gloss: affect.gloss, confidence: affect.confidence });
-      console.log(`[enquire/${contextLabel}] session=${currentSessionId} vagal=${vagal.probable ?? 'null'}/${vagal.confidence ?? 'null'} belief=${belief.pattern ?? 'null'}/${belief.confidence ?? 'null'} quality=${quality.quality ?? 'null'}/${quality.confidence ?? 'null'} affect=${affect.gloss ?? 'null'}`);
-      return { nextFullText, vagal, belief, quality, affect, conversation };
+      console.log(`[enquire/${contextLabel}] session=${currentSessionId} source=${inference_source ?? 'unknown'} vagal=${vagal.probable ?? 'null'}/${vagal.confidence ?? 'null'} belief=${belief.pattern ?? 'null'}/${belief.confidence ?? 'null'} quality=${quality.quality ?? 'null'}/${quality.confidence ?? 'null'} affect=${affect.gloss ?? 'null'}`);
+      return { nextFullText, vagal, belief, quality, affect, inference_source, conversation };
     };
 
     const handleInquiryTurn = async (session, incomingMessage, currentSessionId) => {
@@ -1676,8 +1679,11 @@ Most responses will NOT include [READY].`;
         const prescription = buildPrescription(offeringState.vagal.probable, belief, quality);
         console.log(`[enquire/offering] session=${session_id} ready=yes rite=${prescription.rite?.rite_name ?? 'none'}`);
         const divination = drawDivinationSource(null, quality.quality);
-        const history = await getSeekerHistory(seeker_id, 1);
-        const lastRite = history?.[0]?.rite_name || null;
+        const latestSession = await getSeekerLatestSession(seeker_id);
+        const history = latestSession?.id === session_id ? await getSeekerHistory(seeker_id, 1) : null;
+        const lastRite = latestSession?.id !== session_id
+          ? latestSession?.rite_name || null
+          : history?.[0]?.rite_name || null;
         if (lastRite && prescription.rite?.rite_name === lastRite) {
           const altVagal = ['dorsal', 'sympathetic', 'ventral', 'uncertain'].find(v => v !== prescription.vagal_state && RITES[v]?.[quality.quality]);
           if (altVagal) prescription.rite = RITES[altVagal][quality.quality];
@@ -2273,7 +2279,12 @@ function logLifecycle(event, extra = '') {
 }
 
 const server = app.listen(PORT, () => {
+  const semEnabled = process.env.SEMANTIC_INFERENCE === 'true';
+  const semMode = semEnabled ? (process.env.SEMANTIC_INFERENCE_MODE || 'llm') : 'off';
+  const cfPresent = !!(process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN);
+  const orPresent = !!(process.env.OURACLE_OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY);
   console.log(`[api:${bootId}] boot pid=${process.pid} started=${bootedAt} port=${PORT} version=${version}`);
+  console.log(`[api:${bootId}] inference mode=${semMode} cloudflare=${cfPresent} openrouter=${orPresent}`);
 });
 
 process.on('SIGINT', () => {

@@ -71,7 +71,13 @@ function buildPhraseBank() {
   }
   for (const entry of OCTAVE_SCHEMA) {
     if (!entry.quality || !entry.signature_text) continue;
-    bank.set(`quality:${entry.quality}`, [entry.signature_text]);
+    // signature_text is pipe-delimited — split into phrases for a better centroid.
+    // Filter out ultra-short labels (single words like "be", "sit", "do") that add noise.
+    const phrases = entry.signature_text
+      .split(' | ')
+      .map((p) => p.trim())
+      .filter((p) => p.split(/\s+/).length >= 2);
+    bank.set(`quality:${entry.quality}`, phrases.length ? phrases : [entry.signature_text]);
   }
 
   return bank;

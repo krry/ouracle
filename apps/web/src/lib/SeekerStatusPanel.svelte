@@ -84,13 +84,6 @@
 </script>
 
 <div class="seeker-status" class:has-data={$seekerState.affect.valence !== null} class:expanded={variant === 'expanded'}>
-	<div class="ss-header">
-		<div class="ss-identity">
-			<span class="ss-label">Seeker</span>
-			<span class="ss-handle">{$seekerState.handle ?? 'guest'}</span>
-		</div>
-	</div>
-
 	<!-- Circumplex affect plot -->
 	<div class="ss-affect-plot" title={getDotTitle()}>
 		<svg viewBox="0 0 100 100" class="circumplex">
@@ -99,14 +92,14 @@
 			<line x1="50" y1="0" x2="50" y2="100" class="axis" />
 		<!-- Axis labels and +/- markers -->
 		<!-- X-axis: Valence -->
-		<text x="5" y="54" class="axis-label valence-label">-</text>
-		<text x="98" y="54" class="axis-label valence-label">+</text>
-		<text x="50" y="96" class="axis-label valence-label">Valence</text>
+		<text x="5" y="57" class="axis-label axis-marker">-</text>
+		<text x="98" y="57" class="axis-label axis-marker">+</text>
+		<text x="84" y="47" class="axis-label axis-title">Valence</text>
 
-		<!-- Y-axis: Arousal (rotated vertical) -->
-		<text x="54" y="8" class="axis-label arousal-label">+</text>
-		<text x="54" y="98" class="axis-label arousal-label">-</text>
-		<text x="92" y="50" class="axis-label arousal-label">Arousal</text>
+		<!-- Y-axis: Arousal -->
+		<text x="55" y="8" class="axis-label axis-marker">+</text>
+		<text x="55" y="98" class="axis-label axis-marker">-</text>
+		<text x="46" y="18" class="axis-label axis-title axis-title-y">Arousal</text>
 			<!-- Data point -->
 			<circle cx={getDotX()} cy={getDotY()} r="4" class="affect-dot" />
 		</svg>
@@ -161,32 +154,6 @@
 		box-shadow: 0 0 12px hsl(0 0% 0% / 0.2);
 	}
 
-	.ss-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-	.ss-identity {
-		display: flex;
-		flex-direction: row;
-		align-items: baseline;
-		gap: 1ch;
-	}
-	.ss-handle {
-		font-size: 0.75rem;
-		font-weight: 600;
-		letter-spacing: 0.08em;
-		color: var(--accent);
-	}
-	.ss-label {
-		font-size: 0.55rem;
-		text-transform: uppercase;
-		letter-spacing: 0.12em;
-		color: var(--muted);
-		min-width: 3rem;
-		text-align: right;
-	}
-
 	/* Circumplex plot */
 	.ss-affect-plot {
 		position: relative;
@@ -198,6 +165,7 @@
 	.circumplex {
 		width: 100%;
 		height: 100%;
+		overflow: visible;
 	}
 	.axis {
 		stroke: var(--border);
@@ -210,12 +178,15 @@
 		opacity: 0.6;
 		font-weight: 500;
 	}
-	.valence-label {
-		font-size: 5px;
+	.axis-marker {
+		font-size: 7.5px;
 	}
-	.arousal-label {
-		font-size: 5px;
+	.axis-title {
+		font-size: 4px;
+	}
+	.axis-title-y {
 		transform: rotate(-90deg);
+		transform-box: fill-box;
 		transform-origin: center;
 	}
 	.affect-dot {
@@ -261,18 +232,8 @@
 		padding: 1rem;
 		gap: 0.8rem;
 	}
-	.seeker-status.expanded .ss-header {
-		padding-bottom: 0.2rem;
-		border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-	}
-	.seeker-status.expanded .ss-handle {
-		font-size: 1rem;
-	}
-	.seeker-status.expanded .ss-label {
-		font-size: 0.6rem;
-	}
 	.seeker-status.expanded .ss-affect-plot {
-		max-width: 180px;
+		max-width: 300px;
 	}
 	.seeker-status.expanded .badge-row {
 		font-size: 0.72rem;
@@ -289,9 +250,6 @@
 		}
 		.ss-affect-plot {
 			max-width: 80px;
-		}
-		.axis-label {
-			font-size: 3px;
 		}
 		.badge-row {
 			font-size: 0.6rem;

@@ -148,7 +148,7 @@
     </label>
     <label>
       <span>password</span>
-      <input bind:value={password} type="password" autocomplete={mode === 'sign-up' ? 'new-password' : 'current-password'} required />
+      <input bind:value={password} type="password" autocomplete={mode === 'sign-up' ? 'new-password' : 'current-password'} required onkeydown={(e) => { if (e.key === 'Enter' && password) { e.preventDefault(); submit(); } }} />
     </label>
 
     {#if error}<p class="error">{error}</p>{/if}

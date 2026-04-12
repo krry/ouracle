@@ -486,13 +486,13 @@ export const VAGAL_CLUE_MAP = {
 };
 
 export const BELIEF_CLUE_MAP = {
-  scarcity:     ['not enough', 'running out', "can't afford", 'scarce', 'losing', 'hoarding', 'taking', 'mine', 'protect what i have'],
-  unworthiness: ["don't deserve", 'not good enough', 'unworthy', 'who am i', 'imposter', 'fraud', "shouldn't", 'not ready', "when i'm better"],
+  scarcity:     ['not enough', 'running out', "can't afford", 'scarce', 'losing what i have', 'hoarding', 'taking more than', 'what is mine', 'protect what i have', "there's never enough", 'keep slipping away'],
+  unworthiness: ["don't deserve", 'not good enough', 'unworthy', 'imposter', 'fraud', "shouldn't have", 'not ready for this', "when i'm better", 'who am i to'],
   control:      ['must manage', "can't trust", "don't trust", 'need to control', 'if i let go', 'what if they', 'have to do it myself', 'do everything myself', 'no one else can', "can't let go", 'i have to manage', 'orchestrat'],
-  isolation:    ['alone', 'no one understands', 'by myself', 'do it alone', "can't ask", "haven't talked", 'reaching out', "haven't reached", 'two years', 'distance', 'brother', 'sister', 'parent'],
-  silence:      ["can't say", "won't be heard", 'stay quiet', "doesn't matter", 'unsaid', 'kept quiet', 'never told', 'bite my tongue'],
-  blindness:    ["can't look", 'avoiding', 'not ready', "don't want to see", 'unclear', 'turning away', 'looking away', 'ignoring'],
-  separation:   ['separate', 'not part of', "don't belong", 'outside', 'disconnected from everything', 'no place', 'not one of them'],
+  isolation:    ['feel alone', 'no one understands', 'by myself', 'do it alone', "can't ask for help", "haven't talked", 'reaching out', "haven't reached out", 'keeping my distance', 'no one to turn to'],
+  silence:      ["can't say", "won't be heard", 'stay quiet', "doesn't matter what i say", 'unsaid', 'kept quiet', 'never told', 'bite my tongue', "can't speak up"],
+  blindness:    ["can't look at", 'turning away from', "don't want to see", 'looking away', 'not ready to face', 'ignoring what i know'],
+  separation:   ['not part of', "don't belong", 'disconnected from everything', 'no place for me', 'not one of them', 'fundamentally outside', 'cut off from'],
 };
 
 // TODO: QUALITY_CLUE_MAP — Chef, this is yours to fill in.
@@ -513,16 +513,16 @@ export const BELIEF_CLUE_MAP = {
 // File: api/engine.js, below this comment block.
 
 export const QUALITY_CLUE_MAP = {
-  entity:    ['who am i', 'what am i', 'where do i start', 'beginning', "don't know where i am", 'lost myself', 'no ground', 'who is this', 'starting from zero'],
-  affinity:  ['what do i want', 'what do i feel', 'drawn to', 'connection', 'attraction', 'resonance', 'this feels right', 'something is calling', 'longing'],
-  activity:  ['need to make this happen', 'working hard', 'trying so hard', 'doing everything i can', "can't stop moving", 'grinding', 'willpower', 'effort', 'pushing'],
-  pity:      ["thought i knew", "i was wrong", 'everything changed', 'not what i thought', 'separate now', 'left behind', 'gap', 'missing something', "can't go back"],
-  capacity:  ['open up', 'receive', 'let it in', "can't take it in", 'too much love', 'how do i accept', 'letting go of armor', 'softening'],
-  causality: ['finding my voice', 'need to speak', "can't express", 'how do i say this', 'my truth', 'what i need to say', 'communicate', 'the right words'],
-  eternity:  ['i can see the pattern', 'something bigger', 'connected to something larger', 'the long view', 'zoom out', 'vision', 'it all makes sense now', 'i know where this goes'],
-  unity:     ['i understand', 'it all comes together', 'wholeness', 'integration', 'i know what i need to do', 'clarity', 'complete picture', 'all in'],
-  calamity:  ['falling apart', 'collapsed', 'surrender', 'i give up', 'everything is gone', 'the bottom', 'hit rock bottom', "don't know anything anymore", 'crisis'],
-  cyclicity: ['starting over', 'full circle', 'back to the beginning', 'where do i go from here', 'what comes next', 'completed something', 'a new chapter', 'wandering'],
+  entity:    ['who am i', 'what am i', 'where do i start', 'at the very beginning', "don't know where i am", 'lost myself', 'no ground', 'starting from zero', 'back to zero', 'no idea who i am'],
+  affinity:  ['what do i want', 'what do i feel', 'drawn to', 'something is calling me', 'attraction', 'deep resonance', 'this feels right', 'something calling', 'longing for'],
+  activity:  ['need to make this happen', 'working so hard', 'trying so hard', 'doing everything i can', "can't stop moving", 'grinding', 'pure willpower', 'pushing through'],
+  pity:      ["thought i knew", "i was wrong about", 'everything changed', 'not what i thought', 'left behind', 'gap between who i was', 'missing something essential', "can't go back to how it was", 'fell through'],
+  capacity:  ['open up', 'learn to receive', 'let it in', "can't take it in", 'too much love', 'how do i accept this', 'letting go of my armor', 'learning to soften'],
+  causality: ['finding my voice', 'need to speak', "can't express this", 'how do i say this', 'my truth', 'what i need to say', 'say what needs to be said', 'the right words'],
+  eternity:  ['i can see the pattern', 'something bigger', 'connected to something larger', 'the long view', 'zoom out', 'it all makes sense now', 'i know where this goes', 'part of something larger'],
+  unity:     ['it all comes together', 'wholeness', 'deep integration', 'i know what i need to do', 'sudden clarity', 'complete picture', 'all of it fits', "i've been avoiding"],
+  calamity:  ['falling apart', 'it collapsed', 'i surrender', 'i give up', 'everything is gone', 'hit rock bottom', "don't know anything anymore", 'full crisis', 'everything fell apart'],
+  cyclicity: ['starting over', 'full circle', 'back to the beginning', 'where do i go from here', 'what comes next', 'completed something', 'a new chapter', 'wandering again'],
 };
 
 // ─────────────────────────────────────────────
@@ -711,19 +711,29 @@ export async function infer(text) {
     const mode = (process.env.SEMANTIC_INFERENCE_MODE || 'llm').toLowerCase();
     try {
       let result;
+      let inferenceSource;
+      const NEUTRAL_AFFECT = { valence: 0, arousal: 0, gloss: 'neutral', confidence: 'low', reasoning: 'affect inference failed' };
       if (mode === 'embeddings') {
-        const [semantics, affect] = await Promise.all([
+        const [semantics, affectResult] = await Promise.allSettled([
           (await import('./semantic-embeddings.js')).inferSemanticsEmbeddings(text),
           (await import('./infer.js')).inferAffect(text),
         ]);
-        result = { ...semantics, affect: affect.affect };
+        if (semantics.status === 'rejected') throw semantics.reason;
+        const affect = affectResult.status === 'fulfilled' ? affectResult.value.affect : NEUTRAL_AFFECT;
+        if (affectResult.status === 'rejected') console.warn('[infer] affect failed, using neutral:', affectResult.reason?.message);
+        result = { ...semantics.value, affect };
+        inferenceSource = 'semantic_embeddings';
       } else {
         // Parallel LLM calls for semantics and affect
-        const [semantics, affect] = await Promise.all([
+        const [semantics, affectResult] = await Promise.allSettled([
           (await import('./infer.js')).inferSemantics(text),
           (await import('./infer.js')).inferAffect(text),
         ]);
-        result = { ...semantics, affect: affect.affect };
+        if (semantics.status === 'rejected') throw semantics.reason;
+        const affect = affectResult.status === 'fulfilled' ? affectResult.value.affect : NEUTRAL_AFFECT;
+        if (affectResult.status === 'rejected') console.warn('[infer] affect failed, using neutral:', affectResult.reason?.message);
+        result = { ...semantics.value, affect };
+        inferenceSource = 'semantic_llm';
 
         // Validation: clamp valence/arousal to [-1.0, 1.0]
         const origV = result.affect.valence;
@@ -761,6 +771,7 @@ export async function infer(text) {
         const node = Object.values(OCTAVE).find(n => n.quality === result.quality.quality);
         result.quality.seeker_language = node?.seeker_language || null;
       }
+      result.inference_source = inferenceSource;
       return result;
     } catch (err) {
       const is402 = err?.status === 402 || err?.statusCode === 402;
@@ -769,7 +780,7 @@ export async function infer(text) {
         reason: is402 ? 'payment_required' : 'error',
         error: err?.message,
       }));
-      return keywordInfer(text);
+      return { ...keywordInfer(text), inference_source: 'keyword_fallback' };
     }
   }
 
@@ -777,6 +788,7 @@ export async function infer(text) {
   const keywordResult = keywordInfer(text);
   keywordResult.affect = adjustAffectFromVagalLexicon(text, { valence: 0, arousal: 0, gloss: 'neutral', confidence: 'low', reasoning: 'inference disabled' });
   keywordResult.vagal = adjustVagalFromSignals(text, keywordResult.vagal, keywordResult.affect);
+  keywordResult.inference_source = 'keyword_disabled';
   return keywordResult;
 }
 

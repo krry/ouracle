@@ -47,12 +47,19 @@
   
 	const STAGES: Array<'offered' | 'received' | 'enacted'> = ['offered', 'received', 'enacted'];
 
+	function clearOfferedRite() {
+		activeRite.set(null);
+		if ($pendingRite?.stage === 'offered') pendingRite.set(null);
+	}
+
 	function dismissCard() {
 		showPractice = false;
 		expandPracticeCard = false;
 		activeCard.set(null);
 	}
-	function dismissRite() { activeRite.set(null); }
+	function dismissRite() {
+		clearOfferedRite();
+	}
 
 	function handleInterpret() {
 		if (!$activeCard) return;
@@ -87,7 +94,7 @@
 		showPractice = false;
 		expandPracticeCard = false;
 		activeCard.set(null);
-		activeRite.set(null);
+		clearOfferedRite();
 		onDrawCard();
 	}
 
