@@ -152,8 +152,8 @@
   box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.18);
   transition: color 300ms ease-in-out, background 300ms ease-in-out, backdrop-filter 300ms ease-in-out, transform 300ms ease-in-out;
   animation: enter-pulse 2.5s ease-in-out infinite;
-  backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
+  backdrop-filter: var(--glass-backdrop);
+  -webkit-backdrop-filter: var(--glass-backdrop);
 }
 .enter:hover {
   animation-play-state: paused;
@@ -215,8 +215,8 @@
   position: fixed;
   inset: 0;
   background: color-mix(in srgb, var(--bg) 60%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: var(--glass-backdrop);
+  -webkit-backdrop-filter: var(--glass-backdrop);
   z-index: 200;
   display: flex;
   align-items: center;

@@ -29,7 +29,11 @@
   onMount(async () => {
     if ($authed) return;
     const BASE = import.meta.env.VITE_OURACLE_BASE_URL ?? 'https://api.ouracle.kerry.ink';
-    const { data } = await authClient.getSession();
+    // getSession() may trigger BetterAuth's redirectPlugin if the OAuth session
+    // expired. Catch the redirect by checking data before it can fire.
+    let sessionData: Awaited<ReturnType<typeof authClient.getSession>> | null = null;
+    try { sessionData = await authClient.getSession(); } catch { return; }
+    const data = sessionData?.data;
     if (!data?.session?.token) return;
     exchanging = true;
     try {
@@ -177,7 +181,7 @@
   }
 
   .content-wrapper.blurred .chat-stage {
-    filter: blur(10px) saturate(180%);
+    filter: blur(var(--modal-blur, 10px)) saturate(180%);
     transition: filter 0.8s ease;
   }
 

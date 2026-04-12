@@ -13,6 +13,11 @@ const BASE = RAW_BASE
 // better-auth 1.x ships passkey as a built-in proxy path with no separate plugin.
 export const authClient = createAuthClient({
   baseURL: `${BASE}/api/auth`,
+  // Ouracle manages auth state via its own creds store (Ouracle JWTs).
+  // BetterAuth's background session polling triggers its redirectPlugin when the
+  // BetterAuth session expires — even if the Ouracle JWT is still valid — causing
+  // a full window.location.href redirect that looks like a spurious reload on iOS.
+  sessionOptions: { refetchOnWindowFocus: false, refetchInterval: 0 },
 });
 
 export const { signIn, signUp, signOut, useSession } = authClient;

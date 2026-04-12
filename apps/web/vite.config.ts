@@ -110,6 +110,11 @@ export default defineConfig({
       cert: './certs/souvenir.local+2.pem',
     },
     proxy: {
+      '/ambient': {
+        target: 'http://localhost:3737',
+        changeOrigin: true,
+        secure: false,
+      },
       '/api': {
         target: 'http://localhost:3737',
         changeOrigin: true,

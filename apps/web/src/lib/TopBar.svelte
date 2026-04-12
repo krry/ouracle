@@ -33,8 +33,8 @@
   height: var(--topbar-h, 57px);
   box-sizing: border-box;
   transition: opacity 0.4s ease;
-  backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
+  backdrop-filter: var(--glass-backdrop);
+  -webkit-backdrop-filter: var(--glass-backdrop);
 }
 
 :global(html.modal-open) .topbar {

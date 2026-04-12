@@ -35,6 +35,8 @@
 	--glass-shadow: 0 24px 80px hsl(0 0% 0% / 0.22);
 	--glass-blur: 18px;
 	--glass-saturate: 135%;
+	--glass-backdrop: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+	--glass-backdrop-heavy: blur(calc(var(--glass-blur) + 4px)) saturate(calc(var(--glass-saturate) + 10%));
 	--glass-wash:
 		linear-gradient(180deg, hsl(0 0% 100% / 0.08), hsl(0 0% 100% / 0.01)),
 		linear-gradient(135deg, hsl(var(--accent-hue) 70% 70% / 0.08), transparent 55%);
@@ -96,6 +98,19 @@
   :root { animation: none; }
 }
 
+/* iOS GPU memory relief: pause the @property accent animation on touch devices.
+ * -webkit-touch-callout targets iOS Safari exclusively.
+ * The accent-breathe animation updates --accent-hue / --focus-hue every frame,
+ * forcing style recalculation across the entire DOM 60fps — costly on the chat
+ * page where hundreds of elements inherit --accent and --focus.
+ * Pausing keeps the current hue snapshot without per-frame recalc.
+ */
+@supports (-webkit-touch-callout: none) {
+  :root {
+    animation-play-state: paused;
+  }
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
@@ -143,16 +158,16 @@ body {
 	background: var(--glass-wash), var(--glass-bg);
 	border: 1px solid var(--glass-border);
 	box-shadow: var(--glass-shadow);
-	backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-	-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+	backdrop-filter: var(--glass-backdrop);
+	-webkit-backdrop-filter: var(--glass-backdrop);
 }
 
 .thin-material-strong {
 	background: var(--glass-wash), var(--glass-bg-strong);
 	border: 1px solid var(--glass-border);
 	box-shadow: var(--glass-shadow);
-	backdrop-filter: blur(calc(var(--glass-blur) + 4px)) saturate(calc(var(--glass-saturate) + 10%));
-	-webkit-backdrop-filter: blur(calc(var(--glass-blur) + 4px)) saturate(calc(var(--glass-saturate) + 10%));
+	backdrop-filter: var(--glass-backdrop-heavy);
+	-webkit-backdrop-filter: var(--glass-backdrop-heavy);
 }
 
 /* Safe areas handled per-component (fixed elements are viewport-relative;
@@ -248,6 +263,6 @@ p {
 	border: 1px solid var(--glass-border);
 	border-radius: 18px;
 	box-shadow: var(--glass-shadow);
-	backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-	-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+	backdrop-filter: var(--glass-backdrop);
+	-webkit-backdrop-filter: var(--glass-backdrop);
 }
