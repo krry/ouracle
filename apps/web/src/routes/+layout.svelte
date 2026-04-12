@@ -273,8 +273,8 @@
   inset: 0;
   z-index: 38;
   background: color-mix(in srgb, var(--bg) 56%, transparent);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: var(--glass-backdrop);
+  -webkit-backdrop-filter: var(--glass-backdrop);
 }
 
 .drawer {
@@ -285,8 +285,8 @@
   width: min(82vw, 360px);
   background: var(--glass-wash), var(--glass-bg-strong);
   border-right: 1px solid var(--glass-border);
-  backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
+  backdrop-filter: var(--glass-backdrop);
+  -webkit-backdrop-filter: var(--glass-backdrop);
   z-index: 39;
   display: flex;
   flex-direction: column;

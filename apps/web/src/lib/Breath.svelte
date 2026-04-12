@@ -1,20 +1,23 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import * as THREE from 'three';
-	import { waveform, voiceState, ambience } from './stores';
+	import { waveform, voiceState, streaming, ambience } from './stores';
 
 	let canvas: HTMLCanvasElement;
 	let renderer: THREE.WebGLRenderer;
 	let scene: THREE.Scene;
 	let camera: THREE.OrthographicCamera;
 	let line: THREE.Line;
-	let raf: number;
+	let raf = 0;
+	let running = false;
+	let idleTimer: ReturnType<typeof setTimeout> | null = null;
 
 	const POINTS = 128;
+	const IDLE_GRACE_MS = 4000; // pause rAF loop after 4s of no activity
 
 	onMount(() => {
 		renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-		renderer.setPixelRatio(devicePixelRatio);
+		renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); // cap at 2× — no need for 3× on breath line
 		renderer.setClearColor(0x000000, 0);
 
 		scene = new THREE.Scene();
@@ -35,11 +38,12 @@
 
 		resize();
 		window.addEventListener('resize', resize);
-		tick();
+		startAnim();
 	});
 
 	onDestroy(() => {
-		cancelAnimationFrame(raf);
+		stopAnim();
+		if (idleTimer) clearTimeout(idleTimer);
 		window.removeEventListener('resize', resize);
 		renderer?.dispose();
 	});
@@ -50,8 +54,39 @@
 		renderer.setSize(w, h, false);
 	}
 
+	function startAnim() {
+		if (running) return;
+		running = true;
+		tick();
+	}
+
+	function stopAnim() {
+		running = false;
+		cancelAnimationFrame(raf);
+	}
+
+	function scheduleIdle() {
+		if (idleTimer) clearTimeout(idleTimer);
+		idleTimer = setTimeout(() => {
+			idleTimer = null;
+			stopAnim();
+		}, IDLE_GRACE_MS);
+	}
+
+	// Wake/sleep based on conversation activity
+	$effect(() => {
+		const active = $streaming || $voiceState !== 'idle';
+		if (active) {
+			if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
+			startAnim();
+		} else {
+			scheduleIdle();
+		}
+	});
+
 	let t = 0;
 	function tick() {
+		if (!running) return;
 		raf = requestAnimationFrame(tick);
 		t += 0.012;
 

@@ -63,8 +63,8 @@
   inset: 0;
   z-index: 50;
   background: hsl(0 0% 0% / 0.72);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: var(--glass-backdrop);
+  -webkit-backdrop-filter: var(--glass-backdrop);
   display: grid;
   place-items: center;
   padding: 1.5rem;

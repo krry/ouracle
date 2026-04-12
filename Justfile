@@ -13,3 +13,6 @@ api:
 
 tui:
     cd apps/tui; cargo watch -x 'run'
+
+dev:
+    bash -lc 'trap \"kill 0\" EXIT INT TERM; (cd api && bun run dev) & (cd apps/web && bun run dev --host) & wait'

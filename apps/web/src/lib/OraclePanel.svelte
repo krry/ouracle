@@ -463,8 +463,8 @@
 	border: 1px solid var(--glass-border);
 	border-radius: 18px;
 	box-shadow: var(--glass-shadow);
-	backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
-	-webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
+	backdrop-filter: var(--glass-backdrop);
+	-webkit-backdrop-filter: var(--glass-backdrop);
 	overflow: hidden;
 	width: 100%;
 	height: 100%;
