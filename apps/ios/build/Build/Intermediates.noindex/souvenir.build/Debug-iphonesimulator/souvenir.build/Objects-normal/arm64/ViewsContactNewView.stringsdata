@@ -1,0 +1,32 @@
+{
+  "source": "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsContactNewView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "New Contact",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 26
+        }
+      },
+      {
+        "comment": "",
+        "key": "New Contact",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 19
+        }
+      },
+      {
+        "comment": "",
+        "key": "Phase 2: Contact Creation",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 22
+        }
+      }
+    ]
+  },
+  "version": 1
+}

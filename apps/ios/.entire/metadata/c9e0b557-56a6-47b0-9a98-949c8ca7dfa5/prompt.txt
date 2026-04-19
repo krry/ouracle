@@ -1,0 +1,1 @@
+Will you help me set up the build number auto-increment script?

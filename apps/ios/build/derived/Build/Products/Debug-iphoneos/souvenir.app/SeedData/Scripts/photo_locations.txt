@@ -1,0 +1,38 @@
+# Photo Locations
+# Format: filename: lat, lon, city, state/country/locality
+# Example: seed-kyle.jpeg: 37.7749, -122.4194, San Francisco, California
+
+seed-alyssa.jpeg: 9.73487, 100.02132, Koh Pha-Ngan, Thailand
+seed-cameron-kyle.jpeg: 50.822750, -0.141529, Brighton, England
+seed-carl-allie.jpeg: 42.289203, -89.058992, Rockford, Illinois
+seed-carole-zack-hana.jpeg: 20.719548, -155.987570, Hana, Maui
+seed-carole-zack.jpeg: 20.771738, -156.000939, Hana, Maui
+seed-charlie.jpeg: 36.45541, -118.55561, Mineral King, California
+seed-christian.jpeg: 38.498172, -122.900040, Forestville, California
+seed-dusty-christian-mads-julian-elizabeth-jana.jpeg: 40.75380, -119.27706, Black Rock City, Nevada
+seed-dusty-kyle-elizabeth-mads.jpeg: 38.959501, -119.941387, Stateline, Nevada
+seed-fiona.jpeg: 33.514385, -86.805295, Birmingham, Alabama
+seed-hana.jpeg: 20.894374, -156.487294, Wailuku, Maui
+seed-jane-01.jpeg: 20.933499, -156.357379, Pa'ia, Maui
+seed-jane-02.jpeg: 20.755186, -155.983554, Hana, Maui
+seed-jane-03.jpeg: 20.799057, -156.067089, Nahiku, Maui
+seed-jane-04.jpeg: 20.788686, -156.003606, Hana, Maui
+seed-jane-05.jpeg: 20.719548, -155.987570, Hana, Maui
+seed-josh-andy-mark-steve.jpeg: 49.284242, -123.095314, Vancouver, British Columbia
+seed-josh-justin-dustin-cameron-ashley-katysue-jeanne.jpeg: 48.853361, 2.359110, Paris, France
+seed-josh.jpeg: 9.770721, 99.962443, Koh Pha-Ngah, Thailand
+seed-justin.jpeg: 39.257443, -123.174699, Redwood Valley, California
+seed-kyle-christian-mj-sonia-laura.jpeg: 39.007327, -119.950997, Zephyr Cove, Nevada
+seed-kyle-daryl.jpeg: 37.854014, -122.249601, Berkeley, California
+seed-kyle-dusty-cameron-jevon-julian-daryl-michelle.jpeg: 37.775220, -122.411411, San Francisco, California
+seed-kyle-jevon-estelle.jpeg: 37.854014, -122.249601, Berkeley, California
+seed-kyle-josh.jpeg: 37.829155, -122.237552, Piedmont, California
+seed-kyle-sparkles.jpeg: 37.853602, -122.221201, Oakland, California
+seed-kyle.jpeg: 37.768552, -122.481616, San Francisco, California
+seed-mads.jpeg: 38.959501, -119.941387, Stateline, Nevada
+seed-mark-alan-mat.jpeg: 49.342858, -123.114944, Vancouver, British Columbia
+seed-molly.jpeg: 36.467085, -118.646808, Silver City, California
+seed-ourhay.jpeg: 44.283, -120.123, Big Summit Prairie, Oregon
+seed-rodney.jpeg: 37.900615, -122.514382, Mill Valley, California
+seed-tim-andy-josh.jpeg: 36.145370, -112.187100, Grand Canyon, Arizona
+seed-zac-dave-mac.jpeg: 44.8913, -121.9975, Molalla, Oregon

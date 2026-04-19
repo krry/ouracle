@@ -1,0 +1,51 @@
+{
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Services/ServicesPlusCodeService.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPlusCodeService.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPlusCodeService.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPlusCodeService.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPlusCodeService.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPlusCodeService.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Services/ServicesShareService.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesShareService.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesShareService.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesShareService.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesShareService.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesShareService.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Services/ServicesSouvenirCaptureService.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesSouvenirCaptureService.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesSouvenirCaptureService.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesSouvenirCaptureService.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesSouvenirCaptureService.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesSouvenirCaptureService.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Services/ServicesWhat3WordsService.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesWhat3WordsService.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesWhat3WordsService.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesWhat3WordsService.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesWhat3WordsService.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesWhat3WordsService.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Utilities/CoreDataJSONExport.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/CoreDataJSONExport.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/CoreDataJSONExport.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/CoreDataJSONExport.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/CoreDataJSONExport.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/CoreDataJSONExport.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Utilities/CoreDataJSONImport.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/CoreDataJSONImport.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/CoreDataJSONImport.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/CoreDataJSONImport.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/CoreDataJSONImport.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/CoreDataJSONImport.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Utilities/UtilitiesAutoCaptionGenerator.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesAutoCaptionGenerator.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesAutoCaptionGenerator.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesAutoCaptionGenerator.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesAutoCaptionGenerator.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesAutoCaptionGenerator.swiftdeps"
+  }
+}

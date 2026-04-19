@@ -1,0 +1,29 @@
+{
+  "" : {
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITests-primary.dia",
+    "emit-module-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITests-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITests-primary-emit-module.dia",
+    "pch" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITests-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITests-primary.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenirUITests/souvenirUITests.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITests.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITests.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITests.dia",
+    "index-unit-output-path" : "/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITests.o",
+    "llvm-bc" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITests.bc",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITests.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITests.swiftdeps",
+    "swiftmodule" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITests~partial.swiftmodule"
+  },
+  "/Users/kerry/Code/SVNR/souvenirUITests/souvenirUITestsLaunchTests.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITestsLaunchTests.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITestsLaunchTests.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITestsLaunchTests.dia",
+    "index-unit-output-path" : "/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITestsLaunchTests.o",
+    "llvm-bc" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITestsLaunchTests.bc",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITestsLaunchTests.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITestsLaunchTests.swiftdeps",
+    "swiftmodule" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirUITests.build/Objects-normal/arm64/souvenirUITestsLaunchTests~partial.swiftmodule"
+  }
+}

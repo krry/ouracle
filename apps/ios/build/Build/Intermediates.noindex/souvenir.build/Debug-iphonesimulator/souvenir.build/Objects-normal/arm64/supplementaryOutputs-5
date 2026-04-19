@@ -1,0 +1,51 @@
+{
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Utilities/UtilitiesDateFormatters.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesDateFormatters.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesDateFormatters.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesDateFormatters.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesDateFormatters.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesDateFormatters.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Utilities/UtilitiesPerformanceLogger.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesPerformanceLogger.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesPerformanceLogger.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesPerformanceLogger.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesPerformanceLogger.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesPerformanceLogger.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Utilities/UtilitiesTextFieldDebugger.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesTextFieldDebugger.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesTextFieldDebugger.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesTextFieldDebugger.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesTextFieldDebugger.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesTextFieldDebugger.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Utilities/UtilitiesZodiacCalculator.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesZodiacCalculator.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesZodiacCalculator.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesZodiacCalculator.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesZodiacCalculator.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/UtilitiesZodiacCalculator.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/NavigationRoute.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/NavigationRoute.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/NavigationRoute.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/NavigationRoute.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/NavigationRoute.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/NavigationRoute.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/NavigationRouter.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/NavigationRouter.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/NavigationRouter.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/NavigationRouter.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/NavigationRouter.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/NavigationRouter.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsCameraPickerView.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsCameraPickerView.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsCameraPickerView.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsCameraPickerView.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsCameraPickerView.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsCameraPickerView.swiftdeps"
+  }
+}

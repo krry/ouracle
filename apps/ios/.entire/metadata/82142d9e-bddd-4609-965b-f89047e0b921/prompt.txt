@@ -1,0 +1,3 @@
+BUG: flipping to back camera and then back to the front camera leads to the captures being stuck in landscape orientation
+
+BUG: selecting a photo from the library I still see the back button, but when I capture a photo, I do not. Why is this? If we can show the back button over the photo, we should just make this the Retake Button, not the back button.

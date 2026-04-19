@@ -1,0 +1,581 @@
+{
+  "ContactEntity": [
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/kyle",
+      "birthday": "1983-05-17T19:55:24Z",
+      "compositeName": "Kyle Wild",
+      "createdAt": "2012-01-17T19:55:24Z",
+      "familyName": "Wild",
+      "givenName": "Kyle",
+      "id": "6FCDC189-23DD-41BB-B3B9-E0373BCB23A7",
+      "isPrimaryForSouvenir": 1,
+      "phoneE164": "+2176212298",
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kyle1",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kyle2",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kyle3",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kj"
+      ],
+      "primarySouvenir": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/kyle"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/josh",
+      "birthday": "1982-09-12T19:55:24Z",
+      "compositeName": "Josh Dzielak",
+      "createdAt": "2020-01-17T20:05:33Z",
+      "familyName": "Dzielak",
+      "givenName": "Josh",
+      "id": "C4AEDD85-C681-45FD-A9B6-F17E5E102142",
+      "isPrimaryForSouvenir": 1,
+      "phoneE164": "+33767948519",
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kj",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jjj"
+      ],
+      "primarySouvenir": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/josh"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/jane",
+      "birthday": "1988-10-25T19:55:24Z",
+      "compositeName": "Jane Kim",
+      "createdAt": "2026-01-17T20:06:30Z",
+      "familyName": "Kim",
+      "givenName": "Jane",
+      "id": "D90D14CC-8100-43FC-A187-E1DDD393D583",
+      "isPrimaryForSouvenir": 1,
+      "phoneE164": "+5108203777",
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane1",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane2",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane3",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane4",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane5"
+      ],
+      "primarySouvenir": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/jane"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/rodney",
+      "birthday": "1981-09-17T19:55:24Z",
+      "compositeName": "Rodney Hansen",
+      "createdAt": "2025-12-17T20:06:30Z",
+      "familyName": "Hansen",
+      "givenName": "Rodney",
+      "id": "D90D14CC-8100-43FC-A187-E1DDD393D584",
+      "isPrimaryForSouvenir": 1,
+      "phoneE164": "+2083460736",
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/rodney"
+      ],
+      "primarySouvenir": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/rodney"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/molly",
+      "birthday": "1991-10-29T19:55:24Z",
+      "compositeName": "Molly Dunn",
+      "createdAt": "2024-01-17T20:06:30Z",
+      "familyName": "Dunn",
+      "givenName": "Molly",
+      "id": "D90D14CC-8100-43FC-A187-E1DDD393D585",
+      "isPrimaryForSouvenir": 1,
+      "phoneE164": "+5596236996",
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/molly"
+      ],
+      "primarySouvenir": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/molly"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/mads",
+      "birthday": "1987-07-13T20:06:30Z",
+      "compositeName": "Madelin Woods",
+      "createdAt": "2022-07-13T20:06:30Z",
+      "familyName": "Woods",
+      "givenName": "Madelin",
+      "id": "D90D14CC-8100-43FC-A187-E1DDD393D586",
+      "isPrimaryForSouvenir": 1,
+      "phoneE164": "+2177664181",
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/mads"
+      ],
+      "primarySouvenir": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/mads"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/hanatrops",
+      "birthday": "2025-01-03T19:55:24Z",
+      "compositeName": "Hana Trops",
+      "createdAt": "2025-07-17T20:06:30Z",
+      "familyName": "Trops",
+      "givenName": "Hana",
+      "id": "D90D14CC-8100-43FC-A187-E1DDD393D587",
+      "isPrimaryForSouvenir": 1,
+      "phoneE164": "+18088080808",
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/hana1",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/hana2",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/hana3"
+      ],
+      "primarySouvenir": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/hana"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/jj",
+      "birthday": "1983-06-12T19:55:24Z",
+      "compositeName": "Justin Johnson",
+      "createdAt": "1982-09-01T21:27:42Z",
+      "familyName": "Johnson",
+      "givenName": "Justin",
+      "id": "DE8D891A-0777-4C59-908C-FA893DD06A28",
+      "isPrimaryForSouvenir": 1,
+      "phoneE164": "+4152970223",
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jj",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jjj"
+      ],
+      "primarySouvenir": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/jj"
+    }
+  ],
+  "PhotoEntity": [
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/hana1",
+      "assetLocalId": "seed:\/\/seed-hana-01.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/hanatrops"
+      ],
+      "favoriteForSouvenir": 0,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECE50A1FBD4",
+      "latitude": 20.76333,
+      "longitude": -155.99375,
+      "plusCode": "7RGQQX7V+8F",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/hana"
+      ],
+      "timestamp": "2025-05-17T19:55:03Z",
+      "timezoneID": "America\/Honolulu"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/hana2",
+      "assetLocalId": "seed:\/\/seed-hana-02.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/hanatrops"
+      ],
+      "favoriteForSouvenir": 0,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECE50A1FBD5",
+      "latitude": 20.76333,
+      "longitude": -155.99375,
+      "plusCode": "7RGQQX7V+8F",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/hana"
+      ],
+      "timestamp": "2025-07-17T19:55:03Z",
+      "timezoneID": "America\/Honolulu"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/hana3",
+      "assetLocalId": "seed:\/\/seed-hana-03.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/hanatrops"
+      ],
+      "favoriteForSouvenir": 1,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECE50A1FBD6",
+      "latitude": 20.76333,
+      "longitude": -155.99375,
+      "plusCode": "7RGQQX7V+8F",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/hana"
+      ],
+      "timestamp": "2025-07-17T19:55:03Z",
+      "timezoneID": "America\/Honolulu"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane1",
+      "assetLocalId": "seed:\/\/seed-jane-01.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/jane"
+      ],
+      "favoriteForSouvenir": 0,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECE50A1FBA1",
+      "latitude": 20.7714,
+      "longitude": -155.99978,
+      "plusCode": "7RGQQXCX+HW",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/jane"
+      ],
+      "timestamp": "2026-01-14T19:55:03Z",
+      "timezoneID": "America\/Honolulu"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane2",
+      "assetLocalId": "seed:\/\/seed-jane-02.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/jane"
+      ],
+      "favoriteForSouvenir": 0,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECE50A1FBA2",
+      "latitude": 20.7714,
+      "longitude": -155.99978,
+      "plusCode": "7RGQQXCX+HW",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/jane"
+      ],
+      "timestamp": "2026-01-16T19:55:03Z",
+      "timezoneID": "America\/Honolulu"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane3",
+      "assetLocalId": "seed:\/\/seed-jane-03.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/jane"
+      ],
+      "favoriteForSouvenir": 1,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECE50A1FBA3",
+      "latitude": 20.7714,
+      "longitude": -155.99978,
+      "plusCode": "7RGQQXCX+HW",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/jane"
+      ],
+      "timestamp": "2026-01-17T19:55:03Z",
+      "timezoneID": "America\/Honolulu"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane4",
+      "assetLocalId": "seed:\/\/seed-jane-04.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/jane"
+      ],
+      "favoriteForSouvenir": 0,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECE50A1FBA4",
+      "latitude": 20.7714,
+      "longitude": -155.99978,
+      "plusCode": "7RGQQXCX+HW",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/jane"
+      ],
+      "timestamp": "2026-01-15T19:55:03Z",
+      "timezoneID": "America\/Honolulu"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane5",
+      "assetLocalId": "seed:\/\/seed-jane-05.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/jane"
+      ],
+      "favoriteForSouvenir": 0,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECE50A1FBA5",
+      "latitude": 20.7714,
+      "longitude": -155.99978,
+      "plusCode": "7RGQQXCX+HW",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/jane"
+      ],
+      "timestamp": "2026-01-13T19:55:03Z",
+      "timezoneID": "America\/Honolulu"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jj",
+      "assetLocalId": "seed:\/\/seed-jj-01.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/jj"
+      ],
+      "favoriteForSouvenir": 1,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECE50A1EAD4",
+      "latitude": 37.83466,
+      "longitude": -122.27014,
+      "plusCode": "8Q94R7MC+V3",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/jj"
+      ],
+      "timestamp": "2024-01-17T19:55:03Z",
+      "timezoneID": "America\/Los_Angeles"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jjj",
+      "assetLocalId": "seed:\/\/seed-josh-jj-01.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/josh",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/jj"
+      ],
+      "favoriteForSouvenir": 1,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECE50A2EBD4",
+      "latitude": 47.22228,
+      "longitude": 1.5691,
+      "plusCode": "8FV36HC9+WJ",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/jj",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/josh"
+      ],
+      "timestamp": "2024-07-17T19:55:03Z",
+      "timezoneID": "Europe\/Paris"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kyle1",
+      "assetLocalId": "seed:\/\/seed-kyle-01.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/kyle"
+      ],
+      "favoriteForSouvenir": 0,
+      "id": "B8CB6682-0D2A-44F9-976F-4ACE50A1FBD4",
+      "latitude": 37.854,
+      "longitude": -122.2498,
+      "plusCode": "8Q94V63X+HW",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/kyle"
+      ],
+      "timestamp": "2012-01-17T19:55:03Z",
+      "timezoneID": "America\/Los_Angeles"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kyle2",
+      "assetLocalId": "seed:\/\/seed-kyle-02.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/kyle"
+      ],
+      "favoriteForSouvenir": 1,
+      "id": "B8CB6682-0D2A-44F9-976F-4BCE50A1FBD4",
+      "latitude": 37.77077,
+      "longitude": -122.48986,
+      "plusCode": "8Q94QFCQ+8W",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/kyle"
+      ],
+      "timestamp": "2013-01-17T19:55:03Z",
+      "timezoneID": "America\/Los_Angeles"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kyle3",
+      "assetLocalId": "seed:\/\/seed-kyle-03.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/kyle"
+      ],
+      "favoriteForSouvenir": 0,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECE40A1FBD4",
+      "latitude": 38.99739,
+      "longitude": -119.95292,
+      "plusCode": "8PCXXXW3+X5",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/kyle"
+      ],
+      "timestamp": "2014-01-17T19:55:03Z",
+      "timezoneID": "America\/Los_Angeles"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kj",
+      "assetLocalId": "seed:\/\/seed-kyle-josh-01.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/josh",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/kyle"
+      ],
+      "favoriteForSouvenir": 0,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECE50B1FBD4",
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+      "plusCode": "849VQHFJ+XY",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/josh",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/kyle"
+      ],
+      "timestamp": "2020-01-17T19:55:03Z",
+      "timezoneID": "America\/Los_Angeles"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/mads",
+      "assetLocalId": "seed:\/\/seed-mads-01.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/mads"
+      ],
+      "favoriteForSouvenir": 1,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECE50A2ABD4",
+      "latitude": 38.96291,
+      "longitude": -119.93847,
+      "plusCode": "8PCXXW7Q+59",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/mads"
+      ],
+      "timestamp": "2022-01-17T19:55:03Z",
+      "timezoneID": "America\/Los_Angeles"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/molly",
+      "assetLocalId": "seed:\/\/seed-molly-01.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/molly"
+      ],
+      "favoriteForSouvenir": 1,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECD49A1FBD4",
+      "latitude": 36.45963,
+      "longitude": -118.64813,
+      "plusCode": "8P8WFJ5X+V7",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/molly"
+      ],
+      "timestamp": "2024-01-17T19:55:03Z",
+      "timezoneID": "America\/Los_Angeles"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/rodney",
+      "assetLocalId": "seed:\/\/seed-rodney-01.jpeg",
+      "contacts": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/rodney"
+      ],
+      "favoriteForSouvenir": 1,
+      "id": "B8CB6682-0D2A-44F9-976F-4ECE50A1FBB1",
+      "latitude": 37.9123,
+      "longitude": -122.56763,
+      "plusCode": "8Q94WH69+W3",
+      "postalGeocodeJSON": "",
+      "souvenirs": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/rodney"
+      ],
+      "timestamp": "2025-12-17T19:55:03Z",
+      "timezoneID": "America\/Los_Angeles"
+    }
+  ],
+  "ShareEntity": [],
+  "SouvenirEntity": [
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/jane",
+      "caption": "Jungle Snugz",
+      "createdAt": "2026-01-17T19:55:36Z",
+      "favoritePhoto": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane3",
+      "id": "8B9CC660-2C0F-4100-9282-5AAA2F36DB21",
+      "lastLatitude": 20.7714,
+      "lastLongitude": -155.99978,
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane3",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane5",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane4",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane2",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jane1"
+      ],
+      "primaryContact": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/jane",
+      "shares": [],
+      "updatedAt": "2026-01-17T20:04:33Z"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/rodney",
+      "caption": "Social skydivers",
+      "createdAt": "2025-12-17T19:55:36Z",
+      "favoritePhoto": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/rodney",
+      "id": "8B9CC660-2C0F-4100-9282-5AAA2F36DB24",
+      "lastLatitude": 37.9123,
+      "lastLongitude": -122.56763,
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/rodney"
+      ],
+      "primaryContact": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/rodney",
+      "shares": [],
+      "updatedAt": "2025-12-17T20:04:33Z"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/hana",
+      "caption": "Hana Trops 4 Lyfe!",
+      "createdAt": "2025-07-17T19:55:36Z",
+      "favoritePhoto": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/hana3",
+      "id": "8B9CC660-2C0F-4100-9282-5AAA2F36DB97",
+      "lastLatitude": 20.76333,
+      "lastLongitude": -155.99375,
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/hana3",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/hana2",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/hana1"
+      ],
+      "primaryContact": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/hanatrops",
+      "shares": [],
+      "updatedAt": "2025-07-17T20:04:33Z"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/jj",
+      "caption": "Bruthur JJ!",
+      "createdAt": "2024-01-17T19:55:36Z",
+      "favoritePhoto": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jj",
+      "id": "8B9CC660-2C0F-4100-9282-5AAA2F36DB23",
+      "lastLatitude": 37.83466,
+      "lastLongitude": -122.27014,
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jj",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jjj"
+      ],
+      "primaryContact": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/jj",
+      "shares": [],
+      "updatedAt": "2024-07-17T20:04:33Z"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/josh",
+      "caption": "Dzello pudding",
+      "createdAt": "2020-01-17T19:55:36Z",
+      "favoritePhoto": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jjj",
+      "id": "8B9CC660-2C0F-4100-9282-5ABA2F36DB24",
+      "lastLatitude": 47.22228,
+      "lastLongitude": 1.5691,
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/jjj",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kj"
+      ],
+      "primaryContact": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/josh",
+      "shares": [],
+      "updatedAt": "2020-01-17T20:04:33Z"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/kyle",
+      "caption": "Kiwis for KyWi!",
+      "createdAt": "2012-01-17T19:55:36Z",
+      "favoritePhoto": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kyle1",
+      "id": "8B9CC660-2C0F-4100-9282-5AAA2F36DB25",
+      "lastLatitude": 37.77077,
+      "lastLongitude": -122.48986,
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kyle1",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kyle2",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kyle3",
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/kj"
+      ],
+      "primaryContact": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/kyle",
+      "shares": [],
+      "updatedAt": "2012-01-17T20:04:33Z"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/mads",
+      "caption": "Let's get mads!",
+      "createdAt": "2022-01-17T19:55:36Z",
+      "favoritePhoto": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/mads",
+      "id": "8B9CC660-2C0F-4100-9282-5AAA2F36DB26",
+      "lastLatitude": 38.96291,
+      "lastLongitude": -119.93847,
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/mads"
+      ],
+      "primaryContact": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/mads",
+      "shares": [],
+      "updatedAt": "2022-01-17T20:04:33Z"
+    },
+    {
+      "_objectID": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/SouvenirEntity\/molly",
+      "caption": "Climb abroad!",
+      "createdAt": "2024-01-17T19:55:36Z",
+      "favoritePhoto": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/molly",
+      "id": "8B9CC660-2C0F-4100-9282-5AAA2F36DB27",
+      "lastLatitude": 36.45963,
+      "lastLongitude": -118.64813,
+      "photos": [
+        "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/PhotoEntity\/molly"
+      ],
+      "primaryContact": "x-coredata:\/\/A914B88A-BDDC-42FF-83D7-1A0C3FF607E4\/ContactEntity\/molly",
+      "shares": [],
+      "updatedAt": "2024-01-17T20:04:33Z"
+    }
+  ]
+}

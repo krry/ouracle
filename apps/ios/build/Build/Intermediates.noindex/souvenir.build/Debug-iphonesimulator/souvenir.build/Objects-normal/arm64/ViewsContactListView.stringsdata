@@ -1,0 +1,40 @@
+{
+  "source": "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsContactListView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Contacts",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 33
+        }
+      },
+      {
+        "comment": "",
+        "key": "New Contact",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 39
+        }
+      },
+      {
+        "comment": "",
+        "key": "Contacts will appear here when you create souvenirs.",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 48
+        }
+      },
+      {
+        "comment": "",
+        "key": "No Contacts",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 46
+        }
+      }
+    ]
+  },
+  "version": 1
+}

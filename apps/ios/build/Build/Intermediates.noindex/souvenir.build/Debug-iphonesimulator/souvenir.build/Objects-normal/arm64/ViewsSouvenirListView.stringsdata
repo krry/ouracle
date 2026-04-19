@@ -1,0 +1,80 @@
+{
+  "source": "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsSouvenirListView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "SVNR",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 91
+        }
+      },
+      {
+        "comment": "",
+        "key": "View Details",
+        "location": {
+          "startingColumn": 43,
+          "startingLine": 65
+        }
+      },
+      {
+        "comment": "",
+        "key": "Debug Info",
+        "location": {
+          "startingColumn": 43,
+          "startingLine": 72
+        }
+      },
+      {
+        "comment": "",
+        "key": "Sort By",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 95
+        }
+      },
+      {
+        "comment": "",
+        "key": "New Souvenir",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 107
+        }
+      },
+      {
+        "comment": "",
+        "key": "Map",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 115
+        }
+      },
+      {
+        "comment": "",
+        "key": "·",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 175
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld photos",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 177
+        }
+      },
+      {
+        "comment": "",
+        "key": "·",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 185
+        }
+      }
+    ]
+  },
+  "version": 1
+}

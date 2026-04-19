@@ -1,0 +1,16 @@
+{
+  "source": "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsComponentsPolaroidCardView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Sample Contact",
+        "location": {
+          "startingColumn": 1,
+          "startingLine": 43
+        }
+      }
+    ]
+  },
+  "version": 1
+}

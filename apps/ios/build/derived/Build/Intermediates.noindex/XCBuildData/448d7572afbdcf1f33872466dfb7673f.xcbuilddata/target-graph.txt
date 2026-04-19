@@ -1,0 +1,6 @@
+Target dependency graph (3 targets)
+Target 'souvenirUITests' in project 'souvenir'
+➜ Explicit dependency on target 'souvenir' in project 'souvenir'
+Target 'souvenirTests' in project 'souvenir'
+➜ Explicit dependency on target 'souvenir' in project 'souvenir'
+Target 'souvenir' in project 'souvenir' (no dependencies)

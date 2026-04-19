@@ -1,0 +1,28 @@
+Done. Fixed both issues:
+
+**Issue 1: Sheet detent collapse**
+- Changed `presentationDetents` from `[.height(compact), .medium]` to `[.medium]` only
+- Sheet now stays at medium height instead of collapsing
+
+**Issue 2: Birthday not populating + no logs**
+- Added `displayBirthday` variable to properly track birthday from contact imports
+- Fixed `DateComponents` → `Date` conversion using `Calendar.current.date(from:)`
+- Added comprehensive logging for contact population:
+  ```
+  📋 Contact populated:
+    name: [value]
+    phone: [value]
+    email: [value]
+    address: [value]
+    birthday: [value or nil]
+  ```
+- For system contacts, also logs:
+  ```
+  📱 System contact raw data:
+    rawPhone: [value]
+    rawEmail: [value]
+    cnContact.birthday: [value]
+    ✅ Birthday set to: [date]
+  ```
+
+Now you'll see in the console exactly what's being imported from contacts and why birthday might be nil. Build verified ✓

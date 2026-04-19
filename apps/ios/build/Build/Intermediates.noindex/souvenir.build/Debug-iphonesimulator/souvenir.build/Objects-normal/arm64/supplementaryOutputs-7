@@ -1,0 +1,51 @@
+{
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsContactNewView.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsContactNewView.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsContactNewView.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsContactNewView.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsContactNewView.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsContactNewView.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsCustomCameraView.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsCustomCameraView.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsCustomCameraView.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsCustomCameraView.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsCustomCameraView.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsCustomCameraView.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsDevTools.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsDevTools.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsDevTools.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsDevTools.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsDevTools.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsDevTools.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsFriendMapView.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsFriendMapView.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsFriendMapView.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsFriendMapView.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsFriendMapView.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsFriendMapView.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsLaunchProgressView.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsLaunchProgressView.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsLaunchProgressView.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsLaunchProgressView.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsLaunchProgressView.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsLaunchProgressView.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsNewContactSheet.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsNewContactSheet.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsNewContactSheet.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsNewContactSheet.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsNewContactSheet.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsNewContactSheet.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsPhotosPickerView.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsPhotosPickerView.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsPhotosPickerView.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsPhotosPickerView.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsPhotosPickerView.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsPhotosPickerView.swiftdeps"
+  }
+}

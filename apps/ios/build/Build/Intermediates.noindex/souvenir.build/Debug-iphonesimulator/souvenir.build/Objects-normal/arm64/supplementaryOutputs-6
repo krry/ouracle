@@ -1,0 +1,51 @@
+{
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsComponentsCaptionView.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsCaptionView.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsCaptionView.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsCaptionView.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsCaptionView.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsCaptionView.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsComponentsPhotoCarouselView.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPhotoCarouselView.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPhotoCarouselView.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPhotoCarouselView.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPhotoCarouselView.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPhotoCarouselView.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsComponentsPhotoView.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPhotoView.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPhotoView.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPhotoView.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPhotoView.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPhotoView.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsComponentsPolaroidCardView.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPolaroidCardView.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPolaroidCardView.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPolaroidCardView.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPolaroidCardView.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPolaroidCardView.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsComponentsPolaroidView.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPolaroidView.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPolaroidView.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPolaroidView.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPolaroidView.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsPolaroidView.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsComponentsShareSheet.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsShareSheet.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsShareSheet.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsShareSheet.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsShareSheet.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsComponentsShareSheet.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsContactListView.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsContactListView.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsContactListView.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsContactListView.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsContactListView.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ViewsContactListView.swiftdeps"
+  }
+}

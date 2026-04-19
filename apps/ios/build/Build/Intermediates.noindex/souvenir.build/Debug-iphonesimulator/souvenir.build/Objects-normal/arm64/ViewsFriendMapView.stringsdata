@@ -1,0 +1,32 @@
+{
+  "source": "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsFriendMapView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Friend Map",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 60
+        }
+      },
+      {
+        "comment": "",
+        "key": "Close",
+        "location": {
+          "startingColumn": 36,
+          "startingLine": 75
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 155
+        }
+      }
+    ]
+  },
+  "version": 1
+}

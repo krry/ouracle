@@ -1,0 +1,3 @@
+The @souvenir/Views/ViewsContactReviewSheet.swift shrinks to compact when it should dismiss; it only needs the medium detent.
+
+Also birthday is not populating and I don't see logs about it. We need to log what we are populating from the contact. And we need to populate the birthday.

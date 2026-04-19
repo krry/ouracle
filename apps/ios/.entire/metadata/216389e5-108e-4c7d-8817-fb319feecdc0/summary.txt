@@ -1,0 +1,3 @@
+What went wrong? Did the log not get written before context ran out, or did it get written but in the wrong format? Was there an earlier session that should have a log entry?
+
+Let me understand the failure mode so I can prevent it this time.

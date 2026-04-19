@@ -1,0 +1,79 @@
+{
+  "" : {
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/souvenirTests-primary.dia",
+    "emit-module-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/souvenirTests-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/souvenirTests-primary-emit-module.dia",
+    "pch" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/souvenirTests-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/souvenirTests-primary.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenirTests/TestsFrecencyServiceTests.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsFrecencyServiceTests.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsFrecencyServiceTests.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsFrecencyServiceTests.dia",
+    "index-unit-output-path" : "/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsFrecencyServiceTests.o",
+    "llvm-bc" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsFrecencyServiceTests.bc",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsFrecencyServiceTests.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsFrecencyServiceTests.swiftdeps",
+    "swiftmodule" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsFrecencyServiceTests~partial.swiftmodule"
+  },
+  "/Users/kerry/Code/SVNR/souvenirTests/TestsGeocodingServiceTests.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsGeocodingServiceTests.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsGeocodingServiceTests.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsGeocodingServiceTests.dia",
+    "index-unit-output-path" : "/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsGeocodingServiceTests.o",
+    "llvm-bc" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsGeocodingServiceTests.bc",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsGeocodingServiceTests.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsGeocodingServiceTests.swiftdeps",
+    "swiftmodule" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsGeocodingServiceTests~partial.swiftmodule"
+  },
+  "/Users/kerry/Code/SVNR/souvenirTests/TestsLocationServiceTests.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsLocationServiceTests.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsLocationServiceTests.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsLocationServiceTests.dia",
+    "index-unit-output-path" : "/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsLocationServiceTests.o",
+    "llvm-bc" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsLocationServiceTests.bc",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsLocationServiceTests.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsLocationServiceTests.swiftdeps",
+    "swiftmodule" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsLocationServiceTests~partial.swiftmodule"
+  },
+  "/Users/kerry/Code/SVNR/souvenirTests/TestsSemanticColors.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSemanticColors.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSemanticColors.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSemanticColors.dia",
+    "index-unit-output-path" : "/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSemanticColors.o",
+    "llvm-bc" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSemanticColors.bc",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSemanticColors.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSemanticColors.swiftdeps",
+    "swiftmodule" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSemanticColors~partial.swiftmodule"
+  },
+  "/Users/kerry/Code/SVNR/souvenirTests/TestsSouvenirCaptureTests.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSouvenirCaptureTests.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSouvenirCaptureTests.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSouvenirCaptureTests.dia",
+    "index-unit-output-path" : "/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSouvenirCaptureTests.o",
+    "llvm-bc" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSouvenirCaptureTests.bc",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSouvenirCaptureTests.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSouvenirCaptureTests.swiftdeps",
+    "swiftmodule" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsSouvenirCaptureTests~partial.swiftmodule"
+  },
+  "/Users/kerry/Code/SVNR/souvenirTests/TestsValidationServiceTests.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsValidationServiceTests.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsValidationServiceTests.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsValidationServiceTests.dia",
+    "index-unit-output-path" : "/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsValidationServiceTests.o",
+    "llvm-bc" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsValidationServiceTests.bc",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsValidationServiceTests.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsValidationServiceTests.swiftdeps",
+    "swiftmodule" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/TestsValidationServiceTests~partial.swiftmodule"
+  },
+  "/Users/kerry/Code/SVNR/souvenirTests/souvenirTests.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/souvenirTests.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/souvenirTests.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/souvenirTests.dia",
+    "index-unit-output-path" : "/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/souvenirTests.o",
+    "llvm-bc" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/souvenirTests.bc",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/souvenirTests.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/souvenirTests.swiftdeps",
+    "swiftmodule" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenirTests.build/Objects-normal/arm64/souvenirTests~partial.swiftmodule"
+  }
+}

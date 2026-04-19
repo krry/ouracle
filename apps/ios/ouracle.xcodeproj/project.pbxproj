@@ -1,0 +1,940 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		C7DEDF9F2F1AC06100FFF806 /* Testing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7DEDF9E2F1AC06100FFF806 /* Testing.framework */; platformFilter = ios; };
+		C7DEDFA02F1AC06100FFF806 /* Testing.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C7DEDF9E2F1AC06100FFF806 /* Testing.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C7DEDFA52F1AC27C00FFF806 /* Testing.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7DEDF9E2F1AC06100FFF806 /* Testing.framework */; platformFilter = ios; };
+		C7DEDFA62F1AC27C00FFF806 /* Testing.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C7DEDF9E2F1AC06100FFF806 /* Testing.framework */; platformFilter = ios; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C7DEV0022F17F1B2004A92CB /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = C7DEV00C2F17F1B2004A92CB /* WebRTC */; };
+		C7E499FD2F5D7A23002F8D3B /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = C7E499FC2F5D7A23002F8D3B /* WebRTC */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C7BE81022F17F1B3004A92CB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C7BE80E52F17F1B2004A92CB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C7BE80EC2F17F1B2004A92CB;
+			remoteInfo = ouracle;
+		};
+		C7BE810C2F17F1B3004A92CB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C7BE80E52F17F1B2004A92CB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C7BE80EC2F17F1B2004A92CB;
+			remoteInfo = ouracle;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C7DEDFA12F1AC06100FFF806 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				C7DEDFA02F1AC06100FFF806 /* Testing.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C7DEDFA72F1AC27C00FFF806 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				C7DEDFA62F1AC27C00FFF806 /* Testing.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		C7BE80ED2F17F1B2004A92CB /* ouracle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ouracle.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7BE81012F17F1B3004A92CB /* souvenirTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = souvenirTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7BE810B2F17F1B3004A92CB /* souvenirUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = souvenirUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7DEDF9E2F1AC06100FFF806 /* Testing.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Testing.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/Testing.framework; sourceTree = DEVELOPER_DIR; };
+		C7DEV0012F17F1B2004A92CB /* ouracle Dev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ouracle Dev.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7AA00012F990000000001AA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ouracle/Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+		C7AA00022F990000000002AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C7AA00012F990000000001AA /* Assets.xcassets */; };
+		C7AA00032F990000000003AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C7AA00012F990000000001AA /* Assets.xcassets */; };
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C74CAE842F5895FE001B0338 /* Exceptions for "ouracle" folder in "ouracle" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				Assets.xcassets,
+			);
+			target = C7BE80EC2F17F1B2004A92CB /* ouracle */;
+		};
+		C7DEV00B2F17F1B2004A92CB /* Exceptions for "ouracle" folder in "ouracle Dev" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				Assets.xcassets,
+			);
+			target = C7DEV0072F17F1B2004A92CB /* ouracle Dev */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		C7BE80EF2F17F1B2004A92CB /* ouracle */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C74CAE842F5895FE001B0338 /* Exceptions for "ouracle" folder in "ouracle" target */,
+				C7DEV00B2F17F1B2004A92CB /* Exceptions for "ouracle" folder in "ouracle Dev" target */,
+			);
+			explicitFolders = (
+				SeedData,
+			);
+			path = ouracle;
+			sourceTree = "<group>";
+		};
+		C7D09F932F46152A00C34C9D /* ../../docs */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ../../docs;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C7BE80EA2F17F1B2004A92CB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C7E499FD2F5D7A23002F8D3B /* WebRTC in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C7BE80FE2F17F1B3004A92CB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C7DEDF9F2F1AC06100FFF806 /* Testing.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C7BE81082F17F1B3004A92CB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C7DEDFA52F1AC27C00FFF806 /* Testing.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C7DEV0052F17F1B2004A92CB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C7DEV0022F17F1B2004A92CB /* WebRTC in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C7BE80E42F17F1B2004A92CB = {
+			isa = PBXGroup;
+			children = (
+				C7AA00012F990000000001AA /* Assets.xcassets */,
+				C7BE80EF2F17F1B2004A92CB /* ouracle */,
+				C7DEDF9D2F1AC06100FFF806 /* Frameworks */,
+				C7BE80EE2F17F1B2004A92CB /* Products */,
+				C7D09F932F46152A00C34C9D /* ../../docs */,
+			);
+			sourceTree = "<group>";
+		};
+		C7BE80EE2F17F1B2004A92CB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C7BE80ED2F17F1B2004A92CB /* ouracle.app */,
+				C7BE81012F17F1B3004A92CB /* souvenirTests.xctest */,
+				C7BE810B2F17F1B3004A92CB /* souvenirUITests.xctest */,
+				C7DEV0012F17F1B2004A92CB /* ouracle Dev.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C7DEDF9D2F1AC06100FFF806 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C7DEDF9E2F1AC06100FFF806 /* Testing.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C7BE80EC2F17F1B2004A92CB /* ouracle */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C7BE81142F17F1B3004A92CB /* Build configuration list for PBXNativeTarget "ouracle" */;
+			buildPhases = (
+				C7A1B2C32F9E0D1A005F3E7B /* Fix WebRTC Headers */,
+				C7BE80E92F17F1B2004A92CB /* Sources */,
+				C7BE80EA2F17F1B2004A92CB /* Frameworks */,
+				C7BE80EB2F17F1B2004A92CB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C7BE80EF2F17F1B2004A92CB /* ouracle */,
+			);
+			name = ouracle;
+			packageProductDependencies = (
+				C7E499FC2F5D7A23002F8D3B /* WebRTC */,
+			);
+			productName = ouracle;
+			productReference = C7BE80ED2F17F1B2004A92CB /* ouracle.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C7BE81002F17F1B3004A92CB /* souvenirTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C7BE81192F17F1B3004A92CB /* Build configuration list for PBXNativeTarget "souvenirTests" */;
+			buildPhases = (
+				C7BE80FD2F17F1B3004A92CB /* Sources */,
+				C7BE80FE2F17F1B3004A92CB /* Frameworks */,
+				C7BE80FF2F17F1B3004A92CB /* Resources */,
+				C7DEDFA12F1AC06100FFF806 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C7BE81032F17F1B3004A92CB /* PBXTargetDependency */,
+			);
+			name = souvenirTests;
+			packageProductDependencies = (
+			);
+			productName = souvenirTests;
+			productReference = C7BE81012F17F1B3004A92CB /* souvenirTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		C7BE810A2F17F1B3004A92CB /* souvenirUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C7BE811C2F17F1B3004A92CB /* Build configuration list for PBXNativeTarget "souvenirUITests" */;
+			buildPhases = (
+				C7BE81072F17F1B3004A92CB /* Sources */,
+				C7BE81082F17F1B3004A92CB /* Frameworks */,
+				C7BE81092F17F1B3004A92CB /* Resources */,
+				C7DEDFA72F1AC27C00FFF806 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C7BE810D2F17F1B3004A92CB /* PBXTargetDependency */,
+			);
+			name = souvenirUITests;
+			packageProductDependencies = (
+			);
+			productName = souvenirUITests;
+			productReference = C7BE810B2F17F1B3004A92CB /* souvenirUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		C7DEV0072F17F1B2004A92CB /* ouracle Dev */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C7DEV00A2F17F1B2004A92CB /* Build configuration list for PBXNativeTarget "ouracle Dev" */;
+			buildPhases = (
+				C7DEV0032F17F1B2004A92CB /* Fix WebRTC Headers */,
+				C7DEV0042F17F1B2004A92CB /* Sources */,
+				C7DEV0052F17F1B2004A92CB /* Frameworks */,
+				C7DEV0062F17F1B2004A92CB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C7BE80EF2F17F1B2004A92CB /* ouracle */,
+			);
+			name = "ouracle Dev";
+			packageProductDependencies = (
+				C7DEV00C2F17F1B2004A92CB /* WebRTC */,
+			);
+			productName = "ouracle Dev";
+			productReference = C7DEV0012F17F1B2004A92CB /* ouracle Dev.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C7BE80E52F17F1B2004A92CB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 2630;
+				ORGANIZATIONNAME = kerry.ink;
+				TargetAttributes = {
+					C7BE80EC2F17F1B2004A92CB = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					C7BE81002F17F1B3004A92CB = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = C7BE80EC2F17F1B2004A92CB;
+					};
+					C7BE810A2F17F1B3004A92CB = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = C7BE80EC2F17F1B2004A92CB;
+					};
+					C7DEV0072F17F1B2004A92CB = {
+						CreatedOnToolsVersion = 26.2;
+					};
+				};
+			};
+			buildConfigurationList = C7BE80E82F17F1B2004A92CB /* Build configuration list for PBXProject "ouracle" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = C7BE80E42F17F1B2004A92CB;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C7E499FB2F5D7A23002F8D3B /* XCRemoteSwiftPackageReference "WebRTC" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C7BE80EE2F17F1B2004A92CB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C7BE80EC2F17F1B2004A92CB /* ouracle */,
+				C7BE81002F17F1B3004A92CB /* souvenirTests */,
+				C7BE810A2F17F1B3004A92CB /* souvenirUITests */,
+				C7DEV0072F17F1B2004A92CB /* ouracle Dev */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C7BE80EB2F17F1B2004A92CB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C7AA00022F990000000002AA /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C7BE80FF2F17F1B3004A92CB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C7BE81092F17F1B3004A92CB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C7DEV0062F17F1B2004A92CB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C7AA00032F990000000003AA /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		C7A1B2C32F9E0D1A005F3E7B /* Fix WebRTC Headers */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Fix WebRTC Headers";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "\"$SRCROOT/scripts/fix-webrtc-headers.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C7DEV0032F17F1B2004A92CB /* Fix WebRTC Headers */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Fix WebRTC Headers";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "\"$SRCROOT/scripts/fix-webrtc-headers.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C7BE80E92F17F1B2004A92CB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C7BE80FD2F17F1B3004A92CB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C7BE81072F17F1B3004A92CB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C7DEV0042F17F1B2004A92CB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C7BE81032F17F1B3004A92CB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C7BE80EC2F17F1B2004A92CB /* ouracle */;
+			targetProxy = C7BE81022F17F1B3004A92CB /* PBXContainerItemProxy */;
+		};
+		C7BE810D2F17F1B3004A92CB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C7BE80EC2F17F1B2004A92CB /* ouracle */;
+			targetProxy = C7BE810C2F17F1B3004A92CB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		C7BE81152F17F1B3004A92CB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = ouracle/ouracle.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 44;
+				DEVELOPMENT_TEAM = 8F5AWKGCZ8;
+				DRIVERKIT_DEPLOYMENT_TARGET = 25.0;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				EXCLUDED_RESOURCE_FILE_NAMES = Info.plist;
+				EXCLUDED_SOURCE_FILE_NAMES = Info.plist;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ouracle/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "OURACLE 𝛼";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				"INFOPLIST_KEY_UILaunchStoryboardName[sdk=*]" = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.8;
+				PRODUCT_BUNDLE_IDENTIFIER = ink.kerry.ouracle;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TURN_HOST = "";
+				TURN_PASSWORD = "";
+				TURN_USERNAME = "";
+				TVOS_DEPLOYMENT_TARGET = 26.0;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		C7BE81162F17F1B3004A92CB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = ouracle/ouracle.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 44;
+				DEVELOPMENT_TEAM = 8F5AWKGCZ8;
+				DRIVERKIT_DEPLOYMENT_TARGET = 25.0;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				EXCLUDED_RESOURCE_FILE_NAMES = Info.plist;
+				EXCLUDED_SOURCE_FILE_NAMES = Info.plist;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ouracle/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "OURACLE β";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.8;
+				PRODUCT_BUNDLE_IDENTIFIER = ink.kerry.ouracle;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TURN_HOST = "";
+				TURN_PASSWORD = "";
+				TURN_USERNAME = "";
+				TVOS_DEPLOYMENT_TARGET = 26.0;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
+		C7BE81172F17F1B3004A92CB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 8F5AWKGCZ8;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		C7BE81182F17F1B3004A92CB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 8F5AWKGCZ8;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C7BE811A2F17F1B3004A92CB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 25;
+				DEVELOPMENT_TEAM = 8F5AWKGCZ8;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.6.2;
+				PRODUCT_BUNDLE_IDENTIFIER = ink.kerry.ouracleTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ouracle.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ouracle";
+			};
+			name = Debug;
+		};
+		C7BE811B2F17F1B3004A92CB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 25;
+				DEVELOPMENT_TEAM = 8F5AWKGCZ8;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.6.2;
+				PRODUCT_BUNDLE_IDENTIFIER = ink.kerry.ouracleTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ouracle.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ouracle";
+			};
+			name = Release;
+		};
+		C7BE811D2F17F1B3004A92CB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 25;
+				DEVELOPMENT_TEAM = 8F5AWKGCZ8;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.6.2;
+				PRODUCT_BUNDLE_IDENTIFIER = ink.kerry.ouracleUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ouracle;
+			};
+			name = Debug;
+		};
+		C7BE811E2F17F1B3004A92CB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 25;
+				DEVELOPMENT_TEAM = 8F5AWKGCZ8;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.6.2;
+				PRODUCT_BUNDLE_IDENTIFIER = ink.kerry.ouracleUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ouracle;
+			};
+			name = Release;
+		};
+		C7DEV0082F17F1B2004A92CB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconDev;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = "ouracle/ouracle-dev.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 44;
+				DEVELOPMENT_TEAM = 8F5AWKGCZ8;
+				DRIVERKIT_DEPLOYMENT_TARGET = 25.0;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				EXCLUDED_RESOURCE_FILE_NAMES = Info.plist;
+				EXCLUDED_SOURCE_FILE_NAMES = Info.plist;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ouracle/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "OURACLE 𝛼";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				"INFOPLIST_KEY_UILaunchStoryboardName[sdk=*]" = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.8;
+				PRODUCT_BUNDLE_IDENTIFIER = ink.kerry.ouracle.dev;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "IS_DEV_TARGET $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TVOS_DEPLOYMENT_TARGET = 26.0;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		C7DEV0092F17F1B2004A92CB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconDev;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = "ouracle/ouracle-dev.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 44;
+				DEVELOPMENT_TEAM = 8F5AWKGCZ8;
+				DRIVERKIT_DEPLOYMENT_TARGET = 25.0;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				EXCLUDED_RESOURCE_FILE_NAMES = Info.plist;
+				EXCLUDED_SOURCE_FILE_NAMES = Info.plist;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ouracle/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "OURACLE 𝛼";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.8;
+				PRODUCT_BUNDLE_IDENTIFIER = ink.kerry.ouracle.dev;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "IS_DEV_TARGET $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TVOS_DEPLOYMENT_TARGET = 26.0;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C7BE80E82F17F1B2004A92CB /* Build configuration list for PBXProject "ouracle" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C7BE81172F17F1B3004A92CB /* Debug */,
+				C7BE81182F17F1B3004A92CB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C7BE81142F17F1B3004A92CB /* Build configuration list for PBXNativeTarget "ouracle" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C7BE81152F17F1B3004A92CB /* Debug */,
+				C7BE81162F17F1B3004A92CB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C7BE81192F17F1B3004A92CB /* Build configuration list for PBXNativeTarget "souvenirTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C7BE811A2F17F1B3004A92CB /* Debug */,
+				C7BE811B2F17F1B3004A92CB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C7BE811C2F17F1B3004A92CB /* Build configuration list for PBXNativeTarget "souvenirUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C7BE811D2F17F1B3004A92CB /* Debug */,
+				C7BE811E2F17F1B3004A92CB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C7DEV00A2F17F1B2004A92CB /* Build configuration list for PBXNativeTarget "ouracle Dev" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C7DEV0082F17F1B2004A92CB /* Debug */,
+				C7DEV0092F17F1B2004A92CB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C7E499FB2F5D7A23002F8D3B /* XCRemoteSwiftPackageReference "WebRTC" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stasel/WebRTC";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 141.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C7DEV00C2F17F1B2004A92CB /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C7E499FB2F5D7A23002F8D3B /* XCRemoteSwiftPackageReference "WebRTC" */;
+			productName = WebRTC;
+		};
+		C7E499FC2F5D7A23002F8D3B /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C7E499FB2F5D7A23002F8D3B /* XCRemoteSwiftPackageReference "WebRTC" */;
+			productName = WebRTC;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = C7BE80E52F17F1B2004A92CB /* Project object */;
+}

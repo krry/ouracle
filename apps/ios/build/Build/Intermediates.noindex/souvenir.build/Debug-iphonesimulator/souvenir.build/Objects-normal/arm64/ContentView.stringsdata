@@ -1,0 +1,24 @@
+{
+  "source": "/Users/kerry/Code/SVNR/souvenir/souvenir/ContentView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Dev Tools",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 59
+        }
+      },
+      {
+        "comment": "",
+        "key": "Done",
+        "location": {
+          "startingColumn": 40,
+          "startingLine": 63
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,51 @@
+{
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Services/ServicesFrecencyService.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesFrecencyService.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesFrecencyService.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesFrecencyService.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesFrecencyService.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesFrecencyService.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Services/ServicesGeocodingService.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesGeocodingService.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesGeocodingService.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesGeocodingService.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesGeocodingService.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesGeocodingService.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Services/ServicesLocationService.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesLocationService.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesLocationService.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesLocationService.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesLocationService.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesLocationService.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Services/ServicesMapClusteringService.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesMapClusteringService.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesMapClusteringService.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesMapClusteringService.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesMapClusteringService.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesMapClusteringService.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Services/ServicesPerformanceWarmer.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPerformanceWarmer.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPerformanceWarmer.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPerformanceWarmer.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPerformanceWarmer.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPerformanceWarmer.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Services/ServicesPhotoLoadingService.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPhotoLoadingService.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPhotoLoadingService.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPhotoLoadingService.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPhotoLoadingService.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPhotoLoadingService.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/souvenir/Services/ServicesPhotoPickerService.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPhotoPickerService.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPhotoPickerService.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPhotoPickerService.dia",
+    "object" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPhotoPickerService.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/souvenir/build/Build/Intermediates.noindex/souvenir.build/Debug-iphonesimulator/souvenir.build/Objects-normal/arm64/ServicesPhotoPickerService.swiftdeps"
+  }
+}

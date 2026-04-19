@@ -1,0 +1,72 @@
+{
+  "/Users/kerry/Code/SVNR/souvenir/Models/ModelsContactEntity+CoreDataClass.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactEntity+CoreDataClass.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactEntity+CoreDataClass.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactEntity+CoreDataClass.dia",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactEntity+CoreDataClass.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactEntity+CoreDataClass.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/Models/ModelsContactEntity+CoreDataProperties.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactEntity+CoreDataProperties.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactEntity+CoreDataProperties.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactEntity+CoreDataProperties.dia",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactEntity+CoreDataProperties.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactEntity+CoreDataProperties.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/Models/ModelsContactSearchResult.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactSearchResult.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactSearchResult.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactSearchResult.dia",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactSearchResult.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsContactSearchResult.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/Models/ModelsMapAnnotation.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsMapAnnotation.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsMapAnnotation.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsMapAnnotation.dia",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsMapAnnotation.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsMapAnnotation.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/Models/ModelsPhotoEntity+CoreDataClass.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsPhotoEntity+CoreDataClass.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsPhotoEntity+CoreDataClass.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsPhotoEntity+CoreDataClass.dia",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsPhotoEntity+CoreDataClass.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsPhotoEntity+CoreDataClass.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/Models/ModelsPhotoEntity+CoreDataProperties.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsPhotoEntity+CoreDataProperties.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsPhotoEntity+CoreDataProperties.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsPhotoEntity+CoreDataProperties.dia",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsPhotoEntity+CoreDataProperties.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsPhotoEntity+CoreDataProperties.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/Models/ModelsShareEntity+CoreDataClass.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsShareEntity+CoreDataClass.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsShareEntity+CoreDataClass.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsShareEntity+CoreDataClass.dia",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsShareEntity+CoreDataClass.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsShareEntity+CoreDataClass.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/Models/ModelsShareEntity+CoreDataProperties.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsShareEntity+CoreDataProperties.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsShareEntity+CoreDataProperties.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsShareEntity+CoreDataProperties.dia",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsShareEntity+CoreDataProperties.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsShareEntity+CoreDataProperties.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/Models/ModelsSouvenirEntity+CoreDataClass.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsSouvenirEntity+CoreDataClass.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsSouvenirEntity+CoreDataClass.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsSouvenirEntity+CoreDataClass.dia",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsSouvenirEntity+CoreDataClass.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsSouvenirEntity+CoreDataClass.swiftdeps"
+  },
+  "/Users/kerry/Code/SVNR/souvenir/Models/ModelsSouvenirEntity+CoreDataProperties.swift" : {
+    "const-values" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsSouvenirEntity+CoreDataProperties.swiftconstvalues",
+    "dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsSouvenirEntity+CoreDataProperties.d",
+    "diagnostics" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsSouvenirEntity+CoreDataProperties.dia",
+    "object" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsSouvenirEntity+CoreDataProperties.o",
+    "swift-dependencies" : "/Users/kerry/Code/SVNR/build/derived/Build/Intermediates.noindex/souvenir.build/Debug-iphoneos/souvenir.build/Objects-normal/arm64/ModelsSouvenirEntity+CoreDataProperties.swiftdeps"
+  }
+}

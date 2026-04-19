@@ -1,0 +1,1 @@
+We need to finish the @docs/ISSUES.md first. Many of them are not fixed, as I test. I have placed those needing more attention under Pending solution

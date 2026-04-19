@@ -1,0 +1,3 @@
+sounds like this isn't well thought through yet. I'll restate the objective and our capabilities and see what you can come up with:
+
+For beta testing, I want to be able to invite my friends and family to the app in pairs. For example I would send my Dad and sister an invite, which would resolve them both to the same shared souvenir with a photo of them that I chose. They'll be downloading the app through TestFlight, so it would be nice if I could send them these invites after they do to save them a step.

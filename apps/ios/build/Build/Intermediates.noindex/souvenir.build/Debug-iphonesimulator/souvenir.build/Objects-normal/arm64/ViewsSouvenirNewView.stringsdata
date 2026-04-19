@@ -1,0 +1,208 @@
+{
+  "source": "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsSouvenirNewView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "New Souvenir",
+        "location": {
+          "startingColumn": 59,
+          "startingLine": 72
+        }
+      },
+      {
+        "comment": "",
+        "key": "Who is this?",
+        "location": {
+          "startingColumn": 76,
+          "startingLine": 72
+        }
+      },
+      {
+        "comment": "",
+        "key": "Location: %@, %@",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 133
+        }
+      },
+      {
+        "comment": "",
+        "key": "Retake Photo",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 151
+        }
+      },
+      {
+        "comment": "",
+        "key": "Next: Choose Contact",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 169
+        }
+      },
+      {
+        "comment": "",
+        "key": "Capture a Memory",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 187
+        }
+      },
+      {
+        "comment": "",
+        "key": "Take a photo or choose from your library",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 189
+        }
+      },
+      {
+        "comment": "",
+        "key": "Take Photo",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 199
+        }
+      },
+      {
+        "comment": "",
+        "key": "Choose from Library",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 212
+        }
+      },
+      {
+        "comment": "",
+        "key": "Who is in this photo?",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 243
+        }
+      },
+      {
+        "comment": "",
+        "key": "Change",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 259
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start typing to search",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 284
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enter a name or phone number to find or create a contact",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 288
+        }
+      },
+      {
+        "comment": "",
+        "key": "No contacts found",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 305
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create a new contact for \"%@\"",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 308
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create New Contact",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 317
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enable Contacts Access",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 418
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 427
+        }
+      },
+      {
+        "comment": "",
+        "key": "Back",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 454
+        }
+      },
+      {
+        "comment": "",
+        "key": "Contacts Access",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 963
+        }
+      },
+      {
+        "comment": "",
+        "key": "Search Your Contacts",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 937
+        }
+      },
+      {
+        "comment": "",
+        "key": "Souvenir can search your contacts to help you quickly tag people in photos. We'll only save contacts you explicitly select.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 940
+        }
+      },
+      {
+        "comment": "",
+        "key": "Allow Access",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 948
+        }
+      },
+      {
+        "comment": "",
+        "key": "Not Now",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 954
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 967
+        }
+      }
+    ]
+  },
+  "version": 1
+}

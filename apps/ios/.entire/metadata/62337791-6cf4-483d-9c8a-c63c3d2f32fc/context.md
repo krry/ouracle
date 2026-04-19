@@ -1,0 +1,54 @@
+# Session Context
+
+**Session ID:** 62337791-6cf4-483d-9c8a-c63c3d2f32fc
+
+**Commit Message:** Is it considerably more expensive to query and filter? It seems like add
+
+## Prompt
+
+Is it considerably more expensive to query and filter? It seems like additional upkeep and duplicative bloat unless I am missing something?
+
+## Summary
+
+You're absolutely right. **Drop `bondsToMe`.**
+
+Here's why:
+
+**Storage cost:** Zero. The relationship data is the same either way.
+
+**Query cost:** Negligible. Both queries hit the same index:
+```swift
+// With bondsToMe
+kyle.bondsToMe.filter { $0.owner == kerry }
+
+// Without it
+BondEntity.fetch(where: contact == kyle, owner == kerry)
+```
+Same underlying lookup.
+
+**Maintenance cost:** You're declaring an extra relationship you rarely use, and it adds to schema complexity.
+
+**The one thing you DON'T lose:**
+Core Data's inverse relationships are automatic for referential integrity. If you delete Kerry, all her bonds cascade correctly—whether or not you explicitly named the inverse. So you get safety for free.
+
+**Final schema:**
+
+```swift
+ContactEntity
+├── id: UUID
+├── givenName, familyName, compositeName: String
+├── email, phoneE164: String
+├── createdAt: Date
+└── bonds: [BondEntity] (inverse: "owner")
+
+BondEntity
+├── owner: ContactEntity
+├── contact: ContactEntity
+├── ring: Int16 (1-3)
+└── ringOrder: Int16 (0-N)
+```
+
+One direction. Clean. When you need "who has me in their rings", you write a fetch. No bloat.
+
+## Key Actions
+

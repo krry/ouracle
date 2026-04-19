@@ -1,0 +1,16 @@
+{
+  "source": "/Users/kerry/Code/SVNR/souvenir/souvenir/Views/ViewsLaunchProgressView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Souvenir",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 29
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,1697 @@
+{
+  "ContactEntity" : [
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p29",
+      "birthday" : "1984-05-17T05:00:00Z",
+      "compositeName" : "Kyle Wild",
+      "createdAt" : "2026-01-30T08:35:18Z",
+      "email" : "dorkitude@gmail.com",
+      "externalIdentifier" : "D45FA91B-6012-4484-8432-B8FFE73C2A4B",
+      "familyName" : "Wild",
+      "givenName" : "Kyle",
+      "id" : "4680ACC4-FB0D-4D02-950B-5665FF907248",
+      "isPrimaryForSouvenir" : 0,
+      "phoneE164" : "+12176212298",
+      "photos" : [
+
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p18"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p15",
+      "birthday" : "1975-11-13T00:00:00Z",
+      "compositeName" : "Brandon",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "givenName" : "Alissa",
+      "id" : "CDF35A12-7333-4EEB-9008-68DF9DB485D2",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+15302328480",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p15"
+      ]
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p13",
+      "birthday" : "1978-10-10T00:00:00Z",
+      "compositeName" : "Carole Juarez",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "familyName" : "Juarez",
+      "givenName" : "Carole",
+      "id" : "2CB07F50-5ECB-4B2D-8783-072689EEDB43",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+12047699881",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p7",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p24"
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p16"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/\/ContactEntity\/tFE785C69-E59D-4C7F-98DE-D143ACB6297696",
+      "compositeName" : "Zack Cordas",
+      "createdAt" : "2026-01-30T08:40:44Z",
+      "email" : "zdc9902@rit.edu",
+      "externalIdentifier" : "C02BB1AD-5719-4C1B-80E1-3E14B4FD1839:ABPerson",
+      "familyName" : "Cordas",
+      "givenName" : "Zack",
+      "id" : "94751CE1-1286-477D-A2E6-44271BEF77E2",
+      "isPrimaryForSouvenir" : 0,
+      "phoneE164" : "+18644341736",
+      "photos" : [
+
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p3"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p22",
+      "birthday" : "1982-09-02T05:00:00Z",
+      "compositeName" : "Kerry Snyder",
+      "createdAt" : "2026-01-30T08:02:20Z",
+      "email" : "kerryourself@gmail.com",
+      "externalIdentifier" : "6B5672B3-F175-4BB1-B449-7065B570CC58",
+      "familyName" : "Snyder",
+      "givenName" : "Kerry",
+      "id" : "49D86261-8F8E-4855-9AA4-293D46783619",
+      "isPrimaryForSouvenir" : 0,
+      "phoneE164" : "+12177217217",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p35"
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p21"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/\/ContactEntity\/tFE785C69-E59D-4C7F-98DE-D143ACB6297695",
+      "birthday" : "1988-10-25T05:00:00Z",
+      "compositeName" : "Jane Kim",
+      "createdAt" : "2026-01-30T08:38:56Z",
+      "email" : "yearofthedragonjane@gmail.com",
+      "externalIdentifier" : "CFCBB22F-40F7-4235-92ED-6CE924DBC627:ABPerson",
+      "familyName" : "Kim",
+      "givenName" : "Jane",
+      "id" : "F093A021-28B0-4611-B027-20D70991CF00",
+      "isPrimaryForSouvenir" : 0,
+      "phoneE164" : "+15108203777",
+      "photos" : [
+
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p7"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p14",
+      "birthday" : "1990-12-06T00:00:00Z",
+      "compositeName" : "Julian Nachtigal",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "familyName" : "Nachtigal",
+      "givenName" : "Julian",
+      "id" : "55ED06D6-7DEE-4DE2-9CD3-EC15B6727F79",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+19308211619",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p10",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p5"
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p6"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p28",
+      "compositeName" : "Christian Schlensker",
+      "createdAt" : "2026-01-30T08:34:58Z",
+      "externalIdentifier" : "C62D6586-3657-4C08-8C03-D7D74FAEB8AC",
+      "familyName" : "Schlensker",
+      "givenName" : "Christian",
+      "id" : "55F68595-E8F7-4506-BBDC-7312109B2B06",
+      "isPrimaryForSouvenir" : 0,
+      "phoneE164" : "+14159672085",
+      "photos" : [
+
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p2"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p11",
+      "birthday" : "1993-09-28T00:00:00Z",
+      "compositeName" : "Madel",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "givenName" : "Madel",
+      "id" : "44232C31-BABC-4D7A-9A93-77CFE76AB484",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+12687139368",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p10",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p13",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p27"
+      ]
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p27",
+      "birthday" : "1983-06-12T05:00:00Z",
+      "compositeName" : "Justin Johnson",
+      "createdAt" : "2026-01-30T08:33:42Z",
+      "email" : "elofjohnson@gmail.com",
+      "externalIdentifier" : "893DC06E-CBC4-4538-A13C-C4D448906BDC",
+      "familyName" : "Johnson",
+      "givenName" : "Justin",
+      "id" : "1772A28C-0507-41C0-836E-B1577DC1035E",
+      "isPrimaryForSouvenir" : 0,
+      "phoneE164" : "+14152970223",
+      "photos" : [
+
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p17"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p23",
+      "birthday" : "1982-09-12T05:00:00Z",
+      "compositeName" : "Josh Dzielak",
+      "createdAt" : "2026-01-30T08:04:43Z",
+      "email" : "jdzielak@gmail.com",
+      "externalIdentifier" : "8ADE1DB2-7411-4734-9D6D-3FB6B43AE554",
+      "familyName" : "Dzielak",
+      "givenName" : "Josh",
+      "id" : "F924D70E-A6E3-42DB-B03D-CCF8438EE252",
+      "isPrimaryForSouvenir" : 0,
+      "phoneE164" : "+17735405264",
+      "photos" : [
+
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p13"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p19",
+      "birthday" : "1984-10-26T00:00:00Z",
+      "compositeName" : "Daryl",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "givenName" : "Daryl",
+      "id" : "1802A2B5-B4C6-4306-81AC-9BCEDD5FB17F",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+19123037698",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p5",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p1"
+      ]
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p9",
+      "birthday" : "1994-11-06T00:00:00Z",
+      "compositeName" : "Gracie Brakeman",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "familyName" : "Brakeman",
+      "givenName" : "Gracie",
+      "id" : "D1B21394-1C41-4B59-9D8F-15E8016BC389",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+13081695621",
+      "photos" : [
+
+      ]
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p17",
+      "birthday" : "1998-01-05T00:00:00Z",
+      "compositeName" : "Mark Bel",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "familyName" : "Bel",
+      "givenName" : "Mark",
+      "id" : "C8BE7BF3-2CF2-4728-8FDF-C237F4F60ACB",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+17596863397",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p3",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p21"
+      ]
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p25",
+      "birthday" : "1985-11-21T08:19:51Z",
+      "compositeName" : "Cameron Boehmer",
+      "createdAt" : "2026-01-30T08:18:43Z",
+      "email" : "cameron.boehmer@gmail.com",
+      "externalIdentifier" : "6F2E6580-21C7-4C21-932C-B910F112A920",
+      "familyName" : "Boehmer",
+      "givenName" : "Cameron",
+      "id" : "B316789E-BF1A-4034-B66B-D363918C3BD1",
+      "isPrimaryForSouvenir" : 0,
+      "phoneE164" : "+15037842557",
+      "photos" : [
+
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p9"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p7",
+      "birthday" : "1992-09-26T00:00:00Z",
+      "compositeName" : "Jevon Wild",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "familyName" : "Wild",
+      "givenName" : "Jevon",
+      "id" : "A51A42E5-EE49-4A33-9D30-BCE52947F6FB",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+16463021821",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p5",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p29"
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p15"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/\/ContactEntity\/tFE785C69-E59D-4C7F-98DE-D143ACB6297694",
+      "birthday" : "1981-12-05T06:00:00Z",
+      "compositeName" : "Mark Belmont",
+      "createdAt" : "2026-01-30T08:38:03Z",
+      "email" : "mtb1981@gmail.com",
+      "externalIdentifier" : "FC01E7EC-22BB-4C4B-A717-1126B9AB2BA8",
+      "familyName" : "Belmont",
+      "givenName" : "Mark",
+      "id" : "4EE7C45F-9892-4141-951C-6D51F7581D0F",
+      "isPrimaryForSouvenir" : 0,
+      "phoneE164" : "+18159884213",
+      "photos" : [
+
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p11"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p26",
+      "birthday" : "1982-08-30T05:00:00Z",
+      "compositeName" : "Andrew Shin",
+      "createdAt" : "2026-01-30T08:21:49Z",
+      "email" : "andrewkshin@gmail.com",
+      "externalIdentifier" : "497C4CF9-7756-4F36-841A-5DEB2133F7E2",
+      "familyName" : "Shin",
+      "givenName" : "Andrew",
+      "id" : "E8F49C58-7057-4195-AB5D-26B4E5EFE43E",
+      "isPrimaryForSouvenir" : 0,
+      "phoneE164" : "+18183218833",
+      "photos" : [
+
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p1"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/\/ContactEntity\/tFE785C69-E59D-4C7F-98DE-D143ACB6297698",
+      "birthday" : "1986-03-17T06:00:00Z",
+      "compositeName" : "Allison Holman",
+      "createdAt" : "2026-01-30T08:43:04Z",
+      "email" : "alliesnyde@gmail.com",
+      "externalIdentifier" : "31394706-E4ED-4C23-B7F5-8A5DC7E91F7F",
+      "familyName" : "Holman",
+      "givenName" : "Allison",
+      "id" : "344FD1CB-42E8-4FCB-84E4-4FBA4462C889",
+      "isPrimaryForSouvenir" : 0,
+      "phoneE164" : "+18152187826",
+      "photos" : [
+
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p5"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p10",
+      "birthday" : "1993-10-05T00:00:00Z",
+      "compositeName" : "Zack",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "givenName" : "Zack",
+      "id" : "18FA5E0E-10BD-4EE1-A333-E4A7A4A0154A",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+12785413398",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p7",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p24"
+      ]
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p5",
+      "birthday" : "1990-12-22T00:00:00Z",
+      "compositeName" : "Alliso",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "givenName" : "Alliso",
+      "id" : "C6D36EFF-D734-4B78-A758-5B64D9F4E6F3",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+12492251511",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p11"
+      ]
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p24",
+      "birthday" : "1987-07-13T05:00:00Z",
+      "compositeName" : "Madelin Woods",
+      "createdAt" : "2026-01-30T08:07:02Z",
+      "email" : "madelinw@gmail.com",
+      "externalIdentifier" : "A075BD01-6F81-45A6-9C4B-06581BCEDD3A",
+      "familyName" : "Woods",
+      "givenName" : "Madelin",
+      "id" : "99D3B9CE-D07F-4268-8F05-88F127FCB5C0",
+      "isPrimaryForSouvenir" : 0,
+      "phoneE164" : "+12177664181",
+      "photos" : [
+
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p8"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/\/ContactEntity\/tFE785C69-E59D-4C7F-98DE-D143ACB6297699",
+      "compositeName" : "Camer",
+      "createdAt" : "2026-01-30T08:45:26Z",
+      "givenName" : "Camer",
+      "id" : "26A9E9A9-9A33-45C5-B387-C5DBAEC56B2E",
+      "isPrimaryForSouvenir" : 1,
+      "photos" : [
+
+      ]
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p18",
+      "birthday" : "1979-04-24T00:00:00Z",
+      "compositeName" : "Cam",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "givenName" : "Cam",
+      "id" : "46B87E0F-7B3B-455D-9001-8DAC7B9E5E6D",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+18238047349",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p20",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p5",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p28"
+      ]
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p16",
+      "birthday" : "1997-10-09T00:00:00Z",
+      "compositeName" : "Christian",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "givenName" : "Christian",
+      "id" : "F7D0D851-6877-4AF7-A7C0-75E9D291165B",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+16135454743",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p10",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p32",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p33"
+      ]
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p8",
+      "birthday" : "1982-09-12T23:00:00Z",
+      "compositeName" : "Josh Dzielak",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "familyName" : "Dzielak",
+      "givenName" : "Josh",
+      "id" : "A24FBA4E-5EF1-4DF0-BB89-E21EC33D0E15",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+18227106723",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p20",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p19",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p2",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p25",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p21"
+      ]
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p20",
+      "birthday" : "2000-12-12T00:00:00Z",
+      "compositeName" : "Andrew Shin",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "familyName" : "Shin",
+      "givenName" : "Andrew",
+      "id" : "33826DDA-45B7-4CF7-AAC0-DC5D400300E3",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+15345495114",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p21",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p2"
+      ]
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p30",
+      "compositeName" : "Daryl McCurdy",
+      "createdAt" : "2026-01-30T08:35:34Z",
+      "email" : "mccurdy2@gmail.com",
+      "externalIdentifier" : "2BA2B40C-40E2-4E1F-A5BA-75E49AA11C4C",
+      "familyName" : "McCurdy",
+      "givenName" : "Daryl",
+      "id" : "3F633CE1-4AC3-4C1B-B1C9-608CB2CF703E",
+      "isPrimaryForSouvenir" : 0,
+      "phoneE164" : "+16309659465",
+      "photos" : [
+
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p12"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p6",
+      "birthday" : "1976-12-09T00:00:00Z",
+      "compositeName" : "Jane Kim",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "familyName" : "Kim",
+      "givenName" : "Jane",
+      "id" : "926C1B0F-EF47-4577-A3FF-6037D3142423",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+14875917169",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p34",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p22",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p9",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p26",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p31"
+      ]
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p3",
+      "birthday" : "1978-01-02T00:00:00Z",
+      "compositeName" : "Kyle",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "givenName" : "Kyle",
+      "id" : "77D5C38A-E01E-48B3-817D-49AF864F6B13",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+17274402004",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p28",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p27",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p32",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p1",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p16",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p6",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p29",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p19",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p5"
+      ]
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p12",
+      "birthday" : "1999-01-15T00:00:00Z",
+      "compositeName" : "Alan Carter",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "familyName" : "Carter",
+      "givenName" : "Alan",
+      "id" : "230D9CA4-007D-4B91-AE37-0F8DC6554855",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+13683262389",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p3",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p2"
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p10"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p2",
+      "birthday" : "1981-06-06T00:00:00Z",
+      "compositeName" : "Hana Trops",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "familyName" : "Trops",
+      "givenName" : "Hana",
+      "id" : "D0B21394-1C41-4C50-9D8F-15E8016BC389",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+15281605601",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p4",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p24"
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p20"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p21",
+      "birthday" : "1997-04-20T00:00:00Z",
+      "compositeName" : "Elizabeth Nolan",
+      "createdAt" : "2026-01-22T20:20:33Z",
+      "familyName" : "Nolan",
+      "givenName" : "Elizabeth",
+      "id" : "B862A32F-373C-4DEC-B4F5-89AB45862C39",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+12854207473",
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p10",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p27"
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p4"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/\/ContactEntity\/tFE785C69-E59D-4C7F-98DE-D143ACB6297697",
+      "compositeName" : "Alissa Brandon",
+      "createdAt" : "2026-01-30T08:41:25Z",
+      "externalIdentifier" : "2E49E4CC-7DD4-4DC8-AB5B-743D0F19FAF6",
+      "familyName" : "Brandon",
+      "givenName" : "Alissa",
+      "id" : "333C8FF1-392F-4B27-90DC-C003D3C17484",
+      "isPrimaryForSouvenir" : 1,
+      "phoneE164" : "+19145894178",
+      "photos" : [
+
+      ],
+      "primarySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p14"
+    }
+  ],
+  "PhotoEntity" : [
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p1",
+      "assetLocalId" : "local:\/\/seed-kyle-daryl.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p19",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p3"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p12",
+      "favoriteForSouvenir" : 1,
+      "id" : "C4B49296-1963-4BDC-8E82-519021BEFD59",
+      "latitude" : 37.854013999999999,
+      "longitude" : -122.249601,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Berkeley\", \"administrativeArea\": \"California\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p12",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p18"
+      ],
+      "timestamp" : "2026-01-10T05:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p2",
+      "assetLocalId" : "local:\/\/seed-tim-andy-josh.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p8",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p12",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p20"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p1",
+      "favoriteForSouvenir" : 1,
+      "id" : "FAC9133E-DA29-4B68-8514-C51DF9BDE27B",
+      "plusCode" : "",
+      "postalGeocodeJSON" : "",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p13",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p1"
+      ],
+      "timestamp" : "2026-01-21T13:20:33Z",
+      "timezoneID" : ""
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p3",
+      "assetLocalId" : "local:\/\/seed-mark-alan-mat.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p12",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p17"
+      ],
+      "favoriteForSouvenir" : 1,
+      "id" : "7DDAC4D1-C4A1-47B3-922D-9A001BC348FA",
+      "latitude" : 49.342858,
+      "longitude" : -123.11494399999999,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Vancouver\", \"administrativeArea\": \"British Columbia\", \"country\": \"Canada\", \"countryCode\": \"CA\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p11",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p10"
+      ],
+      "timestamp" : "2026-01-17T15:20:33Z",
+      "timezoneID" : "America\/Vancouver"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p4",
+      "assetLocalId" : "local:\/\/seed-hana.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p2"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p20",
+      "favoriteForSouvenir" : 1,
+      "id" : "0C014F50-AC5C-4EDD-B613-7A9A9B2A8CE5",
+      "latitude" : 20.894373999999999,
+      "longitude" : -156.48729399999999,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Wailuku\", \"administrativeArea\": \"Maui\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p20"
+      ],
+      "timestamp" : "2025-12-30T14:20:33Z",
+      "timezoneID" : "Pacific\/Honolulu"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p5",
+      "assetLocalId" : "local:\/\/seed-kyle-dusty-cameron-jevon-julian-daryl-michelle.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p18",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p19",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p1",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p3",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p7",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p14"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p15",
+      "favoriteForSouvenir" : 1,
+      "id" : "8FC609AE-29B0-41A6-8BC6-288823B235C6",
+      "latitude" : 37.775219999999997,
+      "longitude" : -122.411411,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"San Francisco\", \"administrativeArea\": \"California\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p15",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p9",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p18",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p12",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p6",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p19"
+      ],
+      "timestamp" : "2026-01-11T14:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p6",
+      "assetLocalId" : "local:\/\/seed-kyle-sparkles.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p3"
+      ],
+      "favoriteForSouvenir" : 1,
+      "id" : "13B16F49-22D0-4443-87F8-AAF9E8CE69E4",
+      "latitude" : 37.853602000000002,
+      "longitude" : -122.22120099999999,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Oakland\", \"administrativeArea\": \"California\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p18"
+      ],
+      "timestamp" : "2026-01-14T12:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p7",
+      "assetLocalId" : "local:\/\/seed-carole-zack.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p13",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p10"
+      ],
+      "favoriteForSouvenir" : 0,
+      "id" : "9F286DD0-C99C-4198-9B28-B63C0E168EA4",
+      "plusCode" : "",
+      "postalGeocodeJSON" : "",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p3",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p16"
+      ],
+      "timestamp" : "2025-12-24T07:20:33Z",
+      "timezoneID" : ""
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p8",
+      "assetLocalId" : "local:\/\/seed-zac-dave-mac.jpeg",
+      "contacts" : [
+
+      ],
+      "favoriteForSouvenir" : 1,
+      "id" : "A878277E-C1E3-42DA-AFC4-614007ED3371",
+      "latitude" : 44.891300000000001,
+      "longitude" : -121.9975,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Molalla\", \"administrativeArea\": \"Oregon\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+
+      ],
+      "timestamp" : "2026-01-22T10:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p9",
+      "assetLocalId" : "local:\/\/seed-jane-05.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p6"
+      ],
+      "favoriteForSouvenir" : 0,
+      "id" : "0F844D16-90F8-4B82-BAD6-72BE967E3167",
+      "latitude" : 20.719548,
+      "longitude" : -155.98757000000001,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Hana\", \"administrativeArea\": \"Maui\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p7"
+      ],
+      "timestamp" : "2026-01-04T04:20:33Z",
+      "timezoneID" : "Pacific\/Honolulu"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p10",
+      "assetLocalId" : "local:\/\/seed-dusty-christian-mads-julian-elizabeth-jana.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p21",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p11",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p1",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p16",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p14"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p6",
+      "favoriteForSouvenir" : 1,
+      "id" : "1F602123-9560-4960-B5A9-BF2F587DE80B",
+      "latitude" : 40.753799999999998,
+      "longitude" : -119.27706000000001,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Black Rock City\", \"administrativeArea\": \"Nevada\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p2",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p4",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p6",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p8",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p19"
+      ],
+      "timestamp" : "2025-12-27T13:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p11",
+      "assetLocalId" : "local:\/\/seed-carl-allie.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p5"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p5",
+      "favoriteForSouvenir" : 1,
+      "id" : "05F15B00-C355-48E7-93B0-0F87BA0505F3",
+      "latitude" : 42.289203000000001,
+      "longitude" : -89.058992000000003,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Rockford\", \"administrativeArea\": \"Illinois\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p5"
+      ],
+      "timestamp" : "2025-12-22T06:20:33Z",
+      "timezoneID" : "America\/Chicago"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p12",
+      "assetLocalId" : "local:\/\/seed-justin.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p4"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p17",
+      "favoriteForSouvenir" : 1,
+      "id" : "15452770-CBA2-441B-943E-1A1770F0C066",
+      "latitude" : 39.257443000000002,
+      "longitude" : -123.174699,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Redwood Valley\", \"administrativeArea\": \"California\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p17"
+      ],
+      "timestamp" : "2026-01-08T14:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p13",
+      "assetLocalId" : "local:\/\/seed-mads.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p11"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p8",
+      "favoriteForSouvenir" : 1,
+      "id" : "ADD4EC6D-B719-4E83-8DB7-80426B5A8321",
+      "latitude" : 38.959501000000003,
+      "longitude" : -119.94138700000001,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Stateline\", \"administrativeArea\": \"Nevada\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p8"
+      ],
+      "timestamp" : "2026-01-16T13:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p14",
+      "assetLocalId" : "local:\/\/seed-fiona.jpeg",
+      "contacts" : [
+
+      ],
+      "favoriteForSouvenir" : 1,
+      "id" : "56CBD2B4-276A-4991-8BAC-5F342BF0CC88",
+      "latitude" : 33.514384999999997,
+      "longitude" : -86.805295000000001,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Birmingham\", \"administrativeArea\": \"Alabama\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+
+      ],
+      "timestamp" : "2025-12-29T09:20:33Z",
+      "timezoneID" : "America\/Chicago"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p15",
+      "assetLocalId" : "local:\/\/seed-alyssa.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p15"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p14",
+      "favoriteForSouvenir" : 1,
+      "id" : "96AC8A34-E8AF-4AA7-A504-D262E8DF701E",
+      "latitude" : 9.7348700000000008,
+      "longitude" : 100.02132,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Koh Pha-Ngan\", \"administrativeArea\": \"Thailand\", \"country\": \"Thailand\", \"countryCode\": \"TH\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p14"
+      ],
+      "timestamp" : "2025-12-20T14:20:33Z",
+      "timezoneID" : "Asia\/Bangkok"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p16",
+      "assetLocalId" : "local:\/\/seed-kyle.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p3"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p18",
+      "favoriteForSouvenir" : 1,
+      "id" : "AE77A494-6238-488F-AEEC-0F40FA768567",
+      "latitude" : 37.768552,
+      "longitude" : -122.481616,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"San Francisco\", \"administrativeArea\": \"California\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p18"
+      ],
+      "timestamp" : "2026-01-15T12:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p17",
+      "assetLocalId" : "local:\/\/seed-ourhay.jpeg",
+      "contacts" : [
+
+      ],
+      "favoriteForSouvenir" : 1,
+      "id" : "28B78ACE-F5B9-4B24-91AD-858595311780",
+      "latitude" : 44.283000000000001,
+      "longitude" : -120.123,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Big Summit Prairie\", \"administrativeArea\": \"Oregon\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+
+      ],
+      "timestamp" : "2026-01-19T08:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p18",
+      "assetLocalId" : "local:\/\/seed-molly.jpeg",
+      "contacts" : [
+
+      ],
+      "favoriteForSouvenir" : 1,
+      "id" : "BCB86EC7-1280-4A30-8E09-CE784032BE71",
+      "latitude" : 36.467084999999997,
+      "longitude" : -118.64680799999999,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Silver City\", \"administrativeArea\": \"California\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+
+      ],
+      "timestamp" : "2026-01-18T15:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p19",
+      "assetLocalId" : "local:\/\/seed-kyle-josh.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p8",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p3"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p13",
+      "favoriteForSouvenir" : 0,
+      "id" : "A95EF4B0-DEEA-4FD0-9D21-0953BC451DFD",
+      "latitude" : 37.829155,
+      "longitude" : -122.23755199999999,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Piedmont\", \"administrativeArea\": \"California\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p13",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p18"
+      ],
+      "timestamp" : "2026-01-13T15:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p20",
+      "assetLocalId" : "local:\/\/seed-josh-justin-dustin-cameron-ashley-katysue-jeanne.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p8",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p4",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p18"
+      ],
+      "favoriteForSouvenir" : 1,
+      "id" : "8BDBD333-38C5-4371-8087-8830C38F67DC",
+      "latitude" : 48.853361,
+      "longitude" : 2.3591099999999998,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Paris\", \"administrativeArea\": \"France\", \"country\": \"France\", \"countryCode\": \"FR\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p13",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p9",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p17"
+      ],
+      "timestamp" : "2026-01-06T05:20:33Z",
+      "timezoneID" : "Europe\/Paris"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p21",
+      "assetLocalId" : "local:\/\/seed-josh-andy-mark-steve.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p8",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p17",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p20"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p11",
+      "favoriteForSouvenir" : 1,
+      "id" : "02791E84-9986-4809-9FAB-B8DEE35D5A08",
+      "latitude" : 49.284241999999999,
+      "longitude" : -123.095314,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Vancouver\", \"administrativeArea\": \"British Columbia\", \"country\": \"Canada\", \"countryCode\": \"CA\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p13",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p11",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p1"
+      ],
+      "timestamp" : "2026-01-05T05:20:33Z",
+      "timezoneID" : "America\/Vancouver"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p22",
+      "assetLocalId" : "local:\/\/seed-jane-01.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p6"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p7",
+      "favoriteForSouvenir" : 1,
+      "id" : "1ED27F22-0AAB-4EA3-B22A-07EC685C96BA",
+      "latitude" : 20.933499000000001,
+      "longitude" : -156.35737900000001,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Pa'ia\", \"administrativeArea\": \"Maui\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p7"
+      ],
+      "timestamp" : "2025-12-31T04:20:33Z",
+      "timezoneID" : "Pacific\/Honolulu"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p23",
+      "assetLocalId" : "local:\/\/seed-charlie.jpeg",
+      "contacts" : [
+
+      ],
+      "favoriteForSouvenir" : 1,
+      "id" : "FF7AC1EA-CCD6-412C-A546-989AB4B4897D",
+      "latitude" : 36.455410000000001,
+      "longitude" : -118.55561,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Mineral King\", \"administrativeArea\": \"California\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+
+      ],
+      "timestamp" : "2025-12-25T10:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p24",
+      "assetLocalId" : "local:\/\/seed-carole-zack-hana.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p13",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p10",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p2"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p3",
+      "favoriteForSouvenir" : 1,
+      "id" : "8DA67420-B812-4CB4-BB95-B60544AC7442",
+      "latitude" : 20.719548,
+      "longitude" : -155.98757000000001,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Hana\", \"administrativeArea\": \"Maui\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p3",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p20",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p16"
+      ],
+      "timestamp" : "2025-12-23T14:20:33Z",
+      "timezoneID" : "Pacific\/Honolulu"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p25",
+      "assetLocalId" : "local:\/\/seed-josh.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p8"
+      ],
+      "favoriteForSouvenir" : 1,
+      "id" : "F7B952B0-56DF-4FE7-9B61-24392B89DBB4",
+      "latitude" : 9.770721,
+      "longitude" : 99.962442999999993,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Koh Pha-Ngah\", \"administrativeArea\": \"Thailand\", \"country\": \"Thailand\", \"countryCode\": \"TH\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p13"
+      ],
+      "timestamp" : "2026-01-07T13:20:33Z",
+      "timezoneID" : "Asia\/Bangkok"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p26",
+      "assetLocalId" : "local:\/\/seed-jane-04.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p6"
+      ],
+      "favoriteForSouvenir" : 0,
+      "id" : "F7691A83-3808-4556-99FC-158B8735150B",
+      "latitude" : 20.788685999999998,
+      "longitude" : -156.00360599999999,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Hana\", \"administrativeArea\": \"Maui\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p7"
+      ],
+      "timestamp" : "2026-01-03T11:20:33Z",
+      "timezoneID" : "Pacific\/Honolulu"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p27",
+      "assetLocalId" : "local:\/\/seed-dusty-kyle-elizabeth-mads-gracie.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p21",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p11",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p1",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p3"
+      ],
+      "favoriteForSouvenir" : 0,
+      "id" : "E9268718-2966-4352-90F2-0AD19505538D",
+      "latitude" : 38.959501000000003,
+      "longitude" : -119.94138700000001,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Stateline\", \"administrativeArea\": \"Nevada\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p18",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p4",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p8",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p19"
+      ],
+      "timestamp" : "2025-12-28T09:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p28",
+      "assetLocalId" : "local:\/\/seed-cameron-kyle.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p3",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p18"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p9",
+      "favoriteForSouvenir" : 1,
+      "id" : "16395117-70E6-4E68-ABBD-A1E1A76BF2DD",
+      "latitude" : 50.822749999999999,
+      "longitude" : -0.14152899999999999,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Brighton\", \"administrativeArea\": \"England\", \"country\": \"United Kingdom\", \"countryCode\": \"GB\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p9",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p18"
+      ],
+      "timestamp" : "2025-12-21T15:20:33Z",
+      "timezoneID" : "Europe\/London"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p29",
+      "assetLocalId" : "local:\/\/seed-kyle-jevon-estelle.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p7",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p3"
+      ],
+      "favoriteForSouvenir" : 1,
+      "id" : "73C0712C-0AEE-4FA8-BC6B-E969E6DA09B8",
+      "latitude" : 37.854013999999999,
+      "longitude" : -122.249601,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Berkeley\", \"administrativeArea\": \"California\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p15",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p18"
+      ],
+      "timestamp" : "2026-01-12T07:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p30",
+      "assetLocalId" : "local:\/\/seed-rodney.jpeg",
+      "contacts" : [
+
+      ],
+      "favoriteForSouvenir" : 1,
+      "id" : "C2B921E7-8DFB-4311-93AF-1AB976B16EE3",
+      "latitude" : 37.900615000000002,
+      "longitude" : -122.514382,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Mill Valley\", \"administrativeArea\": \"California\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+
+      ],
+      "timestamp" : "2026-01-20T14:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p31",
+      "assetLocalId" : "local:\/\/seed-jane-02.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p6"
+      ],
+      "favoriteForSouvenir" : 0,
+      "id" : "810FF9E2-BAD3-4EF8-9E0D-E916D2DC9D1B",
+      "plusCode" : "",
+      "postalGeocodeJSON" : "",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p7"
+      ],
+      "timestamp" : "2026-01-01T07:20:33Z",
+      "timezoneID" : ""
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p32",
+      "assetLocalId" : "local:\/\/seed-kyle-christian-mj-sonia-laura-gracie.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p3",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p16"
+      ],
+      "favoriteForSouvenir" : 1,
+      "id" : "5C92AF5D-95DA-433C-B981-61AC9E5A14BE",
+      "latitude" : 39.007326999999997,
+      "longitude" : -119.950997,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Zephyr Cove\", \"administrativeArea\": \"Nevada\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p2",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p18"
+      ],
+      "timestamp" : "2026-01-09T04:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p33",
+      "assetLocalId" : "local:\/\/seed-christian.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p16"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p2",
+      "favoriteForSouvenir" : 1,
+      "id" : "77FE6817-2C6A-4FA6-BA1C-7C565C920BA3",
+      "latitude" : 38.498171999999997,
+      "longitude" : -122.90004,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Forestville\", \"administrativeArea\": \"California\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p2"
+      ],
+      "timestamp" : "2025-12-26T13:20:33Z",
+      "timezoneID" : "America\/Los_Angeles"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p34",
+      "assetLocalId" : "local:\/\/seed-jane-03.jpeg",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p6"
+      ],
+      "favoriteForSouvenir" : 0,
+      "id" : "F5744A8D-0204-4347-9B37-B17D7B7C0FD9",
+      "latitude" : 20.799057000000001,
+      "longitude" : -156.06708900000001,
+      "plusCode" : "",
+      "postalGeocodeJSON" : "{\"locality\": \"Nahiku\", \"administrativeArea\": \"Maui\", \"country\": \"United States\", \"countryCode\": \"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p7"
+      ],
+      "timestamp" : "2026-01-02T16:20:33Z",
+      "timezoneID" : "Pacific\/Honolulu"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p35",
+      "assetLocalId" : "1B611F09-C554-4DC2-9D2F-5BE1FCC5BA2C\/L0\/001",
+      "contacts" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p22"
+      ],
+      "favoritedBySouvenir" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p21",
+      "favoriteForSouvenir" : 0,
+      "id" : "4F781BC6-3C7E-4B15-99B1-FF62FDB5FA52",
+      "latitude" : 41.639024454251661,
+      "longitude" : -93.82080186674709,
+      "plusCode" : "86H8J5QH+JM",
+      "postalGeocodeJSON" : "{\"subThoroughfare\":\"4114\",\"postalCode\":\"50323\",\"locality\":\"Urbandale\",\"thoroughfare\":\"146th St\",\"subAdministrativeArea\":\"Dallas County\",\"country\":\"United States\",\"name\":\"4114 146th St\",\"administrativeArea\":\"IA\",\"countryCode\":\"US\"}",
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p21"
+      ],
+      "timestamp" : "2026-01-30T08:02:03Z",
+      "timezoneID" : "America\/Chicago"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p36",
+      "assetLocalId" : "3F804031-7F05-4E32-94E6-A0F8DEA4B536\/L0\/001",
+      "contacts" : [
+
+      ],
+      "favoriteForSouvenir" : 0,
+      "id" : "008C3E70-81E7-4637-A4E9-C9B84A9A6EC1",
+      "latitude" : 0,
+      "longitude" : 0,
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p13"
+      ],
+      "timestamp" : "2003-10-19T08:27:50Z",
+      "timezoneID" : "America\/Chicago"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p37",
+      "assetLocalId" : "3316088C-BC60-4743-8A50-2FAD648B67AD\/L0\/001",
+      "contacts" : [
+
+      ],
+      "favoriteForSouvenir" : 0,
+      "id" : "7961912C-BB6F-49A4-9362-61909F3657D5",
+      "latitude" : 0,
+      "longitude" : 0,
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p21"
+      ],
+      "timestamp" : "2026-01-27T18:46:56Z",
+      "timezoneID" : "America\/Chicago"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p38",
+      "assetLocalId" : "030914EF-551A-4557-9D12-7371310884A1\/L0\/001",
+      "contacts" : [
+
+      ],
+      "favoriteForSouvenir" : 0,
+      "id" : "06AFAB0F-FB27-47FA-8051-D529D07DFE6F",
+      "latitude" : 0,
+      "longitude" : 0,
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p21"
+      ],
+      "timestamp" : "2026-01-27T11:15:29Z",
+      "timezoneID" : "America\/Chicago"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p39",
+      "assetLocalId" : "F0A8A904-4E78-4658-89AB-5E4C6E419024\/L0\/001",
+      "contacts" : [
+
+      ],
+      "favoriteForSouvenir" : 0,
+      "id" : "FA62DE25-A492-450B-96A8-4C803CB2FBEE",
+      "latitude" : 49.284205,
+      "longitude" : -123.11173883333333,
+      "souvenirs" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p1"
+      ],
+      "timestamp" : "2018-05-26T08:05:20Z",
+      "timezoneID" : "America\/Chicago"
+    }
+  ],
+  "ShareEntity" : [
+
+  ],
+  "SouvenirEntity" : [
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p11",
+      "caption" : "Memories with Mark",
+      "createdAt" : "2026-01-05T05:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p21",
+      "id" : "C40FBFD7-3B9C-4E3F-9C82-D875ED92EE3F",
+      "lastLatitude" : 49.284241999999999,
+      "lastLongitude" : -123.095314,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p3",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p21"
+      ],
+      "primaryContact" : "x-coredata:\/\/\/ContactEntity\/tFE785C69-E59D-4C7F-98DE-D143ACB6297694",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:38:06Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p8",
+      "caption" : "Memories with Mads",
+      "createdAt" : "2026-01-16T13:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p13",
+      "id" : "EF781B98-A518-45D2-AEC0-5E79325363E6",
+      "lastLatitude" : 38.959501000000003,
+      "lastLongitude" : -119.94138700000001,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p10",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p13",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p27"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p24",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:07:01Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p13",
+      "caption" : "Memories with Josh",
+      "createdAt" : "2026-01-07T13:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p19",
+      "id" : "8B9833BC-234D-468D-ADFA-77E379D4952B",
+      "lastLatitude" : 0,
+      "lastLongitude" : 0,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p20",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p19",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p25",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p2",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p36",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p21"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p23",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:11:35Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p19",
+      "caption" : "Memories with Dusty",
+      "createdAt" : "2025-12-27T13:20:33Z",
+      "id" : "1BD6DF1C-7F9B-4FFD-B1E3-7F7FB1F9C462",
+      "lastLatitude" : 40.753799999999998,
+      "lastLongitude" : -119.27706000000001,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p10",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p5",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p27"
+      ],
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:37:40Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p3",
+      "caption" : "Memories with Zack",
+      "createdAt" : "2025-12-23T14:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p24",
+      "id" : "F9897157-78D2-4E38-94A4-EB16257CD5C0",
+      "lastLatitude" : 20.719548,
+      "lastLongitude" : -155.98757000000001,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p7",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p24"
+      ],
+      "primaryContact" : "x-coredata:\/\/\/ContactEntity\/tFE785C69-E59D-4C7F-98DE-D143ACB6297696",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:40:50Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p14",
+      "caption" : "Memories with Alyssa",
+      "createdAt" : "2025-12-20T14:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p15",
+      "id" : "24C6A18D-6C97-4BF9-80C2-BBC9A0FD7BF7",
+      "lastLatitude" : 9.7348700000000008,
+      "lastLongitude" : 100.02132,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p15"
+      ],
+      "primaryContact" : "x-coredata:\/\/\/ContactEntity\/tFE785C69-E59D-4C7F-98DE-D143ACB6297697",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:41:29Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p5",
+      "caption" : "Memories with Allie",
+      "createdAt" : "2025-12-22T06:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p11",
+      "id" : "8BE8163B-90DF-4C2B-AE41-7FD9663F5F0F",
+      "lastLatitude" : 42.289203000000001,
+      "lastLongitude" : -89.058992000000003,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p11"
+      ],
+      "primaryContact" : "x-coredata:\/\/\/ContactEntity\/tFE785C69-E59D-4C7F-98DE-D143ACB6297698",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:43:07Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p15",
+      "caption" : "Memories with Jevon",
+      "createdAt" : "2026-01-11T14:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p5",
+      "id" : "95ACFEBA-DBA4-49AF-8B1C-C4FC9AAFB635",
+      "lastLatitude" : 37.775219999999997,
+      "lastLongitude" : -122.411411,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p5",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p29"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p7",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-22T20:20:33Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p18",
+      "caption" : "Memories with Kyle",
+      "createdAt" : "2026-01-15T12:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p16",
+      "id" : "6E049F06-19E2-443A-BBAE-771E92436DAE",
+      "lastLatitude" : 37.768552,
+      "lastLongitude" : -122.481616,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p28",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p27",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p32",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p1",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p16",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p6",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p29",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p19",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p5"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p29",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:35:14Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p9",
+      "caption" : "Memories with Cameron",
+      "createdAt" : "2025-12-21T15:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p28",
+      "id" : "36BF1A70-2673-4486-9D0F-88CB7E21D0D5",
+      "lastLatitude" : 50.822749999999999,
+      "lastLongitude" : -0.14152899999999999,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p20",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p5",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p28"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p25",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:45:27Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p20",
+      "caption" : "Memories with Hana",
+      "createdAt" : "2025-12-30T14:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p4",
+      "id" : "8A9121ED-A292-478B-B0FD-2A172985A9DD",
+      "lastLatitude" : 20.894373999999999,
+      "lastLongitude" : -156.48729399999999,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p4",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p24"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p2",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-22T20:20:33Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p12",
+      "caption" : "Memories with Daryl",
+      "createdAt" : "2026-01-10T05:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p1",
+      "id" : "F4A1CEBB-63F5-4F6C-A44F-6BF1817BEA80",
+      "lastLatitude" : 37.854013999999999,
+      "lastLongitude" : -122.249601,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p5",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p1"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p30",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:35:33Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p6",
+      "caption" : "Memories with Julian",
+      "createdAt" : "2025-12-27T13:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p10",
+      "id" : "7B6E49B8-62AB-4612-AEE5-BF6073564294",
+      "lastLatitude" : 40.753799999999998,
+      "lastLongitude" : -119.27706000000001,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p10",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p5"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p14",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-22T20:20:33Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p21",
+      "createdAt" : "2026-01-30T08:02:34Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p35",
+      "id" : "7B9D1654-B9FA-4D8C-B59A-FCAA899D4FA6",
+      "lastLatitude" : 41.639024454251661,
+      "lastLongitude" : -93.82080186674709,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p37",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p35",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p38"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p22",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:14:59Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p1",
+      "caption" : "Memories with Andy",
+      "createdAt" : "2026-01-05T05:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p2",
+      "id" : "67C1A4C6-9E88-49B1-93A0-89B683208824",
+      "lastLatitude" : 0,
+      "lastLongitude" : 0,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p39",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p21",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p2"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p26",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:22:19Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p4",
+      "caption" : "Memories with Elizabeth",
+      "createdAt" : "2025-12-27T13:20:33Z",
+      "id" : "014EEF91-432C-4C98-B9A4-4C265940DA7B",
+      "lastLatitude" : 40.753799999999998,
+      "lastLongitude" : -119.27706000000001,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p10",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p27"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p21",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-22T20:20:33Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p17",
+      "caption" : "Memories with Justin",
+      "createdAt" : "2026-01-08T14:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p12",
+      "id" : "64E07C74-1360-49FA-B05C-FB4D4A70CEEB",
+      "lastLatitude" : 39.257443000000002,
+      "lastLongitude" : -123.174699,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p20",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p12"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p27",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:33:38Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p2",
+      "caption" : "Memories with Christian",
+      "createdAt" : "2025-12-26T13:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p33",
+      "id" : "D40802AA-2FAB-4EBE-AE38-841D09D4670D",
+      "lastLatitude" : 38.498171999999997,
+      "lastLongitude" : -122.90004,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p10",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p32",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p33"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p28",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:34:56Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p7",
+      "caption" : "Memories with Jane",
+      "createdAt" : "2025-12-31T04:20:33Z",
+      "favoritePhoto" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p22",
+      "id" : "F9FDDC44-3F77-4CF1-8745-A37352B1EA8F",
+      "lastLatitude" : 20.933499000000001,
+      "lastLongitude" : -156.35737900000001,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p34",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p22",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p9",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p26",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p31"
+      ],
+      "primaryContact" : "x-coredata:\/\/\/ContactEntity\/tFE785C69-E59D-4C7F-98DE-D143ACB6297695",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-30T08:39:34Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p16",
+      "caption" : "Memories with Carole",
+      "createdAt" : "2025-12-23T14:20:33Z",
+      "id" : "17CFB010-A12A-4483-AA91-B71AEBF47072",
+      "lastLatitude" : 20.719548,
+      "lastLongitude" : -155.98757000000001,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p7",
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p24"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p13",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-22T20:20:33Z"
+    },
+    {
+      "_objectID" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/SouvenirEntity\/p10",
+      "caption" : "Memories with Alan",
+      "createdAt" : "2026-01-17T15:20:33Z",
+      "id" : "1C095581-8E42-4812-A004-33E9A0B9AC1F",
+      "lastLatitude" : 49.342858,
+      "lastLongitude" : -123.11494399999999,
+      "photos" : [
+        "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/PhotoEntity\/p3"
+      ],
+      "primaryContact" : "x-coredata:\/\/07A8A8FC-70B5-4C52-B493-A3E5020610B8\/ContactEntity\/p12",
+      "shares" : [
+
+      ],
+      "updatedAt" : "2026-01-22T20:20:33Z"
+    }
+  ]
+}

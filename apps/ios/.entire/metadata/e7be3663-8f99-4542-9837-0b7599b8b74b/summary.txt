@@ -1,0 +1,3 @@
+Updated. Changes:
+- Button background: `.ultraThinMaterial` → `Color.successSvnr.opacity(0.2)` (subtle success tint)
+- Section: Added `.listRowSeparator(.hidden)` to remove the divider line below

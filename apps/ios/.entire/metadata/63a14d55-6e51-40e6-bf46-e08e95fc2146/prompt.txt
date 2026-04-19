@@ -1,0 +1,1 @@
+No, I don't want the user to have to select a photo. But the photos are coming out blurrier than the Messages app's photos. Maybe we need to implement a low-light detector. Ideally though the camera component would choose a nice frame with the subject's eyes open

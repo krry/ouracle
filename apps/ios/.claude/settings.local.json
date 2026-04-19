@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "mcp__acp__Write",
+      "mcp__acp__Edit",
+      "Bash(xcodebuild:*)",
+      "Bash(xcrun simctl:*)",
+      "Bash(grep:*)",
+      "Bash(python3:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:orfx.kerry.ink)",
+      "Bash(ls:*)",
+      "Bash(git checkout:*)",
+      "Bash(rm:*)",
+      "Bash(bun install:*)",
+      "Bash(bun exec:*)",
+      "Bash(npx prisma:*)",
+      "Bash(find:*)",
+      "Bash(git reset:*)",
+      "Bash(git:*)",
+      "WebSearch"
+    ]
+  },
+  "sandbox": {
+    "enabled": false,
+    "autoAllowBashIfSandboxed": false
+  },
+  "spinnerTipsEnabled": true
+}

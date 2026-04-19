@@ -1,0 +1,1 @@
+Is it considerably more expensive to query and filter? It seems like additional upkeep and duplicative bloat unless I am missing something?
