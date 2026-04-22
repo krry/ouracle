@@ -1041,23 +1041,27 @@ app.post('/auth/device/verify', async (req, res) => {
 
   if (!valid) return res.status(401).json({ error: 'Signature verification failed.' });
 
-  // Find or create the seeker for this device.
-  let device = await findDeviceBySigningKey(signing_key);
-  let seekerId = device?.seeker_id;
-  const isNew = !device;
+  try {
+    let device = await findDeviceBySigningKey(signing_key);
+    let seekerId = device?.seeker_id;
+    const isNew = !device;
 
-  if (isNew) {
-    seekerId = await createDeviceSeeker();
+    if (isNew) {
+      seekerId = await createDeviceSeeker();
+    }
+
+    await upsertDeviceIdentity({ signingKey: signing_key, agreementKey: public_key, seekerId });
+
+    const tokens = await issueTokenPair(seekerId);
+    return res.status(isNew ? 201 : 200).json({
+      ...tokens,
+      user_id: seekerId,
+      is_new: isNew,
+    });
+  } catch (err) {
+    console.error('[device/verify] DB error:', err);
+    return res.status(500).json({ error: err.message });
   }
-
-  await upsertDeviceIdentity({ signingKey: signing_key, agreementKey: public_key, seekerId });
-
-  const tokens = await issueTokenPair(seekerId);
-  return res.status(isNew ? 201 : 200).json({
-    ...tokens,
-    user_id: seekerId,
-    is_new: isNew,
-  });
 });
 
 // POST /covenant — accept the current covenant. Auth required.
