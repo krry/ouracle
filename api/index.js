@@ -983,6 +983,16 @@ app.post('/auth/refresh', async (req, res) => {
 });
 
 // ── Device Auth ─────────────────────────────────────────────────────────────
+// GET /auth/device/ping — smoke test DB by running a known-safe query
+app.get('/auth/device/ping', async (req, res) => {
+  try {
+    const device = await findDeviceBySigningKey('__ping__');
+    return res.json({ ok: true, found: !!device });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 // Curve25519/Ed25519 keypair-based auth for native iOS clients.
 // Flow: POST /auth/device/challenge → POST /auth/device/verify → tokens
 // Nonces are in-memory with a 60s TTL (Railway is single-instance).

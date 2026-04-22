@@ -486,9 +486,10 @@ export async function upsertDeviceIdentity({ signingKey, agreementKey, seekerId 
 }
 
 export async function createDeviceSeeker() {
+  const { handle, handle_base } = await generateHandle('seeker');
   const rows = await sql`
-    INSERT INTO seekers (consent_version, consented_at)
-    VALUES ('device-v1', now())
+    INSERT INTO seekers (consent_version, consented_at, handle, handle_base)
+    VALUES ('device-v1', now(), ${handle}, ${handle_base})
     RETURNING id
   `;
   return rows[0].id;
