@@ -454,3 +454,42 @@ export async function getOctaveStep(number) {
   `;
   return rows[0] ?? null;
 }
+
+// ─────────────────────────────────────────────
+// DEVICE AUTH
+// Curve25519 keypair-based auth for native iOS clients.
+// ─────────────────────────────────────────────
+
+export async function findDeviceBySigningKey(signingKey) {
+  const rows = await sql`
+    SELECT * FROM device_identities WHERE signing_key = ${signingKey} LIMIT 1
+  `;
+  return rows[0] ?? null;
+}
+
+export async function upsertDeviceIdentity({ signingKey, agreementKey, seekerId }) {
+  const [existing] = await sql`
+    SELECT id FROM device_identities WHERE signing_key = ${signingKey} LIMIT 1
+  `;
+  if (existing) {
+    await sql`
+      UPDATE device_identities
+      SET last_seen_at = now(), agreement_key = ${agreementKey}
+      WHERE id = ${existing.id}
+    `;
+    return;
+  }
+  await sql`
+    INSERT INTO device_identities (seeker_id, signing_key, agreement_key)
+    VALUES (${seekerId}, ${signingKey}, ${agreementKey})
+  `;
+}
+
+export async function createDeviceSeeker() {
+  const rows = await sql`
+    INSERT INTO seekers (consent_version, consented_at)
+    VALUES ('device-v1', now())
+    RETURNING id
+  `;
+  return rows[0].id;
+}

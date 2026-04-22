@@ -186,6 +186,21 @@ RULES:
 - If affect is ambiguous or mixed, say so in gloss and still give best-guess coordinates with low confidence.
 - Do not project beyond what is in the text.`;
 
+function normalizeSemanticResult(raw) {
+  return {
+    vagal_state:        raw.vagal_state        ?? 'sympathetic',
+    vagal_confidence:   raw.vagal_confidence   ?? 'low',
+    vagal_reasoning:    raw.vagal_reasoning    ?? 'insufficient signal',
+    belief_pattern:     raw.belief_pattern     ?? null,
+    belief_confidence:  raw.belief_confidence  ?? 'low',
+    belief_reasoning:   raw.belief_reasoning   ?? 'insufficient signal',
+    quality:            raw.quality            ?? null,
+    quality_confidence: raw.quality_confidence ?? 'low',
+    quality_is_shock:   raw.quality_is_shock   ?? false,
+    quality_reasoning:  raw.quality_reasoning  ?? 'insufficient signal',
+  };
+}
+
 function coerceBoundedNumber(value, field) {
   const parsed = typeof value === 'number' ? value : Number.parseFloat(String(value));
   if (!Number.isFinite(parsed)) {
@@ -241,7 +256,7 @@ export async function inferSemantics(text) {
     const toolCall = response.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) throw new Error('No tool call in inference response');
 
-    const result = JSON.parse(toolCall.function.arguments || '{}');
+    const result = normalizeSemanticResult(JSON.parse(toolCall.function.arguments || '{}'));
     const durationMs = Date.now() - startedAt;
 
     // Log — correlation ID only, no seeker data

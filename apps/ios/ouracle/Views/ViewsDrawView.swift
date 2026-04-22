@@ -1,22 +1,28 @@
 import SwiftUI
 
 struct ViewsDrawView: View {
+    @EnvironmentObject private var accent: TreasureAccent
     @State private var decks: [OracleDeck] = []
     @State private var selectedDeckIDs: Set<String> = []
     @State private var drawnCard: OracleCard? = nil
     @State private var isDrawing = false
     @State private var isLoadingDecks = true
-    @State private var deckPickerOpen = false
+    @State private var sheetDetent: PresentationDetent = .height(96)
+
+    private let smallDetent = PresentationDetent.height(96)
 
     var body: some View {
-        VStack(spacing: 0) {
-            cardArea
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            Divider()
-            deckMenu
-            drawBar
-        }
-        .task { await loadDecks() }
+        cardArea
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .sheet(isPresented: .constant(true)) {
+                deckSheet
+                    .presentationDetents([smallDetent, .large], selection: $sheetDetent)
+                    .presentationBackgroundInteraction(.enabled(upThrough: smallDetent))
+                    .presentationDragIndicator(.visible)
+                    .presentationCornerRadius(20)
+                    .interactiveDismissDisabled()
+            }
+            .task { await loadDecks() }
     }
 
     // MARK: - Card area
@@ -41,7 +47,6 @@ struct ViewsDrawView: View {
                                 .foregroundStyle(.tertiary)
                         }
                     }
-
                     if !card.body.isEmpty {
                         Text(card.body)
                             .font(.body)
@@ -51,75 +56,91 @@ struct ViewsDrawView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(24)
+                .padding(.bottom, 80)
             }
         } else {
-            VStack(spacing: 16) {
-                Text("✶")
-                    .font(.system(size: 56))
-                    .foregroundStyle(.secondary)
-                Text(isLoadingDecks ? "loading decks..." : "draw a card")
-                    .font(.system(.subheadline, design: .monospaced))
-                    .foregroundStyle(.secondary)
+            Button(action: drawCard) {
+                VStack(spacing: 16) {
+                    Text(isDrawing ? "·" : "✶")
+                        .font(.system(size: 56))
+                        .foregroundStyle(isDrawing ? Color.secondary : accent.color)
+                    Text(isLoadingDecks ? "loading decks..." : isDrawing ? "drawing..." : "draw a card")
+                        .font(.system(.subheadline, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                }
             }
+            .buttonStyle(.plain)
+            .disabled(isDrawing || isLoadingDecks)
         }
     }
 
-    // MARK: - Deck menu
+    // MARK: - Sheet
 
-    private var deckMenu: some View {
+    private var deckSheet: some View {
         VStack(spacing: 0) {
-            // Header row: "decks" toggle + all · some · one · none
-            HStack(spacing: 0) {
-                Button {
-                    withAnimation(.easeOut(duration: 0.18)) {
-                        deckPickerOpen.toggle()
+            List {
+                Section {
+                    if isLoadingDecks {
+                        ProgressView()
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .listRowBackground(Color.clear)
+                    } else {
+                        ForEach(decks) { deck in
+                            deckRow(deck)
+                        }
                     }
-                } label: {
-                    HStack(spacing: 5) {
+                } header: {
+                    HStack(spacing: 0) {
                         Text("decks")
-                            .font(.system(.caption, design: .monospaced).weight(.semibold))
-                            .foregroundStyle(.secondary)
-                        Text(deckPickerOpen ? "▴" : "▾")
-                            .font(.system(size: 8))
-                            .foregroundStyle(.secondary)
+                            .font(.system(.footnote, design: .monospaced).weight(.semibold))
+                            .textCase(nil)
+                        Spacer()
+                        quickSelectButtons
                     }
-                }
-                .buttonStyle(.plain)
-
-                Spacer()
-
-                HStack(spacing: 0) {
-                    quickSelectButton("all")  { selectAll() }
-                    Text("·").foregroundStyle(.tertiary).font(.caption).padding(.horizontal, 6)
-                    quickSelectButton("some") { selectSome() }
-                    Text("·").foregroundStyle(.tertiary).font(.caption).padding(.horizontal, 6)
-                    quickSelectButton("one")  { selectOne() }
-                    Text("·").foregroundStyle(.tertiary).font(.caption).padding(.horizontal, 6)
-                    quickSelectButton("none") { selectNone() }
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 12)
-            .padding(.bottom, deckPickerOpen ? 10 : 12)
+            .listStyle(.plain)
 
-            // Expandable deck list
-            if deckPickerOpen {
-                if isLoadingDecks {
-                    ProgressView().controlSize(.small).padding(.bottom, 10)
-                } else {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(decks) { deck in
-                                deckChip(deck)
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 12)
-                    }
+            Divider()
+            drawButton
+        }
+    }
+
+    private func deckRow(_ deck: OracleDeck) -> some View {
+        let selected = selectedDeckIDs.contains(deck.id)
+        return Button {
+            if selected { selectedDeckIDs.remove(deck.id) }
+            else { selectedDeckIDs.insert(deck.id) }
+        } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(deck.name)
+                        .foregroundStyle(.primary)
+                    Text("\(deck.cardCount) cards")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                if selected {
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(accent.color)
+                        .fontWeight(.semibold)
                 }
             }
         }
-        .background(.ultraThinMaterial)
+        .foregroundStyle(.primary)
+    }
+
+    private var quickSelectButtons: some View {
+        HStack(spacing: 0) {
+            quickSelectButton("all")  { selectAll() }
+            Text("·").foregroundStyle(.tertiary).font(.caption).padding(.horizontal, 6)
+            quickSelectButton("some") { selectSome() }
+            Text("·").foregroundStyle(.tertiary).font(.caption).padding(.horizontal, 6)
+            quickSelectButton("one")  { selectOne() }
+            Text("·").foregroundStyle(.tertiary).font(.caption).padding(.horizontal, 6)
+            quickSelectButton("none") { selectNone() }
+        }
     }
 
     private func quickSelectButton(_ label: String, action: @escaping () -> Void) -> some View {
@@ -129,38 +150,7 @@ struct ViewsDrawView: View {
             .buttonStyle(.plain)
     }
 
-    private func deckChip(_ deck: OracleDeck) -> some View {
-        let selected = selectedDeckIDs.contains(deck.id)
-        return Button {
-            if selected { selectedDeckIDs.remove(deck.id) }
-            else { selectedDeckIDs.insert(deck.id) }
-        } label: {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(deck.name)
-                    .font(.system(.caption, design: .monospaced).weight(.semibold))
-                Text("\(deck.cardCount)")
-                    .font(.system(size: 10, design: .monospaced))
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 7)
-            .background(selected ? Color.jing.opacity(0.15) : Color.clear)
-            .foregroundStyle(selected ? Color.jing : Color.secondary)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(
-                        selected ? Color.jing.opacity(0.5) : Color.secondary.opacity(0.2),
-                        lineWidth: 1
-                    )
-            )
-        }
-        .buttonStyle(.plain)
-    }
-
-    // MARK: - Draw bar
-
-    private var drawBar: some View {
+    private var drawButton: some View {
         Button(action: drawCard) {
             HStack(spacing: 8) {
                 if isDrawing {
@@ -172,44 +162,33 @@ struct ViewsDrawView: View {
                     .font(.system(.body, design: .monospaced).weight(.semibold))
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 20)
         }
         .disabled(isDrawing || isLoadingDecks)
-        .foregroundStyle(isDrawing ? Color.secondary : Color.jing)
-        .background(.ultraThinMaterial)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 8)
+        .foregroundStyle(isDrawing ? Color.secondary : accent.color)
     }
 
-    // MARK: - Selection helpers (ported from OraclePanel.svelte)
+    // MARK: - Selection helpers
 
-    private func selectAll() {
-        selectedDeckIDs = Set(decks.map(\.id))
-    }
-
-    private func selectNone() {
-        selectedDeckIDs = []
-    }
+    private func selectAll()  { selectedDeckIDs = Set(decks.map(\.id)) }
+    private func selectNone() { selectedDeckIDs = [] }
 
     private func selectOne() {
         guard !decks.isEmpty else { return }
         selectNone()
-        let chosen = decks[Int.random(in: 0..<decks.count)]
-        selectedDeckIDs.insert(chosen.id)
+        selectedDeckIDs.insert(decks[Int.random(in: 0..<decks.count)].id)
     }
 
     private func selectSome() {
         guard !decks.isEmpty else { return }
         selectNone()
-        // Fisher-Yates shuffle, pick random 1…n decks
         var pool = decks
         for i in stride(from: pool.count - 1, through: 1, by: -1) {
-            let j = Int.random(in: 0...i)
-            pool.swapAt(i, j)
+            pool.swapAt(i, Int.random(in: 0...i))
         }
-        let count = Int.random(in: 1...pool.count)
-        for deck in pool.prefix(count) {
-            selectedDeckIDs.insert(deck.id)
+        pool.prefix(Int.random(in: 1...pool.count)).forEach {
+            selectedDeckIDs.insert($0.id)
         }
     }
 
@@ -223,7 +202,6 @@ struct ViewsDrawView: View {
 
     private func drawCard() {
         isDrawing = true
-        // empty selection = draw from all (pass nil)
         let deckIDs = selectedDeckIDs.isEmpty ? nil : Array(selectedDeckIDs)
         Task {
             defer { isDrawing = false }
@@ -235,4 +213,5 @@ struct ViewsDrawView: View {
 
 #Preview {
     ViewsDrawView()
+        .environmentObject(TreasureAccent())
 }

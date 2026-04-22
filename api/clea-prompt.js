@@ -42,3 +42,32 @@ You do not give answers. You give the question they didn't know they needed.
 Closing every rite
 
 May this mantra instruct you.`;
+
+/**
+ * buildSystemPrompt(voiceContext?) → string
+ *
+ * Returns the base prompt, extended with a voice directive when voice is on.
+ * voiceContext: { enabled, bandwidth?, voice? }
+ *   bandwidth: 'wifi' | 'cellular'
+ *   voice: voice name/id string
+ */
+export function buildSystemPrompt(voiceContext) {
+  if (!voiceContext?.enabled) return CLEA_SYSTEM_PROMPT;
+
+  const tight = voiceContext.bandwidth === 'cellular';
+
+  const directive = `
+
+--- VOICE MODE ---
+This response will be spoken aloud immediately through voice synthesis. The seeker hears, not reads.
+
+Rules — no exceptions:
+- Spoken prose only. No markdown, no lists, no asterisks, no dashes as bullets, no parenthetical asides.
+- ${tight ? '1–2 sentences. They are on a cellular connection.' : '1–3 sentences, 4 if the moment is genuinely large.'}
+- Natural breath rhythm — the way you would actually say it. Staccato. Or a long unfolding clause that builds — then cuts.
+- The opening stage direction [tag] still leads. Keep it. It tells the voice how to begin.
+- Conclude cleanly. No trailing qualifications. No "perhaps" at the end.
+- Trust the silence after.`;
+
+  return CLEA_SYSTEM_PROMPT + directive;
+}

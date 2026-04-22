@@ -707,6 +707,11 @@ function adjustAffectFromVagalLexicon(text, affect) {
 }
 
 export async function infer(text) {
+  // Skip LLM inference for empty or trivially short messages (e.g. initial greeting ping).
+  // Groq validates tool call args server-side and 400s when the model can't produce
+  // meaningful classifications from no signal.
+  if (!text || text.trim().split(/\s+/).length < 3) return null;
+
   if (process.env.SEMANTIC_INFERENCE === 'true') {
     const mode = (process.env.SEMANTIC_INFERENCE_MODE || 'llm').toLowerCase();
     try {

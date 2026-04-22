@@ -27,8 +27,8 @@ function sendSSE(res, obj) {
 const audioCache = new Map(); // text -> { base64, timestamp }
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 import { makeLlmClient } from './llm-client.js';
-import { CLEA_SYSTEM_PROMPT } from './clea-prompt.js';
-import { randomUUID } from 'crypto';
+import { CLEA_SYSTEM_PROMPT, buildSystemPrompt } from './clea-prompt.js';
+import { randomUUID, randomBytes, createPublicKey, verify as cryptoVerify } from 'crypto';
 import { readFileSync, existsSync, mkdirSync, unlink } from 'fs';
 import { execSync } from 'child_process';
 const pkgPath = new URL('package.json', import.meta.url);
@@ -85,6 +85,9 @@ import {
   getOrCreateSeekerByAuthId,
   listOctaveSteps,
   getOctaveStep,
+  findDeviceBySigningKey,
+  upsertDeviceIdentity,
+  createDeviceSeeker,
 } from './db.js';
 import { auth } from './auth-config.js';
 import { toNodeHandler } from 'better-auth/node';
@@ -169,6 +172,27 @@ app.use('/ambient', express.static(join(__dirname, 'data/ambient'), {
   maxAge: '7d',
   setHeaders: (res) => res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin'),
 }));
+
+// ── GET /ambience — manifest of available soundscape climes + overlays ────────
+app.get('/ambience', (_req, res) => {
+  res.json({
+    version: 1,
+    climes: [
+      { id: 'forest',  label: 'forest',  file: 'scene-forest.mp3'  },
+      { id: 'jungle',  label: 'jungle',  file: 'scene-jungle.mp3'  },
+      { id: 'night',   label: 'night',   file: 'scene-night.mp3'   },
+      { id: 'meadow',  label: 'meadow',  file: 'scene-meadow.mp3'  },
+      { id: 'desert',  label: 'desert',  file: 'scene-sonora.mp3'  },
+      { id: 'storm',   label: 'storm',   file: 'scene-deluge.mp3'  },
+      { id: 'water',   label: 'water',   file: 'scene-spring.mp3'  },
+    ],
+    overlays: [
+      { id: 'bowls',  label: 'bowls',  file: 'bowls-binaural-singing.mp3' },
+      { id: 'chimes', label: 'chimes', file: 'feature-wind-chimes.mp3'    },
+      { id: 'bells',  label: 'bells',  file: 'bowls-rung.mp3'             },
+    ],
+  });
+});
 
 app.use('/tarot', express.static(join(__dirname, '../assets/tarot'), {
   maxAge: '30d',
@@ -958,6 +982,84 @@ app.post('/auth/refresh', async (req, res) => {
   }
 });
 
+// ── Device Auth ─────────────────────────────────────────────────────────────
+// Curve25519/Ed25519 keypair-based auth for native iOS clients.
+// Flow: POST /auth/device/challenge → POST /auth/device/verify → tokens
+// Nonces are in-memory with a 60s TTL (Railway is single-instance).
+
+const deviceNonces = new Map(); // signingKey (base64) → { nonce: Buffer, expiresAt: number }
+const NONCE_TTL_MS = 60_000;
+const NONCE_LENGTH = 32;
+
+function pruneNonces() {
+  const now = Date.now();
+  for (const [k, v] of deviceNonces) {
+    if (v.expiresAt < now) deviceNonces.delete(k);
+  }
+}
+
+// POST /auth/device/challenge — issue a 32-byte nonce for the given signing key
+app.post('/auth/device/challenge', async (req, res) => {
+  const { signing_key } = req.body;
+  if (!signing_key) return res.status(400).json({ error: 'signing_key required.' });
+  pruneNonces();
+  const nonce = randomBytes(NONCE_LENGTH);
+  deviceNonces.set(signing_key, { nonce, expiresAt: Date.now() + NONCE_TTL_MS });
+  return res.json({ nonce: nonce.toString('hex') });
+});
+
+// POST /auth/device/verify — verify Ed25519 signature, issue JWT tokens
+app.post('/auth/device/verify', async (req, res) => {
+  const { public_key, signing_key, nonce, signature } = req.body;
+  if (!public_key || !signing_key || !nonce || !signature) {
+    return res.status(400).json({ error: 'public_key, signing_key, nonce, and signature are required.' });
+  }
+
+  const stored = deviceNonces.get(signing_key);
+  if (!stored || stored.expiresAt < Date.now()) {
+    return res.status(401).json({ error: 'Challenge expired or not found. Request a new challenge.' });
+  }
+  deviceNonces.delete(signing_key);
+
+  // Verify the Ed25519 signature over the nonce.
+  let valid = false;
+  try {
+    const signingKeyBuffer = Buffer.from(signing_key, 'base64');
+    const signatureBuffer = Buffer.from(signature, 'base64');
+    const keyObject = createPublicKey({
+      key: Buffer.concat([
+        Buffer.from('302a300506032b6570032100', 'hex'), // Ed25519 SubjectPublicKeyInfo prefix
+        signingKeyBuffer,
+      ]),
+      format: 'der',
+      type: 'spki',
+    });
+    valid = cryptoVerify(null, stored.nonce, keyObject, signatureBuffer);
+  } catch {
+    return res.status(401).json({ error: 'Invalid signature.' });
+  }
+
+  if (!valid) return res.status(401).json({ error: 'Signature verification failed.' });
+
+  // Find or create the seeker for this device.
+  let device = await findDeviceBySigningKey(signing_key);
+  let seekerId = device?.seeker_id;
+  const isNew = !device;
+
+  if (isNew) {
+    seekerId = await createDeviceSeeker();
+  }
+
+  await upsertDeviceIdentity({ signingKey: signing_key, agreementKey: public_key, seekerId });
+
+  const tokens = await issueTokenPair(seekerId);
+  return res.status(isNew ? 201 : 200).json({
+    ...tokens,
+    user_id: seekerId,
+    is_new: isNew,
+  });
+});
+
 // POST /covenant — accept the current covenant. Auth required.
 app.post('/covenant', authenticate, async (req, res) => {
   const seeker = await recordCovenant(req.seeker_id, String(COVENANT.version));
@@ -1284,6 +1386,8 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
   };
 
   // Initialize sentence streamer with mute/voice preferences
+  const voiceContext = req.body.voice_context || (req.body.voice ? { enabled: true, voice: req.body.voice } : null);
+  const activeSystem = buildSystemPrompt(voiceContext);
   streamer = new SentenceAudioStreamer(res, {
     muted: req.body.muted || false,
     voice: req.body.voice
@@ -1304,7 +1408,7 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
 
     const llm = makeLlmClient();
     const stream = await llm.chat({
-      system: CLEA_SYSTEM_PROMPT,
+      system: activeSystem,
       // Include the opening greeting so Clea knows the conversation has already started
       // and doesn't re-introduce herself on the seeker's first reply.
       messages: [
@@ -1390,7 +1494,7 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
           affect,
         });
 
-        const offeringSystem = `${CLEA_SYSTEM_PROMPT}
+        const offeringSystem = `${activeSystem}
 
 --- Something has been heard. There is a practice — a rite — that wants to meet this moment.
 Offer it. Not as prescription, not as diagnosis. As an invitation. Ask if the seeker is open to receiving it.
@@ -1423,7 +1527,7 @@ Brief — one or two sentences. Let it breathe. Do not describe the rite yet.`;
       ];
       const suggestion = clarifiers[newTurn - 1] || 'What else wants to be said?';
 
-      const systemWithSuggestion = `${CLEA_SYSTEM_PROMPT}
+      const systemWithSuggestion = `${activeSystem}
 
 --- Suggested direction (strong suggestion — take it, transform it, or release it entirely if the seeker's words demand something else):
 "${suggestion}"
@@ -1590,7 +1694,7 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
       llmMessages.push({ role: 'user', content: message });
       const llm = makeLlmClient();
       const stream = await llm.chat({
-        system: `${CLEA_SYSTEM_PROMPT}\n\n--- The seeker has drawn a divination card and is asking for your interpretation. Respond as Clea — do not prescribe a rite, do not run an assessment. Simply receive the card and the seeker together, and speak.`,
+        system: `${activeSystem}\n\n--- The seeker has drawn a divination card and is asking for your interpretation. Respond as Clea — do not prescribe a rite, do not run an assessment. Simply receive the card and the seeker together, and speak.`,
         messages: llmMessages,
         temperature: 0.9,
         maxTokens: 512,
@@ -1631,7 +1735,7 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
         quality_is_shock: offeringState.quality.is_shock,
       });
 
-      const offeringSystem = `${CLEA_SYSTEM_PROMPT}
+      const offeringSystem = `${activeSystem}
 
 --- You have offered the seeker a rite. Now you are in conversation about whether they are ready to receive it.
 If the seeker is clearly ready and willing — consenting, open, present — end your response with [READY] on its own at the very end.
@@ -1742,7 +1846,7 @@ Most responses will NOT include [READY].`;
       const riteContext = session.rite_json
         ? `The rite prescribed: "${session.rite_json.rite_name}" — ${session.rite_json.act}`
         : '';
-      const prescribedSystem = `${CLEA_SYSTEM_PROMPT}
+      const prescribedSystem = `${activeSystem}
 
 --- ${riteContext}
 The seeker has been given a rite. They may be asking about it, sitting with it, or reporting back on what happened.
@@ -1964,6 +2068,8 @@ app.get('/health', (req, res) => {
       { method: 'POST', path: '/auth/token' },
       { method: 'POST', path: '/auth/refresh' },
       { method: 'POST', path: '/auth/social-exchange' },
+      { method: 'POST', path: '/auth/device/challenge' },
+      { method: 'POST', path: '/auth/device/verify' },
       { method: 'POST', path: '/seeker/new' },
       // Auth required endpoints omitted for brevity
     ];

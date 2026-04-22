@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ViewsChatView: View {
+    @EnvironmentObject private var accent: TreasureAccent
     @ObservedObject var session: ChatSession
     @State private var inputText = ""
     @FocusState private var isInputFocused: Bool
@@ -86,6 +87,16 @@ struct ViewsChatView: View {
 
     private var inputBar: some View {
         HStack(alignment: .bottom, spacing: 10) {
+            Button {
+                session.voiceEnabled.toggle()
+            } label: {
+                Image(systemName: session.voiceEnabled ? "waveform" : "mic")
+                    .font(.body)
+                    .foregroundStyle(session.voiceEnabled ? accent.color : Color.secondary)
+                    .animation(.easeOut(duration: 0.2), value: session.voiceEnabled)
+            }
+            .buttonStyle(.plain)
+
             TextField("ask...", text: $inputText)
                 .font(.body)
                 .focused($isInputFocused)
@@ -95,7 +106,7 @@ struct ViewsChatView: View {
             Button(action: sendIfReady) {
                 Text("ꜛ")
                     .font(.title3.weight(.bold))
-                    .foregroundStyle(canSend ? Color.jing : Color.secondary)
+                    .foregroundStyle(canSend ? accent.color : Color.secondary)
             }
             .disabled(!canSend)
             .animation(.easeOut(duration: 0.15), value: canSend)
