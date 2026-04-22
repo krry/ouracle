@@ -272,10 +272,14 @@ import { storageMonitor } from './storage-monitor';
 		guestToken = guest_token;
 	}
 
-	// scroll to bottom on new messages
+	// scroll to bottom on new messages — only when near the bottom so user
+	// scroll-up during a long response isn't clobbered by the post-stream cleanup pass.
 	$effect(() => {
 		if ($messages && msgList) {
-			setTimeout(() => msgList.scrollTo({ top: msgList.scrollHeight, behavior: 'smooth' }), 50);
+			const nearBottom = msgList.scrollHeight - msgList.scrollTop - msgList.clientHeight < 120;
+			if (nearBottom || $streaming) {
+				setTimeout(() => msgList.scrollTo({ top: msgList.scrollHeight, behavior: 'smooth' }), 50);
+			}
 		}
 	});
 

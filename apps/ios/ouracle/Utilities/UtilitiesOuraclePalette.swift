@@ -86,10 +86,22 @@ extension Color {
         OuraclePaletteStore.accentColor() ?? Color("AccentColor")
     }
 
-    // Three treasures — mirrors Ouracle web design tokens
-    static let jing = Color(hue: 217.0 / 360.0, saturation: 0.62, brightness: 0.82)
-    static let shen = Color(hue: 354.0 / 360.0, saturation: 0.65, brightness: 0.82)
-    static let qi   = Color(hue:  80.0 / 360.0, saturation: 0.60, brightness: 0.76)
+    // Three treasures — mirrors Ouracle web design tokens, adaptive light/dark
+    static let jing = Color(uiColor: UIColor(dynamicProvider: { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(hue: 217/360, saturation: 0.62, brightness: 0.82, alpha: 1)
+            : UIColor(hue: 217/360, saturation: 0.75, brightness: 0.50, alpha: 1)
+    }))
+    static let shen = Color(uiColor: UIColor(dynamicProvider: { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(hue: 354/360, saturation: 0.65, brightness: 0.82, alpha: 1)
+            : UIColor(hue: 354/360, saturation: 0.82, brightness: 0.52, alpha: 1)
+    }))
+    static let qi = Color(uiColor: UIColor(dynamicProvider: { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(hue: 80/360, saturation: 0.60, brightness: 0.76, alpha: 1)
+            : UIColor(hue: 80/360, saturation: 0.70, brightness: 0.45, alpha: 1)
+    }))
 }
 
 extension Color {

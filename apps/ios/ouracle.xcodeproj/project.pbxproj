@@ -63,17 +63,13 @@
 		C7BE810B2F17F1B3004A92CB /* souvenirUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = souvenirUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C7DEDF9E2F1AC06100FFF806 /* Testing.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Testing.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/Testing.framework; sourceTree = DEVELOPER_DIR; };
 		C7DEV0012F17F1B2004A92CB /* ouracle Dev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ouracle Dev.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C7AA00012F990000000001AA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ouracle/Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-		C7AA00022F990000000002AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C7AA00012F990000000001AA /* Assets.xcassets */; };
-		C7AA00032F990000000003AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C7AA00012F990000000001AA /* Assets.xcassets */; };
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		C74CAE842F5895FE001B0338 /* Exceptions for "ouracle" folder in "ouracle" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				Assets.xcassets,
 			);
 			target = C7BE80EC2F17F1B2004A92CB /* ouracle */;
 		};
@@ -81,7 +77,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				Assets.xcassets,
 			);
 			target = C7DEV0072F17F1B2004A92CB /* ouracle Dev */;
 		};
@@ -146,7 +141,6 @@
 		C7BE80E42F17F1B2004A92CB = {
 			isa = PBXGroup;
 			children = (
-				C7AA00012F990000000001AA /* Assets.xcassets */,
 				C7BE80EF2F17F1B2004A92CB /* ouracle */,
 				C7DEDF9D2F1AC06100FFF806 /* Frameworks */,
 				C7BE80EE2F17F1B2004A92CB /* Products */,
@@ -323,7 +317,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C7AA00022F990000000002AA /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -345,7 +338,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C7AA00032F990000000003AA /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

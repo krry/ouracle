@@ -37,6 +37,7 @@
 
 <script lang="ts">
   import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
   import AmbientControls from './AmbientControls.svelte';
   import { creds, authed, seekerState, pendingRite, messages, ttsEnabled, ttsVoice } from './stores';
   import { anySoundPlaying, allOff } from './ambientEngine';
@@ -56,6 +57,7 @@
     messages.set([]);
     seekerState.reset();
     onclose();
+    goto(controlPanelRouteById.welcome.href);
   }
 </script>
 

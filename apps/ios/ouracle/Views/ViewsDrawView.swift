@@ -84,6 +84,12 @@ struct ViewsDrawView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity, alignment: .center)
                             .listRowBackground(Color.clear)
+                    } else if decks.isEmpty {
+                        Text("no decks available")
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .listRowBackground(Color.clear)
                     } else {
                         ForEach(decks) { deck in
                             deckRow(deck)

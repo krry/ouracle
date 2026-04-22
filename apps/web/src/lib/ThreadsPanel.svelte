@@ -85,22 +85,21 @@
     <ol class="tp-list">
       {#each visibleSessions as session (session.id)}
         <li class="tp-item">
-          <div class="tp-date">{formatDate(session.completed_at ?? session.prescribed_at ?? session.created_at)}</div>
-          <div class="tp-title">{session.encrypted_rite_name ?? 'sealed record'}</div>
-          <div class="tp-quality-row">
-            {#if session.encrypted_quality}
-              <div class="tp-quality">{session.encrypted_quality}</div>
+          <a href="/records/{session.id}" class="tp-item-link">
+            <div class="tp-date">{formatDate(session.completed_at ?? session.prescribed_at ?? session.created_at)}</div>
+            <div class="tp-title">{session.encrypted_rite_name ?? 'sealed record'}</div>
+            <div class="tp-quality-row">
+              {#if session.encrypted_quality}
+                <div class="tp-quality">{session.encrypted_quality}</div>
+              {/if}
+              <div class="tp-stage">{stageLabel(session.stage)}</div>
+            </div>
+            {#if session.encrypted_note}
+              <p class="tp-report">{session.encrypted_note}</p>
+            {:else}
+              <p class="tp-report muted">sealed — tap to unseal</p>
             {/if}
-            <div class="tp-stage">{stageLabel(session.stage)}</div>
-          </div>
-          {#if session.encrypted_note}
-            <p class="tp-report">{session.encrypted_note}</p>
-          {:else}
-            <p class="tp-report">Encrypted details will appear here on this authenticated device.</p>
-          {/if}
-          {#if session.encrypted_feedback}
-            <p class="tp-feedback">“{session.encrypted_feedback}”</p>
-          {/if}
+          </a>
         </li>
       {/each}
     </ol>
@@ -114,6 +113,10 @@
   gap: 0.85rem;
   padding: 1rem;
   min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
 }
 
 .tp-header {
@@ -166,10 +169,28 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding: 0.8rem 0.85rem;
   border-radius: 16px;
   background: color-mix(in srgb, var(--surface) 76%, transparent);
   border: 1px solid color-mix(in srgb, var(--glass-border) 80%, transparent);
+  transition: border-color 0.15s, background 0.15s;
+}
+.tp-item:hover {
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+}
+
+.tp-item-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.8rem 0.85rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.tp-report.muted {
+  opacity: 0.45;
+  font-style: italic;
 }
 
 .tp-date,
@@ -204,15 +225,6 @@
   line-height: 1.55;
   color: var(--muted);
   max-width: min(100%, clamp(36ch, 92%, 72ch));
-}
-
-.tp-feedback {
-  margin: 0;
-  font-size: 0.78rem;
-  line-height: 1.5;
-  color: var(--text);
-  opacity: 0.9;
-  font-style: italic;
 }
 
 .tp-signin-link {

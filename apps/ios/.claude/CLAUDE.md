@@ -6,16 +6,25 @@ SwiftUI app. Bundle ID: `ink.kerry.ouracle`. Xcode 16. iOS 17+.
 
 ```bash
 # Simulator build
-xcodebuild -scheme ouracle -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
+xcodebuild -project apps/ios/ouracle.xcodeproj -scheme ouracle -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
 
-# Device build
-xcodebuild -scheme ouracle -configuration Debug -destination 'platform=iOS,name=Handfill' build
+# Deploy to Handfill over network (build + install + launch)
+bash apps/ios/deploy.sh
+
+# Device build only (no install)
+xcodebuild -project apps/ios/ouracle.xcodeproj -scheme ouracle -configuration Debug -destination 'platform=iOS,name=Handfill' build
 
 # Unit tests
-xcodebuild test -scheme ouracle -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+xcodebuild -project apps/ios/ouracle.xcodeproj test -scheme ouracle -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 ```
 
 Run a build after any substantial code change. Fix all errors before continuing.
+
+## Device deployment
+
+`Handfill` (iPhone 16 Pro) is paired over CoreDevice (WiFi — no USB needed).
+`bash apps/ios/deploy.sh` builds for device, installs via `xcrun devicectl`, and launches.
+Requires Handfill to be on the same network as the Mac.
 
 ## Stack
 

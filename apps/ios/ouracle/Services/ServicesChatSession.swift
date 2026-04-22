@@ -38,6 +38,7 @@ final class ChatSession: ObservableObject {
     @Published var isStreaming: Bool = false
     @Published var drawnCard: OracleCard? = nil
     @Published var lastError: String? = nil  // settable from view for dismiss
+    @Published var voiceEnabled: Bool = false
 
     private var currentSessionID: String?
     private var streamTask: Task<Void, Never>?
@@ -86,6 +87,13 @@ final class ChatSession: ObservableObject {
 
         var body: [String: Any] = ["message": input]
         if let sid = currentSessionID { body["session_id"] = sid }
+        if voiceEnabled {
+            let isCellular = NetworkMonitor.shared.isCellular
+            body["voice_context"] = [
+                "enabled": true,
+                "bandwidth": isCellular ? "cellular" : "wifi",
+            ]
+        }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"

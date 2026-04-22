@@ -100,6 +100,7 @@
           {onDiscussPractice}
           {drawing}
           {streaming}
+          onclose={() => { collapsed = true; }}
         />
       {:else if activeTab === 'seeker'}
         <div class="sp-pane rail-shell">
@@ -117,9 +118,7 @@
           {/if}
         </div>
       {:else}
-        <div class="sp-pane">
-          <ThreadsPanel />
-        </div>
+        <ThreadsPanel />
       {/if}
     </div>
   </section>
@@ -338,6 +337,9 @@
   flex-direction: column;
   gap: 0.9rem;
   padding: 1rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
 }
 
 .sp-pane-header {

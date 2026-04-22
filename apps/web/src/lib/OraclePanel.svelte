@@ -13,6 +13,7 @@
 		onInterpretCard,
 		onAcceptRite,
 		onDiscussPractice,
+		onclose,
 		drawing = false,
 		streaming = false,
 	}: {
@@ -23,6 +24,7 @@
 		onInterpretCard: (card: CardData) => void;
 		onAcceptRite: (rite: RiteData) => void;
 		onDiscussPractice: (card: CardData) => void;
+		onclose?: () => void;
 		drawing?: boolean;
 		streaming?: boolean;
 	} = $props();
@@ -108,6 +110,7 @@
 	}
 
 	function startFreshSession() {
+		onclose?.();
 		goto(`${controlPanelRouteById.oracle.href}?fresh=1`);
 	}
 

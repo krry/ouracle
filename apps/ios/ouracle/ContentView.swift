@@ -8,21 +8,27 @@ enum AppTab: String, CaseIterable {
 
 struct ContentView: View {
     @StateObject private var session = ChatSession()
+    @StateObject private var accent = TreasureAccent()
     @ObservedObject private var warmer = PerformanceWarmer.shared
     @State private var currentTab: AppTab = .enquire
 
     var body: some View {
         if warmer.state.isReady {
             NavigationStack {
-                VStack(spacing: 0) {
-                    topNav
-                    Divider()
-                    tabContent
+                ZStack {
+                    NebulaView()
+                    VStack(spacing: 0) {
+                        topNav
+                        Divider()
+                        tabContent
+                    }
                 }
                 .navigationTitle("ouracle")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar { settingsButton }
+                .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             }
+            .environmentObject(accent)
         } else {
             LaunchProgressView(warmer: warmer)
         }
@@ -39,13 +45,13 @@ struct ContentView: View {
                     VStack(spacing: 4) {
                         Text(tab.rawValue)
                             .font(.system(.caption, design: .monospaced).weight(currentTab == tab ? .semibold : .regular))
-                            .foregroundStyle(currentTab == tab ? Color.jing : Color.secondary)
+                            .foregroundStyle(currentTab == tab ? accent.color : Color.secondary)
                             .padding(.horizontal, 4)
                             .padding(.top, 8)
 
                         Rectangle()
                             .frame(height: 2)
-                            .foregroundStyle(currentTab == tab ? Color.jing : Color.clear)
+                            .foregroundStyle(currentTab == tab ? accent.color : Color.clear)
                             .animation(.easeOut(duration: 0.15), value: currentTab)
                     }
                 }
@@ -73,8 +79,31 @@ struct ContentView: View {
     // MARK: - Settings toolbar button
 
     private var settingsButton: some ToolbarContent {
-        ToolbarItem(placement: .topBarTrailing) {
+        ToolbarItemGroup(placement: .topBarTrailing) {
+            AmbienceToolbarButton()
             SettingsToolbarButton()
+        }
+    }
+}
+
+private struct AmbienceToolbarButton: View {
+    @State private var showAmbience = false
+    @ObservedObject private var ambience = AmbienceService.shared
+
+    var body: some View {
+        Button {
+            showAmbience = true
+        } label: {
+            Image(systemName: ambience.activeClimeID != nil ? "waveform.circle.fill" : "waveform.circle")
+                .foregroundStyle(ambience.activeClimeID != nil ? Color.jing : Color.secondary)
+        }
+        .sheet(isPresented: $showAmbience) {
+            NavigationStack {
+                ViewsAmbiencePickerView()
+                    .navigationTitle("ambience")
+                    .navigationBarTitleDisplayMode(.inline)
+            }
+            .presentationDetents([.height(280)])
         }
     }
 }

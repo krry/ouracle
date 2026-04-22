@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ViewsOraclePanelView: View {
+    @EnvironmentObject private var accent: TreasureAccent
     @Environment(\.dismiss) private var dismiss
     @State private var decks: [OracleDeck] = []
     @State private var selectedDeckIDs: Set<String> = []
@@ -66,14 +67,14 @@ struct ViewsOraclePanelView: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
             .background(
-                selected ? Color.jing.opacity(0.15) : Color.clear
+                selected ? accent.color.opacity(0.15) : Color.clear
             )
-            .foregroundStyle(selected ? Color.jing : Color.secondary)
+            .foregroundStyle(selected ? accent.color : Color.secondary)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .strokeBorder(
-                        selected ? Color.jing.opacity(0.5) : Color.secondary.opacity(0.2),
+                        selected ? accent.color.opacity(0.5) : Color.secondary.opacity(0.2),
                         lineWidth: 1
                     )
             )
@@ -143,7 +144,7 @@ struct ViewsOraclePanelView: View {
             .padding(.vertical, 14)
         }
         .disabled(isDrawing || isLoadingDecks)
-        .foregroundStyle(isDrawing ? Color.secondary : Color.jing)
+        .foregroundStyle(isDrawing ? Color.secondary : accent.color)
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
     }

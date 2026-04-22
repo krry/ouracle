@@ -127,6 +127,33 @@ export interface ThreadSession {
 	completed_at: string | null;
 }
 
+export interface ConversationTurn {
+	role: 'seeker' | 'clea';
+	text: string;
+	at?: string;
+	affect?: { valence: number; arousal: number; gloss: string; confidence: string };
+}
+
+export interface FullSession extends ThreadSession {
+	vagal_probable: string | null;
+	vagal_confidence: string | null;
+	belief_pattern: string | null;
+	belief_confidence: string | null;
+	quality_confidence: string | null;
+	quality_is_shock: boolean | null;
+	love_fear_audit: Record<string, unknown> | null;
+	conversation: ConversationTurn[] | null;
+	full_text: string | null;
+}
+
+export async function getRecord(sessionId: string, token: string): Promise<FullSession> {
+	const r = await fetch(`${BASE}/session/${sessionId}`, {
+		headers: authHeaders(token),
+	});
+	if (!r.ok) throw new Error(await r.text());
+	return r.json();
+}
+
 export async function getThread(seekerId: string, token: string): Promise<ThreadSession[]> {
 	const r = await fetch(`${BASE}/seeker/${seekerId}/thread`, {
 		headers: authHeaders(token),

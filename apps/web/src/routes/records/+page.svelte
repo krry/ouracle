@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { creds, authed } from '$lib/stores';
-  import { redactSession, deleteAccount } from '$lib/api';
+  import { deleteAccount } from '$lib/api';
   import type { MergedRecord } from '$lib/records';
   import { loadMergedRecords } from '$lib/records';
   import { controlPanelRouteById } from '$lib/ControlPanel.svelte';
@@ -11,7 +11,6 @@
   let loading = $state(true);
   let error = $state<string | null>(null);
   let confirmDelete = $state(false);
-  let redacting = $state<Set<string>>(new Set());
 
   onMount(async () => {
     if (!$authed || !$creds) {
@@ -26,21 +25,6 @@
       loading = false;
     }
   });
-
-  async function handleRedact(sessionId: string) {
-    if (!$creds) return;
-    redacting = new Set([...redacting, sessionId]);
-    try {
-      await redactSession($creds.seeker_id, sessionId, $creds.access_token);
-      sessions = sessions.map((s) =>
-        s.id === sessionId ? { ...s, rite_name: null, rite_json: null, report: null } : s
-      );
-    } finally {
-      const next = new Set(redacting);
-      next.delete(sessionId);
-      redacting = next;
-    }
-  }
 
   async function handleDeleteAccount() {
     if (!$creds) return;
@@ -93,11 +77,10 @@
   {:else}
     <ol class="sessions">
       {#each visibleSessions as s (s.id)}
-        <li class="session" class:redacted={!s.rite_name}>
-          <time class="session-date">{formatDate(s.completed_at ?? s.prescribed_at ?? s.created_at)}</time>
-
-          {#if s.rite_name}
-            <div class="rite-name">{s.encrypted_rite_name ?? 'sealed record'}</div>
+        <li class="session">
+          <a href="/records/{s.id}" class="session-link">
+            <time class="session-date">{formatDate(s.completed_at ?? s.prescribed_at ?? s.created_at)}</time>
+            <div class="rite-name">{s.encrypted_rite_name ?? s.rite_name ?? 'sealed record'}</div>
             <div class="quality-row">
               {#if s.encrypted_quality}
                 <div class="quality">{s.encrypted_quality}</div>
@@ -111,32 +94,8 @@
             {/if}
             {#if s.encrypted_note}
               <blockquote class="report">{s.encrypted_note}</blockquote>
-            {:else}
-              <blockquote class="report report-muted">
-                Encrypted details are not available on this device yet.
-              </blockquote>
             {/if}
-            {#if s.encrypted_feedback}
-              <p class="feedback">Rite feedback: “{s.encrypted_feedback}”</p>
-            {/if}
-            {#if s.encrypted_context}
-              <p class="context">{s.encrypted_context}</p>
-            {/if}
-            {#if s.encrypted_beliefs.length}
-              <ul class="beliefs">
-                {#each s.encrypted_beliefs as belief}
-                  <li>{belief}</li>
-                {/each}
-              </ul>
-            {/if}
-            <button
-              class="redact-btn"
-              disabled={redacting.has(s.id)}
-              onclick={() => handleRedact(s.id)}
-            >{redacting.has(s.id) ? '…' : 'redact'}</button>
-          {:else}
-            <div class="redacted-notice">this entry has been redacted.</div>
-          {/if}
+          </a>
         </li>
       {/each}
     </ol>
@@ -221,15 +180,20 @@
 }
 
 .session {
-  padding: var(--space-md) 0;
   border-top: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
 }
 
 .session:last-child {
   border-bottom: 1px solid var(--border);
+}
+
+.session-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: var(--space-md) 0;
+  text-decoration: none;
+  color: inherit;
 }
 
 .session-date {
@@ -247,8 +211,7 @@
 
 .quality,
 .stage,
-.enacted,
-.redacted-notice {
+.enacted {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.06em;
@@ -270,44 +233,10 @@
   padding-left: 1rem;
   border-left: 1px solid var(--border);
   color: var(--text);
-}
-
-.context {
-  margin: 0.25rem 0 0;
-  color: var(--muted);
   font-size: 0.92rem;
   line-height: 1.5;
 }
 
-.feedback {
-  margin: 0.2rem 0 0;
-  color: var(--text);
-  font-size: 0.92rem;
-  line-height: 1.5;
-  font-style: italic;
-}
-
-.beliefs {
-  list-style: none;
-  padding: 0;
-  margin: 0.25rem 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-
-.beliefs li {
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.05em;
-  text-transform: lowercase;
-  color: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 0.22rem 0.48rem;
-}
-
-.redact-btn,
 .delete-btn,
 .delete-final,
 .cancel-btn {
@@ -324,7 +253,6 @@
   cursor: pointer;
 }
 
-.redact-btn:hover,
 .delete-btn:hover,
 .cancel-btn:hover {
   border-color: var(--accent);
