@@ -95,13 +95,29 @@ final class AmbienceService: ObservableObject {
     // MARK: - Private
 
     private func startLooping(track: AmbienceTrack, isOverlay: Bool) async {
-        let fileURL = await cachedURL(for: track)
-        guard let fileURL else { return }
-        let item = AVPlayerItem(url: fileURL)
+        // Use cached file if available, otherwise stream from remote immediately
+        let dest = cacheDir.appendingPathComponent(track.file)
+        let playURL: URL
+        if FileManager.default.fileExists(atPath: dest.path) {
+            playURL = dest
+        } else {
+            guard let remote = URL(string: base + "/ambient/" + track.file) else { return }
+            playURL = remote
+            // Cache in background for next time
+            Task.detached { [weak self] in
+                guard let self else { return }
+                if let (tmp, _) = try? await URLSession.shared.download(from: remote) {
+                    try? FileManager.default.moveItem(at: tmp, to: dest)
+                }
+            }
+        }
+
+        let item = AVPlayerItem(url: playURL)
         let player = AVQueuePlayer()
         let looper = AVPlayerLooper(player: player, templateItem: item)
         player.volume = isOverlay ? overlayVolume : climeVolume
         player.play()
+        print("[Ambience] playing \(track.id) from \(playURL.lastPathComponent) looper=\(looper)")
         if isOverlay {
             overlayPlayers[track.id] = (player, looper)
         } else {
@@ -119,15 +135,6 @@ final class AmbienceService: ObservableObject {
     private func stopOverlay(_ id: String) {
         overlayPlayers[id]?.0.pause()
         overlayPlayers.removeValue(forKey: id)
-    }
-
-    private func cachedURL(for track: AmbienceTrack) async -> URL? {
-        let dest = cacheDir.appendingPathComponent(track.file)
-        if FileManager.default.fileExists(atPath: dest.path) { return dest }
-        guard let remote = URL(string: base + "/ambient/" + track.file),
-              let (tmp, _) = try? await URLSession.shared.download(from: remote) else { return nil }
-        try? FileManager.default.moveItem(at: tmp, to: dest)
-        return dest
     }
 
     private func configureAudioSession() {

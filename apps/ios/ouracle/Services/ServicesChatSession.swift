@@ -129,6 +129,13 @@ final class ChatSession: ObservableObject {
                         accumulated += text
                         updateOrAppendCleaMessage(accumulated)
                     }
+                case "sentence_text":
+                    if let text = json["text"] as? String {
+                        let isFinal = json["isFinal"] as? Bool ?? false
+                        accumulated += text
+                        if !isFinal { accumulated += " " }
+                        updateOrAppendCleaMessage(accumulated.trimmingCharacters(in: .whitespaces))
+                    }
                 case "break":
                     accumulated += "\n"
                     updateOrAppendCleaMessage(accumulated)
@@ -141,7 +148,8 @@ final class ChatSession: ObservableObject {
                        let card = DeckService.shared.card(from: cardJSON) {
                         drawnCard = card
                     }
-                case "complete", "rite", "vagal", "belief", "quality", "affect":
+                case "complete", "rite", "vagal", "belief", "quality", "affect",
+                     "sentence_audio", "sentence_audio_missing":
                     break
                 default:
                     break

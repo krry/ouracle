@@ -1655,7 +1655,7 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
           await streamer.processFullText(COVENANT_REMINDER);
           return finish('inquiry', { session_id: session.id });
         }
-        return handleInquiryTurn({ ...session, stage: 'inquiry', turn: 0, conversation: [], full_text: '' }, message, session.id);
+        return await handleInquiryTurn({ ...session, stage: 'inquiry', turn: 0, conversation: [], full_text: '' }, message, session.id);
       }
 
       const question = chooseOpeningQuestion({
@@ -1728,7 +1728,7 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
     const stage = session.stage;
 
     if (stage === 'inquiry') {
-      return handleInquiryTurn(session, message, session_id);
+      return await handleInquiryTurn(session, message, session_id);
     }
 
     if (stage === 'offering') {
