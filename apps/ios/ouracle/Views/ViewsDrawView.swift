@@ -41,11 +41,9 @@ struct ViewsDrawView: View {
                                 .foregroundStyle(.secondary)
                                 .tracking(0.5)
                         }
-                        if let label = card.deckLabel {
-                            Text(label.lowercased())
-                                .font(.system(.caption2, design: .monospaced))
-                                .foregroundStyle(.tertiary)
-                        }
+                        Text((card.deckLabel ?? card.deck).lowercased())
+                            .font(.system(.caption2, design: .monospaced))
+                            .foregroundStyle(.secondary)
                     }
                     if !card.body.isEmpty {
                         Text(card.body)
@@ -78,37 +76,46 @@ struct ViewsDrawView: View {
 
     private var deckSheet: some View {
         VStack(spacing: 0) {
-            List {
-                Section {
-                    if isLoadingDecks {
-                        ProgressView()
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .listRowBackground(Color.clear)
-                    } else if decks.isEmpty {
-                        Text("no decks available")
-                            .font(.system(.caption, design: .monospaced))
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .listRowBackground(Color.clear)
-                    } else {
-                        ForEach(decks) { deck in
-                            deckRow(deck)
-                        }
-                    }
-                } header: {
-                    HStack(spacing: 0) {
-                        Text("decks")
-                            .font(.system(.footnote, design: .monospaced).weight(.semibold))
-                            .textCase(nil)
-                        Spacer()
-                        quickSelectButtons
+            if sheetDetent != smallDetent {
+                deckList
+                Divider()
+            }
+            drawButton
+        }
+    }
+
+    private var deckList: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    Text("decks")
+                        .font(.system(.footnote, design: .monospaced).weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    quickSelectButtons
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+
+                Divider()
+
+                if isLoadingDecks {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding()
+                } else if decks.isEmpty {
+                    Text("no decks available")
+                        .font(.system(.caption, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding()
+                } else {
+                    ForEach(decks) { deck in
+                        deckRow(deck)
+                        Divider().padding(.leading, 16)
                     }
                 }
             }
-            .listStyle(.plain)
-
-            Divider()
-            drawButton
         }
     }
 
@@ -133,7 +140,11 @@ struct ViewsDrawView: View {
                         .fontWeight(.semibold)
                 }
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
         .foregroundStyle(.primary)
     }
 

@@ -104,8 +104,7 @@ final class AmbienceService: ObservableObject {
             guard let remote = URL(string: base + "/ambient/" + track.file) else { return }
             playURL = remote
             // Cache in background for next time
-            Task.detached { [weak self] in
-                guard let self else { return }
+            Task.detached {
                 if let (tmp, _) = try? await URLSession.shared.download(from: remote) {
                     try? FileManager.default.moveItem(at: tmp, to: dest)
                 }

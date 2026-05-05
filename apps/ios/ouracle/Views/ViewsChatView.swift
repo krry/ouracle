@@ -38,6 +38,10 @@ struct ViewsChatView: View {
                 DrawnCardSheet(card: card, onDismiss: session.dismissCard)
             }
         }
+        .sheet(isPresented: .constant(session.needsCovenant)) {
+            ViewsCovenantView(session: session)
+                .environmentObject(accent)
+        }
     }
 
     // MARK: - Message list
@@ -117,7 +121,9 @@ struct ViewsChatView: View {
     }
 
     private var canSend: Bool {
-        !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !session.isStreaming
+        !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !session.isStreaming
+            && !session.needsCovenant
     }
 
     private func sendIfReady() {

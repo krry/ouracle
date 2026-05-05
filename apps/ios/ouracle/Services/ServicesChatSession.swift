@@ -39,6 +39,7 @@ final class ChatSession: ObservableObject {
     @Published var drawnCard: OracleCard? = nil
     @Published var lastError: String? = nil  // settable from view for dismiss
     @Published var voiceEnabled: Bool = false
+    @Published var needsCovenant: Bool = false
 
     private var currentSessionID: String?
     private var streamTask: Task<Void, Never>?
@@ -73,6 +74,19 @@ final class ChatSession: ObservableObject {
 
     func dismissCard() {
         drawnCard = nil
+    }
+
+    func acceptCovenant() async {
+        guard let token = AuthService.shared.activeAccessToken,
+              let url = URL(string: baseURL + "/covenant") else { return }
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: [:])
+        _ = try? await URLSession.shared.data(for: req)
+        needsCovenant = false
+        send("I accept the covenant.")
     }
 
     // MARK: - Streaming
@@ -142,6 +156,9 @@ final class ChatSession: ObservableObject {
                 case "session":
                     if let sid = json["session_id"] as? String {
                         currentSessionID = sid
+                    }
+                    if let nc = json["needs_covenant"] as? Bool {
+                        needsCovenant = nc
                     }
                 case "draw":
                     if let cardJSON = json["card"] as? [String: Any],
