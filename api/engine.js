@@ -495,6 +495,39 @@ export const BELIEF_CLUE_MAP = {
   separation:   ['not part of', "don't belong", 'disconnected from everything', 'no place for me', 'not one of them', 'fundamentally outside', 'cut off from'],
 };
 
+// ─────────────────────────────────────────────
+// CORE LANGUAGE SIGNATURES — Wolynn
+// Vocabulary organized by emotional charge category.
+// These words carry weight beyond their surface meaning.
+// Flagged as signal, not content. Clea decides whether and how to surface them.
+// ─────────────────────────────────────────────
+
+export const CORE_LANGUAGE_SIGNATURES = {
+  urgency:     ['always', 'never', 'impossible', 'have to', 'must', "i can't", 'no choice', 'no way out', 'no option', 'i can never', 'i will never', 'i could never', 'forced to', 'i have no'],
+  catastrophe: ['destroyed', 'ruined', 'disaster', 'falling apart', 'hopeless', 'nothing works', 'lost everything', 'unbearable', 'nothing left', "everything is wrong", "it's all wrong", "can't take it", 'collapsed', 'it all fell apart', 'fell apart'],
+  body:        ['crushing', 'drowning', 'suffocating', 'paralyzed', 'hollow', 'dead inside', "can't breathe", 'weight on my chest', 'sick to my stomach', 'knot in my stomach', 'physically ill', 'numb all over'],
+  inheritance: ['just like my', 'all my life', 'same as my', "i've always been", "i've never been able to", 'for as long as i can remember', 'this is just who i am', 'my whole life', 'ever since i can remember', 'born this way', 'always been this way', 'never been any different', 'it runs in'],
+};
+
+export function detectCoreLanguage(currentText, priorSeekerTexts = []) {
+  const current = currentText.toLowerCase();
+  const flagged = [];
+  const by_category = {};
+
+  for (const [category, phrases] of Object.entries(CORE_LANGUAGE_SIGNATURES)) {
+    const hits = phrases.filter(p => current.includes(p));
+    if (hits.length > 0) {
+      by_category[category] = hits;
+      flagged.push(...hits);
+    }
+  }
+
+  const priorJoined = priorSeekerTexts.map(t => t.toLowerCase()).join(' ');
+  const repetition_of = flagged.filter(word => priorJoined.includes(word));
+
+  return { flagged, by_category, repetition_of, has_signal: flagged.length > 0 };
+}
+
 // TODO: QUALITY_CLUE_MAP — Chef, this is yours to fill in.
 //
 // These keyword arrays map what a Seeker says to which Quality vector
@@ -706,11 +739,18 @@ function adjustAffectFromVagalLexicon(text, affect) {
   return affect;
 }
 
-export async function infer(text) {
+export async function infer(text, { currentMessage = null, seekerMessages = [] } = {}) {
   // Skip LLM inference for empty or trivially short messages (e.g. initial greeting ping).
   // Groq validates tool call args server-side and 400s when the model can't produce
   // meaningful classifications from no signal.
   if (!text || text.trim().split(/\s+/).length < 3) return null;
+
+  // Core language runs on every turn regardless of LLM flag — pure keyword, cheap.
+  // currentMessage: just the latest seeker turn (for fresh detection)
+  // seekerMessages: all seeker turns (for repetition detection across the arc)
+  const textForFlags = currentMessage || text;
+  const priorTexts = seekerMessages.length > 1 ? seekerMessages.slice(0, -1) : [];
+  const core_language = detectCoreLanguage(textForFlags, priorTexts);
 
   if (process.env.SEMANTIC_INFERENCE === 'true') {
     const mode = (process.env.SEMANTIC_INFERENCE_MODE || 'llm').toLowerCase();
@@ -777,6 +817,7 @@ export async function infer(text) {
         result.quality.seeker_language = node?.seeker_language || null;
       }
       result.inference_source = inferenceSource;
+      result.core_language = core_language;
       return result;
     } catch (err) {
       const is402 = err?.status === 402 || err?.statusCode === 402;
@@ -785,7 +826,7 @@ export async function infer(text) {
         reason: is402 ? 'payment_required' : 'error',
         error: err?.message,
       }));
-      return { ...keywordInfer(text), inference_source: 'keyword_fallback' };
+      return { ...keywordInfer(text), inference_source: 'keyword_fallback', core_language };
     }
   }
 
@@ -794,7 +835,54 @@ export async function infer(text) {
   keywordResult.affect = adjustAffectFromVagalLexicon(text, { valence: 0, arousal: 0, gloss: 'neutral', confidence: 'low', reasoning: 'inference disabled' });
   keywordResult.vagal = adjustVagalFromSignals(text, keywordResult.vagal, keywordResult.affect);
   keywordResult.inference_source = 'keyword_disabled';
+  keywordResult.core_language = core_language;
   return keywordResult;
+}
+
+// ─────────────────────────────────────────────
+// INFERENCE SIGNAL — for Clea
+// Formats inference results as a compact directive block injected into
+// Clea's system context at each turn. Clea sees it; the Seeker never does.
+// ─────────────────────────────────────────────
+
+export function buildInferenceSignal(vagal, belief, quality, affect, coreLanguage) {
+  const lines = ['--- INTERNAL READ (Priestess only) ---'];
+
+  if (vagal?.probable && vagal.probable !== 'uncertain') {
+    const conf = vagal.confidence !== 'low' ? ` (${vagal.confidence})` : '';
+    const reas = vagal.reasoning ? ` — ${vagal.reasoning}` : '';
+    lines.push(`Vagal: ${vagal.probable}${conf}${reas}`);
+  }
+
+  if (belief?.pattern) {
+    const conf = belief.confidence !== 'low' ? ` (${belief.confidence})` : '';
+    const reas = belief.reasoning ? ` — ${belief.reasoning}` : '';
+    lines.push(`Belief: ${belief.pattern}${conf}${reas}`);
+  }
+
+  if (quality?.quality) {
+    const shock = quality.is_shock ? ' [shock point]' : '';
+    const lang = quality.seeker_language ? ` — ${quality.seeker_language}` : '';
+    lines.push(`Quality: ${quality.quality}${shock}${lang}`);
+  }
+
+  if (affect?.gloss && affect.confidence !== 'low') {
+    lines.push(`Affect: ${affect.gloss} (v ${affect.valence?.toFixed(2)}, a ${affect.arousal?.toFixed(2)})`);
+  }
+
+  if (coreLanguage?.has_signal) {
+    const catEntries = Object.entries(coreLanguage.by_category)
+      .map(([cat, words]) => `${cat}: ${words.map(w => `"${w}"`).join(', ')}`)
+      .join(' | ');
+    lines.push(`Core language: ${catEntries}`);
+    if (coreLanguage.repetition_of?.length > 0) {
+      const rep = coreLanguage.repetition_of.map(w => `"${w}"`).join(', ');
+      lines.push(`Repeating across turns: ${rep} — may carry weight beyond this seeker's own story.`);
+    }
+  }
+
+  lines.push('---');
+  return lines.join('\n');
 }
 
 // ─────────────────────────────────────────────

@@ -45,6 +45,7 @@ import {
 import {
   infer,
   buildPrescription,
+  buildInferenceSignal,
   chooseOpeningQuestion,
   getClosingDedication,
   drawDivinationSource,
@@ -52,6 +53,13 @@ import {
   BELIEFS,
   OCTAVE,
 } from './engine.js';
+
+// Extract seeker message strings from conversation for core language arc detection.
+function seekerTexts(conversation) {
+  return Array.isArray(conversation)
+    ? conversation.filter(e => e.role === 'seeker').map(e => e.text || '')
+    : [];
+}
 import {
   createSeeker,
   getSeeker,
@@ -610,7 +618,11 @@ app.post('/inquire', authenticate, async (req, res) => {
     conversation.push({ role: 'seeker', text: response, at: new Date().toISOString() });
   }
 
-  const { vagal, belief, quality, affect } = await infer(newText);
+  const allSeekerMessages = seekerTexts(conversation);
+  const { vagal, belief, quality, affect, core_language } = await infer(newText, {
+    currentMessage: response || null,
+    seekerMessages: allSeekerMessages,
+  });
   // Attach affect to the last seeker entry if present
   if (response) {
     const lastSeekerIdx = conversation.findLastIndex(e => e.role === 'seeker');
@@ -674,7 +686,10 @@ app.post('/inquire', authenticate, async (req, res) => {
   ];
   const suggestion = clarifiers[newTurn - 1] || 'What else wants to be said?';
 
+  const inquireSignal = buildInferenceSignal(vagal, belief, quality, affect, core_language);
   const systemWithSuggestion = `${CLEA_SYSTEM_PROMPT}
+
+${inquireSignal}
 
 --- Suggested direction (strong suggestion — take it, transform it, or release it entirely if the seeker's words demand something else):
 "${suggestion}"`;
@@ -1458,7 +1473,11 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
     const inferSessionState = async (session, incomingMessage, conversation, currentSessionId, contextLabel) => {
       // Weight the latest turn twice so current language can move the live seeker reading.
       const nextFullText = `${session.full_text || ''} ${incomingMessage} ${incomingMessage}`.trim();
-      const { vagal, belief, quality, affect, inference_source } = await infer(nextFullText);
+      const allSeekerMessages = seekerTexts(conversation);
+      const { vagal, belief, quality, affect, core_language, inference_source } = await infer(nextFullText, {
+        currentMessage: incomingMessage,
+        seekerMessages: allSeekerMessages,
+      });
       const lastSeekerIdx = conversation.findLastIndex(e => e.role === 'seeker');
       if (lastSeekerIdx !== -1) {
         conversation[lastSeekerIdx] = { ...conversation[lastSeekerIdx], affect };
@@ -1468,7 +1487,7 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
       emit({ type: 'quality', quality: quality.quality, confidence: quality.confidence, is_shock: quality.is_shock, reasoning: quality.reasoning });
       emit({ type: 'affect', valence: affect.valence, arousal: affect.arousal, gloss: affect.gloss, confidence: affect.confidence });
       console.log(`[enquire/${contextLabel}] session=${currentSessionId} source=${inference_source ?? 'unknown'} vagal=${vagal.probable ?? 'null'}/${vagal.confidence ?? 'null'} belief=${belief.pattern ?? 'null'}/${belief.confidence ?? 'null'} quality=${quality.quality ?? 'null'}/${quality.confidence ?? 'null'} affect=${affect.gloss ?? 'null'}`);
-      return { nextFullText, vagal, belief, quality, affect, inference_source, conversation };
+      return { nextFullText, vagal, belief, quality, affect, core_language, inference_source, conversation };
     };
 
     const handleInquiryTurn = async (session, incomingMessage, currentSessionId) => {
@@ -1479,7 +1498,11 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
       const conversation = Array.isArray(session.conversation) ? [...session.conversation] : [];
       conversation.push({ role: 'seeker', text: incomingMessage, at: new Date().toISOString() });
 
-      const { vagal, belief, quality, affect } = await infer(newText);
+      const allSeekerMessages = seekerTexts(conversation);
+      const { vagal, belief, quality, affect, core_language } = await infer(newText, {
+        currentMessage: incomingMessage,
+        seekerMessages: allSeekerMessages,
+      });
       const lastSeekerIdx = conversation.findLastIndex(e => e.role === 'seeker');
       if (lastSeekerIdx !== -1) {
         conversation[lastSeekerIdx] = { ...conversation[lastSeekerIdx], affect };
@@ -1488,6 +1511,8 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
       emit({ type: 'belief', pattern: belief.pattern, confidence: belief.confidence, reasoning: belief.reasoning });
       emit({ type: 'quality', quality: quality.quality, confidence: quality.confidence, is_shock: quality.is_shock, reasoning: quality.reasoning });
       emit({ type: 'affect', valence: affect.valence, arousal: affect.arousal, gloss: affect.gloss, confidence: affect.confidence });
+
+      const signal = buildInferenceSignal(vagal, belief, quality, affect, core_language);
 
       const threshold = vagal.confidence === 'high' || (vagal.confidence === 'medium' && belief.confidence !== 'low');
       console.log(`[enquire/inquiry] session=${currentSessionId} turn=${newTurn} threshold=${threshold} vagal=${vagal.probable ?? 'null'}/${vagal.confidence ?? 'null'} belief=${belief.pattern ?? 'null'}/${belief.confidence ?? 'null'} quality=${quality.quality ?? 'null'}/${quality.confidence ?? 'null'} affect=${affect.gloss ?? 'null'}`);
@@ -1509,6 +1534,8 @@ app.post('/enquire', authenticateOrGuest, async (req, res) => {
         });
 
         const offeringSystem = `${activeSystem}
+
+${signal}
 
 --- Something has been heard. There is a practice — a rite — that wants to meet this moment.
 Offer it. Not as prescription, not as diagnosis. As an invitation. Ask if the seeker is open to receiving it.
@@ -1542,6 +1569,8 @@ Brief — one or two sentences. Let it breathe. Do not describe the rite yet.`;
       const suggestion = clarifiers[newTurn - 1] || 'What else wants to be said?';
 
       const systemWithSuggestion = `${activeSystem}
+
+${signal}
 
 --- Suggested direction (strong suggestion — take it, transform it, or release it entirely if the seeker's words demand something else):
 "${suggestion}"
@@ -1749,7 +1778,10 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
         quality_is_shock: offeringState.quality.is_shock,
       });
 
+      const offeringSignal = buildInferenceSignal(offeringState.vagal, offeringState.belief, offeringState.quality, offeringState.affect, offeringState.core_language);
       const offeringSystem = `${activeSystem}
+
+${offeringSignal}
 
 --- You have offered the seeker a rite. Now you are in conversation about whether they are ready to receive it.
 If the seeker is clearly ready and willing — consenting, open, present — end your response with [READY] on its own at the very end.
@@ -1860,7 +1892,10 @@ Most responses will NOT include [READY].`;
       const riteContext = session.rite_json
         ? `The rite prescribed: "${session.rite_json.rite_name}" — ${session.rite_json.act}`
         : '';
+      const prescribedSignal = buildInferenceSignal(prescribedState.vagal, prescribedState.belief, prescribedState.quality, prescribedState.affect, prescribedState.core_language);
       const prescribedSystem = `${activeSystem}
+
+${prescribedSignal}
 
 --- ${riteContext}
 The seeker has been given a rite. They may be asking about it, sitting with it, or reporting back on what happened.
