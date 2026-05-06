@@ -2037,7 +2037,7 @@ app.post('/stt', authenticateOrGuest, async (req, res) => {
     });
     const result = await groq.audio.transcriptions.create({
       file,
-      model: 'whisper-large-v3-turbo',
+      model: 'whisper-large-v3',
     });
     res.json({ text: result.text ?? '' });
   } catch (err) {
