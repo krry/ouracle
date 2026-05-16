@@ -101,6 +101,17 @@ export async function tts(text: string, token: string, voice?: string): Promise<
 	return r.arrayBuffer();
 }
 
+// ── Seeker ────────────────────────────────────────────────────────────────────
+export async function updateHandle(handle: string, token: string): Promise<{ handle: string }> {
+	const r = await fetch(`${BASE}/seeker/handle`, {
+		method: 'PATCH',
+		headers: authHeaders(token),
+		body: JSON.stringify({ handle })
+	});
+	if (!r.ok) throw new Error(await r.text());
+	return r.json();
+}
+
 // ── STT ───────────────────────────────────────────────────────────────────────
 export async function stt(blob: Blob, token: string): Promise<string> {
 	const r = await fetch(`${BASE}/stt`, {

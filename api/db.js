@@ -157,6 +157,19 @@ export async function deleteSeeker(seeker_id) {
   return row ?? null;
 }
 
+export async function updateSeekerHandle(seeker_id, newHandle) {
+  const normalized = normalizeHandle(String(newHandle).trim());
+  if (!normalized || normalized.length > 40) return { error: 'invalid_handle' };
+  const conflict = await getSeekerByHandle(normalized);
+  if (conflict && conflict.id !== seeker_id) return { error: 'handle_taken' };
+  const [row] = await sql`
+    UPDATE seekers SET handle = ${normalized}, updated_at = now()
+    WHERE id = ${seeker_id}
+    RETURNING id, handle
+  `;
+  return row ?? null;
+}
+
 export async function updateSeekerPassword(seeker_id, password_hash) {
   const [row] = await sql`
     UPDATE seekers

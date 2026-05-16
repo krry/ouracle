@@ -1,13 +1,13 @@
 # Ouracle Progress Tracker
 
-**Last audit:** 2026-03-19
-**Auditor:** Hermes Agent
+**Last audit:** 2026-05-16
+**Auditor:** Worfeus (updated from Hermes Agent 2026-03-19 baseline)
 
 **Summary:**
 - **Phase 0 (Foundation):** ✅ Complete
-- **Phase 1 (Plexus):** ✅ Substantially complete (minor validation items pending)
-- **Phase 2 (Temple):** 🔄 Partial — API complete, Web UI minimal, TUI functional
-- **Phase 3 (Portal):** ❌ Not started
+- **Phase 1 (Plexus):** ✅ Substantially complete — rite generation now LLM-synthesized from conversation
+- **Phase 2 (Temple):** 🔄 Substantial progress — ambient audio, STT/PTT, thread view, tarot images all landed
+- **Phase 3 (Portal):** 🔄 Partial — iOS native app live; streaming SSE on /enquire; Android/rate limiting/push notifications pending
 - **Phase 4 (Commons):** ❌ Not started
 - **Phase 5 (Body):** ❌ Not started
 
@@ -79,10 +79,15 @@
 - [x] Love/Fear auditor: `auditLoveFear()` evaluates prescriptions before delivery
 - [x] False‑positive handling: LLM includes confidence levels; low-confidence inferences are possible but logged
 
+### Landed since March 2026
+
+- [x] LLM-synthesized rite generation — `api/rite-gen.js`; `buildPrescription` now async; rite crafted from full conversation with vagal-state guardrails; table fallback on error
+
 ### Optional / Deferred
 
 - [ ] Enriched rite construction: weave Tarot/Iching references into rite text as contextual resonance (symbolic layer is opt-in but not heavily developed)
 - [ ] Preliminary octave history tracking per seeker: octave trajectory stored but not heavily utilized in UI
+- [ ] Rite generation quality tuning — evaluate generated rites across vagal states, refine system prompt
 
 ### Validation (Roadmap Acceptance)
 
@@ -118,12 +123,17 @@
 
 **Deferred / Not Yet Implemented:**
 
-- [ ] Web Priestess single‑page conversational UI (no chrome, centered field) — Web app exists but is minimal (`apps/web/src/routes/+page.svelte` needs full UX)
 - [ ] Account creation deferred until after first genuine exchange — Currently seeker can create account before first session; needs UX reorder
-- [ ] Thread view in Web app (readable letter of mantras + reintegration reports + octave trajectory) — TUI has thread view; Web does not
-- [ ] Ambient audio layer (opt‑in) for sonic space — TUI has ambient player; Web does not
-- [ ] Accessibility baseline (min 16px, WCAG AA/AAA, keyboard nav, voice input, pausable sessions) — not audited
+- [ ] Accessibility baseline (min 16px, WCAG AA/AAA, keyboard nav, pausable sessions) — not audited
 - [ ] Print/save rite card — not implemented
+
+**Landed since March 2026:**
+
+- [x] Web Priestess conversational UI — `EnquireView.svelte`, full enquire/offer/prescribe cycle in web
+- [x] Thread view in Web app — `ThreadsPanel.svelte` inside `SeekerPanel`
+- [x] Ambient audio layer — `AmbientControls.svelte`, `ambientEngine.ts`, `ambientPlayer.ts`
+- [x] Voice input (STT/PTT) — push-to-talk wired in `Chat.svelte` via `/stt` endpoint
+- [x] Tarot card images — symlinked `static/tarot → assets/tarot`
 
 ### API + Platform
 
@@ -166,7 +176,18 @@
 - [ ] **Haptic breathwork guide** — iOS native haptic patterns for rite delivery
 - [ ] **Wearable bridge** — mobile app relays wearable-derived soft signals (breath cadence, voice affect) to API
 
-**Status:** None of these items are implemented. The API has SSE scaffolding (`sendSSE` function) but no endpoints use it yet. No mobile apps exist. No rate limiting middleware.
+**Landed since March 2026:**
+- [x] Streaming responses — `/enquire` is a full SSE endpoint
+- [x] iOS native app — `apps/ios/` Swift app wired to API (Draw/Enquire/Reflect views, ambient, voice toggle, covenant)
+
+**Still pending:**
+- [ ] Rate limiting — per-key and per-Seeker limits
+- [ ] Android wrapper — PWA or WebView shell
+- [ ] Developer portal — OpenAPI spec, API key self‑service, documentation
+- [ ] Offline inquiry support — lightweight offline mode
+- [ ] Push notifications — reintegration window reminder (opt‑in only)
+- [ ] Haptic breathwork guide — iOS native haptic patterns
+- [ ] Wearable bridge
 
 ---
 
@@ -234,8 +255,9 @@
 |-----------|-------|--------|-----------------|
 | v0.2 — API ready for alpha | 0 | ✅ Done | Mar 2026 |
 | v0.3 — Semantic inference live | 1 | ✅ Done | Mar 2026 |
-| v0.4 — Web UI functional (basic) | 2 | 🔄 In‑progress | Apr 2026 |
-| v0.5 — Mobile wrapper ready | 3 | ❌ Not started | May 2026 |
+| v0.4 — Web UI functional (basic) | 2 | ✅ Done | Apr 2026 |
+| v0.5 — iOS native + rite generation | 2‑3 | ✅ Done | May 2026 |
+| v0.6 — Rite quality + inference tuning | 1‑2 | 🔄 In‑progress | Jun 2026 |
 | v1.0 — Full Priestess suite + Agora | 2‑4 | ❌ Not started | Q3 2026 |
 
 ---
