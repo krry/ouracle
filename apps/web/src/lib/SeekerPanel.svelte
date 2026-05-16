@@ -1,10 +1,13 @@
 <script lang="ts">
   import { browser } from '$app/environment';
+  import { goto } from '$app/navigation';
   import OraclePanel from './OraclePanel.svelte';
   import SeekerStatusPanel from './SeekerStatusPanel.svelte';
   import ThreadsPanel from './ThreadsPanel.svelte';
-  import { authed, activeRite, pendingRite, seekerState } from './stores';
+  import { authed, creds, activeRite, pendingRite, seekerState, messages } from './stores';
   import { controlPanelRouteById } from './ControlPanel.svelte';
+  import { signOut } from './auth';
+  import { updateHandle } from './api';
   import type { CardData, RiteData } from './stores';
 
   type DeckMeta = { id: string; meta: { name?: string; description?: string }; count: number };
@@ -37,12 +40,51 @@
   let activeTab = $state<TabId>('decks');
   let collapsed = $state(browser ? window.matchMedia('(max-width: 639px)').matches : false);
   let hadVisibleRite = $state(false);
+  let editingHandle = $state(false);
+  let handleDraft = $state('');
+  let handleError = $state('');
+  let handleSaving = $state(false);
+
+  const seekerTabLabel = $derived($authed && $seekerState.handle ? $seekerState.handle : 'Seeker');
 
   const tabs: Array<{ id: TabId; label: string }> = [
     { id: 'decks', label: 'Decks' },
-    { id: 'seeker', label: 'Seeker' },
+    { id: 'seeker', label: '' },
     { id: 'threads', label: 'Threads' }
   ];
+
+  async function leave() {
+    await signOut({ fetchOptions: { onSuccess: () => creds.logout() } });
+    creds.logout();
+    pendingRite.set(null);
+    messages.set([]);
+    seekerState.reset();
+    goto(controlPanelRouteById.welcome.href);
+  }
+
+  function startEditHandle() {
+    handleDraft = $seekerState.handle ?? $creds?.handle ?? '';
+    handleError = '';
+    editingHandle = true;
+  }
+
+  async function saveHandle() {
+    const token = $creds?.access_token;
+    if (!token || !handleDraft.trim()) return;
+    handleSaving = true;
+    handleError = '';
+    try {
+      const { handle } = await updateHandle(handleDraft.trim(), token);
+      creds.login({ ...$creds!, handle });
+      seekerState.setPartial({ handle });
+      editingHandle = false;
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      handleError = msg.includes('handle_taken') ? 'already taken' : 'could not save';
+    } finally {
+      handleSaving = false;
+    }
+  }
 
   $effect(() => {
     onCollapseChange(collapsed);
@@ -82,7 +124,7 @@
             onclick={() => (activeTab = tab.id)}
             aria-pressed={tab.id === activeTab}
           >
-            {tab.label}
+            {tab.id === 'seeker' ? seekerTabLabel : tab.label}
           </button>
         {/each}
       </div>
@@ -104,18 +146,38 @@
         />
       {:else if activeTab === 'seeker'}
         <div class="sp-pane rail-shell">
-          <div class="sp-pane-header">
-            <h3>
-              seeker
-              <span class="sp-handle">{$seekerState.handle ?? 'guest'}</span>
-            </h3>
-          </div>
           <SeekerStatusPanel variant="expanded" />
-          {#if !$authed}
-            <div class="sp-pane-actions">
+
+          <div class="sp-identity-block">
+            {#if $authed && $creds}
+              <div class="sp-identity-handle-row">
+                {#if editingHandle}
+                  <input
+                    class="sp-handle-input focus-ring-contained"
+                    bind:value={handleDraft}
+                    onkeydown={(e) => { if (e.key === 'Enter') saveHandle(); if (e.key === 'Escape') editingHandle = false; }}
+                    placeholder="new handle"
+                    maxlength={40}
+                    autofocus
+                  />
+                  <button class="sp-handle-btn" onclick={saveHandle} disabled={handleSaving}>
+                    {handleSaving ? '…' : 'save'}
+                  </button>
+                  <button class="sp-handle-btn sp-handle-btn-muted" onclick={() => (editingHandle = false)}>×</button>
+                {:else}
+                  <span class="sp-handle-display">{$creds.handle ?? 'seeker'}</span>
+                  <button class="sp-handle-btn" onclick={startEditHandle}>rename</button>
+                {/if}
+              </div>
+              {#if handleError}
+                <span class="sp-handle-error">{handleError}</span>
+              {/if}
+              <span class="sp-stage">{$creds.stage ?? 'received'}</span>
+              <button class="sp-pane-action sp-pane-action-muted" onclick={leave}>sign out</button>
+            {:else}
               <a href={`${controlPanelRouteById.draw.href}?signin=1`} class="sp-pane-action focus-ring-contained">sign in</a>
-            </div>
-          {/if}
+            {/if}
+          </div>
         </div>
       {:else}
         <ThreadsPanel />
@@ -285,6 +347,85 @@
   z-index: 1;
 }
 
+.sp-identity-block {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.sp-identity-handle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sp-handle-display {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sp-handle-input {
+  flex: 1;
+  min-width: 0;
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text);
+  outline: none;
+}
+
+.sp-handle-input:focus {
+  border-color: var(--accent);
+}
+
+.sp-handle-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: color-mix(in srgb, var(--muted) 70%, var(--accent));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+
+.sp-handle-btn:hover:not(:disabled) { color: var(--accent); }
+.sp-handle-btn:disabled { opacity: 0.5; cursor: default; }
+.sp-handle-btn-muted { color: var(--muted); text-decoration: none; font-size: 0.78rem; }
+
+.sp-handle-error {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: hsl(var(--hue-shen), 60%, 55%);
+  letter-spacing: 0.04em;
+}
+
+.sp-stage {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 300;
+}
+
 .sp-pane-actions {
   margin-top: auto;
   padding-top: 0.75rem;
@@ -314,6 +455,19 @@
 .sp-pane-action:hover {
   background: color-mix(in srgb, var(--accent) 18%, transparent);
   border-color: color-mix(in srgb, var(--accent) 60%, var(--glass-border));
+}
+
+.sp-pane-action-muted {
+  border-color: var(--border);
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.sp-pane-action-muted:hover {
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  border-color: var(--border);
+  color: var(--text);
 }
 
 .sp-tab.active,
