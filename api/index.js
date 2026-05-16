@@ -738,20 +738,12 @@ app.post('/prescribe', authenticate, async (req, res) => {
 
   const belief  = { pattern: session.belief_pattern, confidence: session.belief_confidence, meta: BELIEFS[session.belief_pattern] };
   const quality = { quality: session.quality, confidence: session.quality_confidence, is_shock: session.quality_is_shock };
-  const prescription = buildPrescription(session.vagal_probable, belief, quality);
+  const sessionConversation = Array.isArray(session.conversation) ? session.conversation : [];
+  const prescription = await buildPrescription(session.vagal_probable, belief, quality, {
+    conversation: sessionConversation,
+    affect: session.affect ?? null,
+  });
   const divination = drawDivinationSource(divination_source, quality.quality);
-  const latestSession = await getSeekerLatestSession(session.seeker_id);
-  const history = latestSession?.id === session_id ? await getSeekerHistory(session.seeker_id, 1) : null;
-  const lastRite = latestSession?.id !== session_id
-    ? latestSession?.rite_name || null
-    : history?.[0]?.rite_name || null;
-  const needsVariant = lastRite && prescription.rite?.rite_name === lastRite;
-
-  if (needsVariant) {
-    const vagalOrder = ['dorsal', 'sympathetic', 'ventral', 'uncertain'];
-    const altVagal = vagalOrder.find(v => v !== prescription.vagal_state && RITES[v]?.[quality.quality]);
-    if (altVagal) prescription.rite = RITES[altVagal][quality.quality];
-  }
   const ritePayload = divination ? { ...prescription.rite, divination } : prescription.rite;
 
   await updateSession(session_id, {
@@ -1826,18 +1818,12 @@ Most responses will NOT include [READY].`;
           is_shock: offeringState.quality.is_shock,
           seeker_language: offeringState.quality.seeker_language
         };
-        const prescription = buildPrescription(offeringState.vagal.probable, belief, quality);
+        const prescription = await buildPrescription(offeringState.vagal.probable, belief, quality, {
+          conversation,
+          affect: offeringState.affect ?? null,
+        });
         console.log(`[enquire/offering] session=${session_id} ready=yes rite=${prescription.rite?.rite_name ?? 'none'}`);
         const divination = drawDivinationSource(null, quality.quality);
-        const latestSession = await getSeekerLatestSession(seeker_id);
-        const history = latestSession?.id === session_id ? await getSeekerHistory(seeker_id, 1) : null;
-        const lastRite = latestSession?.id !== session_id
-          ? latestSession?.rite_name || null
-          : history?.[0]?.rite_name || null;
-        if (lastRite && prescription.rite?.rite_name === lastRite) {
-          const altVagal = ['dorsal', 'sympathetic', 'ventral', 'uncertain'].find(v => v !== prescription.vagal_state && RITES[v]?.[quality.quality]);
-          if (altVagal) prescription.rite = RITES[altVagal][quality.quality];
-        }
         // TODO: rite-deck-pairing — see docs/rite-deck-pairing.md
         const ritePayload = divination ? { ...prescription.rite, divination } : prescription.rite;
         await updateSession(session_id, {

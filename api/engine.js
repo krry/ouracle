@@ -1055,7 +1055,7 @@ export function drawDivinationSource(divinationSource, quality) {
 // Audits for love/fear orientation before returning.
 // ─────────────────────────────────────────────
 
-export function buildPrescription(vagalState, belief, quality) {
+export async function buildPrescription(vagalState, belief, quality, { conversation = [], affect = null } = {}) {
   // mixed vagal → sympathetic (mixed states are usually more activated than shut down)
   // unknown key → uncertain
   const vagalKey = vagalState === 'mixed' ? 'sympathetic'
@@ -1064,9 +1064,24 @@ export function buildPrescription(vagalState, belief, quality) {
 
   const qualityKey = quality?.quality || 'entity';
 
-  const rite = RITES[vagalKey]?.[qualityKey]
-    ?? RITES.uncertain?.[qualityKey]
-    ?? RITES.dorsal.entity;
+  let rite;
+
+  if (process.env.SEMANTIC_INFERENCE === 'true' && Array.isArray(conversation) && conversation.length > 0) {
+    try {
+      const { generateRite } = await import('./rite-gen.js');
+      rite = await generateRite(conversation, {
+        vagalState: vagalKey,
+        beliefPattern: belief?.pattern ?? null,
+        quality: quality?.quality ?? null,
+        affect,
+      });
+    } catch (err) {
+      console.error(JSON.stringify({ event: 'rite_gen_fallback', error: err.message }));
+      rite = RITES[vagalKey]?.[qualityKey] ?? RITES.uncertain?.[qualityKey] ?? RITES.dorsal.entity;
+    }
+  } else {
+    rite = RITES[vagalKey]?.[qualityKey] ?? RITES.uncertain?.[qualityKey] ?? RITES.dorsal.entity;
+  }
 
   const audit = auditLoveFear(rite);
   const flagged = audit.orientation === 'fear';
