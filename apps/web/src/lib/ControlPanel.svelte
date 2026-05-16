@@ -37,28 +37,16 @@
 
 <script lang="ts">
   import { page } from '$app/stores';
-  import { goto } from '$app/navigation';
   import AmbientControls from './AmbientControls.svelte';
-  import { creds, authed, seekerState, pendingRite, messages, ttsEnabled, ttsVoice } from './stores';
+  import { authed, ttsEnabled, ttsVoice } from './stores';
   import { anySoundPlaying, allOff } from './ambientEngine';
   import { TTS_VOICES, DEFAULT_VOICE } from './tts-client';
-  import { signOut } from './auth';
   let { onclose = () => {}, onopencustomvoice = () => {} }: {
     onclose?: () => void;
     onopencustomvoice?: () => void;
   } = $props();
 
   const isCustomVoice = $derived(/^[0-9a-f]{32}$/i.test($ttsVoice));
-
-  async function leave() {
-    await signOut({ fetchOptions: { onSuccess: () => creds.logout() } });
-    creds.logout();
-    pendingRite.set(null);
-    messages.set([]);
-    seekerState.reset();
-    onclose();
-    goto(controlPanelRouteById.welcome.href);
-  }
 </script>
 
 <section class="control-panel">
@@ -128,18 +116,6 @@
     <AmbientControls />
   </div>
 
-  <div class="cp-block glass-block">
-    <div class="cp-kicker">Identity</div>
-    {#if $authed && $creds}
-      <div class="cp-identity">
-        <span class="cp-handle">{$creds.handle ?? 'seeker'}</span>
-        <span class="cp-stage">{$creds.stage ?? 'received'}</span>
-      </div>
-      <button class="cp-action cp-action-muted" onclick={leave}>sign out</button>
-    {:else}
-      <a href={`${controlPanelRouteById.draw.href}?signin=1`} class="cp-action" onclick={onclose}>sign in</a>
-    {/if}
-  </div>
 </section>
 
 <style>
@@ -308,56 +284,4 @@
 .vb-custom-row .vb-own-link { margin-left: 0; }
 .vb-custom-row .vb-own-link:last-child { margin-left: auto; font-size: 0.75rem; text-decoration: none; }
 
-.cp-identity {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.cp-handle {
-  font-family: var(--font-mono);
-  font-size: 0.88rem;
-  color: var(--accent);
-  letter-spacing: 0.04em;
-}
-
-.cp-stage {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 300;
-}
-
-.cp-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: fit-content;
-  min-width: 6.5rem;
-  padding: 0.5rem 0.85rem;
-  border-radius: 999px;
-  border: 1px solid var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  color: var(--accent);
-  text-decoration: none;
-  cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
-  text-transform: lowercase;
-  font-weight: 500;
-}
-
-.cp-action:hover {
-  background: var(--accent);
-  color: var(--bg);
-}
-
-.cp-action-muted {
-  border-color: var(--border);
-  background: color-mix(in srgb, var(--surface) 78%, transparent);
-  color: var(--text);
-}
 </style>

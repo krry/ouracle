@@ -80,6 +80,7 @@ import {
   createApiKey,
   updateApiKey,
   updateSeekerPassword,
+  updateSeekerHandle,
   generateHandle,
   getSeekerByHandle,
   getTotem,
@@ -896,6 +897,19 @@ app.post('/seeker/:id/password', authenticate, async (req, res) => {
   const password_hash = await hashPassword(String(password));
   await updateSeekerPassword(req.params.id, password_hash);
   return res.json({ seeker_id: req.params.id, password_set: true });
+});
+
+// PATCH /seeker/handle — update the authenticated seeker's handle
+app.patch('/seeker/handle', authenticate, async (req, res) => {
+  const { handle } = req.body || {};
+  if (!handle || typeof handle !== 'string') {
+    return res.status(400).json({ error: 'handle required.' });
+  }
+  const result = await updateSeekerHandle(req.seekerId, handle);
+  if (!result) return res.status(404).json({ error: 'Seeker not found.' });
+  if (result.error === 'handle_taken') return res.status(409).json({ error: 'handle_taken', message: 'That handle is already in use.' });
+  if (result.error === 'invalid_handle') return res.status(400).json({ error: 'invalid_handle', message: 'Handle must be 1–40 characters.' });
+  return res.json({ handle: result.handle });
 });
 
 // ─────────────────────────────────────────────

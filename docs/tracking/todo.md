@@ -1,36 +1,32 @@
 **TODO**
 
-- [ ] move the identity cp-block from ControlPanel to the bottom of SeekerPanel
-- [ ] replace Seeker tab label with the username when signed in
-- [ ] add a change username field in the SeekerPanel
-- [ ] 
 
-# Next to do for v0.4-v0.5
+# Next to do for v0.5+
 - [ ] octave-ambiance — requires mapping work first
-- [ ] companions — post v1.0      
-- [ ] tui-stt — testing + wiring
+- [ ] companions — post v1.0
 - [ ] web-aura — bigger, WebGL work
 
 ## TUI tuneup
-- [ ] test speech to text and text to speech
+- [ ] test speech to text and text to speech in TUI
 - [ ] toggle dev mode more easy; keymaps?
 - [ ] write a script for the typical ouracle consultation
 - [ ] have claude pass through the conversation UX after writing a script
 
-## EMO DETECTOR
+## EMO DETECTOR / INFERENCE
+- [ ] rite generation quality tuning — test generated rites across vagal states; refine system prompt based on output
+- [ ] octave quality inference accuracy — evaluation against labeled test cases
 - [ ] evaluation inquiries and seeker messages according to Russell's Circumplex model, tracking position on the 2D map over time
-  - Circumplex guardrails are a perfect fit for Ouracle—it’s basically giving the oracle a mood-ring API.
-
-  If you sketch them as contracts, you can keep them very lean:
-
-  - Always force numeric output on fixed ranges, e.g. valence and arousal in ‎`[−1.0, +1.0]`, plus a very short natural-language gloss.
-
-  - Require the model to justify coordinates in lived semantics: what in the language implies “high arousal” vs “low,” etc.
-
-  - Add a hard rule that if the affect is ambiguous or mixed, it must say so and still pick a best-guess coordinate, with a note like “low :confidence, conflicting cues.”
 
 # DONE
 
+- [x] identity block moved to SeekerPanel bottom; handle rename field; Seeker tab shows username
+- [x] account creation deferred — guest session first, sign-in only after first exchange
+- [x] rite generation — LLM synthesizes rites from conversation (rite-gen.js, PR #21)
+- [x] tarot card images — symlink static/tarot → assets/tarot (PR #20)
+- [x] web ambient audio layer — AmbientControls.svelte + ambientEngine/ambientPlayer
+- [x] web voice input (STT/PTT) — wired in Chat.svelte, push-to-talk UI
+- [x] web thread view — ThreadsPanel.svelte in SeekerPanel
+- [x] streaming responses — /enquire uses SSE
 - [x] covenant-rite — copy + staging redesign
 - [x] tui-torus — visual, self-contained
 - [x] rite-card-ui — quickest win, all frontend
