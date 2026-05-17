@@ -8,13 +8,14 @@ struct ViewsDrawView: View {
     @State private var isDrawing = false
     @State private var isLoadingDecks = true
     @State private var sheetDetent: PresentationDetent = .height(96)
+    @State private var showSheet = true
 
     private let smallDetent = PresentationDetent.height(96)
 
     var body: some View {
         cardArea
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .sheet(isPresented: .constant(true)) {
+            .sheet(isPresented: $showSheet) {
                 deckSheet
                     .presentationDetents([smallDetent, .large], selection: $sheetDetent)
                     .presentationBackgroundInteraction(.enabled(upThrough: smallDetent))
@@ -22,7 +23,29 @@ struct ViewsDrawView: View {
                     .presentationCornerRadius(20)
                     .interactiveDismissDisabled()
             }
+            .onChange(of: showSheet) { _, newValue in
+                if !newValue { showSheet = true }
+            }
             .task { await loadDecks() }
+    }
+
+    // MARK: - Helpers
+
+    private func titleCase(_ s: String) -> String {
+        s.replacingOccurrences(of: "_", with: " ")
+         .capitalized
+    }
+
+    private var cardShareText: String? {
+        guard let card = drawnCard else { return nil }
+        var parts = [card.title]
+        if !card.keywords.isEmpty {
+            parts.append(card.keywords.joined(separator: " · "))
+        }
+        if !card.body.isEmpty {
+            parts += ["", card.body]
+        }
+        return parts.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     // MARK: - Card area
@@ -32,18 +55,28 @@ struct ViewsDrawView: View {
         if let card = drawnCard {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(card.title)
-                            .font(.system(size: 26, weight: .heavy, design: .serif))
-                        if !card.keywords.isEmpty {
-                            Text(card.keywords.joined(separator: " · "))
-                                .font(.system(.caption, design: .monospaced))
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(card.title)
+                                .font(.system(size: 26, weight: .heavy, design: .serif))
+                            if !card.keywords.isEmpty {
+                                Text(card.keywords.joined(separator: " · "))
+                                    .font(.system(.caption, design: .monospaced))
+                                    .foregroundStyle(.secondary)
+                                    .tracking(0.5)
+                            }
+                            Text(titleCase(card.deckLabel ?? card.deck))
+                                .font(.system(.caption2, design: .monospaced))
                                 .foregroundStyle(.secondary)
-                                .tracking(0.5)
                         }
-                        Text((card.deckLabel ?? card.deck).lowercased())
-                            .font(.system(.caption2, design: .monospaced))
-                            .foregroundStyle(.secondary)
+                        Spacer()
+                        if let shareText = cardShareText {
+                            ShareLink(item: shareText) {
+                                Image(systemName: "square.and.arrow.up")
+                                    .font(.body)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                     }
                     if !card.body.isEmpty {
                         Text(card.body)
@@ -127,7 +160,7 @@ struct ViewsDrawView: View {
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(deck.name)
+                    Text(titleCase(deck.name))
                         .foregroundStyle(.primary)
                     Text("\(deck.cardCount) cards")
                         .font(.caption)
@@ -180,7 +213,8 @@ struct ViewsDrawView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 16)
-            .padding(.vertical, 20)
+            .padding(.top, 14)
+            .padding(.bottom, 20)
         }
         .disabled(isDrawing || isLoadingDecks)
         .foregroundStyle(isDrawing ? Color.secondary : accent.color)
