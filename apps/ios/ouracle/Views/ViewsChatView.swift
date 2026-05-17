@@ -13,6 +13,13 @@ struct ViewsChatView: View {
         )
     }
 
+    private var showRite: Binding<Bool> {
+        Binding(
+            get: { session.activeRite != nil },
+            set: { if !$0 { session.activeRite = nil } }
+        )
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             messageList
@@ -36,6 +43,12 @@ struct ViewsChatView: View {
         .sheet(isPresented: showDrawnCard) {
             if let card = session.drawnCard {
                 DrawnCardSheet(card: card, onDismiss: session.dismissCard)
+            }
+        }
+        .sheet(isPresented: showRite) {
+            if let rite = session.activeRite {
+                ViewsRiteSheetView(rite: rite, onDismiss: { session.activeRite = nil })
+                    .environmentObject(accent)
             }
         }
         .sheet(isPresented: .constant(session.needsCovenant)) {
@@ -177,6 +190,17 @@ private struct DrawnCardSheet: View {
     let card: OracleCard
     let onDismiss: () -> Void
 
+    private var shareText: String {
+        var parts = [card.title]
+        if !card.keywords.isEmpty {
+            parts.append(card.keywords.joined(separator: " · "))
+        }
+        if !card.body.isEmpty {
+            parts += ["", card.body]
+        }
+        return parts.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -210,6 +234,12 @@ private struct DrawnCardSheet: View {
             .navigationTitle("a card for you")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    ShareLink(item: shareText) {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                    .font(.system(.body, design: .monospaced))
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("done", action: onDismiss)
                         .font(.system(.body, design: .monospaced))
