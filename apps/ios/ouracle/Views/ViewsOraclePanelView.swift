@@ -58,7 +58,7 @@ struct ViewsOraclePanelView: View {
             else { selectedDeckIDs.insert(deck.id) }
         } label: {
             VStack(alignment: .leading, spacing: 2) {
-                Text(deck.name)
+                Text(titleCase(deck.name))
                     .font(.system(.caption, design: .monospaced).weight(.semibold))
                 Text("\(deck.cardCount)")
                     .font(.system(size: 10, design: .monospaced))
@@ -99,7 +99,7 @@ struct ViewsOraclePanelView: View {
                                 .tracking(0.5)
                         }
                         if let label = card.deckLabel {
-                            Text(label.lowercased())
+                            Text(titleCase(label))
                                 .font(.system(.caption2, design: .monospaced))
                                 .foregroundStyle(.tertiary)
                         }
@@ -147,6 +147,13 @@ struct ViewsOraclePanelView: View {
         .foregroundStyle(isDrawing ? Color.secondary : accent.color)
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
+    }
+
+    // MARK: - Helpers
+
+    private func titleCase(_ s: String) -> String {
+        s.replacingOccurrences(of: "_", with: " ")
+         .capitalized
     }
 
     // MARK: - Actions

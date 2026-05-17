@@ -6,12 +6,32 @@
 //  SSE event shapes:
 //    { type: 'token', text: '...' }        — streamed text fragment
 //    { type: 'draw', card: { ... } }        — Clea-initiated card draw
+//    { type: 'rite', rite: { ... } }        — ritual prescription
 //    { type: 'complete', stage: '...' }     — stream finished
 //    { type: 'break' }                      — paragraph break
 //
 
 import Foundation
 import Combine
+
+// MARK: - RiteData
+
+/// A ritual prescription emitted by the server as a `rite` SSE event.
+struct RiteData: Identifiable {
+    let id: UUID = UUID()
+    /// Display name of the rite (e.g. "Threshold Breath").
+    let riteName: String
+    /// Core action / description of what to do.
+    let act: String
+    /// Optional spoken invocation or mantra.
+    let invocation: String?
+    /// Sensory or material textures that accompany the rite.
+    let textures: [String]
+    /// Optional Sanskrit bija (seed syllable) to be chanted.
+    let bija: String?
+    /// Optional orientation or directional guidance.
+    let orientation: String?
+}
 
 // MARK: - Message
 
@@ -37,6 +57,7 @@ final class ChatSession: ObservableObject {
     @Published var messages: [ChatMessage] = []
     @Published var isStreaming: Bool = false
     @Published var drawnCard: OracleCard? = nil
+    @Published var activeRite: RiteData? = nil
     @Published var lastError: String? = nil  // settable from view for dismiss
     @Published var voiceEnabled: Bool = false
     @Published var needsCovenant: Bool = false
@@ -165,7 +186,20 @@ final class ChatSession: ObservableObject {
                        let card = DeckService.shared.card(from: cardJSON) {
                         drawnCard = card
                     }
-                case "complete", "rite", "vagal", "belief", "quality", "affect",
+                case "rite":
+                    if let riteJSON = json["rite"] as? [String: Any],
+                       let riteName = riteJSON["rite_name"] as? String,
+                       let act = riteJSON["act"] as? String {
+                        activeRite = RiteData(
+                            riteName: riteName,
+                            act: act,
+                            invocation: riteJSON["invocation"] as? String,
+                            textures: riteJSON["textures"] as? [String] ?? [],
+                            bija: riteJSON["bija"] as? String,
+                            orientation: riteJSON["orientation"] as? String
+                        )
+                    }
+                case "complete", "vagal", "belief", "quality", "affect",
                      "sentence_audio", "sentence_audio_missing":
                     break
                 default:
