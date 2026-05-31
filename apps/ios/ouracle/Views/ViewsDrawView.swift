@@ -7,24 +7,13 @@ struct ViewsDrawView: View {
     @State private var drawnCard: OracleCard? = nil
     @State private var isDrawing = false
     @State private var isLoadingDecks = true
-    @State private var sheetDetent: PresentationDetent = .height(96)
-    @State private var showSheet = true
-
-    private let smallDetent = PresentationDetent.height(96)
+    @State private var panelExpanded = false
 
     var body: some View {
         cardArea
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .sheet(isPresented: $showSheet) {
-                deckSheet
-                    .presentationDetents([smallDetent, .large], selection: $sheetDetent)
-                    .presentationBackgroundInteraction(.enabled(upThrough: smallDetent))
-                    .presentationDragIndicator(.visible)
-                    .presentationCornerRadius(20)
-                    .interactiveDismissDisabled()
-            }
-            .onChange(of: showSheet) { _, newValue in
-                if !newValue { showSheet = true }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                deckPanel
             }
             .task { await loadDecks() }
     }
@@ -34,6 +23,14 @@ struct ViewsDrawView: View {
     private func titleCase(_ s: String) -> String {
         s.replacingOccurrences(of: "_", with: " ")
          .capitalized
+    }
+
+    private var deckSummary: String {
+        if selectedDeckIDs.isEmpty { return "from all decks" }
+        let names = decks
+            .filter { selectedDeckIDs.contains($0.id) }
+            .map { titleCase($0.name) }
+        return "from \(names.joined(separator: " · "))"
     }
 
     private var cardShareText: String? {
@@ -55,28 +52,36 @@ struct ViewsDrawView: View {
         if let card = drawnCard {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(card.title)
-                                .font(.system(size: 26, weight: .heavy, design: .serif))
-                            if !card.keywords.isEmpty {
-                                Text(card.keywords.joined(separator: " · "))
-                                    .font(.system(.caption, design: .monospaced))
-                                    .foregroundStyle(.secondary)
-                                    .tracking(0.5)
+                    if let url = card.imageURL {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFit()
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                            case .failure:
+                                EmptyView()
+                            default:
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.secondary.opacity(0.12))
+                                    .frame(height: 240)
                             }
-                            Text(titleCase(card.deckLabel ?? card.deck))
-                                .font(.system(.caption2, design: .monospaced))
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(card.title)
+                            .font(.system(size: 26, weight: .heavy, design: .serif))
+                        if !card.keywords.isEmpty {
+                            Text(card.keywords.joined(separator: " · "))
+                                .font(.system(.caption, design: .monospaced))
                                 .foregroundStyle(.secondary)
+                                .tracking(0.5)
                         }
-                        Spacer()
-                        if let shareText = cardShareText {
-                            ShareLink(item: shareText) {
-                                Image(systemName: "square.and.arrow.up")
-                                    .font(.body)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
+                        Text(titleCase(card.deckLabel ?? card.deck))
+                            .font(.system(.caption2, design: .monospaced))
+                            .foregroundStyle(.secondary)
                     }
                     if !card.body.isEmpty {
                         Text(card.body)
@@ -87,7 +92,6 @@ struct ViewsDrawView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(24)
-                .padding(.bottom, 80)
             }
         } else {
             Button(action: drawCard) {
@@ -105,33 +109,64 @@ struct ViewsDrawView: View {
         }
     }
 
-    // MARK: - Sheet
+    // MARK: - Deck panel
 
-    private var deckSheet: some View {
+    private var deckPanel: some View {
         VStack(spacing: 0) {
-            if sheetDetent != smallDetent {
-                deckList
-                Divider()
+            // Handle sits ABOVE the material — floats over the content behind it
+            Button {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    panelExpanded.toggle()
+                }
+            } label: {
+                Capsule()
+                    .fill(Color.secondary.opacity(0.4))
+                    .frame(width: 36, height: 4)
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
             }
-            drawButton
+            .buttonStyle(.plain)
+
+            // Panel material — rounded top corners, anchors to screen bottom
+            VStack(spacing: 0) {
+                if panelExpanded {
+                    deckListHeader
+                    Divider()
+                    deckListScroll
+                    Divider()
+                }
+                panelFooter
+            }
+            .background {
+                UnevenRoundedRectangle(
+                    topLeadingRadius: 16, bottomLeadingRadius: 0,
+                    bottomTrailingRadius: 0, topTrailingRadius: 16
+                )
+                .fill(.regularMaterial)
+                .ignoresSafeArea(edges: .bottom)
+            }
+            .shadow(color: .black.opacity(0.07), radius: 6, y: -2)
         }
     }
 
-    private var deckList: some View {
+    // MARK: - Deck list (header fixed, rows scrollable)
+
+    private var deckListHeader: some View {
+        HStack(spacing: 0) {
+            Text("decks")
+                .font(.system(.footnote, design: .monospaced).weight(.semibold))
+                .foregroundStyle(.secondary)
+            Spacer()
+            quickSelectButtons
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+    }
+
+    private var deckListScroll: some View {
         ScrollView {
             VStack(spacing: 0) {
-                HStack(spacing: 0) {
-                    Text("decks")
-                        .font(.system(.footnote, design: .monospaced).weight(.semibold))
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    quickSelectButtons
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-
-                Divider()
-
                 if isLoadingDecks {
                     ProgressView()
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -150,6 +185,7 @@ struct ViewsDrawView: View {
                 }
             }
         }
+        .frame(maxHeight: 280)
     }
 
     private func deckRow(_ deck: OracleDeck) -> some View {
@@ -158,7 +194,7 @@ struct ViewsDrawView: View {
             if selected { selectedDeckIDs.remove(deck.id) }
             else { selectedDeckIDs.insert(deck.id) }
         } label: {
-            HStack {
+            HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(titleCase(deck.name))
                         .foregroundStyle(.primary)
@@ -171,10 +207,11 @@ struct ViewsDrawView: View {
                     Image(systemName: "checkmark")
                         .foregroundStyle(accent.color)
                         .fontWeight(.semibold)
+                        .padding(.top, 2)
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.vertical, 8)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -200,24 +237,45 @@ struct ViewsDrawView: View {
             .buttonStyle(.plain)
     }
 
-    private var drawButton: some View {
-        Button(action: drawCard) {
-            HStack(spacing: 8) {
-                if isDrawing {
-                    ProgressView().controlSize(.small)
-                } else {
-                    Text("✶")
+    private var panelFooter: some View {
+        HStack(spacing: 0) {
+            Button(action: drawCard) {
+                VStack(spacing: 3) {
+                    HStack(spacing: 8) {
+                        if isDrawing {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Text("✶")
+                        }
+                        Text(isDrawing ? "drawing..." : "draw")
+                            .font(.system(.body, design: .monospaced).weight(.semibold))
+                    }
+                    Text(deckSummary)
+                        .font(.system(.caption2, design: .monospaced))
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                 }
-                Text(isDrawing ? "drawing..." : "draw")
-                    .font(.system(.body, design: .monospaced).weight(.semibold))
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 16)
+                .padding(.top, 20)
+                .padding(.bottom, 14)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 16)
-            .padding(.top, 14)
-            .padding(.bottom, 20)
+            .disabled(isDrawing || isLoadingDecks)
+            .foregroundStyle(isDrawing ? Color.secondary : accent.color)
+
+            if let shareText = cardShareText {
+                Divider().frame(height: 24)
+                ShareLink(item: shareText) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
+                        .padding(.bottom, 14)
+                }
+            }
         }
-        .disabled(isDrawing || isLoadingDecks)
-        .foregroundStyle(isDrawing ? Color.secondary : accent.color)
     }
 
     // MARK: - Selection helpers

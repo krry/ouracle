@@ -83,7 +83,7 @@ final class DeckService {
         let body     = json["body"]     as? String ?? ""
         let label    = json["deckLabel"] as? String
         let imageStr = json["imageUrl"] as? String
-        let imageURL = imageStr.flatMap { URL(string: $0) }
+        let imageURL = imageStr.flatMap { URL(string: baseURL + $0) }
         return OracleCard(id: id, deck: deck, deckLabel: label, title: title, keywords: keywords, body: body, imageURL: imageURL)
     }
 
@@ -95,7 +95,7 @@ final class DeckService {
             title: r.title,
             keywords: r.keywords ?? [],
             body: r.body ?? "",
-            imageURL: r.imageUrl.flatMap { URL(string: $0) }
+            imageURL: r.imageUrl.flatMap { URL(string: baseURL + $0) }
         )
     }
 
