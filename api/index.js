@@ -100,7 +100,7 @@ import {
 } from './db.js';
 import { auth } from './auth-config.js';
 import { toNodeHandler } from 'better-auth/node';
-import { draw, listDecks, drawContextual, loadDecks, cardImagePath } from './decks.js';
+import { draw, listDecks, drawContextual, loadDecks, cardImagePath, cardLink } from './decks.js';
 import { buildSunoPackage } from './suno.js';
 
 const app = express();
@@ -455,7 +455,7 @@ app.get('/draw', async (req, res) => {
       ? await drawContextual(context, n, deckIds)
       : await draw(n, deckIds);
     if (cards.length === 0) return res.status(404).json({ error: 'No cards found.' });
-    res.json({ cards: cards.map(c => ({ ...c, imageUrl: cardImagePath(c) })) });
+    res.json({ cards: cards.map(c => ({ ...c, imageUrl: cardImagePath(c), cardLink: cardLink(c) })) });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -1627,6 +1627,7 @@ If this moment calls for a card — a fork the seeker can't reason through, a sy
               body: card.body ?? '',
               fields: card.fields ?? {},
               imageUrl: cardImagePath(card),
+              cardLink: cardLink(card),
             }});
           }
         } catch (e) {

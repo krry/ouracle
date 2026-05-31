@@ -295,6 +295,9 @@
 				{:else}
 					<pre class="card-body">{$activeCard.body}</pre>
 				{/if}
+				{#if $activeCard.cardLink}
+					<a class="card-ref-link" href={$activeCard.cardLink} target="_blank" rel="noopener noreferrer">read more ↗</a>
+				{/if}
 			</div>
 
 			<div class="panel-actions">
@@ -648,6 +651,17 @@
 	white-space: pre-wrap;
 	margin: 0;
 }
+
+.card-ref-link {
+	display: inline-block;
+	margin-top: 0.75rem;
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	color: var(--text);
+	opacity: 0.5;
+	text-decoration: none;
+}
+.card-ref-link:hover { opacity: 0.85; }
 
 .ogham .card-body:first-letter {
 	font-size: 4em;

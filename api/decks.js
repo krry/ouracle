@@ -350,6 +350,14 @@ function minorPath(folder, fields) {
   return `/tarot/${folder}/${suitStr}${String(rankNum).padStart(2, '0')}.jpg`;
 }
 
+/** Returns an external reference URL for the card, or null. */
+export function cardLink(card) {
+  if (card.deck === 'i_ching' && card.number != null) {
+    return `https://nameless.kerry.ink/changes/${card.number}`;
+  }
+  return null;
+}
+
 /**
  * Returns the URL path for a card's image, or null if no image exists.
  * e.g. "/tarot/soimoi/00_Fool.jpg"

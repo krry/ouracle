@@ -76,7 +76,13 @@ struct ViewsRiteSheetView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    ShareLink(item: shareText) {
+                    ShareLink(
+                        item: shareText,
+                        preview: SharePreview(
+                            rite.riteName,
+                            image: Image(uiImage: UIImage(named: "AppIcon") ?? UIImage())
+                        )
+                    ) {
                         Image(systemName: "square.and.arrow.up")
                     }
                     .font(.system(.body, design: .monospaced))

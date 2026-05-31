@@ -89,6 +89,11 @@ struct ViewsDrawView: View {
                             .foregroundStyle(.primary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
+                    if let link = card.cardLink {
+                        Link("read more ↗", destination: link)
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(24)
@@ -113,20 +118,26 @@ struct ViewsDrawView: View {
 
     private var deckPanel: some View {
         VStack(spacing: 0) {
-            // Handle sits ABOVE the material — floats over the content behind it
-            Button {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                    panelExpanded.toggle()
+            // Handle sits ABOVE the material — tap or drag to toggle
+            Capsule()
+                .fill(Color.secondary.opacity(0.4))
+                .frame(width: 36, height: 4)
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        panelExpanded.toggle()
+                    }
                 }
-            } label: {
-                Capsule()
-                    .fill(Color.secondary.opacity(0.4))
-                    .frame(width: 36, height: 4)
-                    .padding(.vertical, 8)
-                    .frame(maxWidth: .infinity)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
+                .gesture(
+                    DragGesture(minimumDistance: 10)
+                        .onEnded { value in
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                panelExpanded = value.translation.height < 0
+                            }
+                        }
+                )
 
             // Panel material — rounded top corners, anchors to screen bottom
             VStack(spacing: 0) {
@@ -266,7 +277,13 @@ struct ViewsDrawView: View {
 
             if let shareText = cardShareText {
                 Divider().frame(height: 24)
-                ShareLink(item: shareText) {
+                ShareLink(
+                    item: shareText,
+                    preview: SharePreview(
+                        drawnCard?.title ?? "Ouracle",
+                        image: Image(uiImage: UIImage(named: "AppIcon") ?? UIImage())
+                    )
+                ) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.body)
                         .foregroundStyle(.secondary)

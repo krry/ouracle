@@ -10,6 +10,7 @@ struct OracleCard: Sendable, Identifiable {
     let keywords: [String]
     let body: String
     let imageURL: URL?
+    let cardLink: URL?
 }
 
 struct OracleDeck: Sendable, Identifiable {
@@ -84,7 +85,8 @@ final class DeckService {
         let label    = json["deckLabel"] as? String
         let imageStr = json["imageUrl"] as? String
         let imageURL = imageStr.flatMap { URL(string: baseURL + $0) }
-        return OracleCard(id: id, deck: deck, deckLabel: label, title: title, keywords: keywords, body: body, imageURL: imageURL)
+        let cardLink = (json["cardLink"] as? String).flatMap { URL(string: $0) }
+        return OracleCard(id: id, deck: deck, deckLabel: label, title: title, keywords: keywords, body: body, imageURL: imageURL, cardLink: cardLink)
     }
 
     private func cardFromResponse(_ r: CardResponse) -> OracleCard {
@@ -95,7 +97,8 @@ final class DeckService {
             title: r.title,
             keywords: r.keywords ?? [],
             body: r.body ?? "",
-            imageURL: r.imageUrl.flatMap { URL(string: baseURL + $0) }
+            imageURL: r.imageUrl.flatMap { URL(string: baseURL + $0) },
+            cardLink: r.cardLink.flatMap { URL(string: $0) }
         )
     }
 
@@ -122,5 +125,6 @@ final class DeckService {
         let keywords: [String]?
         let body: String?
         let imageUrl: String?
+        let cardLink: String?
     }
 }
